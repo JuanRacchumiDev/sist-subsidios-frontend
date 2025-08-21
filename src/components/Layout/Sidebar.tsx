@@ -25,6 +25,15 @@ const menuItems = [
     path: "/dashboard",
   },
   {
+    id: "colaborador",
+    icon: Users,
+    label: "Colaboradores",
+    submenu: [
+      { id: "listColaborador", label: "Listado", path: "/colaborador/listado" },
+      { id: "nuevoColaborador", label: "Nuevo", path: "/colaborador/nuevo" },
+    ],
+  },
+  {
     id: "analytics",
     icon: BarChart3,
     label: "Analytics",
