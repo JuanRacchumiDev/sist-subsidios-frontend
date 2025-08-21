@@ -13,6 +13,7 @@ import {
   Zap,
 } from "lucide-react";
 import React, { useState } from "react";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 
 const menuItems = [
   {
@@ -21,15 +22,16 @@ const menuItems = [
     label: "Dashboard",
     active: true,
     badge: "New",
+    path: "/dashboard",
   },
   {
     id: "analytics",
     icon: BarChart3,
     label: "Analytics",
     submenu: [
-      { id: "overview", label: "Overview" },
-      { id: "reports", label: "Reports" },
-      { id: "insights", label: "Insights" },
+      { id: "overview", label: "Overview", path: "/analytics/overview" },
+      { id: "reports", label: "Reports", path: "/analytics/reports" },
+      { id: "insights", label: "Insights", path: "/analytics/insights" },
     ],
   },
   {
@@ -38,9 +40,9 @@ const menuItems = [
     label: "Users",
     count: "2.4k",
     submenu: [
-      { id: "all-users", label: "All Users" },
-      { id: "roles", label: "Roles & Permissions" },
-      { id: "activity", label: "User Activity" },
+      { id: "all-users", label: "All Users", path: "/users/all-users" },
+      { id: "roles", label: "Roles & Permissions", path: "/users/roles" },
+      { id: "activity", label: "User Activity", path: "/rules/activity" },
     ],
   },
   {
@@ -48,9 +50,9 @@ const menuItems = [
     icon: ShoppingBag,
     label: "E-commerce",
     submenu: [
-      { id: "products", label: "Products" },
-      { id: "orders", label: "Orders" },
-      { id: "customers", label: "Customers" },
+      { id: "products", label: "Products", path: "/ecommerce/products" },
+      { id: "orders", label: "Orders", path: "/ecommerce/orders" },
+      { id: "customers", label: "Customers", path: "/ecommerce/customers" },
     ],
   },
   {
@@ -58,37 +60,45 @@ const menuItems = [
     icon: Package,
     label: "Inventory",
     count: "847",
+    path: "/inventory",
   },
   {
     id: "transactions",
     icon: CreditCard,
     label: "Transactions",
+    path: "/transactions",
   },
   {
     id: "messages",
     icon: MessagesSquare,
     label: "Messages",
     badge: "12",
+    path: "/messages",
   },
   {
     id: "calendar",
     icon: Calendar,
     label: "Calendar",
+    path: "/calendar",
   },
   {
     id: "reports",
     icon: FileText,
     label: "Reports",
+    path: "/reports",
   },
   {
     id: "settings",
     icon: Settings,
     label: "Settings",
+    path: "/settings",
   },
 ];
 
-export const Sidebar = ({ collapsed, onToggle, currentPage, onPageChange }) => {
+export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
   const [expandedItems, setExpandedItems] = useState(new Set(["analytics"]));
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const toggleExpanded = (itemid: string) => {
     const newExpanded = new Set(expandedItems);
@@ -132,9 +142,54 @@ export const Sidebar = ({ collapsed, onToggle, currentPage, onPageChange }) => {
       {/* Navigation I will display Dynamic Menus */}
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {menuItems.map((item) => {
+          const isItemActive =
+            item.path && location.pathname.startsWith(item.path);
+
           return (
             <div key={item.id}>
-              <button
+              {item.path ? (
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `w-full flex items-center justify-between p-3 rounded-xl transition-all duration-200 ${
+                      isActive
+                        ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25"
+                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50"
+                    }`
+                  }
+                >
+                  <div className="flex items-center space-x-3">
+                    <item.icon className={`w-5 h-5`} />
+                    {!collapsed && (
+                      <span className="font-medium ml-2">{item.label}</span>
+                    )}
+                  </div>
+                </NavLink>
+              ) : (
+                <button
+                  className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-200 ${
+                    isItemActive
+                      ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50"
+                  }`}
+                  onClick={() => toggleExpanded(item.id)}
+                >
+                  <div className="flex items-center space-x-3">
+                    <item.icon className={`w-5 h-5`} />
+                    {!collapsed && (
+                      <span className="font-medium ml-2">{item.label}</span>
+                    )}
+                  </div>
+                  {!collapsed && item.submenu && (
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${
+                        expandedItems.has(item.id) ? "rotate-180" : ""
+                      }`}
+                    />
+                  )}
+                </button>
+              )}
+              {/* <button
                 className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-200 ${
                   currentPage === item.id || item.active
                     ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25"
@@ -151,7 +206,6 @@ export const Sidebar = ({ collapsed, onToggle, currentPage, onPageChange }) => {
                 <div className="flex items-center space-x-3">
                   <item.icon className={`w-5 h-5`} />
 
-                  {/* Conditional Rendering */}
                   {!collapsed && (
                     <>
                       <span className="font-medium ml-2">{item.label}</span>
@@ -172,10 +226,30 @@ export const Sidebar = ({ collapsed, onToggle, currentPage, onPageChange }) => {
                 {!collapsed && item.submenu && (
                   <ChevronDown className={`w-4 h-4 transition-transform`} />
                 )}
-              </button>
+              </button> */}
 
               {/* Submenu */}
               {!collapsed && item.submenu && expandedItems.has(item.id) && (
+                <div className="ml-8 mt-2 space-y-1">
+                  {item.submenu?.map((subitem) => (
+                    <NavLink
+                      key={subitem.id}
+                      to={subitem.path}
+                      className={({ isActive }) =>
+                        `w-full block text-left p-2 text-sm rounded-lg transition-all ${
+                          isActive
+                            ? "text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-900/20"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50"
+                        }`
+                      }
+                    >
+                      {subitem.label}
+                    </NavLink>
+                  ))}
+                </div>
+              )}
+
+              {/* {!collapsed && item.submenu && expandedItems.has(item.id) && (
                 <div className="ml-8 mt-2 space-y-1">
                   {item.submenu?.map((subitem) => {
                     return (
@@ -185,7 +259,7 @@ export const Sidebar = ({ collapsed, onToggle, currentPage, onPageChange }) => {
                     );
                   })}
                 </div>
-              )}
+              )} */}
             </div>
           );
         })}
