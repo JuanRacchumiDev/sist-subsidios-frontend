@@ -4,9 +4,8 @@ import { Empresa, EmpresaResponse } from "../interfaces/IEmpresa"
 export const getAll = async (): Promise<EmpresaResponse> => {
     try {
         const response = await apiClient.get('/empresas')
-        console.log('response getEmpresas', response)
-
-        const { data: { result, data, status, message, error } } = response
+        const { data: dataEmpresas } = response
+        const { result, data, status, message, error } = dataEmpresas
 
         return {
             result,

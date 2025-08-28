@@ -25,7 +25,6 @@ export const getColaboradorById = async (id: string) => {
 
 export const getColaboradorByIdTipoDocAndNumDoc = async (idTipoDoc: string, numDoc: string) => {
     const response = await getByIdTipoDocAndNumcDoc(idTipoDoc, numDoc)
-    console.log('colaboradorService getColaboradorByIdTipoDocAndNumDoc', response)
 
     return {
         ...response

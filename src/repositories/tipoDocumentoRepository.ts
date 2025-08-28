@@ -5,8 +5,7 @@ export const getAll = async (): Promise<TipoDocumentoResponse> => {
     try {
         const response = await apiClient.get('/tipo-documentos')
         const { data: dataTipoDocumentos } = response
-
-        const { data: { result, data, status, message, error } } = dataTipoDocumentos
+        const { result, data, status, message, error } = dataTipoDocumentos
 
         return {
             result,

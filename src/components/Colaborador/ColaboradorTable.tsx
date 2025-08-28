@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { getColaboradores } from "../../services/colaboradorService";
-// import { UsuarioFormModal } from "@/components/Usuario/UsuarioFormModal";
 
 import { Input } from "../ui/input";
 import {
@@ -15,7 +14,6 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -33,12 +31,14 @@ export const ColaboradorTable: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let data = [];
+        let data: Colaborador[] = [];
         const responseColaborador = await getColaboradores();
-        console.log({ responseColaborador });
-        if (responseColaborador.result && responseColaborador.data) {
-          data = responseColaborador.data as Colaborador[];
+        const { result: resultColaborador, data: dataColaborador } =
+          responseColaborador;
+        if (resultColaborador && dataColaborador) {
+          data = dataColaborador as Colaborador[];
         }
+        console.log("data colaboradores", data);
         setColaborador(data);
       } catch (error) {
         console.error("Error al obtener colaboradores", error);
@@ -53,10 +53,10 @@ export const ColaboradorTable: React.FC = () => {
     setModalOpen(true);
   };
 
-  const handleSubmitUsuario = (usuarioData) => {
-    // console.log("Crear usuario con datos:", usuarioData);
-    setModalOpen(false);
-  };
+  // const handleSubmitUsuario = (usuarioData) => {
+  //   // console.log("Crear usuario con datos:", usuarioData);
+  //   setModalOpen(false);
+  // };
 
   return (
     <div className="w-full space-y-4">
@@ -67,7 +67,6 @@ export const ColaboradorTable: React.FC = () => {
           placeholder="Buscar por nombre o documento..."
           className="w-72"
         />
-        {/* <Button onClick={() => setModalOpen(true)}>Registrar usuario</Button> */}
       </div>
       <div className="rounded-md border">
         <Table>
@@ -104,12 +103,6 @@ export const ColaboradorTable: React.FC = () => {
           </TableBody>
         </Table>
       </div>
-      {/* <UsuarioFormModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSubmit={handleSubmitUsuario}
-        colaborador={selectedColaborador}
-      /> */}
       <div className="mt-4">
         <Pagination>
           <PaginationContent>
