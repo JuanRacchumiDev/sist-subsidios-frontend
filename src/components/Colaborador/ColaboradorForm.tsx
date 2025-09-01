@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { format, parseISO } from "date-fns";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -19,7 +19,6 @@ import {
   FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "../ui/form";
 import {
@@ -36,10 +35,12 @@ import { getCargos } from "@/services/cargoService";
 import { getPersonaByIdTipoDocAndNumDoc } from "@/services/personaService";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-
-const RequiredLabel: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => <FormLabel>{children} *</FormLabel>;
+import { RequiredLabel } from "../Common/RequiredLabel";
+import { Colaborador, ColaboradorResponse } from "@/interfaces/IColaborador";
+import {
+  createColaborador,
+  getColaboradorById,
+} from "@/services/colaboradorService";
 
 const formSchema = z.object({
   idTipoDocumento: z
@@ -59,11 +60,11 @@ const formSchema = z.object({
   apellidoMaterno: z.string().min(2, {
     message: "El apellido materno es requerido.",
   }),
+  // fechaNacimiento: z.string().optional(),
   fechaNacimiento: z
     .date({
       message: "La fecha de nacimiento es requerida",
     })
-    .nullable()
     .refine((val) => val !== null, {
       message: "La fecha de nacimiento es requerida",
     }),
@@ -93,6 +94,7 @@ const formSchema = z.object({
     message: "El número de celular debe tener al menos 9 dígitos.",
   }),
   fechaIngreso: z.date().optional(),
+  // fechaIngreso: z.string().optional(),
   esAsociadoSindicato: z.boolean().optional(),
   esPresentaInconvenientes: z.boolean().optional(),
 });
@@ -121,6 +123,7 @@ type Persona = {
 
 export const ColaboradorForm = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const { showToast } = useToast();
 
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
@@ -154,6 +157,79 @@ export const ColaboradorForm = () => {
 
   const { isSubmitting } = form.formState;
 
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      const {
+        idTipoDocumento,
+        idCargo,
+        idEmpresa,
+        numeroDocumento,
+        apellidoPaterno,
+        apellidoMaterno,
+        nombres,
+        fechaNacimiento,
+        fechaIngreso,
+        nombreArea,
+        nombreSede,
+        emailInstitucional,
+        emailPersonal,
+        numeroCelular,
+        esAsociadoSindicato,
+        esPresentaInconvenientes,
+      } = values;
+
+      const nombreCompleto: string = `${nombres} ${apellidoPaterno} ${apellidoMaterno}`;
+
+      const fechaNacimientoToString: string | null = fechaNacimiento
+        ? fechaNacimiento.toISOString()
+        : null;
+      const partsFechaNacimientoStr: string[] =
+        fechaNacimientoToString.split("T");
+      const fechaNacimientoStr: string = partsFechaNacimientoStr[0];
+
+      let fechaIngresoStr: string | null = null;
+      if (fechaIngreso) {
+        const fechaIngresoToString: string | null = fechaIngreso.toISOString();
+        const partsFechaIngreso: string[] = fechaIngresoToString.split("T");
+        fechaIngresoStr = partsFechaIngreso[0];
+      }
+
+      const payload: Colaborador = {
+        id_tipodocumento: idTipoDocumento,
+        id_cargo: idCargo,
+        id_empresa: idEmpresa,
+        numero_documento: numeroDocumento,
+        apellido_paterno: apellidoPaterno,
+        apellido_materno: apellidoMaterno,
+        nombres,
+        nombre_completo: nombreCompleto,
+        fecha_nacimiento: fechaNacimientoStr,
+        fecha_ingreso: fechaIngresoStr,
+        nombre_area: nombreArea,
+        nombre_sede: nombreSede,
+        correo_institucional: emailInstitucional,
+        correo_personal: emailPersonal,
+        numero_celular: numeroCelular,
+        is_asociado_sindicato: esAsociadoSindicato,
+        is_presenta_inconvenientes: esPresentaInconvenientes,
+      };
+
+      const response = await createColaborador(payload);
+      const { result, message } = response as ColaboradorResponse;
+
+      if (result) {
+        showToast("success", message);
+        navigate("/colaborador");
+      } else {
+        showToast("error", message || "Error al registrar al colaborador");
+        return;
+      }
+    } catch (error) {
+      console.error("Error al registrar colaborador", error);
+      showToast("error", error);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -161,20 +237,19 @@ export const ColaboradorForm = () => {
         let listTipoDocumentos: TipoDocumento[] = [];
         let listCargos: Cargo[] = [];
 
-        const responseEmpresas = await getEmpresas();
-        const { result: resultEmpresa, data: dataEmpresas } = responseEmpresas;
-        if (resultEmpresa && dataEmpresas) {
+        const [responseEmpresas, responseTipoDocumentos, responseCargos] =
+          await Promise.all([getEmpresas(), getTipoDocumentos(), getCargos()]);
+
+        const { result: resultEmpresas, data: dataEmpresas } = responseEmpresas;
+        if (resultEmpresas && dataEmpresas) {
           listEmpresas = dataEmpresas as Empresa[];
         }
 
-        const responseTipoDocumentos = await getTipoDocumentos();
-        const { result: resultTipoDocumento, data: dataTipoDocumentos } =
-          responseTipoDocumentos;
-        if (resultTipoDocumento && dataTipoDocumentos) {
-          listTipoDocumentos = dataTipoDocumentos as TipoDocumento[];
+        const { result: resultTipos, data: dataTipos } = responseTipoDocumentos;
+        if (resultTipos && dataTipos) {
+          listTipoDocumentos = dataTipos as TipoDocumento[];
         }
 
-        const responseCargos = await getCargos();
         const { result: resultCargos, data: dataCargos } = responseCargos;
         if (resultCargos && dataCargos) {
           listCargos = dataCargos as Cargo[];
@@ -183,16 +258,68 @@ export const ColaboradorForm = () => {
         setEmpresas(listEmpresas);
         setTipos(listTipoDocumentos);
         setCargos(listCargos);
+
+        if (id) {
+          const responseColaborador = await getColaboradorById(id);
+          const { result, data, message } = responseColaborador;
+
+          if (result && data) {
+            const colaborador = data as Colaborador;
+            const {
+              id_tipodocumento,
+              numero_documento,
+              nombres,
+              apellido_paterno,
+              apellido_materno,
+              fecha_nacimiento,
+              fecha_ingreso,
+              id_empresa,
+              id_cargo,
+              nombre_area,
+              nombre_sede,
+              correo_institucional,
+              correo_personal,
+              numero_celular,
+              is_asociado_sindicato,
+              is_presenta_inconvenientes,
+            } = colaborador;
+
+            form.reset({
+              idTipoDocumento: id_tipodocumento ?? "",
+              numeroDocumento: numero_documento ?? "",
+              nombres: nombres ?? "",
+              apellidoPaterno: apellido_paterno ?? "",
+              apellidoMaterno: apellido_materno ?? "",
+              fechaNacimiento: fecha_nacimiento
+                ? parseISO(fecha_nacimiento)
+                : null,
+              fechaIngreso: fecha_ingreso ? parseISO(fecha_ingreso) : null,
+              idEmpresa: id_empresa ?? "",
+              idCargo: id_cargo ?? "",
+              nombreArea: nombre_area ?? "",
+              nombreSede: nombre_sede ?? "",
+              emailInstitucional: correo_institucional ?? "",
+              emailPersonal: correo_personal ?? "",
+              numeroCelular: numero_celular ?? "",
+              esAsociadoSindicato: is_asociado_sindicato ?? false,
+              esPresentaInconvenientes: is_presenta_inconvenientes ?? false,
+            });
+          } else {
+            showToast("error", message || "Colaborador no encontrado");
+            navigate("/colaborador/nuevo");
+          }
+        }
       } catch (error) {
         console.error("Error al obtener datos", error);
+        showToast("error", "Error al cargar los datos del formulario.");
       }
     };
 
     fetchData();
-  }, []);
+  }, [id, form, navigate, showToast]);
 
   return (
-    <div>
+    <>
       <Card>
         <CardHeader>
           <CardTitle>Información Personal y Laboral</CardTitle>
@@ -200,7 +327,7 @@ export const ColaboradorForm = () => {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <fieldset className="border border-gray-300 p-4 rounded-md">
                 <legend className="text-base font-semibold text-gray-800 px-2">
                   Información personal
@@ -210,11 +337,11 @@ export const ColaboradorForm = () => {
                     control={form.control}
                     name="idTipoDocumento"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="mb-4">
                         <RequiredLabel>Tipo de Documento</RequiredLabel>
                         <Select
                           onValueChange={field.onChange}
-                          defaultValue={field.value ?? ""}
+                          value={field.value ?? ""}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -261,17 +388,11 @@ export const ColaboradorForm = () => {
                                       field.value
                                     );
 
-                                  console.log(
-                                    "responsePersona TrabajadorSocialForm",
-                                    responsePersona
-                                  );
-
                                   const { result, data, message } =
                                     responsePersona;
 
                                   if (result && data) {
                                     const persona = data as Persona;
-                                    console.log("persona", persona);
 
                                     const {
                                       nombres,
@@ -427,7 +548,7 @@ export const ColaboradorForm = () => {
                         <RequiredLabel>Empresa</RequiredLabel>
                         <Select
                           onValueChange={field.onChange}
-                          defaultValue={field.value ?? ""}
+                          value={field.value ?? ""}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -455,7 +576,7 @@ export const ColaboradorForm = () => {
                         <RequiredLabel>Cargo</RequiredLabel>
                         <Select
                           onValueChange={field.onChange}
-                          defaultValue={field.value ?? ""}
+                          value={field.value ?? ""}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -665,7 +786,7 @@ export const ColaboradorForm = () => {
                   type="button"
                   variant="outline"
                   disabled={isSubmitting}
-                  onClick={() => navigate("/trabajador-social")}
+                  onClick={() => navigate("/colaborador")}
                 >
                   {isSubmitting ? "Cancelando..." : "Cancelar"}
                 </Button>
@@ -674,6 +795,6 @@ export const ColaboradorForm = () => {
           </Form>
         </CardContent>
       </Card>
-    </div>
+    </>
   );
 };

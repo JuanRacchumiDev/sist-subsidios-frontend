@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { getColaboradoresWithPaginate } from "../../services/colaboradorService";
+import { useEffect, useState } from "react";
 import { Input } from "../ui/input";
 import {
   Pagination,
@@ -18,14 +17,15 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { ColaboradorRow } from "./ColaboradorRow";
 import {
-  Colaborador,
-  Pagination as PaginationType,
-} from "../../interfaces/IColaborador";
+  getEmpresas,
+  getEmpresasWithPaginate,
+} from "../../services/empresaService";
+import { Empresa, Pagination as PaginationType } from "@/interfaces/IEmpresa";
+import { EmpresaRow } from "./EmpresaRow";
 
-export const ColaboradorTable: React.FC = () => {
-  const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
+export const EmpresaTable = () => {
+  const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [pagination, setPagination] = useState<PaginationType>({
     currentPage: 1,
     limit: 10,
@@ -46,16 +46,16 @@ export const ColaboradorTable: React.FC = () => {
       try {
         const { currentPage, limit } = pagination;
 
-        const response = await getColaboradoresWithPaginate(currentPage, limit);
+        const response = await getEmpresasWithPaginate(currentPage, limit);
 
         if (response.result && response.data && response.pagination) {
-          setColaboradores(response.data);
+          setEmpresas(response.data);
           setPagination(response.pagination);
         } else {
-          setColaboradores([]);
+          setEmpresas([]);
           setPagination({
             currentPage: 1,
-            limit: 10,
+            limit: 5,
             totalPages: 1,
             totalItems: 0,
             nextPage: null,
@@ -63,7 +63,7 @@ export const ColaboradorTable: React.FC = () => {
           });
         }
       } catch (error) {
-        console.error("Error al obtener colaboradores", error);
+        console.error("Error al obtener empresas", error);
       }
     };
 
@@ -109,10 +109,10 @@ export const ColaboradorTable: React.FC = () => {
   return (
     <div className="w-full space-y-4">
       <div className="pb-4 pt-4 flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Listado de colaboradores</h2>
+        <h2 className="text-xl font-semibold">Listado de empresas</h2>
         <Input
           type="text"
-          placeholder="Buscar por nombre o documento..."
+          placeholder="Buscar por razón social o RUC"
           className="w-72"
         />
       </div>
@@ -120,27 +120,25 @@ export const ColaboradorTable: React.FC = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>DNI/CE</TableHead>
-              <TableHead>Número Documento</TableHead>
-              <TableHead>Nombres y Apellidos</TableHead>
-              <TableHead>Empresa</TableHead>
-              <TableHead>Teléfono</TableHead>
+              <TableHead>Razón Social</TableHead>
+              <TableHead>RUC</TableHead>
+              <TableHead>Dirección</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead>Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {colaboradores.length > 0 ? (
-              colaboradores.map((col) => (
-                <ColaboradorRow key={col.id} col={col} />
+            {empresas.length > 0 ? (
+              empresas.map((empresa) => (
+                <EmpresaRow key={empresa.id} emp={empresa} />
               ))
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={7}
+                  colSpan={5}
                   className="text-center text-gray-500 py-6"
                 >
-                  No se encontraron colaboradores registrados
+                  No se encontraron empresas registradas
                 </TableCell>
               </TableRow>
             )}

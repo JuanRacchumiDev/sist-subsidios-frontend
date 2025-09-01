@@ -4,7 +4,7 @@ import { Colaborador, ColaboradorResponse } from "../interfaces/IColaborador"
 export const getAll = async (): Promise<ColaboradorResponse> => {
     try {
         const response = await apiClient.get('/colaboradores')
-        // console.log('response colaboradores', response)
+
         const { data: { result, message, data, error, status } } = response
 
         return {
@@ -22,11 +22,32 @@ export const getAll = async (): Promise<ColaboradorResponse> => {
     }
 }
 
+export const getAllWithPaginate = async (page: number, limit: number) => {
+    try {
+        const urlApi = `${'/colaboradores/paginate?page='}${page}${'&limit='}${limit}`
+        const response = await apiClient.get(urlApi)
+        const { data: dataColaboradores } = response
+
+        const { result, data, pagination, status } = dataColaboradores
+
+        return {
+            result,
+            data,
+            pagination,
+            status
+        }
+
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+        console.log('errorMessage', errorMessage)
+        return { result: false, error: errorMessage, status: 500 }
+    }
+}
+
 export const getById = async (id: string): Promise<ColaboradorResponse> => {
     try {
         const urlApi = `${'/colaboradores/'}${id}`
         const response = await apiClient.get(urlApi)
-        // console.log('response getById', response)
         const { data: { result, message, data, error, status } } = response
         return {
             result,
@@ -77,7 +98,6 @@ export const getAllByIdEmpresa = async (idEmpresa: string): Promise<ColaboradorR
 export const create = async (payload: Colaborador): Promise<ColaboradorResponse> => {
     try {
         const response = await apiClient.post('/colaboradores', payload)
-        // console.log('response colaboradores', response)
 
         const { data: { result, data, status, message } } = response
 

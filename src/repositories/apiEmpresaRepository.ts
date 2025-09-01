@@ -1,12 +1,10 @@
 import apiClient from "./apiClient";
 import { token } from "../helpers/HToken"
-import { Empresa, EmpresaResponse } from "../interfaces/IEmpresa"
-import { create } from "./empresaRepository"
+import { EmpresaResponse } from "../interfaces/IEmpresa"
 
 export const searchForRuc = async (ruc: string): Promise<EmpresaResponse> => {
     try {
-        // const urlApi = `${API_RUC}{ruc}`
-        const urlApi = `${'/ruc/'}${ruc}`
+        const urlApi = `${'/empresas/consulta-api?ruc='}${ruc}`
 
         const response = await apiClient.get(`${urlApi}`, {
             headers: {
@@ -14,63 +12,24 @@ export const searchForRuc = async (ruc: string): Promise<EmpresaResponse> => {
             }
         })
 
-        const { data: dataApi } = response
+        const { data: dataApi, status } = response
 
-        const { success, data } = dataApi
+        const { result, data, message } = dataApi
 
-        if (success && data) {
-            const {
-                numero,
-                nombre_o_razon_social,
-                tipo_contribuyente,
-                estado,
-                condicion,
-                departamento,
-                provincia,
-                distrito,
-                direccion,
-                direccion_completa,
-                ubigeo_sunat,
-                es_agente_de_retencion
-            } = data
-
-            const empresa: Empresa = {
-                numero,
-                nombre_o_razon_social,
-                tipo_contribuyente,
-                estadoSunat: estado,
-                condicionSunat: condicion,
-                departamento,
-                provincia,
-                distrito,
-                direccion,
-                direccion_completa,
-                ubigeo_sunat,
-                es_agente_de_retencion
-            }
-
-            const response = await create(empresa)
-            // console.log('responseEmpresa', responseEmpresa)
-
-            const {
-                result,
-                data: dataEmpresa,
-                status: statusEmpresa,
-                message
-            } = response as EmpresaResponse
-
+        if (result && data) {
             return {
                 result,
-                data: dataEmpresa,
+                data,
                 message,
-                status: statusEmpresa
+                status
             }
-        } else {
-            return {
-                result: false,
-                message: "Error al obtener datos de la empresa",
-                status: 500
-            }
+        }
+
+        return {
+            result: false,
+            data: [],
+            message: "Error al obtener datos de la empresa",
+            status: 500
         }
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Error desconocido'

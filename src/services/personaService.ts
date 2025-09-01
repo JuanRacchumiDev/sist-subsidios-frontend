@@ -1,4 +1,4 @@
-import { Persona, PersonaResponse } from '../interfaces/IPersona'
+import { Persona } from '../interfaces/IPersona'
 import {
     getAll,
     getById,
@@ -27,7 +27,6 @@ export const getPersonaById = async (id: string) => {
 export const getPersonaByIdTipoDocAndNumDoc = async (idTipoDoc: string, numDoc: string) => {
     // Validando si la persona se encuentra registrada
     const responsePersona = await getByIdTipoDocAndNumDoc(idTipoDoc, numDoc)
-    console.log('personaService getPersonaByIdTipoDocAndNumDoc', responsePersona)
 
     const { result, message, data } = responsePersona
 
@@ -41,7 +40,6 @@ export const getPersonaByIdTipoDocAndNumDoc = async (idTipoDoc: string, numDoc: 
 
     // Registrando una nueva persona
     const responseApiPersona = await searchForTipoDocAndNumDoc(idTipoDoc, numDoc)
-    console.log('responseApiPersona personaService', responseApiPersona)
 
     return {
         ...responseApiPersona

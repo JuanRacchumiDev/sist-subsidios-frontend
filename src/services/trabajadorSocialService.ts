@@ -24,7 +24,6 @@ export const getTrabajadorSocialById = async (id: string) => {
 
 export const getTrabSocialByIdTipoDocAndNumDoc = async (idTipoDoc: string, numDoc: string) => {
     const response = await getByIdTipoDocAndNumDoc(idTipoDoc, numDoc)
-    console.log('trabsSocialService getTrabSocialByIdTipoDocAndNumDoc', response)
 
     return {
         ...response

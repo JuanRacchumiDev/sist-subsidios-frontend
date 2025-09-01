@@ -1,13 +1,13 @@
-import { Cargo } from '../interfaces/ICargo'
+import { DescansoMedico } from '../interfaces/IDescansoMedico'
 import {
     getAll,
     getById,
+    getAllWithPaginate,
     create,
-    update,
-    getAllWithPaginate
-} from '../repositories/cargoRepository'
+    update
+} from '../repositories/descansoMedicoRepository'
 
-export const getCargos = async () => {
+export const getDescansos = async () => {
     const response = await getAll()
 
     return {
@@ -15,7 +15,7 @@ export const getCargos = async () => {
     }
 }
 
-export const getCargosWithPaginate = async (page: number, limit: number) => {
+export const getDescansosWithPaginate = async (page: number, limit: number) => {
     const response = await getAllWithPaginate(page, limit)
 
     return {
@@ -23,7 +23,7 @@ export const getCargosWithPaginate = async (page: number, limit: number) => {
     }
 }
 
-export const getCargoById = async (id: string) => {
+export const getDescansoById = async (id: string) => {
     const response = await getById(id)
 
     return {
@@ -31,7 +31,7 @@ export const getCargoById = async (id: string) => {
     }
 }
 
-export const createCargo = async (payload: Cargo) => {
+export const createDescanso = async (payload: DescansoMedico) => {
     const response = await create(payload)
 
     return {
@@ -39,7 +39,7 @@ export const createCargo = async (payload: Cargo) => {
     }
 }
 
-export const updateCargo = async (id: string, payload: Cargo) => {
+export const updateDescanso = async (id: string, payload: DescansoMedico) => {
     const response = await update(id, payload)
 
     return {

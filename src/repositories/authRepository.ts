@@ -14,8 +14,6 @@ export const login = async (email: string, password: string): Promise<ResponseAu
             password
         }
 
-        console.log('credenciales', credenciales)
-
         const response = await apiClient.post('/auth/login', credenciales)
 
         const { data: { result, token, usuario, message, status, error } } = response

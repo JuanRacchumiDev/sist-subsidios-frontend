@@ -4,11 +4,20 @@ import {
     getById,
     getByIdTipoDocAndNumcDoc,
     getAllByIdEmpresa,
+    getAllWithPaginate,
     create
 } from '../repositories/colaboradorRepository'
 
 export const getColaboradores = async () => {
     const response = await getAll()
+
+    return {
+        ...response
+    }
+}
+
+export const getColaboradoresWithPaginate = async (page: number, limit: number) => {
+    const response = await getAllWithPaginate(page, limit)
 
     return {
         ...response

@@ -53,3 +53,20 @@ export interface ColaboradorResponse {
     error?: string
     status?: number
 }
+
+export interface Pagination {
+    currentPage: number
+    limit: number
+    totalPages: number
+    totalItems: number
+    nextPage: number | null
+    previousPage: number | null
+}
+
+export interface ColaboradorPaginateResponse {
+    result: boolean
+    data?: Colaborador[]
+    pagination?: Pagination
+    errors?: string
+    status?: number
+}

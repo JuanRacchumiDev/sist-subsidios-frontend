@@ -28,8 +28,6 @@ export const getById = async (id: string): Promise<TipoDocumentoResponse> => {
 
         const response = await apiClient.get(urlApi)
 
-        // console.log('response getById', response)
-
         const { data: { result, data, status, message, error } } = response
 
         return {

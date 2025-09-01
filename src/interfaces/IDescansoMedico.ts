@@ -49,3 +49,20 @@ export interface DescansoMedicoResponse {
     error?: string
     status?: number
 }
+
+export interface Pagination {
+    currentPage: number
+    limit: number
+    totalPages: number
+    totalItems: number
+    nextPage: number | null
+    previousPage: number | null
+}
+
+export interface EmpresaPaginateResponse {
+    result: boolean
+    data?: DescansoMedico[]
+    pagination?: Pagination
+    errors?: string
+    status?: number
+}

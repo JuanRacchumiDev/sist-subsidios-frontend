@@ -1,10 +1,11 @@
 import { Upload } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { ColaboradorTable } from "./ColaboradorTable";
+import { Link } from "react-router-dom";
 
 export const ColaboradorList = () => {
   return (
-    <div className="p-6 space-y-6">
+    <>
       <div className="flex justify-between items-center">
         <div className="flex space-x-3">
           <a
@@ -14,12 +15,12 @@ export const ColaboradorList = () => {
             <Upload size={16} />
             <span>Cargar Excel</span>
           </a>
-          <a
-            href="/colaborador/nuevo"
+          <Link
+            to="/colaborador/nuevo"
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             Nuevo colaborador
-          </a>
+          </Link>
         </div>
       </div>
       <Card>
@@ -27,6 +28,6 @@ export const ColaboradorList = () => {
           <ColaboradorTable />
         </CardContent>
       </Card>
-    </div>
+    </>
   );
 };

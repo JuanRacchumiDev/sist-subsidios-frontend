@@ -4,7 +4,6 @@ import { TipoEstablecimientoResponse } from '../interfaces/ITipoEstablecimiento'
 export const getAll = async (): Promise<TipoEstablecimientoResponse> => {
     try {
         const response = await apiClient.get('/tipo-establecimientos')
-        // console.log('response tipo establecimientos', response)
 
         const { data: { result, data, message, status, error } } = response
 
@@ -28,8 +27,6 @@ export const getById = async (id: string): Promise<TipoEstablecimientoResponse> 
         const urlApi = `${'/tipo-establecimientos/'}${id}`
 
         const response = await apiClient.get(urlApi)
-
-        // console.log('response getById', response)
 
         const { data: { result, data, status, message, error } } = response
 

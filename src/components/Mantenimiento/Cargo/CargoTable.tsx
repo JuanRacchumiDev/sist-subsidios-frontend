@@ -1,6 +1,15 @@
+import { Cargo, Pagination as PaginationType } from "@/interfaces/ICargo";
+import { getCargosWithPaginate } from "@/services/cargoService";
 import React, { useEffect, useState } from "react";
-import { getColaboradoresWithPaginate } from "../../services/colaboradorService";
-import { Input } from "../ui/input";
+import { Input } from "../../ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../ui/table";
 import {
   Pagination,
   PaginationContent,
@@ -9,23 +18,11 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "../ui/pagination";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
-import { ColaboradorRow } from "./ColaboradorRow";
-import {
-  Colaborador,
-  Pagination as PaginationType,
-} from "../../interfaces/IColaborador";
+} from "../../ui/pagination";
+import { CargoRow } from "./CargoRow";
 
-export const ColaboradorTable: React.FC = () => {
-  const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
+export const CargoTable: React.FC = () => {
+  const [cargos, setCargos] = useState<Cargo[]>([]);
   const [pagination, setPagination] = useState<PaginationType>({
     currentPage: 1,
     limit: 10,
@@ -46,13 +43,13 @@ export const ColaboradorTable: React.FC = () => {
       try {
         const { currentPage, limit } = pagination;
 
-        const response = await getColaboradoresWithPaginate(currentPage, limit);
+        const response = await getCargosWithPaginate(currentPage, limit);
 
         if (response.result && response.data && response.pagination) {
-          setColaboradores(response.data);
+          setCargos(response.data);
           setPagination(response.pagination);
         } else {
-          setColaboradores([]);
+          setCargos([]);
           setPagination({
             currentPage: 1,
             limit: 10,
@@ -63,7 +60,7 @@ export const ColaboradorTable: React.FC = () => {
           });
         }
       } catch (error) {
-        console.error("Error al obtener colaboradores", error);
+        console.error("Error al obtener cargos", error);
       }
     };
 
@@ -109,38 +106,29 @@ export const ColaboradorTable: React.FC = () => {
   return (
     <div className="w-full space-y-4">
       <div className="pb-4 pt-4 flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Listado de colaboradores</h2>
-        <Input
-          type="text"
-          placeholder="Buscar por nombre o documento..."
-          className="w-72"
-        />
+        <h2 className="text-xl font-semibold">Listado de cargos</h2>
+        <Input type="text" placeholder="Buscar por nombre" className="w-72" />
       </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>DNI/CE</TableHead>
-              <TableHead>Número Documento</TableHead>
-              <TableHead>Nombres y Apellidos</TableHead>
-              <TableHead>Empresa</TableHead>
-              <TableHead>Teléfono</TableHead>
+              <TableHead>#</TableHead>
+              <TableHead>Nombre</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead>Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {colaboradores.length > 0 ? (
-              colaboradores.map((col) => (
-                <ColaboradorRow key={col.id} col={col} />
-              ))
+            {cargos.length > 0 ? (
+              cargos.map((cargo) => <CargoRow key={cargo.id} cargo={cargo} />)
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={7}
+                  colSpan={4}
                   className="text-center text-gray-500 py-6"
                 >
-                  No se encontraron colaboradores registrados
+                  No se encontraron cargos registrados
                 </TableCell>
               </TableRow>
             )}

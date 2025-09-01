@@ -1,5 +1,6 @@
-import { Colaborador } from "../../interfaces/IColaborador";
-import { TableCell, TableRow } from "../ui/table";
+import { Cargo } from "@/interfaces/ICargo";
+import React from "react";
+import { TableCell, TableRow } from "../../ui/table";
 import { CircleCheck, CircleX, MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
@@ -8,30 +9,27 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "../../ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 
 interface Props {
-  col: Colaborador;
+  cargo: Cargo;
 }
 
-export const ColaboradorRow: React.FC<Props> = ({ col }) => {
+export const CargoRow: React.FC<Props> = ({ cargo }) => {
   const navigate = useNavigate();
 
   const handleShowDetail = () => {
-    navigate(`/colaborador/editar/${col.id}`);
+    navigate(`/mantenimiento/cargo/editar/${cargo.id}`);
   };
 
   return (
-    <TableRow key={col.id} className="hover:bg-gray-50">
-      <TableCell>{col.tipoDocumento.abreviatura}</TableCell>
-      <TableCell>{col.numero_documento}</TableCell>
-      <TableCell>{col.nombre_completo}</TableCell>
-      <TableCell>{col.empresa.nombre_o_razon_social}</TableCell>
-      <TableCell>{col.numero_celular}</TableCell>
+    <TableRow key={cargo.id} className="hover:bg-gray-50">
+      <TableCell className="font-medium">{cargo.id}</TableCell>
+      <TableCell>{cargo.nombre}</TableCell>
       <TableCell>
-        {col.estado ? (
+        {cargo.estado ? (
           <CircleCheck className="text-green-500" />
         ) : (
           <CircleX className="text-red-500" />

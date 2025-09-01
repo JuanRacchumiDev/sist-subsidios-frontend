@@ -50,9 +50,9 @@ export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
 
     try {
       const response = await loginAuth(email, password);
-      console.log("response auth", response);
+
       const { result, status, message } = response as ResponseAuth;
-      console.log(result, status, message);
+
       if (result && status === 200) {
         showToast("success", message);
         onLoginSuccess();
