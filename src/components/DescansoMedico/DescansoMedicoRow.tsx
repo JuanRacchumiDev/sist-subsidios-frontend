@@ -1,7 +1,7 @@
-import { Empresa } from "@/interfaces/IEmpresa";
 import React from "react";
+import { DescansoMedico } from "@/interfaces/IDescansoMedico";
 import { TableCell, TableRow } from "../ui/table";
-import { CircleCheck, CircleX, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,28 +14,25 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 
 interface Props {
-  emp: Empresa;
+  desc: DescansoMedico;
 }
 
-export const EmpresaRow: React.FC<Props> = ({ emp }) => {
+export const DescansoMedicoRow: React.FC<Props> = ({ desc }) => {
   const navigate = useNavigate();
+  const colaborador = `${desc.colaborador.apellido_paterno} ${desc.colaborador.apellido_materno} ${desc.colaborador.nombres}`;
 
   const handleShowDetail = () => {
-    navigate(`/empresa/editar/${emp.id}`);
+    navigate(`/descanso-medico/editar/${desc.id}`);
   };
 
   return (
-    <TableRow key={emp.id} className="hover:bg-gray-50 hover:cursor-pointer">
-      <TableCell>{emp.nombre_o_razon_social}</TableCell>
-      <TableCell>{emp.numero}</TableCell>
-      <TableCell>{emp.direccion}</TableCell>
-      <TableCell>
-        {emp.estado ? (
-          <CircleCheck className="text-green-500" />
-        ) : (
-          <CircleX className="text-red-500" />
-        )}
-      </TableCell>
+    <TableRow key={desc.id} className="hover:bg-gray-50">
+      <TableCell>{desc.codigo}</TableCell>
+      <TableCell>{colaborador}</TableCell>
+      <TableCell>{desc.fecha_inicio}</TableCell>
+      <TableCell>{desc.fecha_final}</TableCell>
+      <TableCell>{desc.total_dias}</TableCell>
+      <TableCell>{desc.estado_registro}</TableCell>
       <TableCell>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

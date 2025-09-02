@@ -120,7 +120,7 @@ export const ColaboradorTable: React.FC = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>DNI/CE</TableHead>
+              <TableHead>Tipo Documento</TableHead>
               <TableHead>Número Documento</TableHead>
               <TableHead>Nombres y Apellidos</TableHead>
               <TableHead>Empresa</TableHead>

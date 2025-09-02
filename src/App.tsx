@@ -14,6 +14,9 @@ import { ColaboradorFormPage } from "./components/Colaborador/Page/ColaboradorFo
 import { EmpresaListPage } from "./components/Empresa/Page/EmpresaListPage";
 import { EmpresaFormPage } from "./components/Empresa/Page/EmpresaFormPage";
 
+import { DescansoMedicoListPage } from "./components/DescansoMedico/Page/DescansoMedicoListPage";
+import { DescansoMedicoFormPage } from "./components/DescansoMedico/Page/DescansoMedicoFormPage";
+
 import { MantenimientoPage } from "./components/Mantenimiento/MantenimientoPage";
 
 function App() {
@@ -100,6 +103,19 @@ function App() {
                     <Route
                       path="/empresa/nuevo"
                       element={<EmpresaFormPage />}
+                    ></Route>
+                    <Route
+                      path="/empresa/editar/:id"
+                      element={<EmpresaFormPage />}
+                    ></Route>
+
+                    <Route
+                      path="/descanso-medico"
+                      element={<DescansoMedicoListPage />}
+                    ></Route>
+                    <Route
+                      path="/descanso-medico/nuevo"
+                      element={<DescansoMedicoFormPage />}
                     ></Route>
 
                     <Route

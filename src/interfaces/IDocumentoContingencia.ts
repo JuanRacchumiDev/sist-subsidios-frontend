@@ -1,6 +1,13 @@
+import { TipoContingencia } from "./ITipoContingencia"
+
 export interface DocumentoContingencia {
     id?: string
-    label?: string
+    id_tipocontingencia?: string
+    nombre?: string
+    nombre_url?: string
+    sistema?: boolean
+    estado?: boolean
+    tipoContingencia?: TipoContingencia
 }
 
 export interface DocumentoContingenciaResponse {

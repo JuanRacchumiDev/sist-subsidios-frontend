@@ -113,7 +113,6 @@ export const CargoTable: React.FC = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>#</TableHead>
               <TableHead>Nombre</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead>Acciones</TableHead>

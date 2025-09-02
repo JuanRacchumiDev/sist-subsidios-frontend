@@ -44,6 +44,13 @@ const menuItems = [
     path: "/empresa",
   },
   {
+    id: "descanso-medico",
+    icon: Users,
+    label: "Descansos médicos",
+    active: false,
+    path: "/descanso-medico",
+  },
+  {
     id: "mantenimiento",
     icon: Users,
     label: "Mantenimiento",

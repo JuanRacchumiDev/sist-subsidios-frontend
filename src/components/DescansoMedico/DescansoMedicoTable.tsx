@@ -17,15 +17,18 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { getEmpresasWithPaginate } from "../../services/empresaService";
-import { Empresa, Pagination as PaginationType } from "@/interfaces/IEmpresa";
-import { EmpresaRow } from "./EmpresaRow";
+import { getDescansosWithPaginate } from "../../services/descansoMedicoService";
+import {
+  DescansoMedico,
+  Pagination as PaginationType,
+} from "@/interfaces/IDescansoMedico";
+import { DescansoMedicoRow } from "./DescansoMedicoRow";
 
-export const EmpresaTable = () => {
-  const [empresas, setEmpresas] = useState<Empresa[]>([]);
+export const DescansoMedicoTable = () => {
+  const [descansos, setDescansos] = useState<DescansoMedico[]>([]);
   const [pagination, setPagination] = useState<PaginationType>({
     currentPage: 1,
-    limit: 5,
+    limit: 10,
     totalPages: 1,
     totalItems: 0,
     nextPage: null,
@@ -43,18 +46,18 @@ export const EmpresaTable = () => {
       try {
         const { currentPage, limit } = pagination;
 
-        const response = await getEmpresasWithPaginate(currentPage, limit);
+        const response = await getDescansosWithPaginate(currentPage, limit);
 
         const { result, data, pagination: detailPagination } = response;
 
         if (result && data && detailPagination) {
-          setEmpresas(data);
+          setDescansos(data);
           setPagination(detailPagination);
         } else {
-          setEmpresas([]);
+          setDescansos([]);
           setPagination({
             currentPage: 1,
-            limit: 5,
+            limit: 10,
             totalPages: 1,
             totalItems: 0,
             nextPage: null,
@@ -108,7 +111,7 @@ export const EmpresaTable = () => {
   return (
     <div className="w-full space-y-4">
       <div className="pb-4 pt-4 flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Listado de empresas</h2>
+        <h2 className="text-xl font-semibold">Listado de descansos médicos</h2>
         <Input
           type="text"
           placeholder="Buscar por razón social o RUC"
@@ -119,25 +122,27 @@ export const EmpresaTable = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Razón Social</TableHead>
-              <TableHead>RUC</TableHead>
-              <TableHead>Dirección</TableHead>
+              <TableHead>Código</TableHead>
+              <TableHead>Colaborador</TableHead>
+              <TableHead>Fecha Inicio</TableHead>
+              <TableHead>Fecha Final</TableHead>
+              <TableHead>Total días</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead>Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {empresas.length > 0 ? (
-              empresas.map((empresa) => (
-                <EmpresaRow key={empresa.id} emp={empresa} />
+            {descansos.length > 0 ? (
+              descansos.map((descanso) => (
+                <DescansoMedicoRow key={descanso.id} desc={descanso} />
               ))
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={7}
                   className="text-center text-gray-500 py-6"
                 >
-                  No se encontraron empresas registradas
+                  No se encontraron descansos médicos registrados
                 </TableCell>
               </TableRow>
             )}

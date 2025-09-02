@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -33,7 +33,7 @@ import { getCargos } from "@/services/cargoService";
 import { RequiredLabel } from "../Common/RequiredLabel";
 import { Input } from "../ui/input";
 import { getEmpresaByApi } from "@/services/apiEmpresaService";
-import { Empresa } from "@/interfaces/IEmpresa";
+import { Empresa, EmpresaResponse } from "@/interfaces/IEmpresa";
 import { getPersonaByApi } from "@/services/apiPersonaService";
 import { Persona } from "@/interfaces/IPersona";
 import { Button } from "../ui/button";
@@ -97,6 +97,7 @@ type Cargo = {
 
 export const EmpresaForm = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const { showToast } = useToast();
 
   const [tipos, setTipos] = useState<TipoDocumento[]>([]);
@@ -130,6 +131,7 @@ export const EmpresaForm = () => {
   });
 
   const { isSubmitting } = form.formState;
+  const isEditMode = !!id;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -621,8 +623,10 @@ export const EmpresaForm = () => {
                   {isSubmitting ? (
                     <>
                       <Spinner className="mr-2 h-4 w-4 animate-spin" />
-                      Registrando...
+                      {isEditMode ? "Actualizando..." : "Registrando..."}
                     </>
+                  ) : isEditMode ? (
+                    "Actualizar"
                   ) : (
                     "Registrar"
                   )}

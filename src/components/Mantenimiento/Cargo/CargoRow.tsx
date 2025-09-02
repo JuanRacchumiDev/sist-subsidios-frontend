@@ -1,5 +1,5 @@
-import { Cargo } from "@/interfaces/ICargo";
 import React from "react";
+import { Cargo } from "@/interfaces/ICargo";
 import { TableCell, TableRow } from "../../ui/table";
 import { CircleCheck, CircleX, MoreHorizontal } from "lucide-react";
 import {
@@ -26,7 +26,6 @@ export const CargoRow: React.FC<Props> = ({ cargo }) => {
 
   return (
     <TableRow key={cargo.id} className="hover:bg-gray-50">
-      <TableCell className="font-medium">{cargo.id}</TableCell>
       <TableCell>{cargo.nombre}</TableCell>
       <TableCell>
         {cargo.estado ? (
