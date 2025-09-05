@@ -101,23 +101,6 @@ export const CargoForm = () => {
             navigate("/mantenimiento/cargo/nuevo");
           }
         }
-        // if (id) {
-        //   const responseCargo = await getCargoById(id);
-        //   console.log({ responseCargo });
-        //   const { result, data, message } = responseCargo;
-
-        //   if (result && data) {
-        //     const cargo = data as Cargo;
-        //     const { nombre } = cargo;
-
-        //     form.reset({
-        //       nombre,
-        //     });
-        //   } else {
-        //     showToast("error", message || "Cargo no encontrado");
-        //     navigate("/cargo/nuevo");
-        //   }
-        // }
       } catch (error) {
         console.error("Error al obtener datos", error);
         showToast("error", "Error al cargar los cargos del formulario.");

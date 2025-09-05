@@ -16,15 +16,20 @@ export const login = async (email: string, password: string): Promise<ResponseAu
 
         const response = await apiClient.post('/auth/login', credenciales)
 
-        const { data: { result, token, usuario, message, status, error } } = response
+        const { data: dataAuth, status: statusAuth } = response
 
-        if (result && usuario) {
-            localStorage.setItem('auth', JSON.stringify(
-                {
-                    token,
-                    usuario
-                }
-            ))
+        const { message, result, usuario, status, token, codigoTemp, error } = dataAuth
+
+        if (statusAuth === 200) {
+            if (result && usuario) {
+                localStorage.setItem('auth', JSON.stringify(
+                    {
+                        token,
+                        usuario,
+                        codigoTemp
+                    }
+                ))
+            }
 
             return {
                 result,
@@ -34,11 +39,13 @@ export const login = async (email: string, password: string): Promise<ResponseAu
             }
         }
 
+        return {
+            result: false,
+            status: statusAuth,
+            message: message || "Error al iniciar sesión"
+        }
+
     } catch (error) {
-        // if (error.response) {
-        //     throw new Error(error.response.data.message || 'Error de inicio de sesión')
-        // }
-        // throw new Error('Error de conexión con el servidor')
         const errorMessage = error instanceof Error ? error.message : 'Error de inicio de sesión'
         console.log('errorMessage', errorMessage)
         return { result: false, error: errorMessage, status: 500 }

@@ -5,6 +5,7 @@ import { DescansoMedico } from "./IDescansoMedico"
 import { Reembolso } from "./IReembolso"
 import { TipoAdjunto } from "./ITipoAdjunto"
 import { TrabajadorSocial } from "./ITrabajadorSocial"
+import { DocumentoContingencia } from "./IDocumentoContingencia"
 
 export interface Adjunto {
     id?: string
@@ -15,10 +16,12 @@ export interface Adjunto {
     id_reembolso?: string
     id_colaborador?: string
     id_trabajadorsocial?: string
+    id_documento?: string
     file_name?: string
     file_type?: string
     file_data?: string
     file_path?: string
+    codigo_temp?: string
     sistema?: boolean
     estado?: boolean
     tipoAdjunto?: TipoAdjunto
@@ -28,6 +31,7 @@ export interface Adjunto {
     reembolso?: Reembolso
     colaborador?: Colaborador
     trabajadorSocial?: TrabajadorSocial
+    documento?: DocumentoContingencia
 }
 
 export interface AdjuntoResponse {

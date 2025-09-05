@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { format, parseISO } from "date-fns";
+import { differenceInCalendarDays, format, parseISO } from "date-fns";
 import { useToast } from "../../../context/ToastContext";
 import { Empresa } from "@/interfaces/IEmpresa";
 import { getEmpresas } from "@/services/empresaService";
@@ -100,18 +100,20 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
     DocumentoContingencia[]
   >([]);
 
+  const [totalDias, setTotalDias] = useState<number | null>(null);
+
   // Id de la empresa seleccionada
   const selectedEmpresaId = form.watch("idEmpresa");
+
+  // Id del colaborador seleccionado
+  const selectedColaboradorId = form.watch("idColaborador");
 
   // Id del tipo de contingencia seleccionado
   const selectedTipoContingenciaId = form.watch("idTipoContingencia");
 
-  const [selectedColaboradorId, setSelectedColaboradorId] =
-    useState<string>("");
-
-  const handleColaboradorChange = (id: string) => {
-    setSelectedColaboradorId(id);
-  };
+  // Calcular el total de días cuando la fecha de inicio y final cambian
+  const fechaInicio = form.watch("fechaInicio");
+  const fechaFinal = form.watch("fechaFinal");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -139,7 +141,7 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
     };
 
     fetchData();
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
     if (selectedEmpresaId) {
@@ -147,6 +149,7 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
         try {
           const colaboradoresRes = await dataColaboradores(selectedEmpresaId);
           setColaboradores(colaboradoresRes);
+          form.setValue("idColaborador", "");
         } catch (error) {
           console.error("Error al obtener colaboradores", error);
           showToast("error", "Error al cargar los colaboradores.");
@@ -155,7 +158,7 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
 
       fetchColaboradores();
     }
-  }, [selectedEmpresaId, form]);
+  }, [selectedEmpresaId, form, showToast]);
 
   useEffect(() => {
     const fetchDocumentos = async () => {
@@ -188,6 +191,19 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
     fetchDocumentos();
   }, [selectedTipoContingenciaId, showToast]);
 
+  useEffect(() => {
+    if (fechaInicio && fechaFinal) {
+      const dias = differenceInCalendarDays(fechaFinal, fechaInicio) + 1;
+      if (dias >= 0) {
+        setTotalDias(dias);
+        form.setValue("totalDias", dias.toString());
+      } else {
+        setTotalDias(null);
+        form.setValue("totalDias", "");
+      }
+    }
+  }, [fechaInicio, fechaFinal, form]);
+
   return (
     <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
       <FormField
@@ -210,21 +226,42 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                 ))}
               </SelectContent>
             </Select>
+            <FormMessage />
           </FormItem>
         )}
       />
-      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> */}
-      <div className="space-y-2">
-        <SearchableCombobox<Colaborador>
-          label="Colaborador"
-          placeholder="Buscar un colaborador"
-          options={colaboradores}
-          value={selectedColaboradorId}
-          onChange={handleColaboradorChange}
-          displayKey="nombre_completo"
-          valueKey="id"
-        />
-      </div>
+
+      <FormField
+        control={form.control}
+        name="idColaborador"
+        render={({ field }) => {
+          const selectedColaborador = colaboradores.find(
+            (c) => c.id === field.value
+          );
+
+          return (
+            <FormItem className="flex flex-col">
+              <RequiredLabel>Colaborador</RequiredLabel>
+              <SearchableCombobox<Colaborador>
+                placeholder="Buscar un colaborador"
+                options={colaboradores}
+                value={field.value}
+                onChange={field.onChange}
+                displayKey="nombre_completo"
+                valueKey="id"
+              />
+              {selectedColaborador && (
+                <FormDescription>
+                  Colaborador seleccionado:{" "}
+                  <b>{selectedColaborador.nombre_completo}</b>
+                </FormDescription>
+              )}
+              <FormMessage />
+            </FormItem>
+          );
+        }}
+      />
+
       <FormField
         control={form.control}
         name="idTipoDescansoMedico"
@@ -279,86 +316,107 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
         <Documentos documentos={documentosTipoContingencia} form={form} />
       )}
 
-      <FormField
-        control={form.control}
-        name="fechaOtorgamiento"
-        render={({ field }) => (
-          <FormItem>
-            <RequiredLabel>Fecha de Otorgamiento</RequiredLabel>
-            <FormControl>
-              <Input
-                type="date"
-                value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                onChange={(e) =>
-                  field.onChange(
-                    e.target.value ? parseISO(e.target.value) : null
-                  )
-                }
-              />
-            </FormControl>
-            <FormDescription>
-              {field.value
-                ? format(field.value, "PPP")
-                : "Seleccione una fecha"}
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-4 gap-6">
+        <FormField
+          control={form.control}
+          name="fechaOtorgamiento"
+          render={({ field }) => (
+            <FormItem>
+              <RequiredLabel>Fecha de Otorgamiento</RequiredLabel>
+              <FormControl>
+                <Input
+                  type="date"
+                  value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value ? parseISO(e.target.value) : null
+                    )
+                  }
+                />
+              </FormControl>
+              <FormDescription>
+                {field.value
+                  ? format(field.value, "PPP")
+                  : "Seleccione una fecha"}
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <FormField
-        control={form.control}
-        name="fechaInicio"
-        render={({ field }) => (
-          <FormItem>
-            <RequiredLabel>Fecha de Inicio</RequiredLabel>
-            <FormControl>
-              <Input
-                type="date"
-                value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                onChange={(e) =>
-                  field.onChange(
-                    e.target.value ? parseISO(e.target.value) : null
-                  )
-                }
-              />
-            </FormControl>
-            <FormDescription>
-              {field.value
-                ? format(field.value, "PPP")
-                : "Seleccione una fecha"}
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+        <FormField
+          control={form.control}
+          name="fechaInicio"
+          render={({ field }) => (
+            <FormItem>
+              <RequiredLabel>Fecha de Inicio</RequiredLabel>
+              <FormControl>
+                <Input
+                  type="date"
+                  value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value ? parseISO(e.target.value) : null
+                    )
+                  }
+                />
+              </FormControl>
+              <FormDescription>
+                {field.value
+                  ? format(field.value, "PPP")
+                  : "Seleccione una fecha"}
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <FormField
-        control={form.control}
-        name="fechaFinal"
-        render={({ field }) => (
-          <FormItem>
-            <RequiredLabel>Fecha final</RequiredLabel>
-            <FormControl>
-              <Input
-                type="date"
-                value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                onChange={(e) =>
-                  field.onChange(
-                    e.target.value ? parseISO(e.target.value) : null
-                  )
-                }
-              />
-            </FormControl>
-            <FormDescription>
-              {field.value
-                ? format(field.value, "PPP")
-                : "Seleccione una fecha"}
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+        <FormField
+          control={form.control}
+          name="fechaFinal"
+          render={({ field }) => (
+            <FormItem>
+              <RequiredLabel>Fecha final</RequiredLabel>
+              <FormControl>
+                <Input
+                  type="date"
+                  value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value ? parseISO(e.target.value) : null
+                    )
+                  }
+                />
+              </FormControl>
+              <FormDescription>
+                {field.value
+                  ? format(field.value, "PPP")
+                  : "Seleccione una fecha"}
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="totalDias"
+          render={() => (
+            <FormItem>
+              <RequiredLabel>Número de Días</RequiredLabel>
+              <FormControl>
+                <Input
+                  readOnly
+                  value={totalDias !== null ? totalDias.toString() : ""}
+                  className="bg-gray-100"
+                  autoComplete="off"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
     </div>
   );
 };

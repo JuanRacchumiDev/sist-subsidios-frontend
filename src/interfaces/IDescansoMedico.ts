@@ -3,7 +3,6 @@ import { Colaborador } from "./IColaborador"
 import { Diagnostico } from "./IDiagnostico"
 import { TipoContingencia } from "./ITipoContingencia"
 import { TipoDescansoMedico } from "./ITipoDescansoMedico"
-import { Establecimiento } from '../../../dms-backend-node/src/app/models/Establecimiento';
 
 export interface DescansoMedico {
     id?: string
@@ -11,7 +10,7 @@ export interface DescansoMedico {
     id_tipodescansomedico?: string
     id_tipocontingencia?: string
     codcie10_diagnostico?: string
-    id_establecimiento?: string
+    // id_establecimiento?: string
     codigo?: string
     fecha_otorgamiento?: string
     fecha_inicio?: string
@@ -26,6 +25,7 @@ export interface DescansoMedico {
     nombre_tipodescansomedico?: string
     nombre_tipocontingencia?: string
     nombre_diagnostico?: string
+    nombre_establecimiento?: string
     observacion?: string
     total_dias?: number
     is_subsidio?: boolean
@@ -39,7 +39,7 @@ export interface DescansoMedico {
     tipoDescansoMedico?: TipoDescansoMedico
     tipoContingencia?: TipoContingencia
     diagnostico?: Diagnostico
-    establecimiento?: Establecimiento
+    // establecimiento?: Establecimiento
 }
 
 export interface DescansoMedicoResponse {

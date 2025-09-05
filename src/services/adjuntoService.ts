@@ -1,11 +1,13 @@
 import { Adjunto } from '../interfaces/IAdjunto'
+import { responseViewFile } from '../types/TFile';
 import {
     getAll,
     getById,
     create,
     update,
     getAllWithPaginate,
-    upload
+    upload,
+    viewFile
 } from '../repositories/adjuntoRepository'
 
 export const getAdjuntos = async () => {
@@ -50,6 +52,14 @@ export const updateAdjunto = async (id: string, payload: Adjunto) => {
 
 export const uploadAdjunto = async (formData: FormData) => {
     const response = await upload(formData)
+
+    return {
+        ...response
+    }
+}
+
+export const viewAdjunto = async (id: string): Promise<responseViewFile> => {
+    const response = await viewFile(id)
 
     return {
         ...response

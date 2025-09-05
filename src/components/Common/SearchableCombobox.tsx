@@ -18,7 +18,7 @@ import { FormControl, FormItem } from "@/components/ui/form";
 import { RequiredLabel } from "./RequiredLabel";
 
 interface SearchableComboboxProps<T extends { [key: string]: any }> {
-  label: string;
+  label?: string;
   placeholder: string;
   options: T[];
   value: string;
@@ -50,7 +50,7 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
 
   return (
     <FormItem>
-      <RequiredLabel>{label}</RequiredLabel>
+      {label && <RequiredLabel>{label}</RequiredLabel>}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <FormControl>
@@ -70,8 +70,12 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
         </PopoverTrigger>
         <PopoverContent className="w-[350px] p-0">
           <Command>
-            <CommandInput placeholder={`Buscar ${label.toLowerCase()}...`} />
-            <CommandEmpty>No se encontró {label.toLowerCase()}</CommandEmpty>
+            <CommandInput
+              placeholder={`Buscar ${label ? label.toLowerCase() : ""}...`}
+            />
+            <CommandEmpty>
+              No se encontró {label ? label.toLowerCase() : ""}
+            </CommandEmpty>
             <CommandGroup className="max-h-[300px] overflow-y-auto">
               {Array.isArray(options) &&
                 options.map((option) => (
@@ -82,7 +86,7 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
                       const selectedItem = options.find(
                         (item) =>
                           (item[displayKey] as string).toLowerCase() ===
-                          currentValue
+                          currentValue.toLowerCase()
                       );
 
                       const selectedItemValue = selectedItem?.[
@@ -93,11 +97,6 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
                         selectedItemValue === value ? "" : selectedItemValue
                       );
 
-                      //   onChange(
-                      //     selectedItem?.[valueKey] === value
-                      //       ? ""
-                      //       : (selectedItem?.[valueKey] as string) || ""
-                      //   );
                       setOpen(false);
                     }}
                     className="cursor-pointer px-3 py-2 text-sm transition-colors duration-150 ease-in-out

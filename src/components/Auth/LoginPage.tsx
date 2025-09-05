@@ -51,6 +51,8 @@ export const LoginPage = ({ onLoginSuccess }: LoginPageProps) => {
     try {
       const response = await loginAuth(email, password);
 
+      console.log("response login", response);
+
       const { result, status, message } = response as ResponseAuth;
 
       if (result && status === 200) {
