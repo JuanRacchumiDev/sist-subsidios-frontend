@@ -85,7 +85,7 @@ export const create = async (payload: Cargo): Promise<CargoResponse> => {
 export const update = async (id: string, payload: Cargo): Promise<CargoResponse> => {
     try {
         const urlApi = `${'/cargos/'}${id}`
-        const response = await apiClient.put(urlApi, payload)
+        const response = await apiClient.patch(urlApi, payload)
         const { data: { result, data, message, error, status } } = response
         return {
             result,

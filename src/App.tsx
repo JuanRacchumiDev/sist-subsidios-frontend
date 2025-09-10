@@ -17,6 +17,18 @@ import { EmpresaFormPage } from "./components/Empresa/Page/EmpresaFormPage";
 import { DescansoMedicoListPage } from "./components/DescansoMedico/Page/DescansoMedicoListPage";
 import { DescansoMedicoFormPage } from "./components/DescansoMedico/Page/DescansoMedicoFormPage";
 
+import { CanjeListPage } from "./components/Canje/Page/CanjeListPage";
+import { CanjeFormPage } from "./components/Canje/Page/CanjeFormPage";
+
+import { ReembolsoListPage } from "./components/Reembolso/Page/ReembolsoListPage";
+import { ReembolsoFormPage } from "./components/Reembolso/Page/ReembolsoFormPage";
+
+import { CobroListPage } from "./components/Cobro/Page/CobroListPage";
+import { CobroFormPage } from "./components/Cobro/Page/CobroFormPage";
+
+import { UsuarioListPage } from "./components/Usuario/Page/UsuarioListPage";
+import { UsuarioFormPage } from "./components/Usuario/Page/UsuarioFormPage";
+
 import { MantenimientoPage } from "./components/Mantenimiento/MantenimientoPage";
 
 function App() {
@@ -116,6 +128,36 @@ function App() {
                     <Route
                       path="/descanso-medico/nuevo"
                       element={<DescansoMedicoFormPage />}
+                    ></Route>
+
+                    <Route path="/canje" element={<CanjeListPage />}></Route>
+                    <Route
+                      path="/canje/nuevo"
+                      element={<CanjeFormPage />}
+                    ></Route>
+
+                    <Route
+                      path="/reembolso"
+                      element={<ReembolsoListPage />}
+                    ></Route>
+                    <Route
+                      path="/reembolso/nuevo"
+                      element={<ReembolsoFormPage />}
+                    ></Route>
+
+                    <Route path="/cobro" element={<CobroListPage />}></Route>
+                    <Route
+                      path="/cobro/nuevo"
+                      element={<CobroFormPage />}
+                    ></Route>
+
+                    <Route
+                      path="/usuario"
+                      element={<UsuarioListPage />}
+                    ></Route>
+                    <Route
+                      path="/usuario/nuevo"
+                      element={<UsuarioFormPage />}
                     ></Route>
 
                     <Route

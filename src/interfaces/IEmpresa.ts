@@ -1,5 +1,4 @@
-// import { RepresentanteLegal } from './IRepresentanteLegal';
-
+import { IRepresentanteLegal } from '../../../dms-backend-node/src/app/interfaces/RepresentanteLegal/IRepresentanteLegal';
 export interface Empresa {
     id?: string
     numero?: string
@@ -14,8 +13,8 @@ export interface Empresa {
     estadoSunat?: string
     condicionSunat?: string
     es_agente_de_retencion?: boolean
-    // representantes?: RepresentanteLegal[]
     estado?: boolean
+    representantes?: IRepresentanteLegal[]
 }
 
 export interface EmpresaResponse {

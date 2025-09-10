@@ -86,7 +86,7 @@ export const create = async (payload: Adjunto): Promise<AdjuntoResponse> => {
 export const update = async (id: string, payload: Adjunto): Promise<AdjuntoResponse> => {
     try {
         const urlApi = `${'/adjuntos/'}${id}`
-        const response = await apiClient.put(urlApi, payload)
+        const response = await apiClient.patch(urlApi, payload)
         const { data: { result, data, message, error, status } } = response
         return {
             result,

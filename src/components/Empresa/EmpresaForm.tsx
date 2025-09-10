@@ -35,25 +35,25 @@ import { Input } from "../ui/input";
 import { getEmpresaByApi } from "@/services/apiEmpresaService";
 import { Empresa, EmpresaResponse } from "@/interfaces/IEmpresa";
 import { getPersonaByApi } from "@/services/apiPersonaService";
+import { getEmpresaById } from "@/services/empresaService";
 import { Persona } from "@/interfaces/IPersona";
 import { Button } from "../ui/button";
 import {
   RepresentanteLegal,
   RepresentanteLegalResponse,
 } from "@/interfaces/IRepresentanteLegal";
-import { createRepresentante } from "@/services/representanteService";
+import { createRepresentante, updateRepresentante } from "@/services/representanteService";
 
 const formSchema = z.object({
   ruc: z.string().min(2, {
     message: "El RUC es requerido.",
   }),
-  nombre: z.string().min(2, {
-    message: "El nombre es requerido.",
+  razonSocial: z.string().min(2, {
+    message: "La razón social es requerida.",
   }),
   direccion: z.string().min(2, {
     message: "La dirección es requerida.",
   }),
-
   idTipoDocumento: z
     .string({
       message: "Por favor seleccione un tipo de documento.",
@@ -82,7 +82,7 @@ const formSchema = z.object({
     .min(1, "Por favor seleccione un cargo."),
   telefono: z.string().min(6, { message: "Teléfono inválido." }),
   correo: z.string().email({ message: "Correo electrónico inválido." }),
-  ospe: z.string().min(1, { message: "La OSPE es requerida." }),
+  ospe: z.string().min(1, { message: "El OSPE es requerido." }),
 });
 
 type TipoDocumento = {
@@ -103,6 +103,7 @@ export const EmpresaForm = () => {
   const [tipos, setTipos] = useState<TipoDocumento[]>([]);
   const [cargos, setCargos] = useState<Cargo[]>([]);
   const [idEmpresa, setIdEmpresa] = useState<string>("");
+  const [idRepresentante, setIdRepresentante] = useState<string>("");
 
   const [camposHabilitadosEmpresa, setCamposHabilitadosEmpresa] =
     useState(false);
@@ -114,7 +115,7 @@ export const EmpresaForm = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       ruc: "",
-      nombre: "",
+      razonSocial: "",
       direccion: "",
       idTipoDocumento: "",
       numeroDocumento: "",
@@ -135,6 +136,13 @@ export const EmpresaForm = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      console.log({values})
+      console.log({idRepresentante})
+
+      let messageError: string = "";
+
+      let response: RepresentanteLegalResponse;
+
       // Obteniendo valores del formulario
       const {
         idTipoDocumento,
@@ -165,8 +173,15 @@ export const EmpresaForm = () => {
         ospe,
       };
 
-      const response = await createRepresentante(payload);
-      const { result, message } = response as RepresentanteLegalResponse;
+      if (isEditMode && idRepresentante) {
+        messageError = "Error al actualizar el representante legal"
+        response = await updateRepresentante(idRepresentante, payload)
+      } else {
+        messageError = "Error al registrar el representante legal";
+        response = await await createRepresentante(payload);
+      }
+
+      const { result, message, error } = response as RepresentanteLegalResponse;
 
       if (result) {
         showToast("success", message);
@@ -174,7 +189,7 @@ export const EmpresaForm = () => {
       } else {
         showToast(
           "error",
-          message || "Error al registrar el representante legal"
+          error || messageError
         );
         return;
       }
@@ -187,16 +202,36 @@ export const EmpresaForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        let dataForm = {
+          ruc: "",
+          razonSocial: "",
+          direccion: "",
+          idTipoDocumento: "",
+          numeroDocumento: "",
+          apellidoPateno: "",
+          apellidoMaterno: "",
+          nombres: "",
+          direccionFiscal: "",
+          partidaRegistral: "",
+          idCargo: "",
+          telefono: "",
+          correo: "",
+          ospe: "",
+        }
+
         let listTipoDocumentos: TipoDocumento[] = [];
         let listCargos: Cargo[] = [];
 
-        const responseTipoDocumentos = await getTipoDocumentos();
-        const { result, data } = responseTipoDocumentos;
-        if (result && data) {
-          listTipoDocumentos = data as TipoDocumento[];
+        const [responseTipoDocumentos, responseCargos] = await Promise.all([
+          getTipoDocumentos(),
+          getCargos(),
+        ]);
+
+        const { result: resultTipoDocs, data: dataTipoDocs } = responseTipoDocumentos;
+        if (resultTipoDocs && dataTipoDocs) {
+          listTipoDocumentos = dataTipoDocs as TipoDocumento[];
         }
 
-        const responseCargos = await getCargos();
         const { result: resultCargos, data: dataCargos } = responseCargos;
         if (resultCargos && dataCargos) {
           listCargos = dataCargos as Cargo[];
@@ -204,20 +239,92 @@ export const EmpresaForm = () => {
 
         setTipos(listTipoDocumentos);
         setCargos(listCargos);
+
+        if (isEditMode && id) {
+          const responseEmpresa = await getEmpresaById(id)
+          
+          const { result, data } = responseEmpresa
+          
+          if (result && data) {
+            const empresa = data as Empresa
+         
+            const { id: idEmpresa, numero, nombre_o_razon_social, direccion, representantes } = empresa
+
+            dataForm.ruc = numero
+            dataForm.razonSocial = nombre_o_razon_social
+            dataForm.direccion = direccion
+            
+            setIdEmpresa(idEmpresa)
+
+            const listRepresentantes = representantes as RepresentanteLegal[]
+            
+            const totalRepresentantes = listRepresentantes.length
+            
+            if (totalRepresentantes === 1) {
+              const representante = listRepresentantes[0] as RepresentanteLegal
+
+              const {
+                id_tipodocumento,
+                id_cargo,
+                numero_documento,
+                nombres,
+                apellido_paterno,
+                apellido_materno,
+                direccion_fiscal,
+                partida_registral,
+                telefono,
+                correo,
+                ospe
+              } = representante
+
+              setIdRepresentante(representante.id)
+
+              dataForm = {
+                ...dataForm,
+                idTipoDocumento: id_tipodocumento,
+                numeroDocumento: numero_documento,
+                apellidoPateno: apellido_paterno,
+                apellidoMaterno: apellido_materno,
+                nombres,
+                direccionFiscal: direccion_fiscal,
+                partidaRegistral: partida_registral,
+                idCargo: id_cargo,
+                telefono,
+                correo,
+                ospe
+              }
+
+              console.log({dataForm})
+
+              form.reset(dataForm)
+            }
+
+            // Deshabilita los siguientes campos 
+            form.setValue("idTipoDocumento", dataForm.idTipoDocumento);
+            form.setValue("ruc", dataForm.ruc);
+            form.setValue("numeroDocumento", dataForm.numeroDocumento);
+            form.setValue("idCargo", dataForm.idCargo)
+          }
+        }
       } catch (error) {
         console.error("Error al obtener datos", error);
       }
     };
 
     fetchData();
-  }, []);
+  }, [id]);
 
   return (
     <>
       <Card>
         <CardHeader>
           <CardTitle>Información de empresa</CardTitle>
-          <CardDescription>Ingrese los datos de la empresa</CardDescription>
+          <CardDescription>
+            {isEditMode
+              ? "Actualice los datos de la empresa"
+              : "Ingrese los datos de la empresa"
+            }
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -244,6 +351,7 @@ export const EmpresaForm = () => {
                                 e.preventDefault();
                                 try {
                                   showToast("success", "Buscando empresa...");
+            
                                   const response = await getEmpresaByApi(
                                     field.value
                                   );
@@ -262,16 +370,18 @@ export const EmpresaForm = () => {
                                     setIdEmpresa(id);
 
                                     form.setValue(
-                                      "nombre",
+                                      "razonSocial",
                                       nombre_o_razon_social
                                     );
 
                                     form.setValue("direccion", direccion);
+                                    setCamposHabilitadosEmpresa(false);
                                   } else {
                                     showToast(
                                       "error",
                                       "Error información de emoresa"
                                     );
+                                    setCamposHabilitadosEmpresa(true);
                                   }
                                 } catch (error) {
                                   setCamposHabilitadosEmpresa(true);
@@ -282,6 +392,7 @@ export const EmpresaForm = () => {
                                 }
                               }
                             }}
+                            disabled={isEditMode}
                           />
                         </FormControl>
                         <FormMessage />
@@ -291,10 +402,10 @@ export const EmpresaForm = () => {
 
                   <FormField
                     control={form.control}
-                    name="nombre"
+                    name="razonSocial"
                     render={({ field }) => (
                       <FormItem>
-                        <RequiredLabel>Nombre</RequiredLabel>
+                        <RequiredLabel>Razón social</RequiredLabel>
                         <FormControl>
                           <Input
                             placeholder="SOPHIA HUMAN"
@@ -343,7 +454,8 @@ export const EmpresaForm = () => {
                         <RequiredLabel>Tipo de Documento</RequiredLabel>
                         <Select
                           onValueChange={field.onChange}
-                          defaultValue={field.value ?? ""}
+                          value={field.value ?? ""}
+                          disabled={isEditMode}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -375,6 +487,7 @@ export const EmpresaForm = () => {
                             autoComplete="off"
                             maxLength={8}
                             {...field}
+                            disabled={isEditMode}
                             onKeyDown={async (e) => {
                               if (e.key === "Enter") {
                                 e.preventDefault();
@@ -537,7 +650,7 @@ export const EmpresaForm = () => {
                         <FormLabel>Cargo</FormLabel>
                         <Select
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
+                          value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>

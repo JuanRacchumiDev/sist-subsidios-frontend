@@ -2,7 +2,8 @@ import { RepresentanteLegal, RepresentanteLegalResponse } from '@/interfaces/IRe
 import {
     getAll,
     getById,
-    create
+    create,
+    update
 } from "@/repositories/representanteRepository"
 
 export const getRepresentantes = async () => {
@@ -30,6 +31,20 @@ export const getRepresentanteById = async (id: string): Promise<RepresentanteLeg
 export const createRepresentante = async (payload: RepresentanteLegal) => {
     try {
         const response = await create(payload)
+
+        return {
+            ...response
+        }
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+        console.log('errorMessage', errorMessage)
+        return { result: false, error: errorMessage, status: 500 }
+    }
+}
+
+export const updateRepresentante = async (id: string, payload: Cargo) => {
+    try {
+        const response = await update(id, payload)
 
         return {
             ...response

@@ -57,3 +57,22 @@ export const create = async (payload: RepresentanteLegal): Promise<Representante
         return { result: false, error: errorMessage, status: 500 }
     }
 }
+
+export const update = async (id: string, payload: RepresentanteLegal): Promise<RepresentanteLegalResponse> => {
+    try {
+        const urlApi = `${'/representantes/'}${id}`
+        const response = await apiClient.patch(urlApi, payload)
+        const { data: { result, data, message, error, status } } = response
+        return {
+            result,
+            data,
+            message,
+            error,
+            status
+        }
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+        console.log('errorMessage', errorMessage)
+        return { result: false, data: [], error: errorMessage, status: 500 }
+    }
+}

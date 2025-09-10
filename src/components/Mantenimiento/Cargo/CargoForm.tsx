@@ -52,30 +52,29 @@ export const CargoForm = () => {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const cargoData: Cargo = {
+      let messageError: string = "";
+      let response: CargoResponse;
+
+      const payloadData: Cargo = {
         ...values,
         estado: true,
       };
 
-      let messageError: string = "";
-
-      // const response = await createCargo(cargoData);
-      let response: CargoResponse;
       if (isEditMode && id) {
         messageError = "Error al actualizar el cargo";
-        response = await updateCargo(id, cargoData);
+        response = await updateCargo(id, payloadData);
       } else {
         messageError = "Error al registrar el cargo";
-        response = await createCargo(cargoData);
+        response = await createCargo(payloadData);
       }
 
-      const { result, message } = response;
+      const { result, message, error } = response;
 
       if (result) {
         showToast("success", message);
         navigate("/mantenimiento/cargo");
       } else {
-        showToast("error", messageError);
+        showToast("error", error || messageError);
         return;
       }
     } catch (error) {

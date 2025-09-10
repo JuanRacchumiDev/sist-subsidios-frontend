@@ -117,7 +117,7 @@ export const create = async (payload: Colaborador): Promise<ColaboradorResponse>
 export const update = async (id: string, payload: Colaborador): Promise<ColaboradorResponse> => {
     try {
         const urlApi = `${'/colaboradores/'}${id}`
-        const response = await apiClient.put(urlApi, payload)
+        const response = await apiClient.patch(urlApi, payload)
         console.log('response update colaborador', response)
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
