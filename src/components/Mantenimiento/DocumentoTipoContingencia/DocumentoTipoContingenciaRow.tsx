@@ -1,7 +1,6 @@
-import React from "react";
-import { DescansoMedico } from "@/interfaces/IDescansoMedico";
-import { TableCell, TableRow } from "../ui/table";
-import { MoreHorizontal } from "lucide-react";
+import { DocumentoTipoContingencia } from "../../../interfaces/IDocumentoTipoContingencia";
+import { TableCell, TableRow } from "../../ui/table";
+import { CircleCheck, CircleX, MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,31 +8,36 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "../../ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
-import { Button } from "../ui/button";
-import { formatDate } from "date-fns";
+import { Button } from "../../ui/button";
 
 interface Props {
-  desc: DescansoMedico;
+  documento: DocumentoTipoContingencia;
 }
 
-export const DescansoMedicoRow: React.FC<Props> = ({ desc }) => {
+export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
+  documento,
+}) => {
   const navigate = useNavigate();
-  const colaborador = `${desc.colaborador.apellido_paterno} ${desc.colaborador.apellido_materno} ${desc.colaborador.nombres}`;
 
   const handleShowDetail = () => {
-    navigate(`/descanso-medico/editar/${desc.id}`);
+    navigate(
+      `/mantenimiento/documento-tipo-contingencia/editar/${documento.id}`
+    );
   };
 
   return (
-    <TableRow key={desc.id} className="hover:bg-gray-50">
-      <TableCell>{desc.codigo}</TableCell>
-      <TableCell>{colaborador}</TableCell>
-      <TableCell>{formatDate(desc.fecha_inicio, "dd/MM/yyyy")}</TableCell>
-      <TableCell>{formatDate(desc.fecha_final, "dd/MM/yyyy")}</TableCell>
-      <TableCell>{desc.total_dias}</TableCell>
-      <TableCell>{desc.estado_registro}</TableCell>
+    <TableRow key={documento.id} className="hover:bg-gray-50">
+      <TableCell>{documento.tipoContingencia.nombre}</TableCell>
+      <TableCell>{documento.nombre}</TableCell>
+      <TableCell>
+        {documento.estado ? (
+          <CircleCheck className="text-green-500" />
+        ) : (
+          <CircleX className="text-red-500" />
+        )}
+      </TableCell>
       <TableCell>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

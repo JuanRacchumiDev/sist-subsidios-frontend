@@ -104,11 +104,10 @@ export const update = async (id: string, payload: Adjunto): Promise<AdjuntoRespo
 
 export const upload = async (formData: FormData): Promise<AdjuntoResponse> => {
     try {
-
         // Añadiendo tipo adjunto a formData
-        const tipoAdjunto = "ab55a4f1-b5aa-4ac6-a14f-f27ac1a4ad84";
+        const idTipoAdjunto = "6d58216b-142a-467a-b146-04e78fc60628";
 
-        formData.append("id_tipoadjunto", tipoAdjunto)
+        formData.append("id_tipoadjunto", idTipoAdjunto)
 
         // Obteniendo el código temporal del usuario autenticado
         const auth = localStorage.getItem("auth") || null
@@ -117,9 +116,9 @@ export const upload = async (formData: FormData): Promise<AdjuntoResponse> => {
 
             const authJson = JSON.parse(auth)
 
-            const { codigoTemp } = authJson
+            const { codigo_temp } = authJson
 
-            formData.append("codigo_temp", codigoTemp)
+            formData.append("codigo_temp", codigo_temp)
         }
 
         const response = await apiClient.post('/adjuntos', formData, {

@@ -1,5 +1,5 @@
 import React from "react";
-import { DocumentoContingencia } from "@/interfaces/IDocumentoContingencia";
+import { DocumentoTipoContingencia } from "@/interfaces/IDocumentoTipoContingencia";
 import { Adjunto } from "@/interfaces/IAdjunto";
 import { UseFormReturn } from "react-hook-form";
 import * as z from "zod";
@@ -18,7 +18,7 @@ import { uploadAdjunto, viewAdjunto } from "../../services/adjuntoService";
 import { responseViewFile } from "../../types/TFile";
 
 interface DocumentosRequeridosProps {
-  documentos: DocumentoContingencia[];
+  documentos: DocumentoTipoContingencia[];
   form: UseFormReturn<z.infer<typeof formSchema>>;
 }
 

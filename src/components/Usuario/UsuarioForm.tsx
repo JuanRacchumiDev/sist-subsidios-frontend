@@ -63,6 +63,7 @@ type Persona = {
   apellido_paterno: string;
   apellido_materno: string;
   nombres: string;
+  email: string;
   nombre_completo: string;
 };
 
@@ -117,9 +118,15 @@ export const UsuarioForm = () => {
       let messageError: string = "";
       let response: UsuarioResponse;
 
+      const { idPerfil, idPersona, username, email } = values;
+
       const payloadData: Usuario = {
-        ...values,
-        estado: true,
+        // ...values,
+        // estado: true,
+        id_perfil: idPerfil,
+        id_persona: idPersona,
+        username,
+        email,
       };
 
       if (isEditMode && id) {
@@ -129,6 +136,8 @@ export const UsuarioForm = () => {
         messageError = "Error al registrar el usuario";
         response = await createUsuario(payloadData);
       }
+
+      console.log("response new usuario", response);
 
       const { result, message, error } = response;
 
@@ -236,6 +245,16 @@ export const UsuarioForm = () => {
                       (c) => c.id === field.value
                     );
 
+                    if (selectedPersona) {
+                      const { email } = selectedPersona;
+
+                      if (email) {
+                        form.setValue("email", email);
+                      } else {
+                        form.setValue("email", "");
+                      }
+                    }
+
                     return (
                       <FormItem className="flex flex-col">
                         <RequiredLabel>Persona</RequiredLabel>
@@ -262,7 +281,7 @@ export const UsuarioForm = () => {
                 <FormField
                   control={form.control}
                   name="idPerfil"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <RequiredLabel>Perfil</RequiredLabel>
                       <Select
@@ -270,7 +289,11 @@ export const UsuarioForm = () => {
                         value={field.value ?? ""}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
+                          >
                             <SelectValue placeholder="Seleccionar perfil" />
                           </SelectTrigger>
                         </FormControl>
@@ -290,7 +313,7 @@ export const UsuarioForm = () => {
                 <FormField
                   control={form.control}
                   name="username"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <RequiredLabel>Nombre de usuario</RequiredLabel>
                       <FormControl>
@@ -299,6 +322,7 @@ export const UsuarioForm = () => {
                           autoComplete="off"
                           maxLength={10}
                           {...field}
+                          className={fieldState.invalid ? "border-red-500" : ""}
                         />
                       </FormControl>
                       <FormMessage />
@@ -309,7 +333,7 @@ export const UsuarioForm = () => {
                 <FormField
                   control={form.control}
                   name="email"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <RequiredLabel>Correo Electrónico</RequiredLabel>
                       <FormControl>
@@ -319,6 +343,7 @@ export const UsuarioForm = () => {
                           autoComplete="off"
                           maxLength={60}
                           {...field}
+                          className={fieldState.invalid ? "border-red-500" : ""}
                         />
                       </FormControl>
                       <FormMessage />

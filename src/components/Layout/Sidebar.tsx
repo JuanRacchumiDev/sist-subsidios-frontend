@@ -1,162 +1,17 @@
-import {
-  BarChart3,
-  Calendar,
-  ChevronDown,
-  CreditCard,
-  FileText,
-  LayoutDashboard,
-  MessagesSquare,
-  Package,
-  Settings,
-  ShoppingBag,
-  Users,
-  Zap,
-} from "lucide-react";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { MENU_ITEMS } from "../../utils/menuItems";
+import { ChevronDown, Zap } from "lucide-react";
 
-const menuItems = [
-  {
-    id: "dashboard",
-    icon: LayoutDashboard,
-    label: "Dashboard",
-    active: true,
-    badge: "New",
-    path: "/dashboard",
-  },
-  {
-    id: "colaborador",
-    icon: Users,
-    label: "Colaboradores",
-    active: false,
-    badge: "New",
-    path: "/colaborador",
-    // submenu: [
-    //   { id: "listColaborador", label: "Listado", path: "/colaborador/listado" },
-    //   { id: "nuevoColaborador", label: "Nuevo", path: "/colaborador/nuevo" },
-    // ],
-  },
-  {
-    id: "empresa",
-    icon: Users,
-    label: "Empresas",
-    active: false,
-    path: "/empresa",
-  },
-  {
-    id: "descanso-medico",
-    icon: Users,
-    label: "Descansos médicos",
-    active: false,
-    path: "/descanso-medico",
-  },
-  {
-    id: "canje",
-    icon: Users,
-    label: "Canjes",
-    active: false,
-    path: "/canje",
-  },
-  {
-    id: "reembolso",
-    icon: Users,
-    label: "Reembolsos",
-    active: false,
-    path: "/reembolso",
-  },
-  {
-    id: "cobro",
-    icon: Users,
-    label: "Cobros",
-    active: false,
-    path: "/cobro",
-  },
-  {
-    id: "usuario",
-    icon: Users,
-    label: "Usuarios",
-    active: false,
-    path: "/usuario",
-  },
-  {
-    id: "mantenimiento",
-    icon: Users,
-    label: "Mantenimiento",
-    submenu: [
-      { id: "cargo", label: "Cargo", path: "/mantenimiento/cargo" },
-      // { id: "nuevoCargo", label: "Nuevo", path: "/cargo/nuevo" },
-    ],
-  },
-  // {
-  //   id: "analytics",
-  //   icon: BarChart3,
-  //   label: "Analytics",
-  //   submenu: [
-  //     { id: "overview", label: "Overview", path: "/analytics/overview" },
-  //     { id: "reports", label: "Reports", path: "/analytics/reports" },
-  //     { id: "insights", label: "Insights", path: "/analytics/insights" },
-  //   ],
-  // },
-  // {
-  //   id: "users",
-  //   icon: Users,
-  //   label: "Users",
-  //   count: "2.4k",
-  //   submenu: [
-  //     { id: "all-users", label: "All Users", path: "/users/all-users" },
-  //     { id: "roles", label: "Roles & Permissions", path: "/users/roles" },
-  //     { id: "activity", label: "User Activity", path: "/rules/activity" },
-  //   ],
-  // },
-  // {
-  //   id: "ecommerce",
-  //   icon: ShoppingBag,
-  //   label: "E-commerce",
-  //   submenu: [
-  //     { id: "products", label: "Products", path: "/ecommerce/products" },
-  //     { id: "orders", label: "Orders", path: "/ecommerce/orders" },
-  //     { id: "customers", label: "Customers", path: "/ecommerce/customers" },
-  //   ],
-  // },
-  // {
-  //   id: "inventory",
-  //   icon: Package,
-  //   label: "Inventory",
-  //   count: "847",
-  //   path: "/inventory",
-  // },
-  // {
-  //   id: "transactions",
-  //   icon: CreditCard,
-  //   label: "Transactions",
-  //   path: "/transactions",
-  // },
-  // {
-  //   id: "messages",
-  //   icon: MessagesSquare,
-  //   label: "Messages",
-  //   badge: "12",
-  //   path: "/messages",
-  // },
-  // {
-  //   id: "calendar",
-  //   icon: Calendar,
-  //   label: "Calendar",
-  //   path: "/calendar",
-  // },
-  // {
-  //   id: "reports",
-  //   icon: FileText,
-  //   label: "Reports",
-  //   path: "/reports",
-  // },
-  // {
-  //   id: "settings",
-  //   icon: Settings,
-  //   label: "Settings",
-  //   path: "/settings",
-  // },
-];
+interface UserData {
+  nombre_completo: string;
+  nombre_perfil: string;
+  slug_perfil: string;
+}
+
+interface AuthData {
+  usuario: UserData;
+}
 
 export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
   const [expandedItems, setExpandedItems] = useState(new Set(["analytics"]));
@@ -175,12 +30,49 @@ export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
     setExpandedItems(newExpanded);
   };
 
+  const authData = useMemo(() => {
+    try {
+      const auth = localStorage.getItem("auth");
+      return auth ? (JSON.parse(auth) as AuthData) : null;
+    } catch (e) {
+      console.error("Failed to parse auth data from localStorage", e);
+      return null;
+    }
+  }, []);
+
+  const userProfile = authData?.usuario;
+
+  // Filtrar el menú de acuerdo al perfil del usuario
+  const filteredMenuItems = useMemo(() => {
+    if (!userProfile) {
+      return [];
+    }
+
+    const { slug_perfil } = userProfile;
+
+    switch (slug_perfil) {
+      case "colaborador":
+        return MENU_ITEMS.filter((item) => item.id === "descanso-medico");
+      case "especialista":
+        return MENU_ITEMS.filter(
+          (item) =>
+            item.id === "colaborador" ||
+            item.id === "empresa" ||
+            item.id === "descanso-medico" ||
+            item.id === "canje" ||
+            item.id === "reembolso" ||
+            item.id === "cobro" ||
+            item.id === "usuario" ||
+            item.id === "mantenimiento"
+        );
+      case "administrador":
+        return MENU_ITEMS;
+      default:
+        return [];
+    }
+  }, [userProfile]);
+
   return (
-    // <div
-    //   className={`${
-    //     collapsed ? "w-20" : "w-72"
-    //   } transition-all duration-300 ease-in-out bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-700/50 flex flex-col relative z-10`}
-    // >
     <div
       className={`${
         collapsed ? "w-20" : "w-72"
@@ -209,7 +101,7 @@ export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
 
       {/* Navigation I will display Dynamic Menus */}
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        {menuItems.map((item) => {
+        {filteredMenuItems.map((item) => {
           const isItemActive =
             item.path && location.pathname.startsWith(item.path);
 
@@ -257,44 +149,6 @@ export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
                   )}
                 </button>
               )}
-              {/* <button
-                className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-200 ${
-                  currentPage === item.id || item.active
-                    ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25"
-                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50"
-                }`}
-                onClick={() => {
-                  if (item.submenu) {
-                    toggleExpanded(item.id);
-                  } else {
-                    onPageChange(item.id);
-                  }
-                }}
-              >
-                <div className="flex items-center space-x-3">
-                  <item.icon className={`w-5 h-5`} />
-
-                  {!collapsed && (
-                    <>
-                      <span className="font-medium ml-2">{item.label}</span>
-                      {item.badge && (
-                        <span className="px-2 py-1 text-xs bg-red-500 text-white rounded-full">
-                          {item.badge}
-                        </span>
-                      )}
-                      {item.count && (
-                        <span className="px-2 py-1 text-xs bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full">
-                          {item.count}
-                        </span>
-                      )}
-                    </>
-                  )}
-                </div>
-
-                {!collapsed && item.submenu && (
-                  <ChevronDown className={`w-4 h-4 transition-transform`} />
-                )}
-              </button> */}
 
               {/* Submenu */}
               {!collapsed && item.submenu && expandedItems.has(item.id) && (
@@ -316,18 +170,6 @@ export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
                   ))}
                 </div>
               )}
-
-              {/* {!collapsed && item.submenu && expandedItems.has(item.id) && (
-                <div className="ml-8 mt-2 space-y-1">
-                  {item.submenu?.map((subitem) => {
-                    return (
-                      <button className="w-full text-left p-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded-lg transition-all">
-                        {subitem.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              )} */}
             </div>
           );
         })}
@@ -345,10 +187,10 @@ export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
             <div className="flex-1 min-w-0">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-slate-800 dark:text-white truncate">
-                  Alex Johson
+                  {userProfile.nombre_completo || "Usuario"}
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                  Administrator
+                  {userProfile.nombre_perfil || "Perfil"}
                 </p>
               </div>
             </div>

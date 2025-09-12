@@ -35,6 +35,7 @@ export interface DescansoMedico {
     estado_registro?: EstadoDescansoMedico,
     sistema?: boolean
     estado?: boolean
+    codigo_temp?: string
     colaborador?: Colaborador
     tipoDescansoMedico?: TipoDescansoMedico
     tipoContingencia?: TipoContingencia

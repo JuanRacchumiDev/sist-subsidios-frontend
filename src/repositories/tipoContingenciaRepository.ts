@@ -26,6 +26,8 @@ export const getById = async (id: string): Promise<TipoContingenciaResponse> => 
     try {
         const urlApi = `${'/tipo-contingencias/'}${id}`
 
+        console.log('urlApi documento por tipocontingencia', urlApi)
+
         const response = await apiClient.get(urlApi)
 
         const { data: { result, data, status, message, error } } = response

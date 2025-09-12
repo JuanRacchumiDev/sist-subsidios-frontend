@@ -14,11 +14,17 @@ export const login = async (email: string, password: string): Promise<ResponseAu
             password
         }
 
+        console.log({ credenciales })
+
         const response = await apiClient.post('/auth/login', credenciales)
+
+        console.log({ response })
 
         const { data: dataAuth, status: statusAuth } = response
 
-        const { message, result, usuario, status, token, codigoTemp, error } = dataAuth
+        console.log({ dataAuth })
+
+        const { message, result, usuario, status, token, codigo_temp, error } = dataAuth
 
         if (statusAuth === 200) {
             if (result && usuario) {
@@ -26,7 +32,7 @@ export const login = async (email: string, password: string): Promise<ResponseAu
                     {
                         token,
                         usuario,
-                        codigoTemp
+                        codigo_temp
                     }
                 ))
             }

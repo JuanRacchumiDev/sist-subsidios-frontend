@@ -58,7 +58,7 @@ export const DatosMedicos = ({ form }: DatosMedicosProps) => {
       <FormField
         control={form.control}
         name="colegiadoMedico"
-        render={({ field }) => (
+        render={({ field, fieldState }) => (
           <FormItem>
             <RequiredLabel>Colegiado Médico</RequiredLabel>
             <FormControl>
@@ -67,6 +67,7 @@ export const DatosMedicos = ({ form }: DatosMedicosProps) => {
                 autoComplete="off"
                 maxLength={6}
                 {...field}
+                className={fieldState.invalid ? "border-red-500" : ""}
               />
             </FormControl>
             <FormMessage />
@@ -77,7 +78,7 @@ export const DatosMedicos = ({ form }: DatosMedicosProps) => {
       <FormField
         control={form.control}
         name="medicoTratante"
-        render={({ field }) => (
+        render={({ field, fieldState }) => (
           <FormItem>
             <RequiredLabel>Médico Tratante</RequiredLabel>
             <FormControl>
@@ -86,6 +87,7 @@ export const DatosMedicos = ({ form }: DatosMedicosProps) => {
                 autoComplete="off"
                 maxLength={50}
                 {...field}
+                className={fieldState.invalid ? "border-red-500" : ""}
               />
             </FormControl>
             <FormMessage />
@@ -96,7 +98,7 @@ export const DatosMedicos = ({ form }: DatosMedicosProps) => {
       <FormField
         control={form.control}
         name="idDiagnostico"
-        render={({ field }) => {
+        render={({ field, fieldState }) => {
           const selectedDiagnostico = dxs.find(
             (dx) => dx.codCie10 === field.value
           );
@@ -111,6 +113,7 @@ export const DatosMedicos = ({ form }: DatosMedicosProps) => {
                 onChange={field.onChange}
                 displayKey="nombre"
                 valueKey="codCie10"
+                // isInvalid={fieldState.invalid}
               />
               {selectedDiagnostico && (
                 <FormDescription>
@@ -126,7 +129,7 @@ export const DatosMedicos = ({ form }: DatosMedicosProps) => {
       <FormField
         control={form.control}
         name="nombreEstablecimiento"
-        render={({ field }) => (
+        render={({ field, fieldState }) => (
           <FormItem>
             <RequiredLabel>Establecimiento</RequiredLabel>
             <FormControl>
@@ -135,6 +138,7 @@ export const DatosMedicos = ({ form }: DatosMedicosProps) => {
                 autoComplete="off"
                 maxLength={100}
                 {...field}
+                className={fieldState.invalid ? "border-red-500" : ""}
               />
             </FormControl>
             <FormMessage />

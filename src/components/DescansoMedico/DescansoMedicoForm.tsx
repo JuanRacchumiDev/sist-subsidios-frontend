@@ -91,9 +91,20 @@ export const formSchema = z.object({
     .string()
     .min(1, "El nombre del médico tratante es requerido"),
   documentos: z.record(z.string(), z.any()).optional(),
-  aceptaResponsabilidad: z.boolean().optional(),
-  aceptaPoliticaSubsidio: z.boolean().optional(),
-  estadoRegistro: z.string().optional(),
+  // aceptaResponsabilidad: z.boolean().optional(),
+  // aceptaPoliticaSubsidio: z.boolean().optional(),
+  aceptaResponsabilidad: z.boolean().refine((val) => val === true, {
+    message: "Debe aceptar la declaración de responsabilidad",
+  }),
+  aceptaPoliticaSubsidio: z.boolean().refine((val) => val === true, {
+    message: "Debe aceptar la política de subsidio",
+  }),
+  // estadoRegistro: z.string().optional(),
+  estadoRegistro: z
+    .string({
+      message: "Debe seleccionar un estado",
+    })
+    .min(1, "Debe seleccionar un estado"),
   observacion: z.string().optional(),
 });
 
@@ -159,6 +170,7 @@ export const DescansoMedicoForm = () => {
       const responseColaborador = await getColaboradorById(idColaborador);
       console.log({ responseColaborador });
       const { result: resultCol, data: dataCol } = responseColaborador;
+
       if (resultCol && dataCol) {
         const { nombres, apellido_paterno, apellido_materno } =
           dataCol as Colaborador;
@@ -171,6 +183,7 @@ export const DescansoMedicoForm = () => {
         idTipoDescansoMedico
       );
       console.log({ responseTipoDescanso });
+
       const { result: resultTipoDescanso, data: dataTipoDescanso } =
         responseTipoDescanso;
       if (resultTipoDescanso && dataTipoDescanso) {
@@ -184,6 +197,7 @@ export const DescansoMedicoForm = () => {
         idTipoContingencia
       );
       console.log({ responseTipoContingencia });
+
       const { result: resultTipoContingencia, data: dataTipoContingencia } =
         responseTipoContingencia;
       if (resultTipoContingencia && dataTipoContingencia) {
@@ -196,6 +210,7 @@ export const DescansoMedicoForm = () => {
       const responseDiagnostico = await getDiagnosticoByCodigo(idDiagnostico);
       console.log({ responseDiagnostico });
       const { result: resultDx, data: dataDx } = responseDiagnostico;
+
       if (resultDx && dataDx) {
         const { nombre } = dataDx as Diagnostico;
         nombreDiagnostico = nombre;
@@ -206,7 +221,6 @@ export const DescansoMedicoForm = () => {
         id_tipodescansomedico: idTipoDescansoMedico,
         id_tipocontingencia: idTipoContingencia,
         codcie10_diagnostico: idDiagnostico,
-        codigo: "DM-2025-0001",
         fecha_otorgamiento: formatDateToString(fechaOtorgamiento),
         fecha_inicio: formatDateToString(fechaInicio),
         fecha_final: formatDateToString(fechaFinal),
@@ -224,6 +238,8 @@ export const DescansoMedicoForm = () => {
         estado_registro: estadoRegistro as EstadoDescansoMedico,
       };
 
+      console.log({ payloadDescansoMedico });
+
       const responseNewDescanso = await createDescanso(payloadDescansoMedico);
       const { result: resultNewDescanso, message: messageNewDescanso } =
         responseNewDescanso;
@@ -234,7 +250,7 @@ export const DescansoMedicoForm = () => {
       } else {
         showToast(
           "error",
-          messageNewDescanso || "Error al registrar el representante legal"
+          messageNewDescanso || "Error al registrar el descanso médico"
         );
         return;
       }
@@ -245,7 +261,7 @@ export const DescansoMedicoForm = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <>
       <Card>
         <CardHeader>
           <CardTitle>Información del descanso médico</CardTitle>
@@ -282,7 +298,7 @@ export const DescansoMedicoForm = () => {
                 <FormField
                   control={form.control}
                   name="aceptaResponsabilidad"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <div className="flex items-center space-x-2">
                         <input
@@ -290,6 +306,11 @@ export const DescansoMedicoForm = () => {
                           checked={field.value}
                           onChange={field.onChange}
                           id="responsabilidad"
+                          className={
+                            fieldState.invalid
+                              ? "border-red-500 text-red-500 focus:ring-red-500"
+                              : ""
+                          }
                         />
                         <label
                           htmlFor="responsabilidad"
@@ -314,7 +335,7 @@ export const DescansoMedicoForm = () => {
                 <FormField
                   control={form.control}
                   name="aceptaPoliticaSubsidio"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <div className="flex items-center space-x-2">
                         <input
@@ -322,6 +343,11 @@ export const DescansoMedicoForm = () => {
                           checked={field.value}
                           onChange={field.onChange}
                           id="politicaSubsidio"
+                          className={
+                            fieldState.invalid
+                              ? "border-red-500 text-red-500 focus:ring-red-500"
+                              : ""
+                          }
                         />
                         <label
                           htmlFor="politicaSubsidio"
@@ -383,6 +409,6 @@ export const DescansoMedicoForm = () => {
           </Form>
         </CardContent>
       </Card>
-    </div>
+    </>
   );
 };

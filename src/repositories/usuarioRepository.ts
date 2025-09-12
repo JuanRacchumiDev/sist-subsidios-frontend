@@ -68,7 +68,7 @@ export const create = async (payload: Usuario): Promise<UsuarioResponse> => {
     try {
         const response = await apiClient.post('/usuarios', payload)
 
-        const { result, data, status, message, error } = response as UsuarioResponse
+        const { data: { result, data, status, message, error } } = response
 
         return {
             result,

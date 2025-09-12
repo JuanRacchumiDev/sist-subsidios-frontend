@@ -336,7 +336,7 @@ export const ColaboradorForm = () => {
                   <FormField
                     control={form.control}
                     name="idTipoDocumento"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem className="mb-4">
                         <RequiredLabel>Tipo de Documento</RequiredLabel>
                         <Select
@@ -344,7 +344,11 @@ export const ColaboradorForm = () => {
                           value={field.value ?? ""}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger
+                              className={
+                                fieldState.invalid ? "border-red-500" : ""
+                              }
+                            >
                               <SelectValue placeholder="Seleccionar tipo de documento" />
                             </SelectTrigger>
                           </FormControl>
@@ -364,7 +368,7 @@ export const ColaboradorForm = () => {
                   <FormField
                     control={form.control}
                     name="numeroDocumento"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Número de Documento</RequiredLabel>
                         <FormControl>
@@ -435,6 +439,9 @@ export const ColaboradorForm = () => {
                                 }
                               }
                             }}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -445,7 +452,7 @@ export const ColaboradorForm = () => {
                   <FormField
                     control={form.control}
                     name="nombres"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Nombres</RequiredLabel>
                         <FormControl>
@@ -455,6 +462,9 @@ export const ColaboradorForm = () => {
                             maxLength={40}
                             {...field}
                             disabled={!camposHabilitadosPersona}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -465,7 +475,7 @@ export const ColaboradorForm = () => {
                   <FormField
                     control={form.control}
                     name="apellidoPaterno"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Apellido Paterno</RequiredLabel>
                         <FormControl>
@@ -475,6 +485,9 @@ export const ColaboradorForm = () => {
                             maxLength={40}
                             {...field}
                             disabled={!camposHabilitadosPersona}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -485,7 +498,7 @@ export const ColaboradorForm = () => {
                   <FormField
                     control={form.control}
                     name="apellidoMaterno"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Apellido Materno</RequiredLabel>
                         <FormControl>
@@ -495,6 +508,9 @@ export const ColaboradorForm = () => {
                             maxLength={40}
                             {...field}
                             disabled={!camposHabilitadosPersona}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -505,7 +521,7 @@ export const ColaboradorForm = () => {
                   <FormField
                     control={form.control}
                     name="fechaNacimiento"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Fecha de Nacimiento</RequiredLabel>
                         <FormControl>
@@ -520,6 +536,9 @@ export const ColaboradorForm = () => {
                               field.onChange(
                                 e.target.value ? parseISO(e.target.value) : null
                               )
+                            }
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
                             }
                           />
                         </FormControl>
@@ -543,7 +562,7 @@ export const ColaboradorForm = () => {
                   <FormField
                     control={form.control}
                     name="idEmpresa"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Empresa</RequiredLabel>
                         <Select
@@ -551,7 +570,11 @@ export const ColaboradorForm = () => {
                           value={field.value ?? ""}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger
+                              className={
+                                fieldState.invalid ? "border-red-500" : ""
+                              }
+                            >
                               <SelectValue placeholder="Seleccionar empresa" />
                             </SelectTrigger>
                           </FormControl>
@@ -571,7 +594,7 @@ export const ColaboradorForm = () => {
                   <FormField
                     control={form.control}
                     name="idCargo"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Cargo</RequiredLabel>
                         <Select
@@ -579,7 +602,11 @@ export const ColaboradorForm = () => {
                           value={field.value ?? ""}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger
+                              className={
+                                fieldState.invalid ? "border-red-500" : ""
+                              }
+                            >
                               <SelectValue placeholder="Seleccionar cargo" />
                             </SelectTrigger>
                           </FormControl>
@@ -599,7 +626,7 @@ export const ColaboradorForm = () => {
                   <FormField
                     control={form.control}
                     name="nombreArea"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Área</RequiredLabel>
                         <FormControl>
@@ -608,6 +635,9 @@ export const ColaboradorForm = () => {
                             autoComplete="off"
                             maxLength={40}
                             {...field}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -618,7 +648,7 @@ export const ColaboradorForm = () => {
                   <FormField
                     control={form.control}
                     name="nombreSede"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Sede</RequiredLabel>
                         <FormControl>
@@ -627,6 +657,9 @@ export const ColaboradorForm = () => {
                             autoComplete="off"
                             maxLength={40}
                             {...field}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -637,7 +670,7 @@ export const ColaboradorForm = () => {
                   <FormField
                     control={form.control}
                     name="emailInstitucional"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Correo Institucional</RequiredLabel>
                         <FormControl>
@@ -646,6 +679,9 @@ export const ColaboradorForm = () => {
                             autoComplete="off"
                             maxLength={50}
                             {...field}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -656,7 +692,7 @@ export const ColaboradorForm = () => {
                   <FormField
                     control={form.control}
                     name="emailPersonal"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Correo Personal</RequiredLabel>
                         <FormControl>
@@ -665,6 +701,9 @@ export const ColaboradorForm = () => {
                             autoComplete="off"
                             maxLength={50}
                             {...field}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -675,7 +714,7 @@ export const ColaboradorForm = () => {
                   <FormField
                     control={form.control}
                     name="numeroCelular"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Número de Celular</RequiredLabel>
                         <FormControl>
@@ -684,6 +723,9 @@ export const ColaboradorForm = () => {
                             autoComplete="off"
                             maxLength={9}
                             {...field}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -694,7 +736,7 @@ export const ColaboradorForm = () => {
                   <FormField
                     control={form.control}
                     name="fechaIngreso"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Fecha de Ingreso</RequiredLabel>
                         <FormControl>
@@ -709,6 +751,9 @@ export const ColaboradorForm = () => {
                               field.onChange(
                                 e.target.value ? parseISO(e.target.value) : null
                               )
+                            }
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
                             }
                           />
                         </FormControl>

@@ -129,6 +129,10 @@ function App() {
                       path="/descanso-medico/nuevo"
                       element={<DescansoMedicoFormPage />}
                     ></Route>
+                    <Route
+                      path="/descanso-medico/editar/:id"
+                      element={<DescansoMedicoFormPage />}
+                    ></Route>
 
                     <Route path="/canje" element={<CanjeListPage />}></Route>
                     <Route

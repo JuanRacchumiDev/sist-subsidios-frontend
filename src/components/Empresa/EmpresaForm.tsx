@@ -42,7 +42,10 @@ import {
   RepresentanteLegal,
   RepresentanteLegalResponse,
 } from "@/interfaces/IRepresentanteLegal";
-import { createRepresentante, updateRepresentante } from "@/services/representanteService";
+import {
+  createRepresentante,
+  updateRepresentante,
+} from "@/services/representanteService";
 
 const formSchema = z.object({
   ruc: z.string().min(2, {
@@ -136,8 +139,8 @@ export const EmpresaForm = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      console.log({values})
-      console.log({idRepresentante})
+      console.log({ values });
+      console.log({ idRepresentante });
 
       let messageError: string = "";
 
@@ -174,8 +177,8 @@ export const EmpresaForm = () => {
       };
 
       if (isEditMode && idRepresentante) {
-        messageError = "Error al actualizar el representante legal"
-        response = await updateRepresentante(idRepresentante, payload)
+        messageError = "Error al actualizar el representante legal";
+        response = await updateRepresentante(idRepresentante, payload);
       } else {
         messageError = "Error al registrar el representante legal";
         response = await await createRepresentante(payload);
@@ -187,10 +190,7 @@ export const EmpresaForm = () => {
         showToast("success", message);
         navigate("/empresa");
       } else {
-        showToast(
-          "error",
-          error || messageError
-        );
+        showToast("error", error || messageError);
         return;
       }
     } catch (error) {
@@ -217,7 +217,7 @@ export const EmpresaForm = () => {
           telefono: "",
           correo: "",
           ospe: "",
-        }
+        };
 
         let listTipoDocumentos: TipoDocumento[] = [];
         let listCargos: Cargo[] = [];
@@ -227,7 +227,8 @@ export const EmpresaForm = () => {
           getCargos(),
         ]);
 
-        const { result: resultTipoDocs, data: dataTipoDocs } = responseTipoDocumentos;
+        const { result: resultTipoDocs, data: dataTipoDocs } =
+          responseTipoDocumentos;
         if (resultTipoDocs && dataTipoDocs) {
           listTipoDocumentos = dataTipoDocs as TipoDocumento[];
         }
@@ -241,27 +242,33 @@ export const EmpresaForm = () => {
         setCargos(listCargos);
 
         if (isEditMode && id) {
-          const responseEmpresa = await getEmpresaById(id)
-          
-          const { result, data } = responseEmpresa
-          
+          const responseEmpresa = await getEmpresaById(id);
+
+          const { result, data } = responseEmpresa;
+
           if (result && data) {
-            const empresa = data as Empresa
-         
-            const { id: idEmpresa, numero, nombre_o_razon_social, direccion, representantes } = empresa
+            const empresa = data as Empresa;
 
-            dataForm.ruc = numero
-            dataForm.razonSocial = nombre_o_razon_social
-            dataForm.direccion = direccion
-            
-            setIdEmpresa(idEmpresa)
+            const {
+              id: idEmpresa,
+              numero,
+              nombre_o_razon_social,
+              direccion,
+              representantes,
+            } = empresa;
 
-            const listRepresentantes = representantes as RepresentanteLegal[]
-            
-            const totalRepresentantes = listRepresentantes.length
-            
+            dataForm.ruc = numero;
+            dataForm.razonSocial = nombre_o_razon_social;
+            dataForm.direccion = direccion;
+
+            setIdEmpresa(idEmpresa);
+
+            const listRepresentantes = representantes as RepresentanteLegal[];
+
+            const totalRepresentantes = listRepresentantes.length;
+
             if (totalRepresentantes === 1) {
-              const representante = listRepresentantes[0] as RepresentanteLegal
+              const representante = listRepresentantes[0] as RepresentanteLegal;
 
               const {
                 id_tipodocumento,
@@ -274,10 +281,10 @@ export const EmpresaForm = () => {
                 partida_registral,
                 telefono,
                 correo,
-                ospe
-              } = representante
+                ospe,
+              } = representante;
 
-              setIdRepresentante(representante.id)
+              setIdRepresentante(representante.id);
 
               dataForm = {
                 ...dataForm,
@@ -291,19 +298,19 @@ export const EmpresaForm = () => {
                 idCargo: id_cargo,
                 telefono,
                 correo,
-                ospe
-              }
+                ospe,
+              };
 
-              console.log({dataForm})
+              console.log({ dataForm });
 
-              form.reset(dataForm)
+              form.reset(dataForm);
             }
 
-            // Deshabilita los siguientes campos 
+            // Deshabilita los siguientes campos
             form.setValue("idTipoDocumento", dataForm.idTipoDocumento);
             form.setValue("ruc", dataForm.ruc);
             form.setValue("numeroDocumento", dataForm.numeroDocumento);
-            form.setValue("idCargo", dataForm.idCargo)
+            form.setValue("idCargo", dataForm.idCargo);
           }
         }
       } catch (error) {
@@ -322,8 +329,7 @@ export const EmpresaForm = () => {
           <CardDescription>
             {isEditMode
               ? "Actualice los datos de la empresa"
-              : "Ingrese los datos de la empresa"
-            }
+              : "Ingrese los datos de la empresa"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -337,7 +343,7 @@ export const EmpresaForm = () => {
                   <FormField
                     control={form.control}
                     name="ruc"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>RUC</RequiredLabel>
                         <FormControl>
@@ -351,7 +357,7 @@ export const EmpresaForm = () => {
                                 e.preventDefault();
                                 try {
                                   showToast("success", "Buscando empresa...");
-            
+
                                   const response = await getEmpresaByApi(
                                     field.value
                                   );
@@ -393,6 +399,9 @@ export const EmpresaForm = () => {
                               }
                             }}
                             disabled={isEditMode}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -403,7 +412,7 @@ export const EmpresaForm = () => {
                   <FormField
                     control={form.control}
                     name="razonSocial"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Razón social</RequiredLabel>
                         <FormControl>
@@ -413,6 +422,9 @@ export const EmpresaForm = () => {
                             maxLength={40}
                             {...field}
                             disabled={!camposHabilitadosEmpresa}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -423,7 +435,7 @@ export const EmpresaForm = () => {
                   <FormField
                     control={form.control}
                     name="direccion"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Dirección</RequiredLabel>
                         <FormControl>
@@ -433,6 +445,9 @@ export const EmpresaForm = () => {
                             maxLength={60}
                             {...field}
                             disabled={!camposHabilitadosEmpresa}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -449,7 +464,7 @@ export const EmpresaForm = () => {
                   <FormField
                     control={form.control}
                     name="idTipoDocumento"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Tipo de Documento</RequiredLabel>
                         <Select
@@ -458,7 +473,11 @@ export const EmpresaForm = () => {
                           disabled={isEditMode}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger
+                              className={
+                                fieldState.invalid ? "border-red-500" : ""
+                              }
+                            >
                               <SelectValue placeholder="Seleccionar tipo de documento" />
                             </SelectTrigger>
                           </FormControl>
@@ -478,7 +497,7 @@ export const EmpresaForm = () => {
                   <FormField
                     control={form.control}
                     name="numeroDocumento"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Número de Documento</RequiredLabel>
                         <FormControl>
@@ -537,6 +556,9 @@ export const EmpresaForm = () => {
                                 }
                               }
                             }}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -547,7 +569,7 @@ export const EmpresaForm = () => {
                   <FormField
                     control={form.control}
                     name="apellidoPateno"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Apellido paterno</RequiredLabel>
                         <FormControl>
@@ -557,6 +579,9 @@ export const EmpresaForm = () => {
                             maxLength={30}
                             {...field}
                             disabled={!camposHabilitadosPersona}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -567,7 +592,7 @@ export const EmpresaForm = () => {
                   <FormField
                     control={form.control}
                     name="apellidoMaterno"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Apellido materno</RequiredLabel>
                         <FormControl>
@@ -577,6 +602,9 @@ export const EmpresaForm = () => {
                             maxLength={30}
                             {...field}
                             disabled={!camposHabilitadosPersona}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -587,7 +615,7 @@ export const EmpresaForm = () => {
                   <FormField
                     control={form.control}
                     name="nombres"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Nombres</RequiredLabel>
                         <FormControl>
@@ -597,6 +625,9 @@ export const EmpresaForm = () => {
                             maxLength={40}
                             {...field}
                             disabled={!camposHabilitadosPersona}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -607,7 +638,7 @@ export const EmpresaForm = () => {
                   <FormField
                     control={form.control}
                     name="direccionFiscal"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Dirección Fiscal</RequiredLabel>
                         <FormControl>
@@ -616,6 +647,9 @@ export const EmpresaForm = () => {
                             autoComplete="off"
                             maxLength={60}
                             {...field}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -626,7 +660,7 @@ export const EmpresaForm = () => {
                   <FormField
                     control={form.control}
                     name="partidaRegistral"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Partida Registral</RequiredLabel>
                         <FormControl>
@@ -635,6 +669,9 @@ export const EmpresaForm = () => {
                             autoComplete="off"
                             maxLength={10}
                             {...field}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -645,7 +682,7 @@ export const EmpresaForm = () => {
                   <FormField
                     control={form.control}
                     name="idCargo"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <FormLabel>Cargo</FormLabel>
                         <Select
@@ -653,7 +690,11 @@ export const EmpresaForm = () => {
                           value={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger
+                              className={
+                                fieldState.invalid ? "border-red-500" : ""
+                              }
+                            >
                               <SelectValue placeholder="Seleccionar cargo" />
                             </SelectTrigger>
                           </FormControl>
@@ -673,7 +714,7 @@ export const EmpresaForm = () => {
                   <FormField
                     control={form.control}
                     name="telefono"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Teléfono</RequiredLabel>
                         <FormControl>
@@ -682,6 +723,9 @@ export const EmpresaForm = () => {
                             autoComplete="off"
                             maxLength={9}
                             {...field}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -692,7 +736,7 @@ export const EmpresaForm = () => {
                   <FormField
                     control={form.control}
                     name="correo"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Correo Electrónico</RequiredLabel>
                         <FormControl>
@@ -702,6 +746,9 @@ export const EmpresaForm = () => {
                             autoComplete="off"
                             maxLength={50}
                             {...field}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -712,7 +759,7 @@ export const EmpresaForm = () => {
                   <FormField
                     control={form.control}
                     name="ospe"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>OSPE</RequiredLabel>
                         <FormControl>
@@ -721,6 +768,9 @@ export const EmpresaForm = () => {
                             autoComplete="off"
                             maxLength={30}
                             {...field}
+                            className={
+                              fieldState.invalid ? "border-red-500" : ""
+                            }
                           />
                         </FormControl>
 

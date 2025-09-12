@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { Input } from "../ui/input";
+import React, { useEffect, useState } from "react";
+import { getDocumentosTipoContWithPaginate } from "../../../services/documentoTipoContService";
+import { Input } from "../../ui/input";
 import {
   Pagination,
   PaginationContent,
@@ -8,7 +9,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "../ui/pagination";
+} from "../../ui/pagination";
 import {
   Table,
   TableBody,
@@ -16,16 +17,18 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../ui/table";
-import { Usuario, Pagination as PaginationType } from "@/interfaces/IUsuario";
-import { UsuarioRow } from "./UsuarioRow";
-import { getUsuariosWithPaginate } from "@/services/usuarioService";
+} from "../../ui/table";
+import { DocumentoTipoContingenciaRow } from "./DocumentoTipoContingenciaRow";
+import {
+  DocumentoTipoContingencia,
+  Pagination as PaginationType,
+} from "../../../interfaces/IDocumentoTipoContingencia";
 
-export const UsuarioTable = () => {
-  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+export const DocumentoTipoContingenciaTable: React.FC = () => {
+  const [documentos, setDocumentos] = useState<DocumentoTipoContingencia[]>([]);
   const [pagination, setPagination] = useState<PaginationType>({
     currentPage: 1,
-    limit: 5,
+    limit: 10,
     totalPages: 1,
     totalItems: 0,
     nextPage: null,
@@ -43,20 +46,19 @@ export const UsuarioTable = () => {
       try {
         const { currentPage, limit } = pagination;
 
-        const response = await getUsuariosWithPaginate(currentPage, limit);
+        const response = await getDocumentosTipoContWithPaginate(
+          currentPage,
+          limit
+        );
 
-        console.log({ response });
-
-        const { result, data, pagination: detailPagination } = response;
-
-        if (result && data && detailPagination) {
-          setUsuarios(data);
-          setPagination(detailPagination);
+        if (response.result && response.data && response.pagination) {
+          setDocumentos(response.data);
+          setPagination(response.pagination);
         } else {
-          setUsuarios([]);
+          setDocumentos([]);
           setPagination({
             currentPage: 1,
-            limit: 5,
+            limit: 10,
             totalPages: 1,
             totalItems: 0,
             nextPage: null,
@@ -64,7 +66,10 @@ export const UsuarioTable = () => {
           });
         }
       } catch (error) {
-        console.error("Error al obtener usuarios", error);
+        console.error(
+          "Error al obtener documentos por tipo de contingencia",
+          error
+        );
       }
     };
 
@@ -110,10 +115,10 @@ export const UsuarioTable = () => {
   return (
     <div className="w-full space-y-4">
       <div className="pb-4 pt-4 flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Listado de usuarios</h2>
+        <h2 className="text-xl font-semibold">Listado de documentos</h2>
         <Input
           type="text"
-          placeholder="Buscar por razón social o RUC"
+          placeholder="Buscar por nombre o documento..."
           className="w-72"
         />
       </div>
@@ -121,25 +126,27 @@ export const UsuarioTable = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Razón Social</TableHead>
-              <TableHead>RUC</TableHead>
-              <TableHead>Dirección</TableHead>
+              <TableHead>Tipo Contingencia</TableHead>
+              <TableHead>Nombre</TableHead>
               <TableHead>Estado</TableHead>
-              <TableHead>Acciones</TableHead>
+              <TableHead>Opciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {usuarios.length > 0 ? (
-              usuarios.map((usuario) => (
-                <UsuarioRow key={usuario.id} usuario={usuario} />
+            {documentos.length > 0 ? (
+              documentos.map((documento) => (
+                <DocumentoTipoContingenciaRow
+                  key={documento.id}
+                  documento={documento}
+                />
               ))
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={7}
                   className="text-center text-gray-500 py-6"
                 >
-                  No se encontraron usuarios registrados
+                  No se encontraron documentos registrados
                 </TableCell>
               </TableRow>
             )}

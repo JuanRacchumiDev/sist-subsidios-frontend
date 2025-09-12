@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   FormControl,
   FormDescription,
@@ -27,7 +27,7 @@ import {
 import { TipoDescansoMedico } from "@/interfaces/ITipoDescansoMedico";
 import { getTipoDescansosMedicos } from "@/services/tipoDescansoMedicoService";
 import { TipoContingencia } from "@/interfaces/ITipoContingencia";
-import { DocumentoContingencia } from "@/interfaces/IDocumentoContingencia";
+import { DocumentoTipoContingencia } from "@/interfaces/IDocumentoTipoContingencia";
 import {
   getTipoContingencias,
   getTipoContingenciaById,
@@ -87,6 +87,18 @@ const dataTipoContingencias = async () => {
   return tipoContingencias;
 };
 
+interface UserData {
+  id_colaborador: string;
+  id_empresa: string;
+  nombre_completo: string;
+  nombre_perfil: string;
+  slug_perfil: string;
+}
+
+interface AuthData {
+  usuario: UserData;
+}
+
 export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
   const { showToast } = useToast();
 
@@ -97,10 +109,11 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
     TipoContingencia[]
   >([]);
   const [documentosTipoContingencia, setDocumentosTipoContingencia] = useState<
-    DocumentoContingencia[]
+    DocumentoTipoContingencia[]
   >([]);
 
   const [totalDias, setTotalDias] = useState<number | null>(null);
+  const [isDisabled, setIsDisabled] = useState<boolean>(false);
 
   // Id de la empresa seleccionada
   const selectedEmpresaId = form.watch("idEmpresa");
@@ -114,6 +127,18 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
   // Calcular el total de días cuando la fecha de inicio y final cambian
   const fechaInicio = form.watch("fechaInicio");
   const fechaFinal = form.watch("fechaFinal");
+
+  const authData = useMemo(() => {
+    try {
+      const auth = localStorage.getItem("auth");
+      return auth ? (JSON.parse(auth) as AuthData) : null;
+    } catch (e) {
+      console.error("Failed to parse auth data from localStorage", e);
+      return null;
+    }
+  }, []);
+
+  const userProfile = authData?.usuario;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -134,6 +159,12 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
         setColaboradores(colaboradoresRes);
         setTipoDescansos(tipoDescansosRes);
         setTipoContingencias(tipoContingenciasRes);
+
+        if (userProfile?.id_empresa && userProfile?.id_colaborador) {
+          form.setValue("idEmpresa", userProfile.id_empresa);
+          form.setValue("idColaborador", userProfile.id_colaborador);
+          setIsDisabled(true); // Deshabilita los campos si hay datos de perfil
+        }
       } catch (error) {
         console.error("Error al obtener datos", error);
         showToast("error", "Error al cargar los datos del formulario.");
@@ -141,7 +172,7 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
     };
 
     fetchData();
-  }, [showToast]);
+  }, [form, showToast, userProfile]);
 
   useEffect(() => {
     if (selectedEmpresaId) {
@@ -149,7 +180,11 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
         try {
           const colaboradoresRes = await dataColaboradores(selectedEmpresaId);
           setColaboradores(colaboradoresRes);
-          form.setValue("idColaborador", "");
+          // form.setValue("idColaborador", "");
+          // Solo si no estamos en un perfil de usuario, reseteamos el valor
+          if (!userProfile?.id_empresa) {
+            form.setValue("idColaborador", "");
+          }
         } catch (error) {
           console.error("Error al obtener colaboradores", error);
           showToast("error", "Error al cargar los colaboradores.");
@@ -158,11 +193,11 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
 
       fetchColaboradores();
     }
-  }, [selectedEmpresaId, form, showToast]);
+  }, [selectedEmpresaId, form, showToast, userProfile]);
 
   useEffect(() => {
     const fetchDocumentos = async () => {
-      let listDocumentos: DocumentoContingencia[] = [];
+      let listDocumentos: DocumentoTipoContingencia[] = [];
 
       if (selectedTipoContingenciaId) {
         try {
@@ -170,12 +205,14 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
             selectedTipoContingenciaId
           );
 
+          console.log("response documentos", response);
+
           const { result, data } = response;
 
           if (result && data) {
             const tipoContingencia = data as TipoContingencia;
-            const { documentos } = tipoContingencia;
-            listDocumentos = documentos as DocumentoContingencia[];
+            const { documentoTipoCont } = tipoContingencia;
+            listDocumentos = documentoTipoCont as DocumentoTipoContingencia[];
           }
 
           setDocumentosTipoContingencia(listDocumentos);
@@ -209,12 +246,18 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
       <FormField
         control={form.control}
         name="idEmpresa"
-        render={({ field }) => (
+        render={({ field, fieldState }) => (
           <FormItem>
             <RequiredLabel>Empresa</RequiredLabel>
-            <Select onValueChange={field.onChange} value={field.value ?? ""}>
+            <Select
+              onValueChange={field.onChange}
+              value={field.value ?? ""}
+              // disabled={isDisabled}
+            >
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger
+                  className={fieldState.invalid ? "border-red-500" : ""}
+                >
                   <SelectValue placeholder="Seleccionar empresa" />
                 </SelectTrigger>
               </FormControl>
@@ -234,7 +277,7 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
       <FormField
         control={form.control}
         name="idColaborador"
-        render={({ field }) => {
+        render={({ field, fieldState }) => {
           const selectedColaborador = colaboradores.find(
             (c) => c.id === field.value
           );
@@ -249,6 +292,7 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                 onChange={field.onChange}
                 displayKey="nombre_completo"
                 valueKey="id"
+                // disabled={isDisabled}
               />
               {selectedColaborador && (
                 <FormDescription>
@@ -265,12 +309,14 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
       <FormField
         control={form.control}
         name="idTipoDescansoMedico"
-        render={({ field }) => (
+        render={({ field, fieldState }) => (
           <FormItem>
             <RequiredLabel>Tipo de descanso médico</RequiredLabel>
             <Select onValueChange={field.onChange} value={field.value ?? ""}>
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger
+                  className={fieldState.invalid ? "border-red-500" : ""}
+                >
                   <SelectValue placeholder="Seleccionar tipo de descanso médico" />
                 </SelectTrigger>
               </FormControl>
@@ -290,12 +336,14 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
       <FormField
         control={form.control}
         name="idTipoContingencia"
-        render={({ field }) => (
+        render={({ field, fieldState }) => (
           <FormItem>
             <RequiredLabel>Tipo de Contingencia</RequiredLabel>
             <Select onValueChange={field.onChange} value={field.value ?? ""}>
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger
+                  className={fieldState.invalid ? "border-red-500" : ""}
+                >
                   <SelectValue placeholder="Seleccionar tipo de contingencia" />
                 </SelectTrigger>
               </FormControl>
@@ -320,7 +368,7 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
         <FormField
           control={form.control}
           name="fechaOtorgamiento"
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <FormItem>
               <RequiredLabel>Fecha de Otorgamiento</RequiredLabel>
               <FormControl>
@@ -332,6 +380,7 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                       e.target.value ? parseISO(e.target.value) : null
                     )
                   }
+                  className={fieldState.invalid ? "border-red-500" : ""}
                 />
               </FormControl>
               <FormDescription>
@@ -347,7 +396,7 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
         <FormField
           control={form.control}
           name="fechaInicio"
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <FormItem>
               <RequiredLabel>Fecha de Inicio</RequiredLabel>
               <FormControl>
@@ -359,6 +408,7 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                       e.target.value ? parseISO(e.target.value) : null
                     )
                   }
+                  className={fieldState.invalid ? "border-red-500" : ""}
                 />
               </FormControl>
               <FormDescription>
@@ -374,7 +424,7 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
         <FormField
           control={form.control}
           name="fechaFinal"
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <FormItem>
               <RequiredLabel>Fecha final</RequiredLabel>
               <FormControl>
@@ -386,6 +436,7 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                       e.target.value ? parseISO(e.target.value) : null
                     )
                   }
+                  className={fieldState.invalid ? "border-red-500" : ""}
                 />
               </FormControl>
               <FormDescription>
@@ -401,14 +452,16 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
         <FormField
           control={form.control}
           name="totalDias"
-          render={() => (
+          render={({ fieldState }) => (
             <FormItem>
               <RequiredLabel>Número de Días</RequiredLabel>
               <FormControl>
                 <Input
                   readOnly
                   value={totalDias !== null ? totalDias.toString() : ""}
-                  className="bg-gray-100"
+                  className={`bg-gray-100 ${
+                    fieldState.invalid ? "border-red-500" : ""
+                  }`}
                   autoComplete="off"
                 />
               </FormControl>

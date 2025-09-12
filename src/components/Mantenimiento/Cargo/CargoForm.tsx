@@ -110,8 +110,8 @@ export const CargoForm = () => {
   }, [id, isEditMode, form, navigate, showToast]);
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
+    <div className="flex justify-center w-full">
+      {/* <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
             {isEditMode ? "Editar" : "Registrar"} Cargo
@@ -128,20 +128,20 @@ export const CargoForm = () => {
         >
           ← Volver al listado
         </Link>
-      </div>
-      <Card>
+      </div> */}
+      <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle>Información</CardTitle>
           <CardDescription>Ingrese los datos del cargo</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <div className="grid grid-cols-1 gap-6">
                 <FormField
                   control={form.control}
                   name="nombre"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <RequiredLabel>Nombre</RequiredLabel>
                       <FormControl>
@@ -150,6 +150,7 @@ export const CargoForm = () => {
                           autoComplete="off"
                           maxLength={50}
                           {...field}
+                          className={fieldState.invalid ? "border-red-500" : ""}
                         />
                       </FormControl>
                       <FormMessage />

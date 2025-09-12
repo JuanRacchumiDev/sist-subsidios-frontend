@@ -1,11 +1,14 @@
 import apiClient from "./apiClient"
-import { DescansoMedico, DescansoMedicoResponse } from '../interfaces/IDescansoMedico'
+import {
+    DocumentoTipoContingencia,
+    DocumentoTipoContingenciaResponse
+} from '../interfaces/IDocumentoTipoContingencia'
 
-export const getAll = async (): Promise<DescansoMedicoResponse> => {
+export const getAll = async (): Promise<DocumentoTipoContingenciaResponse> => {
     try {
-        const response = await apiClient.get('/descansos')
-        const { data: dataDescansos } = response
-        const { result, data, message, status, error } = dataDescansos
+        const response = await apiClient.get('/documentos-tipo-contingencia')
+        const { data: dataDocumentos } = response
+        const { result, data, message, status, error } = dataDocumentos
 
         return {
             result,
@@ -23,7 +26,7 @@ export const getAll = async (): Promise<DescansoMedicoResponse> => {
 
 export const getAllWithPaginate = async (page: number, limit: number) => {
     try {
-        const urlApi = `${'/descansos/paginate?page='}${page}${'&limit='}${limit}`
+        const urlApi = `${'/documentos-tipo-contingencia/paginate?page='}${page}${'&limit='}${limit}`
         const response = await apiClient.get(urlApi)
         const { data: dataDescansos } = response
 
@@ -43,9 +46,9 @@ export const getAllWithPaginate = async (page: number, limit: number) => {
     }
 }
 
-export const getById = async (id: string): Promise<DescansoMedicoResponse> => {
+export const getById = async (id: string): Promise<DocumentoTipoContingenciaResponse> => {
     try {
-        const urlApi = `${'/descansos/'}${id}`
+        const urlApi = `${'/documentos-tipo-contingencia/'}${id}`
         const response = await apiClient.get(urlApi)
         const { data: { result, data, message, error, status } } = response
 
@@ -63,21 +66,9 @@ export const getById = async (id: string): Promise<DescansoMedicoResponse> => {
     }
 }
 
-export const create = async (payload: DescansoMedico): Promise<DescansoMedicoResponse> => {
+export const create = async (payload: DocumentoTipoContingencia): Promise<DocumentoTipoContingenciaResponse> => {
     try {
-        // Obteniendo el código temporal del usuario autenticado
-        const auth = localStorage.getItem("auth") || null
-
-        if (auth) {
-
-            const authJson = JSON.parse(auth)
-
-            const { codigo_temp } = authJson
-
-            payload.codigo_temp = codigo_temp
-        }
-
-        const response = await apiClient.post('/descansos', payload)
+        const response = await apiClient.post('/documentos-tipo-contingencia', payload)
 
         const { data: { result, message, status } } = response
 
@@ -94,9 +85,9 @@ export const create = async (payload: DescansoMedico): Promise<DescansoMedicoRes
     }
 }
 
-export const update = async (id: string, payload: DescansoMedico): Promise<DescansoMedicoResponse> => {
+export const update = async (id: string, payload: DocumentoTipoContingencia): Promise<DocumentoTipoContingenciaResponse> => {
     try {
-        const urlApi = `${'/descansos/'}${id}`
+        const urlApi = `${'/documentos-tipo-contingencia/'}${id}`
         const response = await apiClient.patch(urlApi, payload)
         const { data: { result, data, message, error, status } } = response
         return {

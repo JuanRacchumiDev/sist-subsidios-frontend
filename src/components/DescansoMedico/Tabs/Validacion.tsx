@@ -33,12 +33,14 @@ export const Validacion = ({ form }: ValidacionProps) => {
       <FormField
         control={form.control}
         name="estadoRegistro"
-        render={({ field }) => (
+        render={({ field, fieldState }) => (
           <FormItem>
             <RequiredLabel>Estado del registro</RequiredLabel>
             <Select onValueChange={field.onChange} value={field.value ?? ""}>
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger
+                  className={fieldState.invalid ? "border-red-500" : ""}
+                >
                   <SelectValue placeholder="Seleccionar estado" />
                 </SelectTrigger>
               </FormControl>
