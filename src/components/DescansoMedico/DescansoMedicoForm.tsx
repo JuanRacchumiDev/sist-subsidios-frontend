@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "../ui/card";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Form, FormField, FormItem, FormMessage } from "../ui/form";
@@ -108,6 +108,18 @@ export const formSchema = z.object({
   observacion: z.string().optional(),
 });
 
+interface UserData {
+  id_colaborador: string;
+  id_empresa: string;
+  nombre_completo: string;
+  nombre_perfil: string;
+  slug_perfil: string;
+}
+
+interface AuthData {
+  usuario: UserData;
+}
+
 export const DescansoMedicoForm = () => {
   const [showResponsabilidad, setShowResponsabilidad] = useState(false);
   const [showPoliticaSubsidio, setShowPoliticaSubsidio] = useState(false);
@@ -117,6 +129,18 @@ export const DescansoMedicoForm = () => {
   const navigate = useNavigate();
 
   const { showToast } = useToast();
+
+  const authData = useMemo(() => {
+    try {
+      const auth = localStorage.getItem("auth");
+      return auth ? (JSON.parse(auth) as AuthData) : null;
+    } catch (e) {
+      console.error("Failed to parse auth data from localStorage", e);
+      return null;
+    }
+  }, []);
+
+  const userProfile = authData?.usuario;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -136,7 +160,9 @@ export const DescansoMedicoForm = () => {
       documentos: {},
       aceptaResponsabilidad: false,
       aceptaPoliticaSubsidio: false,
-      estadoRegistro: "",
+      estadoRegistro: userProfile.id_colaborador
+        ? EstadoDescansoMedico.REGISTRO_INGRESADO
+        : "",
       observacion: "",
     },
   });
@@ -278,7 +304,12 @@ export const DescansoMedicoForm = () => {
                     Datos del descanso médico
                   </TabsTrigger>
                   <TabsTrigger value="datos-medicos">Datos médicos</TabsTrigger>
-                  <TabsTrigger value="validacion">Validación</TabsTrigger>
+                  {!userProfile.id_colaborador ? (
+                    <TabsTrigger value="validacion">Validación</TabsTrigger>
+                  ) : (
+                    <></>
+                  )}
+                  {/* <TabsTrigger value="validacion">Validación</TabsTrigger> */}
                 </TabsList>
 
                 <TabsContent value="datos-descanso-medico" className="mt-6">

@@ -60,7 +60,7 @@ export interface Pagination {
     previousPage: number | null
 }
 
-export interface EmpresaPaginateResponse {
+export interface DescansoMedicoPaginateResponse {
     result: boolean
     data?: DescansoMedico[]
     pagination?: Pagination

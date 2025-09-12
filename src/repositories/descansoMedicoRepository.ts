@@ -43,6 +43,29 @@ export const getAllWithPaginate = async (page: number, limit: number) => {
     }
 }
 
+export const getAllByColaboradorPaginate = async (idColaborador: string, page: number, limit: number) => {
+    try {
+        const urlApi = `${'/descansos/colaborador/paginate?idColaborador='}${idColaborador}${'&page='}${page}${'&limit='}${limit}`
+        console.log('urlApi getAllByColaboradorPaginate', urlApi)
+        const response = await apiClient.get(urlApi)
+        const { data: dataDescansos } = response
+
+        const { result, data, pagination, status } = dataDescansos
+
+        return {
+            result,
+            data,
+            pagination,
+            status
+        }
+
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+        console.log('errorMessage', errorMessage)
+        return { result: false, error: errorMessage, status: 500 }
+    }
+}
+
 export const getById = async (id: string): Promise<DescansoMedicoResponse> => {
     try {
         const urlApi = `${'/descansos/'}${id}`

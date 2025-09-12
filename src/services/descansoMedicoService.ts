@@ -3,6 +3,7 @@ import {
     getAll,
     getById,
     getAllWithPaginate,
+    getAllByColaboradorPaginate,
     create,
     update
 } from '../repositories/descansoMedicoRepository'
@@ -17,6 +18,14 @@ export const getDescansos = async () => {
 
 export const getDescansosWithPaginate = async (page: number, limit: number) => {
     const response = await getAllWithPaginate(page, limit)
+
+    return {
+        ...response
+    }
+}
+
+export const getDescansosByColaboradorWithPaginate = async (idColaborador: string, page: number, limit: number) => {
+    const response = await getAllByColaboradorPaginate(idColaborador, page, limit)
 
     return {
         ...response

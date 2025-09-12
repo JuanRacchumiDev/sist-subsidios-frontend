@@ -105,7 +105,7 @@ export const update = async (id: string, payload: Adjunto): Promise<AdjuntoRespo
 export const upload = async (formData: FormData): Promise<AdjuntoResponse> => {
     try {
         // Añadiendo tipo adjunto a formData
-        const idTipoAdjunto = "6d58216b-142a-467a-b146-04e78fc60628";
+        const idTipoAdjunto = "ec2be959-b9ed-4dd3-99ae-105d57e45f09";
 
         formData.append("id_tipoadjunto", idTipoAdjunto)
 

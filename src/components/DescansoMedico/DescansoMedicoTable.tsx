@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Input } from "../ui/input";
 import {
   Pagination,
@@ -17,12 +17,28 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { getDescansosWithPaginate } from "../../services/descansoMedicoService";
+import {
+  getDescansosWithPaginate,
+  getDescansosByColaboradorWithPaginate,
+} from "../../services/descansoMedicoService";
 import {
   DescansoMedico,
+  DescansoMedicoPaginateResponse,
   Pagination as PaginationType,
 } from "@/interfaces/IDescansoMedico";
 import { DescansoMedicoRow } from "./DescansoMedicoRow";
+
+interface UserData {
+  id_colaborador: string;
+  id_empresa: string;
+  nombre_completo: string;
+  nombre_perfil: string;
+  slug_perfil: string;
+}
+
+interface AuthData {
+  usuario: UserData;
+}
 
 export const DescansoMedicoTable = () => {
   const [descansos, setDescansos] = useState<DescansoMedico[]>([]);
@@ -35,6 +51,18 @@ export const DescansoMedicoTable = () => {
     previousPage: null,
   });
 
+  const authData = useMemo(() => {
+    try {
+      const auth = localStorage.getItem("auth");
+      return auth ? (JSON.parse(auth) as AuthData) : null;
+    } catch (e) {
+      console.error("Failed to parse auth data from localStorage", e);
+      return null;
+    }
+  }, []);
+
+  const userProfile = authData?.usuario;
+
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= pagination.totalPages) {
       setPagination((prev) => ({ ...prev, currentPage: page }));
@@ -44,9 +72,25 @@ export const DescansoMedicoTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        let response: DescansoMedicoPaginateResponse = null;
+
+        const { slug_perfil, id_colaborador } = userProfile;
+
         const { currentPage, limit } = pagination;
 
-        const response = await getDescansosWithPaginate(currentPage, limit);
+        if (slug_perfil && id_colaborador) {
+          response = await getDescansosByColaboradorWithPaginate(
+            id_colaborador,
+            currentPage,
+            limit
+          );
+        } else {
+          response = await getDescansosWithPaginate(currentPage, limit);
+        }
+
+        console.log("response list descansos médicos", response);
+
+        // const response = await getDescansosWithPaginate(currentPage, limit);
 
         const { result, data, pagination: detailPagination } = response;
 
@@ -65,7 +109,7 @@ export const DescansoMedicoTable = () => {
           });
         }
       } catch (error) {
-        console.error("Error al obtener empresas", error);
+        console.error("Error al obtener colaboradores", error);
       }
     };
 
