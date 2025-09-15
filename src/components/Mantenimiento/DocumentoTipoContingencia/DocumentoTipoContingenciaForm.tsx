@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { format, parseISO } from "date-fns";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Card,
@@ -10,13 +9,12 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "../../../components/ui/card";
 import { useToast } from "../../../context/ToastContext";
 import { Spinner } from "../../../components/Common/Spinner";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormMessage,
@@ -31,17 +29,14 @@ import {
 import { Button } from "../../ui/button";
 import { RequiredLabel } from "../../Common/RequiredLabel";
 
-import { getTipoContingencias } from "@/services/tipoContingenciaService";
-import {
-  createDocumentoTipoCont,
-  getDocumentoTipoContById,
-} from "@/services/documentoTipoContService";
+import { getTipoContingencias } from "../../../services/tipoContingenciaService";
+import { createDocumentoTipoCont } from "../../../services/documentoTipoContService";
 import {
   DocumentoTipoContingencia,
   DocumentoTipoContingenciaResponse,
-} from "@/interfaces/IDocumentoTipoContingencia";
-import { TipoContingencia } from "@/interfaces/ITipoContingencia";
-import { Input } from "@/components/ui/input";
+} from "../../../interfaces/IDocumentoTipoContingencia";
+import { TipoContingencia } from "../../../interfaces/ITipoContingencia";
+import { Input } from "../../../components/ui/input";
 
 const formSchema = z.object({
   idTipoContingencia: z
@@ -178,12 +173,16 @@ export const DocumentoTipoContigenciaForm = () => {
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Información de documento</CardTitle>
-          <CardDescription>Ingrese los datos del documento</CardDescription>
+      <Card className="shadow-lg border-gray-200">
+        <CardHeader className="border-b border-gray-200">
+          <CardTitle className="text-xl font-bold text-gray-800">
+            Información de documento
+          </CardTitle>
+          <CardDescription className="text-sm text-gray-500">
+            Ingrese los datos del documento
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -199,16 +198,25 @@ export const DocumentoTipoContigenciaForm = () => {
                       >
                         <FormControl>
                           <SelectTrigger
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
+                            className={`
+                            ${
+                              fieldState.invalid
+                                ? "border-red-500 focus:ring-red-500"
+                                : "focus:ring-blue-500"
                             }
+                              focus:ring-2 focus:ring-offset-2 transition-all duration-300
+                            `}
                           >
                             <SelectValue placeholder="Seleccionar tipo de contingencia" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {tipoContingencias.map((tipo) => (
-                            <SelectItem value={tipo.id} key={tipo.id}>
+                            <SelectItem
+                              value={tipo.id}
+                              key={tipo.id}
+                              className="cursor-pointer hover:bg-blue-100 transition-colors"
+                            >
                               {tipo.nombre}
                             </SelectItem>
                           ))}
@@ -231,7 +239,14 @@ export const DocumentoTipoContigenciaForm = () => {
                           autoComplete="off"
                           maxLength={60}
                           {...field}
-                          className={fieldState.invalid ? "border-red-500" : ""}
+                          className={`
+                          ${
+                            fieldState.invalid
+                              ? "border-red-500 focus:ring-red-500"
+                              : "focus:ring-blue-500"
+                          }
+                            transition-all duration-300
+                          `}
                         />
                       </FormControl>
                       <FormMessage />
@@ -241,7 +256,11 @@ export const DocumentoTipoContigenciaForm = () => {
               </div>
 
               <div className="flex justify-end space-x-4 pt-4">
-                <Button type="submit" disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-blue-600 hover:bg-blue-700 hover: cursor-pointer text-white transition-colors duration-300"
+                >
                   {isSubmitting ? (
                     <>
                       <Spinner className="mr-2 h-4 w-4 animate-spin" />
@@ -258,6 +277,7 @@ export const DocumentoTipoContigenciaForm = () => {
                   onClick={() =>
                     navigate("/mantenimiento/documento-tipo-contingencia")
                   }
+                  className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
                   {isSubmitting ? "Cancelando..." : "Cancelar"}
                 </Button>

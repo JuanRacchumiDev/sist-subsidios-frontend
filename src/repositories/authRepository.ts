@@ -1,13 +1,7 @@
+import { TAuthResponse } from "../types/TAuthResponse";
 import apiClient from "./apiClient";
 
-type ResponseAuth = {
-    result?: boolean,
-    message?: string,
-    status?: number,
-    error?: string
-}
-
-export const login = async (email: string, password: string): Promise<ResponseAuth> => {
+export const login = async (email: string, password: string): Promise<TAuthResponse> => {
     try {
         const credenciales: { email: string, password: string } = {
             email,
@@ -58,7 +52,7 @@ export const login = async (email: string, password: string): Promise<ResponseAu
     }
 }
 
-export const logout = async (id: string): Promise<ResponseAuth> => {
+export const logout = async (id: string): Promise<TAuthResponse> => {
     try {
         const response = await apiClient.post('/auth/logout', { id })
         const { data: { result, status, message, error } } = response

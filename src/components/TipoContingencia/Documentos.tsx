@@ -1,6 +1,6 @@
 import React from "react";
-import { DocumentoTipoContingencia } from "@/interfaces/IDocumentoTipoContingencia";
-import { Adjunto } from "@/interfaces/IAdjunto";
+import { DocumentoTipoContingencia } from "../../interfaces/IDocumentoTipoContingencia";
+import { Adjunto } from "../../interfaces/IAdjunto";
 import { UseFormReturn } from "react-hook-form";
 import * as z from "zod";
 import { formSchema } from "../DescansoMedico/DescansoMedicoForm";
@@ -9,11 +9,11 @@ import {
   FormField,
   FormItem,
   FormMessage,
-} from "@/components/ui/form";
-import { RequiredLabel } from "@/components/Common/RequiredLabel";
+} from "../../components/ui/form";
+import { RequiredLabel } from "../../components/Common/RequiredLabel";
 import { Eye, Upload } from "lucide-react";
 import { Button } from "../ui/button";
-import { useToast } from "@/context/ToastContext";
+import { useToast } from "../../context/ToastContext";
 import { uploadAdjunto, viewAdjunto } from "../../services/adjuntoService";
 import { responseViewFile } from "../../types/TFile";
 
@@ -113,7 +113,7 @@ export const Documentos = ({ documentos, form }: DocumentosRequeridosProps) => {
                         size="icon"
                         onClick={() => handleViewDocument(uploadedFileId)}
                       >
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-4 w-4 cursor-pointer hover:bg-blue-100" />
                       </Button>
                     )}
                   </div>

@@ -1,10 +1,10 @@
-import { RepresentanteLegal, RepresentanteLegalResponse } from '@/interfaces/IRepresentanteLegal';
+import { RepresentanteLegal, RepresentanteLegalResponse } from '../interfaces/IRepresentanteLegal';
 import {
     getAll,
     getById,
     create,
     update
-} from "@/repositories/representanteRepository"
+} from "../repositories/representanteRepository"
 
 export const getRepresentantes = async () => {
     const response = await getAll();
@@ -42,7 +42,7 @@ export const createRepresentante = async (payload: RepresentanteLegal) => {
     }
 }
 
-export const updateRepresentante = async (id: string, payload: Cargo) => {
+export const updateRepresentante = async (id: string, payload: RepresentanteLegal) => {
     try {
         const response = await update(id, payload)
 

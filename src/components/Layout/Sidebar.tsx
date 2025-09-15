@@ -1,21 +1,11 @@
-import React, { useMemo, useState } from "react";
-import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import { MENU_ITEMS } from "../../utils/menuItems";
 import { ChevronDown, Zap } from "lucide-react";
-
-interface UserData {
-  nombre_completo: string;
-  nombre_perfil: string;
-  slug_perfil: string;
-}
-
-interface AuthData {
-  usuario: UserData;
-}
+import { getAuthData } from "../../utils/authMemo";
 
 export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
   const [expandedItems, setExpandedItems] = useState(new Set(["analytics"]));
-  const navigate = useNavigate();
   const location = useLocation();
 
   const toggleExpanded = (itemid: string) => {
@@ -30,17 +20,7 @@ export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
     setExpandedItems(newExpanded);
   };
 
-  const authData = useMemo(() => {
-    try {
-      const auth = localStorage.getItem("auth");
-      return auth ? (JSON.parse(auth) as AuthData) : null;
-    } catch (e) {
-      console.error("Failed to parse auth data from localStorage", e);
-      return null;
-    }
-  }, []);
-
-  const userProfile = authData?.usuario;
+  const userProfile = useMemo(() => getAuthData()?.usuario, []);
 
   // Filtrar el menú de acuerdo al perfil del usuario
   const filteredMenuItems = useMemo(() => {

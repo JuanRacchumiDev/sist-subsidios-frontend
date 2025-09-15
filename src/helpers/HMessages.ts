@@ -1,4 +1,5 @@
 export enum EstadoDescansoMedico {
+    REGISTRO_INGRESADO = 'registro_ingresado',
     REGISTRO_EXITOSO = 'registro_exitoso',
     DOCUMENTACION_INCORRECTA = 'documentacion_incorrecta',
     POR_CANJEAR = 'por_canjear'

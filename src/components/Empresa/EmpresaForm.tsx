@@ -28,24 +28,24 @@ import {
   SelectValue,
 } from "../ui/select";
 
-import { getTipoDocumentos } from "@/services/tipoDocumentoService";
-import { getCargos } from "@/services/cargoService";
+import { getTipoDocumentos } from "../../services/tipoDocumentoService";
+import { getCargos } from "../../services/cargoService";
 import { RequiredLabel } from "../Common/RequiredLabel";
 import { Input } from "../ui/input";
-import { getEmpresaByApi } from "@/services/apiEmpresaService";
-import { Empresa, EmpresaResponse } from "@/interfaces/IEmpresa";
-import { getPersonaByApi } from "@/services/apiPersonaService";
-import { getEmpresaById } from "@/services/empresaService";
-import { Persona } from "@/interfaces/IPersona";
+import { getEmpresaByApi } from "../../services/apiEmpresaService";
+import { Empresa } from "../../interfaces/IEmpresa";
+import { getPersonaByApi } from "../../services/apiPersonaService";
+import { getEmpresaById } from "../../services/empresaService";
+import { Persona } from "../../interfaces/IPersona";
 import { Button } from "../ui/button";
 import {
   RepresentanteLegal,
   RepresentanteLegalResponse,
-} from "@/interfaces/IRepresentanteLegal";
+} from "../../interfaces/IRepresentanteLegal";
 import {
   createRepresentante,
   updateRepresentante,
-} from "@/services/representanteService";
+} from "../../services/representanteService";
 
 const formSchema = z.object({
   ruc: z.string().min(2, {
@@ -323,16 +323,18 @@ export const EmpresaForm = () => {
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Información de empresa</CardTitle>
-          <CardDescription>
+      <Card className="shadow-lg border-gray-200">
+        <CardHeader className="border-b border-gray-200">
+          <CardTitle className="text-xl font-bold text-gray-800">
+            Información de empresa
+          </CardTitle>
+          <CardDescription className="text-sm text-gray-500">
             {isEditMode
               ? "Actualice los datos de la empresa"
               : "Ingrese los datos de la empresa"}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <fieldset className="border border-gray-300 p-4 rounded-md">
@@ -399,9 +401,14 @@ export const EmpresaForm = () => {
                               }
                             }}
                             disabled={isEditMode}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                          ${
+                            fieldState.invalid
+                              ? "border-red-500 focus:ring-red-500"
+                              : "focus:ring-blue-500"
+                          }
+                            transition-all duration-300
+                          `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -422,9 +429,14 @@ export const EmpresaForm = () => {
                             maxLength={40}
                             {...field}
                             disabled={!camposHabilitadosEmpresa}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -445,9 +457,14 @@ export const EmpresaForm = () => {
                             maxLength={60}
                             {...field}
                             disabled={!camposHabilitadosEmpresa}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -474,16 +491,25 @@ export const EmpresaForm = () => {
                         >
                           <FormControl>
                             <SelectTrigger
-                              className={
-                                fieldState.invalid ? "border-red-500" : ""
-                              }
+                              className={`
+                                ${
+                                  fieldState.invalid
+                                    ? "border-red-500 focus:ring-red-500"
+                                    : "focus:ring-blue-500"
+                                }
+                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300
+                              `}
                             >
                               <SelectValue placeholder="Seleccionar tipo de documento" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {tipos.map((tipo) => (
-                              <SelectItem value={tipo.id} key={tipo.id}>
+                              <SelectItem
+                                value={tipo.id}
+                                key={tipo.id}
+                                className="cursor-pointer hover:bg-blue-100 transition-colors"
+                              >
                                 {tipo.abreviatura}
                               </SelectItem>
                             ))}
@@ -556,9 +582,14 @@ export const EmpresaForm = () => {
                                 }
                               }
                             }}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -579,9 +610,14 @@ export const EmpresaForm = () => {
                             maxLength={30}
                             {...field}
                             disabled={!camposHabilitadosPersona}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -602,9 +638,14 @@ export const EmpresaForm = () => {
                             maxLength={30}
                             {...field}
                             disabled={!camposHabilitadosPersona}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -625,9 +666,14 @@ export const EmpresaForm = () => {
                             maxLength={40}
                             {...field}
                             disabled={!camposHabilitadosPersona}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -647,9 +693,14 @@ export const EmpresaForm = () => {
                             autoComplete="off"
                             maxLength={60}
                             {...field}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -669,9 +720,14 @@ export const EmpresaForm = () => {
                             autoComplete="off"
                             maxLength={10}
                             {...field}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -691,16 +747,25 @@ export const EmpresaForm = () => {
                         >
                           <FormControl>
                             <SelectTrigger
-                              className={
-                                fieldState.invalid ? "border-red-500" : ""
-                              }
+                              className={`
+                                ${
+                                  fieldState.invalid
+                                    ? "border-red-500 focus:ring-red-500"
+                                    : "focus:ring-blue-500"
+                                }
+                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300
+                              `}
                             >
                               <SelectValue placeholder="Seleccionar cargo" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {cargos.map((cargo) => (
-                              <SelectItem key={cargo.id} value={cargo.id}>
+                              <SelectItem
+                                key={cargo.id}
+                                value={cargo.id}
+                                className="cursor-pointer hover:bg-blue-100 transition-colors"
+                              >
                                 {cargo.nombre}
                               </SelectItem>
                             ))}
@@ -723,9 +788,14 @@ export const EmpresaForm = () => {
                             autoComplete="off"
                             maxLength={9}
                             {...field}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -746,9 +816,14 @@ export const EmpresaForm = () => {
                             autoComplete="off"
                             maxLength={50}
                             {...field}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -768,12 +843,16 @@ export const EmpresaForm = () => {
                             autoComplete="off"
                             maxLength={30}
                             {...field}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
-
                         <FormMessage />
                       </FormItem>
                     )}
@@ -782,7 +861,11 @@ export const EmpresaForm = () => {
               </fieldset>
 
               <div className="flex justify-end space-x-4 pt-4">
-                <Button type="submit" disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-blue-600 hover:bg-blue-700 hover: cursor-pointer text-white transition-colors duration-300"
+                >
                   {isSubmitting ? (
                     <>
                       <Spinner className="mr-2 h-4 w-4 animate-spin" />
@@ -799,6 +882,7 @@ export const EmpresaForm = () => {
                   variant="outline"
                   disabled={isSubmitting}
                   onClick={() => navigate("/empresa")}
+                  className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
                   {isSubmitting ? "Cancelando..." : "Cancelar"}
                 </Button>

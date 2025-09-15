@@ -1,4 +1,4 @@
-import { EstadoDescansoMedico } from "../enums/EstadoRegistro"
+import { EDescansoMedico } from "../enums/EDescansoMedico"
 import { Colaborador } from "./IColaborador"
 import { Diagnostico } from "./IDiagnostico"
 import { TipoContingencia } from "./ITipoContingencia"
@@ -10,7 +10,7 @@ export interface DescansoMedico {
     id_tipodescansomedico?: string
     id_tipocontingencia?: string
     codcie10_diagnostico?: string
-    // id_establecimiento?: string
+    correlativo?: number
     codigo?: string
     fecha_otorgamiento?: string
     fecha_inicio?: string
@@ -19,6 +19,13 @@ export interface DescansoMedico {
     fecha_actualiza?: string
     fecha_elimina?: string
     fecha_maxima_subsanar?: string
+    dia_fecha_inicio?: number
+    mes_fecha_inicio?: number
+    anio_fecha_inicio?: number
+    dia_fecha_final?: number
+    mes_fecha_final?: number
+    anio_fecha_final?: number
+    mes_devengado?: string
     numero_colegiatura?: string
     medico_tratante?: string
     nombre_colaborador?: string
@@ -32,7 +39,7 @@ export interface DescansoMedico {
     is_acepta_responsabilidad?: boolean
     is_acepta_politica?: boolean
     is_continuo?: boolean
-    estado_registro?: EstadoDescansoMedico,
+    estado_registro?: EDescansoMedico,
     sistema?: boolean
     estado?: boolean
     codigo_temp?: string
@@ -40,7 +47,6 @@ export interface DescansoMedico {
     tipoDescansoMedico?: TipoDescansoMedico
     tipoContingencia?: TipoContingencia
     diagnostico?: Diagnostico
-    // establecimiento?: Establecimiento
 }
 
 export interface DescansoMedicoResponse {

@@ -1,20 +1,20 @@
-import { RequiredLabel } from "@/components/Common/RequiredLabel";
+import { RequiredLabel } from "../../../components/Common/RequiredLabel";
 import {
   FormControl,
   FormDescription,
   FormField,
   FormItem,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "../../../components/ui/form";
+import { Input } from "../../../components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import * as z from "zod";
 import { formSchema } from "../DescansoMedicoForm";
-import { getDiagnosticos } from "@/services/diagnosticoService";
-import { Diagnostico } from "@/interfaces/IDiagnostico";
+import { getDiagnosticos } from "../../../services/diagnosticoService";
+import { Diagnostico } from "../../../interfaces/IDiagnostico";
 import { useEffect, useState } from "react";
 import { useToast } from "../../../context/ToastContext";
-import SearchableCombobox from "@/components/Common/SearchableCombobox";
+import SearchableCombobox from "../../../components/Common/SearchableCombobox";
 
 interface DatosMedicosProps {
   form: UseFormReturn<z.infer<typeof formSchema>>;
@@ -67,7 +67,14 @@ export const DatosMedicos = ({ form }: DatosMedicosProps) => {
                 autoComplete="off"
                 maxLength={6}
                 {...field}
-                className={fieldState.invalid ? "border-red-500" : ""}
+                className={`
+                  ${
+                    fieldState.invalid
+                      ? "border-red-500 focus:ring-red-500"
+                      : "focus:ring-blue-500"
+                  }
+                    transition-all duration-300
+                `}
               />
             </FormControl>
             <FormMessage />
@@ -87,7 +94,14 @@ export const DatosMedicos = ({ form }: DatosMedicosProps) => {
                 autoComplete="off"
                 maxLength={50}
                 {...field}
-                className={fieldState.invalid ? "border-red-500" : ""}
+                className={`
+                  ${
+                    fieldState.invalid
+                      ? "border-red-500 focus:ring-red-500"
+                      : "focus:ring-blue-500"
+                  }
+                    transition-all duration-300
+                `}
               />
             </FormControl>
             <FormMessage />

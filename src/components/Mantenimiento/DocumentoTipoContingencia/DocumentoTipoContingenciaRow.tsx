@@ -28,31 +28,45 @@ export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
   };
 
   return (
-    <TableRow key={documento.id} className="hover:bg-gray-50">
-      <TableCell>{documento.tipoContingencia.nombre}</TableCell>
-      <TableCell>{documento.nombre}</TableCell>
-      <TableCell>
+    <TableRow
+      key={documento.id}
+      className="hover:bg-blue-100 hover:cursor-pointer transition-colors duration-200"
+    >
+      <TableCell className="py-3">
+        {documento.tipoContingencia.nombre}
+      </TableCell>
+      <TableCell className="py-3">{documento.nombre}</TableCell>
+      <TableCell className="py-3">
         {documento.estado ? (
-          <CircleCheck className="text-green-500" />
+          <CircleCheck className="text-green-500 w-5 h-5" />
         ) : (
-          <CircleX className="text-red-500" />
+          <CircleX className="text-red-500 w-5 h-5" />
         )}
       </TableCell>
-      <TableCell>
+      <TableCell className="py-3">
+        {/* w-72 border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300 */}
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger
+            asChild
+            className="bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer"
+          >
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Abrir menú</span>
-              <MoreHorizontal className="h-4 w-4" />
+              <MoreHorizontal className="h-4 w-4 text-gray-500" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="bg-gray-400">
             <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <DropdownMenuItem onClick={handleShowDetail}>
+            <DropdownMenuItem
+              onClick={handleShowDetail}
+              className="cursor-pointer hover:bg-gray-100 transition-colors"
+            >
               Ver detalle
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Eliminar</DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 transition-colors">
+              Eliminar
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>

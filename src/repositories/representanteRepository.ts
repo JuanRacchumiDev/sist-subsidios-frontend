@@ -1,4 +1,7 @@
-import { RepresentanteLegal, RepresentanteLegalResponse } from "@/interfaces/IRepresentanteLegal"
+import {
+    RepresentanteLegal,
+    RepresentanteLegalResponse
+} from "../interfaces/IRepresentanteLegal"
 import apiClient from "./apiClient"
 
 export const getAll = async () => {

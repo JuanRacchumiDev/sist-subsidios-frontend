@@ -15,4 +15,11 @@ export default class HDate {
             return '';
         }
     }
+
+    static formatDateLocal = (dateString: string): string => {
+        const dateStringToDatetime = `${dateString}${'T00:00:00'}`
+        const dateLocal = new Date(dateStringToDatetime)
+        const dateFormateoLocal = format(dateLocal, 'dd/MM/yyyy')
+        return dateFormateoLocal
+    }
 }

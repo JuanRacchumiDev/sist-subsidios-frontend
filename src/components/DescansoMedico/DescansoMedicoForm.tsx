@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "../ui/card";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Form, FormField, FormItem, FormMessage } from "../ui/form";
@@ -16,21 +16,26 @@ import { DatosMedicos } from "./Tabs/DatosMedicos";
 import { InfoModal } from "../Common/InfoModal";
 import { Button } from "../ui/button";
 import { Spinner } from "../Common/Spinner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Validacion } from "./Tabs/Validacion";
-import { DescansoMedico } from "@/interfaces/IDescansoMedico";
-import { formatDateToString } from "@/utils/formatDate";
-import { getColaboradorById } from "@/services/colaboradorService";
-import { Colaborador } from "@/interfaces/IColaborador";
-import { getTipoDescansoById } from "@/services/tipoDescansoMedicoService";
-import { TipoDescansoMedico } from "@/interfaces/ITipoDescansoMedico";
-import { getTipoContingenciaById } from "@/services/tipoContingenciaService";
-import { TipoContingencia } from "@/interfaces/ITipoContingencia";
-import { getDiagnosticoByCodigo } from "@/services/diagnosticoService";
-import { Diagnostico } from "@/interfaces/IDiagnostico";
-import { createDescanso } from "@/services/descansoMedicoService";
+import { DescansoMedico } from "../../interfaces/IDescansoMedico";
+import { formatDateToString } from "../../utils/formatDate";
+import { getColaboradorById } from "../../services/colaboradorService";
+import { Colaborador } from "../../interfaces/IColaborador";
+import { getTipoDescansoById } from "../../services/tipoDescansoMedicoService";
+import { TipoDescansoMedico } from "../../interfaces/ITipoDescansoMedico";
+import { getTipoContingenciaById } from "../../services/tipoContingenciaService";
+import { TipoContingencia } from "../../interfaces/ITipoContingencia";
+import { getDiagnosticoByCodigo } from "../../services/diagnosticoService";
+import { Diagnostico } from "../../interfaces/IDiagnostico";
+import {
+  createDescanso,
+  getDescansoById,
+  updateDescanso,
+} from "../../services/descansoMedicoService";
 import { useToast } from "../../context/ToastContext";
-import { EstadoDescansoMedico } from "@/enums/EstadoRegistro";
+import { EDescansoMedico } from "../../enums/EDescansoMedico";
+import { getAuthData } from "../../utils/authMemo";
 
 export const formSchema = z.object({
   idEmpresa: z
@@ -108,18 +113,6 @@ export const formSchema = z.object({
   observacion: z.string().optional(),
 });
 
-interface UserData {
-  id_colaborador: string;
-  id_empresa: string;
-  nombre_completo: string;
-  nombre_perfil: string;
-  slug_perfil: string;
-}
-
-interface AuthData {
-  usuario: UserData;
-}
-
 export const DescansoMedicoForm = () => {
   const [showResponsabilidad, setShowResponsabilidad] = useState(false);
   const [showPoliticaSubsidio, setShowPoliticaSubsidio] = useState(false);
@@ -128,19 +121,13 @@ export const DescansoMedicoForm = () => {
 
   const navigate = useNavigate();
 
+  const { id } = useParams<{ id: string }>();
+
   const { showToast } = useToast();
 
-  const authData = useMemo(() => {
-    try {
-      const auth = localStorage.getItem("auth");
-      return auth ? (JSON.parse(auth) as AuthData) : null;
-    } catch (e) {
-      console.error("Failed to parse auth data from localStorage", e);
-      return null;
-    }
-  }, []);
+  const userProfile = useMemo(() => getAuthData()?.usuario, []);
 
-  const userProfile = authData?.usuario;
+  const isEditMode = !!id;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -161,13 +148,74 @@ export const DescansoMedicoForm = () => {
       aceptaResponsabilidad: false,
       aceptaPoliticaSubsidio: false,
       estadoRegistro: userProfile.id_colaborador
-        ? EstadoDescansoMedico.REGISTRO_INGRESADO
+        ? EDescansoMedico.REGISTRO_INGRESADO
         : "",
       observacion: "",
     },
   });
 
   const { isSubmitting } = form.formState;
+
+  useEffect(() => {
+    const fecthDescansoMedico = async () => {
+      let idEmpresa = "";
+
+      if (isEditMode && id) {
+        try {
+          const responseDescanso = await getDescansoById(id);
+          const { result, data } = responseDescanso;
+
+          if (result && data) {
+            const descanso = data as DescansoMedico;
+            console.log({ descanso });
+            console.log("id_colaborador", descanso.id_colaborador);
+
+            const responseColaborador = await getColaboradorById(
+              descanso.id_colaborador
+            );
+
+            const { result: resultColaborador, data: dataColaborador } =
+              responseColaborador;
+
+            if (resultColaborador && dataColaborador) {
+              const { id_empresa } = dataColaborador as Colaborador;
+              idEmpresa = id_empresa;
+            }
+
+            const payload = {
+              idEmpresa,
+              idColaborador: descanso.id_colaborador,
+              idTipoDescansoMedico: descanso.id_tipodescansomedico,
+              idTipoContingencia: descanso.id_tipocontingencia,
+              fechaOtorgamiento: descanso.fecha_otorgamiento
+                ? new Date(descanso.fecha_otorgamiento)
+                : null,
+              fechaInicio: descanso.fecha_inicio
+                ? new Date(descanso.fecha_inicio)
+                : null,
+              fechaFinal: descanso.fecha_final
+                ? new Date(descanso.fecha_final)
+                : null,
+              totalDias: descanso.total_dias?.toString() || "",
+              colegiadoMedico: descanso.numero_colegiatura,
+              medicoTratante: descanso.medico_tratante,
+              idDiagnostico: descanso.codcie10_diagnostico,
+              nombreEstablecimiento: descanso.nombre_establecimiento,
+              aceptaResponsabilidad: descanso.is_acepta_responsabilidad,
+              aceptaPoliticaSubsidio: descanso.is_acepta_politica,
+              estadoRegistro: descanso.estado_registro,
+              observacion: descanso.observacion || "",
+            };
+            form.reset(payload);
+          }
+        } catch (error) {
+          showToast("error", "Error al cargar los datos del descanso médico.");
+          console.error("Error fetching descanso medico:", error);
+        }
+      }
+    };
+    fecthDescansoMedico();
+  }, [id, isEditMode, navigate, showToast, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -243,6 +291,7 @@ export const DescansoMedicoForm = () => {
       }
 
       const payloadDescansoMedico: DescansoMedico = {
+        id: isEditMode && id ? id : undefined,
         id_colaborador: idColaborador,
         id_tipodescansomedico: idTipoDescansoMedico,
         id_tipocontingencia: idTipoContingencia,
@@ -261,25 +310,40 @@ export const DescansoMedicoForm = () => {
         nombre_tipocontingencia: nombreTipoContingencia,
         nombre_diagnostico: nombreDiagnostico,
         nombre_establecimiento: nombreEstablecimiento,
-        estado_registro: estadoRegistro as EstadoDescansoMedico,
+        estado_registro: estadoRegistro as EDescansoMedico,
       };
 
       console.log({ payloadDescansoMedico });
 
-      const responseNewDescanso = await createDescanso(payloadDescansoMedico);
-      const { result: resultNewDescanso, message: messageNewDescanso } =
-        responseNewDescanso;
+      let response;
+      if (isEditMode) {
+        response = await updateDescanso(id, payloadDescansoMedico); // Llama al servicio de actualización
+      } else {
+        response = await createDescanso(payloadDescansoMedico); // Llama al servicio de creación
+      }
 
-      if (resultNewDescanso) {
-        showToast("success", messageNewDescanso);
+      const { result, message } = response;
+      if (result) {
+        showToast("success", message);
         navigate("/descanso-medico");
       } else {
-        showToast(
-          "error",
-          messageNewDescanso || "Error al registrar el descanso médico"
-        );
-        return;
+        showToast("error", message || "Error al procesar el descanso médico.");
       }
+
+      // const responseNewDescanso = await createDescanso(payloadDescansoMedico);
+      // const { result: resultNewDescanso, message: messageNewDescanso } =
+      //   responseNewDescanso;
+
+      // if (resultNewDescanso) {
+      //   showToast("success", messageNewDescanso);
+      //   navigate("/descanso-medico");
+      // } else {
+      //   showToast(
+      //     "error",
+      //     messageNewDescanso || "Error al registrar el descanso médico"
+      //   );
+      //   return;
+      // }
     } catch (error) {
       console.error("Error al registrar cargo", error);
       showToast("error", error);
@@ -288,26 +352,39 @@ export const DescansoMedicoForm = () => {
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Información del descanso médico</CardTitle>
-          <CardDescription>
+      <Card className="shadow-lg border-gray-200">
+        <CardHeader className="border-b border-gray-200">
+          <CardTitle className="text-xl font-bold text-gray-800">
+            Información del descanso médico
+          </CardTitle>
+          <CardDescription className="text-sm text-gray-500">
             Complete el formulario para registrar un descanso médico
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="datos-descanso-medico">
+                  <TabsTrigger
+                    value="datos-descanso-medico"
+                    className="bg-blue-400 hover:bg-blue-500 hover: cursor-pointer text-white transition-colors duration-300 mr-2"
+                  >
                     Datos del descanso médico
                   </TabsTrigger>
-                  <TabsTrigger value="datos-medicos">Datos médicos</TabsTrigger>
-                  {!userProfile.id_colaborador ? (
-                    <TabsTrigger value="validacion">Validación</TabsTrigger>
-                  ) : (
-                    <></>
+                  <TabsTrigger
+                    value="datos-medicos"
+                    className="bg-blue-400 hover:bg-blue-500 hover: cursor-pointer text-white transition-colors duration-300 mr-2"
+                  >
+                    Datos médicos
+                  </TabsTrigger>
+                  {!userProfile.id_colaborador && (
+                    <TabsTrigger
+                      value="validacion"
+                      className="bg-blue-400 hover:bg-blue-500 hover: cursor-pointer text-white transition-colors duration-300"
+                    >
+                      Validación
+                    </TabsTrigger>
                   )}
                   {/* <TabsTrigger value="validacion">Validación</TabsTrigger> */}
                 </TabsList>
@@ -402,7 +479,11 @@ export const DescansoMedicoForm = () => {
               </div>
 
               <div className="flex justify-end space-x-4 pt-4">
-                <Button type="submit" disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-blue-600 hover:bg-blue-700 hover: cursor-pointer text-white transition-colors duration-300"
+                >
                   {isSubmitting ? (
                     <>
                       <Spinner className="mr-2 h-4 w-4 animate-spin" />
@@ -417,6 +498,7 @@ export const DescansoMedicoForm = () => {
                   variant="outline"
                   disabled={isSubmitting}
                   onClick={() => navigate("/descanso-medico")}
+                  className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
                   {isSubmitting ? "Cancelando..." : "Cancelar"}
                 </Button>

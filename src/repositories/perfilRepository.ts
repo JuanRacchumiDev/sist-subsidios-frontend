@@ -1,4 +1,4 @@
-import { Perfil, PerfilResponse } from "@/interfaces/IPerfil"
+import { Perfil, PerfilResponse } from "../interfaces/IPerfil"
 import apiClient from "./apiClient"
 
 export const getAll = async () => {

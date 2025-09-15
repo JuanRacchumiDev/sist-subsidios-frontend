@@ -10,7 +10,6 @@ import {
   User,
   LogOut,
 } from "lucide-react";
-import React, { useMemo } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,39 +17,17 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "../../components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
-
 import { logoutAuth } from "../../services/authService";
-
-interface UserData {
-  id_colaborador?: string;
-  id_empresa?: string;
-  id_usuario?: string;
-  nombre_completo?: string;
-  nombre_perfil?: string;
-  slug_perfil?: string;
-}
-
-interface AuthData {
-  usuario: UserData;
-}
+import { getAuthData } from "../../utils/authMemo";
+import { useMemo } from "react";
 
 export const Header = ({ sidebarCollapsed, onToggleSidebar }) => {
   const { showToast } = useToast();
 
-  const authData = useMemo(() => {
-    try {
-      const auth = localStorage.getItem("auth");
-      return auth ? (JSON.parse(auth) as AuthData) : null;
-    } catch (e) {
-      console.error("Failed to parse auth data from localStorage", e);
-      return null;
-    }
-  }, []);
-
-  const userProfile = authData?.usuario;
+  const userProfile = useMemo(() => getAuthData()?.usuario, []);
 
   const handleLogout = async () => {
     if (userProfile.id_usuario) {

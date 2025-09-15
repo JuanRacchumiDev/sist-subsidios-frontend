@@ -1,4 +1,4 @@
-import { EstadoCobro } from "../enums/EstadoRegistro";
+import { EstadoCobro } from "../enums/EDescansoMedico";
 
 export interface Cobro {
     id?: string

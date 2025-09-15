@@ -17,9 +17,12 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { Usuario, Pagination as PaginationType } from "@/interfaces/IUsuario";
+import {
+  Usuario,
+  Pagination as PaginationType,
+} from "../../interfaces/IUsuario";
 import { UsuarioRow } from "./UsuarioRow";
-import { getUsuariosWithPaginate } from "@/services/usuarioService";
+import { getUsuariosWithPaginate } from "../../services/usuarioService";
 
 export const UsuarioTable = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);

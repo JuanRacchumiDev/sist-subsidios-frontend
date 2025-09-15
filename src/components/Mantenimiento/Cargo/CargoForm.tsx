@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -26,7 +26,7 @@ import {
 } from "../../../services/cargoService";
 import { Cargo, CargoResponse } from "../../../interfaces/ICargo";
 import { useToast } from "../../../context/ToastContext";
-import { RequiredLabel } from "@/components/Common/RequiredLabel";
+import { RequiredLabel } from "../../../components/Common/RequiredLabel";
 import { useEffect } from "react";
 
 const formSchema = z.object({
@@ -48,6 +48,7 @@ export const CargoForm = () => {
   });
 
   const { isSubmitting } = form.formState;
+
   const isEditMode = !!id;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -129,37 +130,52 @@ export const CargoForm = () => {
           ← Volver al listado
         </Link>
       </div> */}
-      <Card className="w-full max-w-lg">
-        <CardHeader>
-          <CardTitle>Información</CardTitle>
-          <CardDescription>Ingrese los datos del cargo</CardDescription>
+      <Card className="shadow-lg border-gray-200">
+        <CardHeader className="border-b border-gray-200">
+          <CardTitle className="text-xl font-bold text-gray-800">
+            Información
+          </CardTitle>
+          <CardDescription className="text-sm text-gray-500">
+            Ingrese los datos del cargo
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <div className="grid grid-cols-1 gap-6">
-                <FormField
-                  control={form.control}
-                  name="nombre"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <RequiredLabel>Nombre</RequiredLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Director General"
-                          autoComplete="off"
-                          maxLength={50}
-                          {...field}
-                          className={fieldState.invalid ? "border-red-500" : ""}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> */}
+              <FormField
+                control={form.control}
+                name="nombre"
+                render={({ field, fieldState }) => (
+                  <FormItem>
+                    <RequiredLabel>Nombre</RequiredLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Director General"
+                        autoComplete="off"
+                        maxLength={50}
+                        {...field}
+                        className={`
+                          ${
+                            fieldState.invalid
+                              ? "border-red-500 focus:ring-red-500"
+                              : "focus:ring-blue-500"
+                          }
+                            transition-all duration-300 w-full
+                          `}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* </div> */}
               <div className="flex justify-end space-x-4 pt-4">
-                <Button type="submit" disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-blue-600 hover:bg-blue-700 hover: cursor-pointer text-white transition-colors duration-300"
+                >
                   {isSubmitting ? (
                     <>
                       <Spinner className="mr-2 h-4 w-4 animate-spin" />
@@ -176,6 +192,7 @@ export const CargoForm = () => {
                   variant="outline"
                   disabled={isSubmitting}
                   onClick={() => navigate("/mantenimiento/cargo")}
+                  className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
                   {isSubmitting ? "Cancelando..." : "Cancelar"}
                 </Button>

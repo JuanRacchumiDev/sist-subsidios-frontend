@@ -5,7 +5,7 @@ import { Header } from "./components/Layout/Header";
 import { Dashboard } from "./components/Dashboard/Dashboard";
 // import { AnalyticsPage } from "./components/Analytics/AnalyticsPage";
 // import { UserPage } from "./components/Users/UserPage";
-import { LoginPage } from "./components/Auth/LoginPage";
+import { LoginPage } from "./components/Auth/Page/LoginPage";
 import { NotFoundPage } from "./components/Layout/NotFoundPage";
 
 import { ColaboradorListPage } from "./components/Colaborador/Page/ColaboradorListPage";

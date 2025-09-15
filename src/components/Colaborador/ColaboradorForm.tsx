@@ -29,18 +29,21 @@ import {
   SelectValue,
 } from "../ui/select";
 
-import { getEmpresas } from "@/services/empresaService";
-import { getTipoDocumentos } from "@/services/tipoDocumentoService";
-import { getCargos } from "@/services/cargoService";
-import { getPersonaByIdTipoDocAndNumDoc } from "@/services/personaService";
+import { getEmpresas } from "../../services/empresaService";
+import { getTipoDocumentos } from "../../services/tipoDocumentoService";
+import { getCargos } from "../../services/cargoService";
+import { getPersonaByIdTipoDocAndNumDoc } from "../../services/personaService";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { RequiredLabel } from "../Common/RequiredLabel";
-import { Colaborador, ColaboradorResponse } from "@/interfaces/IColaborador";
+import {
+  Colaborador,
+  ColaboradorResponse,
+} from "../../interfaces/IColaborador";
 import {
   createColaborador,
   getColaboradorById,
-} from "@/services/colaboradorService";
+} from "../../services/colaboradorService";
 
 const formSchema = z.object({
   idTipoDocumento: z
@@ -320,12 +323,16 @@ export const ColaboradorForm = () => {
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Información Personal y Laboral</CardTitle>
-          <CardDescription>Ingrese los datos del colaborador</CardDescription>
+      <Card className="shadow-lg border-gray-200">
+        <CardHeader className="border-b border-gray-200">
+          <CardTitle className="text-xl font-bold text-gray-800">
+            Información Personal y Laboral
+          </CardTitle>
+          <CardDescription className="text-sm text-gray-500">
+            Ingrese los datos del colaborador
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <fieldset className="border border-gray-300 p-4 rounded-md">
@@ -345,16 +352,25 @@ export const ColaboradorForm = () => {
                         >
                           <FormControl>
                             <SelectTrigger
-                              className={
-                                fieldState.invalid ? "border-red-500" : ""
-                              }
+                              className={`
+                                ${
+                                  fieldState.invalid
+                                    ? "border-red-500 focus:ring-red-500"
+                                    : "focus:ring-blue-500"
+                                }
+                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300
+                              `}
                             >
                               <SelectValue placeholder="Seleccionar tipo de documento" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {tipos.map((tipo) => (
-                              <SelectItem value={tipo.id} key={tipo.id}>
+                              <SelectItem
+                                value={tipo.id}
+                                key={tipo.id}
+                                className="cursor-pointer hover:bg-blue-100 transition-colors"
+                              >
                                 {tipo.abreviatura}
                               </SelectItem>
                             ))}
@@ -439,9 +455,14 @@ export const ColaboradorForm = () => {
                                 }
                               }
                             }}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -462,9 +483,14 @@ export const ColaboradorForm = () => {
                             maxLength={40}
                             {...field}
                             disabled={!camposHabilitadosPersona}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -485,9 +511,14 @@ export const ColaboradorForm = () => {
                             maxLength={40}
                             {...field}
                             disabled={!camposHabilitadosPersona}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -508,9 +539,14 @@ export const ColaboradorForm = () => {
                             maxLength={40}
                             {...field}
                             disabled={!camposHabilitadosPersona}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -537,9 +573,14 @@ export const ColaboradorForm = () => {
                                 e.target.value ? parseISO(e.target.value) : null
                               )
                             }
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormDescription>
@@ -571,16 +612,25 @@ export const ColaboradorForm = () => {
                         >
                           <FormControl>
                             <SelectTrigger
-                              className={
-                                fieldState.invalid ? "border-red-500" : ""
-                              }
+                              className={`
+                                ${
+                                  fieldState.invalid
+                                    ? "border-red-500 focus:ring-red-500"
+                                    : "focus:ring-blue-500"
+                                }
+                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300
+                              `}
                             >
                               <SelectValue placeholder="Seleccionar empresa" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {empresas.map((empresa) => (
-                              <SelectItem value={empresa.id} key={empresa.id}>
+                              <SelectItem
+                                value={empresa.id}
+                                key={empresa.id}
+                                className="cursor-pointer hover:bg-blue-100 transition-colors"
+                              >
                                 {empresa.nombre_o_razon_social}
                               </SelectItem>
                             ))}
@@ -603,16 +653,25 @@ export const ColaboradorForm = () => {
                         >
                           <FormControl>
                             <SelectTrigger
-                              className={
-                                fieldState.invalid ? "border-red-500" : ""
-                              }
+                              className={`
+                                ${
+                                  fieldState.invalid
+                                    ? "border-red-500 focus:ring-red-500"
+                                    : "focus:ring-blue-500"
+                                }
+                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300
+                              `}
                             >
                               <SelectValue placeholder="Seleccionar cargo" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {cargos.map((cargo) => (
-                              <SelectItem value={cargo.id} key={cargo.id}>
+                              <SelectItem
+                                value={cargo.id}
+                                key={cargo.id}
+                                className="cursor-pointer hover:bg-blue-100 transition-colors"
+                              >
                                 {cargo.nombre}
                               </SelectItem>
                             ))}
@@ -635,9 +694,14 @@ export const ColaboradorForm = () => {
                             autoComplete="off"
                             maxLength={40}
                             {...field}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -657,9 +721,14 @@ export const ColaboradorForm = () => {
                             autoComplete="off"
                             maxLength={40}
                             {...field}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -679,9 +748,14 @@ export const ColaboradorForm = () => {
                             autoComplete="off"
                             maxLength={50}
                             {...field}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -701,9 +775,14 @@ export const ColaboradorForm = () => {
                             autoComplete="off"
                             maxLength={50}
                             {...field}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -723,9 +802,14 @@ export const ColaboradorForm = () => {
                             autoComplete="off"
                             maxLength={9}
                             {...field}
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -752,9 +836,14 @@ export const ColaboradorForm = () => {
                                 e.target.value ? parseISO(e.target.value) : null
                               )
                             }
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormDescription>
@@ -817,7 +906,11 @@ export const ColaboradorForm = () => {
               </fieldset>
 
               <div className="flex justify-end space-x-4 pt-4">
-                <Button type="submit" disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-blue-600 hover:bg-blue-700 hover: cursor-pointer text-white transition-colors duration-300"
+                >
                   {isSubmitting ? (
                     <>
                       <Spinner className="mr-2 h-4 w-4 animate-spin" />
@@ -832,6 +925,7 @@ export const ColaboradorForm = () => {
                   variant="outline"
                   disabled={isSubmitting}
                   onClick={() => navigate("/colaborador")}
+                  className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
                   {isSubmitting ? "Cancelando..." : "Cancelar"}
                 </Button>

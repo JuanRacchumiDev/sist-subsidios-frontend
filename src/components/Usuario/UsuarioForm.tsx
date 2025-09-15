@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { format, parseISO } from "date-fns";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import * as z from "zod";
 import {
@@ -10,16 +9,16 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "../../components/ui/card";
 import { useToast } from "../../context/ToastContext";
 import { Spinner } from "../../components/Common/Spinner";
-import { getPersonas } from "@/services/personaService";
-import { getPerfiles } from "@/services/perfilService";
+import { getPersonas } from "../../services/personaService";
+import { getPerfiles } from "../../services/perfilService";
 import {
   getUsuarioById,
   createUsuario,
   updateUsuario,
-} from "@/services/usuarioService";
+} from "../../services/usuarioService";
 import { Usuario, UsuarioResponse } from "../../interfaces/IUsuario";
 import {
   Form,
@@ -70,26 +69,6 @@ type Persona = {
 type Perfil = {
   id: string;
   nombre: string;
-};
-
-const dataPersonas = async () => {
-  let personas: Persona[] = [];
-  const response = await getPersonas();
-  const { result, data } = response;
-  if (result && data) {
-    personas = data as Persona[];
-  }
-  return personas;
-};
-
-const dataPerfiles = async () => {
-  let perfiles: Perfil[] = [];
-  const response = await getPerfiles();
-  const { result, data } = response;
-  if (result && data) {
-    perfiles = data as Perfil[];
-  }
-  return perfiles;
 };
 
 export const UsuarioForm = () => {

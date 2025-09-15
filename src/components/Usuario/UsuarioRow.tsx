@@ -1,4 +1,4 @@
-import { Usuario } from "@/interfaces/IUsuario";
+import { Usuario } from "../../interfaces/IUsuario";
 import React from "react";
 import { TableCell, TableRow } from "../ui/table";
 import { CircleCheck, CircleX, MoreHorizontal } from "lucide-react";

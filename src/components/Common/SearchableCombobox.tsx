@@ -3,18 +3,18 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "../../components/ui/popover";
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-} from "@/components/ui/command";
-import { Button } from "@/components/ui/button";
+} from "../../components/ui/command";
+import { Button } from "../../components/ui/button";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { FormControl, FormItem } from "@/components/ui/form";
+import { cn } from "../../lib/utils";
+import { FormControl, FormItem } from "../../components/ui/form";
 import { RequiredLabel } from "./RequiredLabel";
 
 interface SearchableComboboxProps<T extends { [key: string]: any }> {

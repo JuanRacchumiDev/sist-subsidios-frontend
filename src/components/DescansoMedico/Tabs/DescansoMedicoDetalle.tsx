@@ -5,38 +5,42 @@ import {
   FormField,
   FormItem,
   FormMessage,
-} from "@/components/ui/form";
-import { RequiredLabel } from "@/components/Common/RequiredLabel";
+} from "../../../components/ui/form";
+import { RequiredLabel } from "../../../components/Common/RequiredLabel";
 import {
   Select,
   SelectItem,
   SelectContent,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "../../../components/ui/select";
 import { differenceInCalendarDays, format, parseISO } from "date-fns";
 import { useToast } from "../../../context/ToastContext";
-import { Empresa } from "@/interfaces/IEmpresa";
-import { getEmpresas } from "@/services/empresaService";
-import SearchableCombobox from "@/components/Common/SearchableCombobox";
-import { Colaborador, ColaboradorResponse } from "@/interfaces/IColaborador";
+import { Empresa } from "../../../interfaces/IEmpresa";
+import { getEmpresas } from "../../../services/empresaService";
+import SearchableCombobox from "../../../components/Common/SearchableCombobox";
+import {
+  Colaborador,
+  ColaboradorResponse,
+} from "../../../interfaces/IColaborador";
 import {
   getColaboradores,
   getColaboradoresByIdEmpresa,
-} from "@/services/colaboradorService";
-import { TipoDescansoMedico } from "@/interfaces/ITipoDescansoMedico";
-import { getTipoDescansosMedicos } from "@/services/tipoDescansoMedicoService";
-import { TipoContingencia } from "@/interfaces/ITipoContingencia";
-import { DocumentoTipoContingencia } from "@/interfaces/IDocumentoTipoContingencia";
+} from "../../../services/colaboradorService";
+import { TipoDescansoMedico } from "../../../interfaces/ITipoDescansoMedico";
+import { getTipoDescansosMedicos } from "../../../services/tipoDescansoMedicoService";
+import { TipoContingencia } from "../../../interfaces/ITipoContingencia";
+import { DocumentoTipoContingencia } from "../../../interfaces/IDocumentoTipoContingencia";
 import {
   getTipoContingencias,
   getTipoContingenciaById,
-} from "@/services/tipoContingenciaService";
-import { Input } from "@/components/ui/input";
+} from "../../../services/tipoContingenciaService";
+import { Input } from "../../../components/ui/input";
 import * as z from "zod";
 import { UseFormReturn } from "react-hook-form";
 import { formSchema } from "../DescansoMedicoForm";
-import Documentos from "@/components/TipoContingencia/Documentos";
+import Documentos from "../../../components/TipoContingencia/Documentos";
+import { getAuthData } from "../../../utils/authMemo";
 
 interface DescansoMedicoDetalleProps {
   form: UseFormReturn<z.infer<typeof formSchema>>;
@@ -87,18 +91,6 @@ const dataTipoContingencias = async () => {
   return tipoContingencias;
 };
 
-interface UserData {
-  id_colaborador: string;
-  id_empresa: string;
-  nombre_completo: string;
-  nombre_perfil: string;
-  slug_perfil: string;
-}
-
-interface AuthData {
-  usuario: UserData;
-}
-
 export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
   const { showToast } = useToast();
 
@@ -128,17 +120,7 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
   const fechaInicio = form.watch("fechaInicio");
   const fechaFinal = form.watch("fechaFinal");
 
-  const authData = useMemo(() => {
-    try {
-      const auth = localStorage.getItem("auth");
-      return auth ? (JSON.parse(auth) as AuthData) : null;
-    } catch (e) {
-      console.error("Failed to parse auth data from localStorage", e);
-      return null;
-    }
-  }, []);
-
-  const userProfile = authData?.usuario;
+  const userProfile = useMemo(() => getAuthData()?.usuario, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -159,6 +141,8 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
         setColaboradores(colaboradoresRes);
         setTipoDescansos(tipoDescansosRes);
         setTipoContingencias(tipoContingenciasRes);
+
+        console.log({ userProfile });
 
         if (userProfile?.id_empresa && userProfile?.id_colaborador) {
           form.setValue("idEmpresa", userProfile.id_empresa);
@@ -242,7 +226,8 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
   }, [fechaInicio, fechaFinal, form]);
 
   return (
-    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+    // <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <FormField
         control={form.control}
         name="idEmpresa"
@@ -256,14 +241,25 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
             >
               <FormControl>
                 <SelectTrigger
-                  className={fieldState.invalid ? "border-red-500" : ""}
+                  className={`
+                    ${
+                      fieldState.invalid
+                        ? "border-red-500 focus:ring-red-500"
+                        : "focus:ring-blue-500"
+                    }
+                      focus:ring-2 focus:ring-offset-2 transition-all duration-300
+                  `}
                 >
                   <SelectValue placeholder="Seleccionar empresa" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
                 {empresas.map((empresa) => (
-                  <SelectItem value={empresa.id} key={empresa.id}>
+                  <SelectItem
+                    value={empresa.id}
+                    key={empresa.id}
+                    className="cursor-pointer hover:bg-gray-100 transition-colors"
+                  >
                     {empresa.nombre_o_razon_social}
                   </SelectItem>
                 ))}
@@ -315,14 +311,25 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
             <Select onValueChange={field.onChange} value={field.value ?? ""}>
               <FormControl>
                 <SelectTrigger
-                  className={fieldState.invalid ? "border-red-500" : ""}
+                  className={`
+                    ${
+                      fieldState.invalid
+                        ? "border-red-500 focus:ring-red-500"
+                        : "focus:ring-blue-500"
+                    }
+                      focus:ring-2 focus:ring-offset-2 transition-all duration-300
+                  `}
                 >
                   <SelectValue placeholder="Seleccionar tipo de descanso médico" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
                 {tipoDescansos.map((td) => (
-                  <SelectItem key={td.id} value={td.id}>
+                  <SelectItem
+                    key={td.id}
+                    value={td.id}
+                    className="cursor-pointer hover:bg-gray-100 transition-colors"
+                  >
                     {td.nombre}
                   </SelectItem>
                 ))}
@@ -342,14 +349,25 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
             <Select onValueChange={field.onChange} value={field.value ?? ""}>
               <FormControl>
                 <SelectTrigger
-                  className={fieldState.invalid ? "border-red-500" : ""}
+                  className={`
+                    ${
+                      fieldState.invalid
+                        ? "border-red-500 focus:ring-red-500"
+                        : "focus:ring-blue-500"
+                    }
+                      focus:ring-2 focus:ring-offset-2 transition-all duration-300
+                  `}
                 >
                   <SelectValue placeholder="Seleccionar tipo de contingencia" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
                 {tipoContingencias.map((tc) => (
-                  <SelectItem key={tc.id} value={tc.id}>
+                  <SelectItem
+                    key={tc.id}
+                    value={tc.id}
+                    className="cursor-pointer hover:bg-gray-100 transition-colors"
+                  >
                     {tc.nombre}
                   </SelectItem>
                 ))}
@@ -380,7 +398,14 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                       e.target.value ? parseISO(e.target.value) : null
                     )
                   }
-                  className={fieldState.invalid ? "border-red-500" : ""}
+                  className={`
+                    ${
+                      fieldState.invalid
+                        ? "border-red-500 focus:ring-red-500"
+                        : "focus:ring-blue-500"
+                    }
+                      transition-all duration-300
+                  `}
                 />
               </FormControl>
               <FormDescription>
@@ -408,7 +433,14 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                       e.target.value ? parseISO(e.target.value) : null
                     )
                   }
-                  className={fieldState.invalid ? "border-red-500" : ""}
+                  className={`
+                    ${
+                      fieldState.invalid
+                        ? "border-red-500 focus:ring-red-500"
+                        : "focus:ring-blue-500"
+                    }
+                      transition-all duration-300
+                  `}
                 />
               </FormControl>
               <FormDescription>
@@ -436,7 +468,14 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                       e.target.value ? parseISO(e.target.value) : null
                     )
                   }
-                  className={fieldState.invalid ? "border-red-500" : ""}
+                  className={`
+                    ${
+                      fieldState.invalid
+                        ? "border-red-500 focus:ring-red-500"
+                        : "focus:ring-blue-500"
+                    }
+                      transition-all duration-300
+                  `}
                 />
               </FormControl>
               <FormDescription>
@@ -459,9 +498,14 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                 <Input
                   readOnly
                   value={totalDias !== null ? totalDias.toString() : ""}
-                  className={`bg-gray-100 ${
-                    fieldState.invalid ? "border-red-500" : ""
-                  }`}
+                  className={`
+                    ${
+                      fieldState.invalid
+                        ? "border-red-500 focus:ring-red-500"
+                        : "focus:ring-blue-500"
+                    }
+                      transition-all duration-300
+                  `}
                   autoComplete="off"
                 />
               </FormControl>
