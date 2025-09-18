@@ -76,7 +76,7 @@ export const update = async (id: string, payload: TrabajadorSocial): Promise<Tra
     try {
         const urlApi = `${'/trab-sociales/'}${id}`
         const response = await apiClient.put(urlApi, payload)
-        console.log('response update trabsocial', response)
+        // console.log('response update trabsocial', response)
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
         console.log('errorMessage', errorMessage)

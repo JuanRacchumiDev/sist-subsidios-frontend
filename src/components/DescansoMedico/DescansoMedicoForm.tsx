@@ -18,8 +18,10 @@ import { Button } from "../ui/button";
 import { Spinner } from "../Common/Spinner";
 import { useNavigate, useParams } from "react-router-dom";
 import { Validacion } from "./Tabs/Validacion";
-import { DescansoMedico } from "../../interfaces/IDescansoMedico";
-import { formatDateToString } from "../../utils/formatDate";
+import {
+  DescansoMedico,
+  DescansoMedicoResponse,
+} from "../../interfaces/IDescansoMedico";
 import { getColaboradorById } from "../../services/colaboradorService";
 import { Colaborador } from "../../interfaces/IColaborador";
 import { getTipoDescansoById } from "../../services/tipoDescansoMedicoService";
@@ -33,11 +35,15 @@ import {
   getDescansoById,
   updateDescanso,
 } from "../../services/descansoMedicoService";
+import { createCodigoTempAuth } from "../../services/authService";
 import { useToast } from "../../context/ToastContext";
 import { EDescansoMedico } from "../../enums/EDescansoMedico";
 import { getAuthData } from "../../utils/authMemo";
+import HDate from "../../helpers/HDate";
+import { parseISO } from "date-fns";
 
 export const formSchema = z.object({
+  id: z.string().optional(),
   idEmpresa: z
     .string({
       message: "Debe seleccionar una empresa",
@@ -96,15 +102,12 @@ export const formSchema = z.object({
     .string()
     .min(1, "El nombre del médico tratante es requerido"),
   documentos: z.record(z.string(), z.any()).optional(),
-  // aceptaResponsabilidad: z.boolean().optional(),
-  // aceptaPoliticaSubsidio: z.boolean().optional(),
   aceptaResponsabilidad: z.boolean().refine((val) => val === true, {
     message: "Debe aceptar la declaración de responsabilidad",
   }),
   aceptaPoliticaSubsidio: z.boolean().refine((val) => val === true, {
     message: "Debe aceptar la política de subsidio",
   }),
-  // estadoRegistro: z.string().optional(),
   estadoRegistro: z
     .string({
       message: "Debe seleccionar un estado",
@@ -116,7 +119,6 @@ export const formSchema = z.object({
 export const DescansoMedicoForm = () => {
   const [showResponsabilidad, setShowResponsabilidad] = useState(false);
   const [showPoliticaSubsidio, setShowPoliticaSubsidio] = useState(false);
-
   const [activeTab, setActiveTab] = useState("datos-descanso-medico");
 
   const navigate = useNavigate();
@@ -129,9 +131,18 @@ export const DescansoMedicoForm = () => {
 
   const isEditMode = !!id;
 
+  // Deshabilitando campos para el perfil especialista
+  const isModeLetter =
+    (userProfile.slug_perfil === "especialista" ||
+      userProfile.slug_perfil === "administrador") &&
+    isEditMode
+      ? true
+      : false;
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      id: "",
       idEmpresa: "",
       idColaborador: "",
       idTipoDescansoMedico: "",
@@ -167,8 +178,8 @@ export const DescansoMedicoForm = () => {
 
           if (result && data) {
             const descanso = data as DescansoMedico;
+
             console.log({ descanso });
-            console.log("id_colaborador", descanso.id_colaborador);
 
             const responseColaborador = await getColaboradorById(
               descanso.id_colaborador
@@ -183,18 +194,19 @@ export const DescansoMedicoForm = () => {
             }
 
             const payload = {
+              // id: descanso.id || "",
               idEmpresa,
               idColaborador: descanso.id_colaborador,
               idTipoDescansoMedico: descanso.id_tipodescansomedico,
               idTipoContingencia: descanso.id_tipocontingencia,
               fechaOtorgamiento: descanso.fecha_otorgamiento
-                ? new Date(descanso.fecha_otorgamiento)
+                ? parseISO(descanso.fecha_otorgamiento)
                 : null,
               fechaInicio: descanso.fecha_inicio
-                ? new Date(descanso.fecha_inicio)
+                ? parseISO(descanso.fecha_inicio)
                 : null,
               fechaFinal: descanso.fecha_final
-                ? new Date(descanso.fecha_final)
+                ? parseISO(descanso.fecha_final)
                 : null,
               totalDias: descanso.total_dias?.toString() || "",
               colegiadoMedico: descanso.numero_colegiatura,
@@ -206,16 +218,25 @@ export const DescansoMedicoForm = () => {
               estadoRegistro: descanso.estado_registro,
               observacion: descanso.observacion || "",
             };
+            console.log("payload data descanso médico", payload);
             form.reset(payload);
           }
         } catch (error) {
           showToast("error", "Error al cargar los datos del descanso médico.");
           console.error("Error fetching descanso medico:", error);
         }
+      } else {
+        // Crea un código temporal único por cada nuevo descanso médico
+        const response = await createCodigoTempAuth();
+        console.log(
+          "response create codigo_temp in new descanso médico",
+          response
+        );
       }
     };
     fecthDescansoMedico();
-  }, [id, isEditMode, navigate, showToast, form]);
+  }, [id, isEditMode]);
+  // [id, isEditMode, navigate, showToast, form]
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -234,15 +255,16 @@ export const DescansoMedicoForm = () => {
         aceptaResponsabilidad,
         estadoRegistro,
         nombreEstablecimiento,
+        observacion,
       } = values;
 
       // Obteniendo la fecha actual en formato yyyy-mm-dd
-      const fechaRegistro = formatDateToString(new Date());
+      const fechaRegistro = HDate.formatDateTimezone(new Date());
 
       // Obtener el nombre del colaborador
       let nombreColaborador: string = "";
       const responseColaborador = await getColaboradorById(idColaborador);
-      console.log({ responseColaborador });
+      // console.log({ responseColaborador });
       const { result: resultCol, data: dataCol } = responseColaborador;
 
       if (resultCol && dataCol) {
@@ -256,7 +278,7 @@ export const DescansoMedicoForm = () => {
       const responseTipoDescanso = await getTipoDescansoById(
         idTipoDescansoMedico
       );
-      console.log({ responseTipoDescanso });
+      // console.log({ responseTipoDescanso });
 
       const { result: resultTipoDescanso, data: dataTipoDescanso } =
         responseTipoDescanso;
@@ -270,7 +292,7 @@ export const DescansoMedicoForm = () => {
       const responseTipoContingencia = await getTipoContingenciaById(
         idTipoContingencia
       );
-      console.log({ responseTipoContingencia });
+      // console.log({ responseTipoContingencia });
 
       const { result: resultTipoContingencia, data: dataTipoContingencia } =
         responseTipoContingencia;
@@ -282,7 +304,7 @@ export const DescansoMedicoForm = () => {
       // Obtener diagnóstico
       let nombreDiagnostico: string = "";
       const responseDiagnostico = await getDiagnosticoByCodigo(idDiagnostico);
-      console.log({ responseDiagnostico });
+      // console.log({ responseDiagnostico });
       const { result: resultDx, data: dataDx } = responseDiagnostico;
 
       if (resultDx && dataDx) {
@@ -291,14 +313,14 @@ export const DescansoMedicoForm = () => {
       }
 
       const payloadDescansoMedico: DescansoMedico = {
-        id: isEditMode && id ? id : undefined,
+        // id: isEditMode && id ? id : undefined,
         id_colaborador: idColaborador,
         id_tipodescansomedico: idTipoDescansoMedico,
         id_tipocontingencia: idTipoContingencia,
         codcie10_diagnostico: idDiagnostico,
-        fecha_otorgamiento: formatDateToString(fechaOtorgamiento),
-        fecha_inicio: formatDateToString(fechaInicio),
-        fecha_final: formatDateToString(fechaFinal),
+        fecha_otorgamiento: HDate.formatDateTimezone(fechaOtorgamiento),
+        fecha_inicio: HDate.formatDateTimezone(fechaInicio),
+        fecha_final: HDate.formatDateTimezone(fechaFinal),
         fecha_registro: fechaRegistro,
         numero_colegiatura: colegiadoMedico,
         medico_tratante: medicoTratante,
@@ -311,11 +333,13 @@ export const DescansoMedicoForm = () => {
         nombre_diagnostico: nombreDiagnostico,
         nombre_establecimiento: nombreEstablecimiento,
         estado_registro: estadoRegistro as EDescansoMedico,
+        observacion,
       };
 
       console.log({ payloadDescansoMedico });
 
-      let response;
+      let response: DescansoMedicoResponse;
+
       if (isEditMode) {
         response = await updateDescanso(id, payloadDescansoMedico); // Llama al servicio de actualización
       } else {
@@ -355,10 +379,14 @@ export const DescansoMedicoForm = () => {
       <Card className="shadow-lg border-gray-200">
         <CardHeader className="border-b border-gray-200">
           <CardTitle className="text-xl font-bold text-gray-800">
-            Información del descanso médico
+            {isEditMode
+              ? "Actualización de descanso médico"
+              : "Registro de descanso médico"}
           </CardTitle>
           <CardDescription className="text-sm text-gray-500">
-            Complete el formulario para registrar un descanso médico
+            {isEditMode
+              ? "Formulario de actualización de descanso médico"
+              : "Complete el formulario para registrar un descanso médico"}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
@@ -390,15 +418,18 @@ export const DescansoMedicoForm = () => {
                 </TabsList>
 
                 <TabsContent value="datos-descanso-medico" className="mt-6">
-                  <DescansoMedicoDetalle form={form} />
+                  <DescansoMedicoDetalle
+                    form={form}
+                    isModeLetter={isModeLetter}
+                  />
                 </TabsContent>
 
                 <TabsContent value="datos-medicos" className="mt-6">
-                  <DatosMedicos form={form} />
+                  <DatosMedicos form={form} isModeLetter={isModeLetter} />
                 </TabsContent>
 
                 <TabsContent value="validacion" className="mt-6">
-                  <Validacion form={form} />
+                  <Validacion form={form} isModeLetter={isModeLetter} />
                 </TabsContent>
               </Tabs>
 
@@ -487,8 +518,10 @@ export const DescansoMedicoForm = () => {
                   {isSubmitting ? (
                     <>
                       <Spinner className="mr-2 h-4 w-4 animate-spin" />
-                      Registrando...
+                      {isEditMode ? "Actualizando..." : "Registrando..."}
                     </>
+                  ) : isEditMode ? (
+                    "Actualizar"
                   ) : (
                     "Registrar"
                   )}

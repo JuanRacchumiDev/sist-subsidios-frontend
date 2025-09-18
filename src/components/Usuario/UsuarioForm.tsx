@@ -116,7 +116,7 @@ export const UsuarioForm = () => {
         response = await createUsuario(payloadData);
       }
 
-      console.log("response new usuario", response);
+      // console.log("response new usuario", response);
 
       const { result, message, error } = response;
 
@@ -187,7 +187,7 @@ export const UsuarioForm = () => {
 
   return (
     <>
-      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
+      {/* <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
             {isEditMode ? "Editar" : "Registrar"} Usuario
@@ -204,12 +204,16 @@ export const UsuarioForm = () => {
         >
           ← Volver al listado
         </Link>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Información de usuario</CardTitle>
-          <CardDescription>
-            Complete el formulario para registrar un usuario
+      </div> */}
+      <Card className="shadow-lg border-gray-200">
+        <CardHeader className="border-b border-gray-200">
+          <CardTitle className="text-xl font-bold text-gray-800">
+            Información de usuario
+          </CardTitle>
+          <CardDescription className="text-sm text-gray-500">
+            {isEditMode
+              ? "Actualice los datos del usuario"
+              : "Ingrese los datos del usuario"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -244,13 +248,14 @@ export const UsuarioForm = () => {
                           onChange={field.onChange}
                           displayKey="nombre_completo"
                           valueKey="id"
+                          searchKeys={["nombre_completo"]}
                         />
-                        {selectedPersona && (
+                        {/* {selectedPersona && (
                           <FormDescription>
                             Persona seleccionada:{" "}
                             <b>{selectedPersona.nombre_completo}</b>
                           </FormDescription>
-                        )}
+                        )} */}
                         <FormMessage />
                       </FormItem>
                     );
@@ -269,16 +274,25 @@ export const UsuarioForm = () => {
                       >
                         <FormControl>
                           <SelectTrigger
-                            className={
-                              fieldState.invalid ? "border-red-500" : ""
-                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
+                            `}
                           >
                             <SelectValue placeholder="Seleccionar perfil" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="bg-gray-400">
                           {perfiles.map((perfil) => (
-                            <SelectItem key={perfil.id} value={perfil.id}>
+                            <SelectItem
+                              value={perfil.id}
+                              key={perfil.id}
+                              className="cursor-pointer hover:bg-gray-100 transition-colors"
+                            >
                               {perfil.nombre}
                             </SelectItem>
                           ))}
@@ -332,7 +346,11 @@ export const UsuarioForm = () => {
               </div>
 
               <div className="flex justify-end space-x-4 pt-4">
-                <Button type="submit" disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-blue-600 hover:bg-blue-700 hover: cursor-pointer text-white transition-colors duration-300"
+                >
                   {isSubmitting ? (
                     <>
                       <Spinner className="mr-2 h-4 w-4 animate-spin" />
@@ -347,6 +365,7 @@ export const UsuarioForm = () => {
                   variant="outline"
                   disabled={isSubmitting}
                   onClick={() => navigate("/usuario")}
+                  className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
                   {isSubmitting ? "Cancelando..." : "Cancelar"}
                 </Button>

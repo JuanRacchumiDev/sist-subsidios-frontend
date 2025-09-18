@@ -38,12 +38,17 @@ import {
 import { Input } from "../../../components/ui/input";
 import * as z from "zod";
 import { UseFormReturn } from "react-hook-form";
+import { useParams } from "react-router-dom";
 import { formSchema } from "../DescansoMedicoForm";
 import Documentos from "../../../components/TipoContingencia/Documentos";
 import { getAuthData } from "../../../utils/authMemo";
+import { Adjunto } from "../../../interfaces/IAdjunto";
+import { DescansoMedico } from "../../../interfaces/IDescansoMedico";
+import { getDescansoById } from "@/services/descansoMedicoService";
 
 interface DescansoMedicoDetalleProps {
   form: UseFormReturn<z.infer<typeof formSchema>>;
+  isModeLetter?: boolean;
 }
 
 const dataEmpresas = async () => {
@@ -81,6 +86,20 @@ const dataTipoDescansosMedicos = async () => {
   return tipoDescansos;
 };
 
+const dataAdjuntos = async (idDescansoMedico: string) => {
+  let adjuntos: Adjunto[] = [];
+  if (idDescansoMedico) {
+    const responseDescanso = await getDescansoById(idDescansoMedico);
+    const { result, data } = responseDescanso;
+
+    if (result && data) {
+      const descanso = data as DescansoMedico;
+      adjuntos = descanso.adjuntos as Adjunto[];
+    }
+  }
+  return adjuntos;
+};
+
 const dataTipoContingencias = async () => {
   let tipoContingencias: TipoContingencia[] = [];
   const response = await getTipoContingencias();
@@ -91,9 +110,12 @@ const dataTipoContingencias = async () => {
   return tipoContingencias;
 };
 
-export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
+export const DescansoMedicoDetalle = ({
+  form,
+  isModeLetter = false,
+}: DescansoMedicoDetalleProps) => {
+  const { id } = useParams<{ id: string }>();
   const { showToast } = useToast();
-
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
   const [tipoDescansos, setTipoDescansos] = useState<TipoDescansoMedico[]>([]);
@@ -103,6 +125,7 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
   const [documentosTipoContingencia, setDocumentosTipoContingencia] = useState<
     DocumentoTipoContingencia[]
   >([]);
+  const [adjuntos, setAdjuntos] = useState<Adjunto[]>([]);
 
   const [totalDias, setTotalDias] = useState<number | null>(null);
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
@@ -130,17 +153,20 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
           colaboradoresRes,
           tipoDescansosRes,
           tipoContingenciasRes,
+          adjuntosRes,
         ] = await Promise.all([
           dataEmpresas(),
           dataColaboradores(),
           dataTipoDescansosMedicos(),
           dataTipoContingencias(),
+          dataAdjuntos(id),
         ]);
 
         setEmpresas(empresasRes);
         setColaboradores(colaboradoresRes);
         setTipoDescansos(tipoDescansosRes);
         setTipoContingencias(tipoContingenciasRes);
+        setAdjuntos(adjuntosRes);
 
         console.log({ userProfile });
 
@@ -189,8 +215,6 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
             selectedTipoContingenciaId
           );
 
-          console.log("response documentos", response);
-
           const { result, data } = response;
 
           if (result && data) {
@@ -237,7 +261,7 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
             <Select
               onValueChange={field.onChange}
               value={field.value ?? ""}
-              // disabled={isDisabled}
+              // disabled={isModeLetter}
             >
               <FormControl>
                 <SelectTrigger
@@ -247,13 +271,13 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                         ? "border-red-500 focus:ring-red-500"
                         : "focus:ring-blue-500"
                     }
-                      focus:ring-2 focus:ring-offset-2 transition-all duration-300
+                      focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
                   `}
                 >
                   <SelectValue placeholder="Seleccionar empresa" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent>
+              <SelectContent className="bg-gray-400">
                 {empresas.map((empresa) => (
                   <SelectItem
                     value={empresa.id}
@@ -274,9 +298,9 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
         control={form.control}
         name="idColaborador"
         render={({ field, fieldState }) => {
-          const selectedColaborador = colaboradores.find(
-            (c) => c.id === field.value
-          );
+          // const selectedColaborador = colaboradores.find(
+          //   (c) => c.id === field.value
+          // );
 
           return (
             <FormItem className="flex flex-col">
@@ -288,14 +312,15 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                 onChange={field.onChange}
                 displayKey="nombre_completo"
                 valueKey="id"
-                // disabled={isDisabled}
+                searchKeys={["nombre_completo"]}
+                // disabled={isModeLetter}
               />
-              {selectedColaborador && (
+              {/* {selectedColaborador && (
                 <FormDescription>
                   Colaborador seleccionado:{" "}
                   <b>{selectedColaborador.nombre_completo}</b>
                 </FormDescription>
-              )}
+              )} */}
               <FormMessage />
             </FormItem>
           );
@@ -308,7 +333,11 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
         render={({ field, fieldState }) => (
           <FormItem>
             <RequiredLabel>Tipo de descanso médico</RequiredLabel>
-            <Select onValueChange={field.onChange} value={field.value ?? ""}>
+            <Select
+              onValueChange={field.onChange}
+              value={field.value ?? ""}
+              disabled={isModeLetter}
+            >
               <FormControl>
                 <SelectTrigger
                   className={`
@@ -317,13 +346,13 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                         ? "border-red-500 focus:ring-red-500"
                         : "focus:ring-blue-500"
                     }
-                      focus:ring-2 focus:ring-offset-2 transition-all duration-300
+                      focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
                   `}
                 >
                   <SelectValue placeholder="Seleccionar tipo de descanso médico" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent>
+              <SelectContent className="bg-gray-400">
                 {tipoDescansos.map((td) => (
                   <SelectItem
                     key={td.id}
@@ -346,7 +375,11 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
         render={({ field, fieldState }) => (
           <FormItem>
             <RequiredLabel>Tipo de Contingencia</RequiredLabel>
-            <Select onValueChange={field.onChange} value={field.value ?? ""}>
+            <Select
+              onValueChange={field.onChange}
+              value={field.value ?? ""}
+              disabled={isModeLetter}
+            >
               <FormControl>
                 <SelectTrigger
                   className={`
@@ -355,13 +388,13 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                         ? "border-red-500 focus:ring-red-500"
                         : "focus:ring-blue-500"
                     }
-                      focus:ring-2 focus:ring-offset-2 transition-all duration-300
+                      focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
                   `}
                 >
                   <SelectValue placeholder="Seleccionar tipo de contingencia" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent>
+              <SelectContent className="bg-gray-400">
                 {tipoContingencias.map((tc) => (
                   <SelectItem
                     key={tc.id}
@@ -379,7 +412,12 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
       />
 
       {documentosTipoContingencia.length > 0 && (
-        <Documentos documentos={documentosTipoContingencia} form={form} />
+        <Documentos
+          documentos={documentosTipoContingencia}
+          form={form}
+          adjuntosExistentes={adjuntos}
+          isModeLetter={isModeLetter}
+        />
       )}
 
       <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -393,6 +431,7 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                 <Input
                   type="date"
                   value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                  disabled={isModeLetter}
                   onChange={(e) =>
                     field.onChange(
                       e.target.value ? parseISO(e.target.value) : null
@@ -408,11 +447,11 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                   `}
                 />
               </FormControl>
-              <FormDescription>
+              {/* <FormDescription>
                 {field.value
                   ? format(field.value, "PPP")
                   : "Seleccione una fecha"}
-              </FormDescription>
+              </FormDescription> */}
               <FormMessage />
             </FormItem>
           )}
@@ -428,6 +467,7 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                 <Input
                   type="date"
                   value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                  disabled={isModeLetter}
                   onChange={(e) =>
                     field.onChange(
                       e.target.value ? parseISO(e.target.value) : null
@@ -443,11 +483,11 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                   `}
                 />
               </FormControl>
-              <FormDescription>
+              {/* <FormDescription>
                 {field.value
                   ? format(field.value, "PPP")
                   : "Seleccione una fecha"}
-              </FormDescription>
+              </FormDescription> */}
               <FormMessage />
             </FormItem>
           )}
@@ -463,6 +503,7 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                 <Input
                   type="date"
                   value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                  disabled={isModeLetter}
                   onChange={(e) =>
                     field.onChange(
                       e.target.value ? parseISO(e.target.value) : null
@@ -478,11 +519,11 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                   `}
                 />
               </FormControl>
-              <FormDescription>
+              {/* <FormDescription>
                 {field.value
                   ? format(field.value, "PPP")
                   : "Seleccione una fecha"}
-              </FormDescription>
+              </FormDescription> */}
               <FormMessage />
             </FormItem>
           )}
@@ -498,6 +539,7 @@ export const DescansoMedicoDetalle = ({ form }: DescansoMedicoDetalleProps) => {
                 <Input
                   readOnly
                   value={totalDias !== null ? totalDias.toString() : ""}
+                  disabled={isModeLetter}
                   className={`
                     ${
                       fieldState.invalid

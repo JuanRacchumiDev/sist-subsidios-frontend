@@ -46,7 +46,7 @@ export const getAllWithPaginate = async (page: number, limit: number) => {
 export const getAllByColaboradorPaginate = async (idColaborador: string, page: number, limit: number) => {
     try {
         const urlApi = `${'/descansos/colaborador/paginate?idColaborador='}${idColaborador}${'&page='}${page}${'&limit='}${limit}`
-        console.log('urlApi getAllByColaboradorPaginate', urlApi)
+        // console.log('urlApi getAllByColaboradorPaginate', urlApi)
         const response = await apiClient.get(urlApi)
         const { data: dataDescansos } = response
 
@@ -89,16 +89,14 @@ export const getById = async (id: string): Promise<DescansoMedicoResponse> => {
 export const create = async (payload: DescansoMedico): Promise<DescansoMedicoResponse> => {
     try {
         // Obteniendo el código temporal del usuario autenticado
-        const auth = localStorage.getItem("auth") || null
+        const codigo_temp = localStorage.getItem("codigo_temp") || null
+        console.log('localStorage codigo_temp', codigo_temp)
 
-        if (auth) {
-
-            const authJson = JSON.parse(auth)
-
-            const { codigo_temp } = authJson
-
+        if (codigo_temp) {
             payload.codigo_temp = codigo_temp
         }
+
+        // console.log('payload new descanso médico', payload)
 
         const response = await apiClient.post('/descansos', payload)
 

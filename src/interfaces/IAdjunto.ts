@@ -5,7 +5,7 @@ import { DescansoMedico } from "./IDescansoMedico"
 import { Reembolso } from "./IReembolso"
 import { TipoAdjunto } from "./ITipoAdjunto"
 import { TrabajadorSocial } from "./ITrabajadorSocial"
-import { DocumentoContingencia } from "./IDocumentoTipoContingencia"
+import { DocumentoTipoContingencia } from "./IDocumentoTipoContingencia"
 
 export interface Adjunto {
     id?: string
@@ -31,7 +31,7 @@ export interface Adjunto {
     reembolso?: Reembolso
     colaborador?: Colaborador
     trabajadorSocial?: TrabajadorSocial
-    documento?: DocumentoContingencia
+    documentoTipoContingencia?: DocumentoTipoContingencia
 }
 
 export interface AdjuntoResponse {

@@ -139,8 +139,8 @@ export const EmpresaForm = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      console.log({ values });
-      console.log({ idRepresentante });
+      // console.log({ values });
+      // console.log({ idRepresentante });
 
       let messageError: string = "";
 
@@ -301,7 +301,7 @@ export const EmpresaForm = () => {
                 ospe,
               };
 
-              console.log({ dataForm });
+              // console.log({ dataForm });
 
               form.reset(dataForm);
             }
@@ -326,12 +326,12 @@ export const EmpresaForm = () => {
       <Card className="shadow-lg border-gray-200">
         <CardHeader className="border-b border-gray-200">
           <CardTitle className="text-xl font-bold text-gray-800">
-            Información de empresa
+            {isEditMode ? "Actualización de empresa" : "Registro de empresa"}
           </CardTitle>
           <CardDescription className="text-sm text-gray-500">
             {isEditMode
-              ? "Actualice los datos de la empresa"
-              : "Ingrese los datos de la empresa"}
+              ? "Formulario de actualización de empresa"
+              : "Complete el formulario para registrar nueva empresa"}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
@@ -402,13 +402,13 @@ export const EmpresaForm = () => {
                             }}
                             disabled={isEditMode}
                             className={`
-                          ${
-                            fieldState.invalid
-                              ? "border-red-500 focus:ring-red-500"
-                              : "focus:ring-blue-500"
-                          }
-                            transition-all duration-300
-                          `}
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -497,18 +497,18 @@ export const EmpresaForm = () => {
                                     ? "border-red-500 focus:ring-red-500"
                                     : "focus:ring-blue-500"
                                 }
-                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300
+                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
                               `}
                             >
                               <SelectValue placeholder="Seleccionar tipo de documento" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent className="bg-gray-400">
                             {tipos.map((tipo) => (
                               <SelectItem
                                 value={tipo.id}
                                 key={tipo.id}
-                                className="cursor-pointer hover:bg-blue-100 transition-colors"
+                                className="cursor-pointer hover:bg-gray-100 transition-colors"
                               >
                                 {tipo.abreviatura}
                               </SelectItem>
@@ -753,18 +753,18 @@ export const EmpresaForm = () => {
                                     ? "border-red-500 focus:ring-red-500"
                                     : "focus:ring-blue-500"
                                 }
-                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300
+                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
                               `}
                             >
                               <SelectValue placeholder="Seleccionar cargo" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent className="bg-gray-400">
                             {cargos.map((cargo) => (
                               <SelectItem
                                 key={cargo.id}
                                 value={cargo.id}
-                                className="cursor-pointer hover:bg-blue-100 transition-colors"
+                                className="cursor-pointer hover:bg-gray-100 transition-colors"
                               >
                                 {cargo.nombre}
                               </SelectItem>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { DocumentoTipoContingencia } from "../../interfaces/IDocumentoTipoContingencia";
 import { Adjunto } from "../../interfaces/IAdjunto";
 import { UseFormReturn } from "react-hook-form";
@@ -20,10 +20,26 @@ import { responseViewFile } from "../../types/TFile";
 interface DocumentosRequeridosProps {
   documentos: DocumentoTipoContingencia[];
   form: UseFormReturn<z.infer<typeof formSchema>>;
+  adjuntosExistentes?: Adjunto[];
+  isModeLetter?: boolean;
 }
 
-export const Documentos = ({ documentos, form }: DocumentosRequeridosProps) => {
+export const Documentos = ({
+  documentos,
+  form,
+  adjuntosExistentes = [],
+  isModeLetter = false,
+}: DocumentosRequeridosProps) => {
   const { showToast } = useToast();
+
+  useEffect(() => {
+    adjuntosExistentes.forEach((adjunto) => {
+      // Usamos `id_documento` para mapear el adjunto con el documento requerido
+      if (adjunto.id_documento) {
+        form.setValue(`documentos.${adjunto.id_documento}`, adjunto.id);
+      }
+    });
+  }, [adjuntosExistentes, form]);
 
   const handleViewDocument = async (id: string) => {
     try {
@@ -80,50 +96,88 @@ export const Documentos = ({ documentos, form }: DocumentosRequeridosProps) => {
       <h3 className="font-semibold text-lg col-span-full">
         Documentos Requeridos
       </h3>
-      {documentos.map((doc) => (
-        <FormField
-          key={doc.id}
-          control={form.control}
-          name={`documentos.${doc.id}`}
-          render={() => {
-            const uploadedFileId = form.watch(`documentos.${doc.id}`);
-            return (
-              <FormItem>
-                <RequiredLabel>{doc.nombre}</RequiredLabel>
-                <FormControl>
-                  <div className="flex items-center gap-2">
-                    <label
-                      htmlFor={`file-input-${doc.id}`}
-                      className="flex items-center justify-center p-2 border rounded-md cursor-pointer hover:bg-gray-100 transition-colors duration-200"
-                    >
-                      <Upload className="mr-2 h-4 w-4" />
-                      {uploadedFileId ? "Cambiar Documento" : "Subir Documento"}
-                    </label>
-                    <input
-                      id={`file-input-${doc.id}`}
-                      type="file"
-                      accept=".pdf"
-                      className="hidden"
-                      onChange={(e) => handleFileChange(e, doc.id)}
-                    />
-                    {uploadedFileId && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleViewDocument(uploadedFileId)}
+      {documentos.map((doc) => {
+        const uploadedFileId = form.watch(`documentos.${doc.id}`);
+        // Determina si existe un adjunto en los datos pasados por props
+        const existingAdjunto = adjuntosExistentes.find(
+          (adj) => adj.id_documento === doc.id
+        );
+        const fileIdToUse = uploadedFileId || existingAdjunto?.id || null;
+
+        return (
+          <FormField
+            key={doc.id}
+            control={form.control}
+            name={`documentos.${doc.id}`}
+            render={() => {
+              // const uploadedFileId = form.watch(`documentos.${doc.id}`);
+              return (
+                <FormItem>
+                  <RequiredLabel>{doc.nombre}</RequiredLabel>
+                  <FormControl>
+                    <div className="flex items-center gap-2">
+                      <label
+                        htmlFor={`file-input-${doc.id}`}
+                        className={`
+                        flex
+                        items-center
+                        justify-center
+                        p-2
+                        border
+                        rounded-md
+                        transition-colors
+                        duration-200
+                        ${
+                          isModeLetter
+                            ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                            : "cursor-pointer hover:bg-gray-100"
+                        }
+                      `}
                       >
-                        <Eye className="h-4 w-4 cursor-pointer hover:bg-blue-100" />
-                      </Button>
-                    )}
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
-        />
-      ))}
+                        <Upload className="mr-2 h-4 w-4" />
+                        {fileIdToUse ? "Cambiar Documento" : "Subir Documento"}
+                        {/* {uploadedFileId
+                          ? "Cambiar Documento"
+                          : "Subir Documento"} */}
+                      </label>
+                      <input
+                        id={`file-input-${doc.id}`}
+                        type="file"
+                        accept=".pdf"
+                        className="hidden"
+                        onChange={(e) => handleFileChange(e, doc.id)}
+                        disabled={isModeLetter}
+                      />
+                      {fileIdToUse && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="cursor-pointer hover:bg-gray-300"
+                          size="icon"
+                          onClick={() => handleViewDocument(fileIdToUse)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {/* {uploadedFileId && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleViewDocument(uploadedFileId)}
+                        >
+                          <Eye className="h-4 w-4 cursor-pointer hover:bg-blue-100" />
+                        </Button>
+                      )} */}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
+        );
+      })}
     </div>
   );
 };

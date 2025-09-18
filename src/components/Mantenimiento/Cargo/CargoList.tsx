@@ -4,7 +4,7 @@ import { CargoTable } from "./CargoTable";
 
 export const CargoList = () => {
   return (
-    <div className="p-6 space-y-6">
+    <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Listado de Cargos</h1>
         <div className="flex space-x-3">

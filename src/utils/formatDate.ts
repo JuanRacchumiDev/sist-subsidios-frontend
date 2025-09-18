@@ -1,12 +1,10 @@
-import { formatInTimeZone } from 'date-fns-tz'
+// import { formatInTimeZone } from 'date-fns-tz'
+// import { TIMEZONE_AMERICA_LIMA } from '../params/constants'
 
-export const formatDateToString = (date: Date, formatString: string = 'yyyy-MM-dd'): string => {
-    // Especifica la zona horaria para Lima, Peru
-    const limaTimeZone = 'America/Lima';
+// export const formatDateToString = (date: Date, formatString: string = 'yyyy-MM-dd'): string => {
+//     // Convierte la fecha a la zona Lima
+//     const zonedDate = formatInTimeZone(date, TIMEZONE_AMERICA_LIMA, formatString);
 
-    // Convierte la fecha a la zona Lima
-    const zonedDate = formatInTimeZone(date, limaTimeZone, formatString);
-
-    // Formateo de fecha
-    return zonedDate
-};
+//     // Formateo de fecha
+//     return zonedDate
+// };

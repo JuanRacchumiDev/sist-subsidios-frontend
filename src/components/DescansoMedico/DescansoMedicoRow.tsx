@@ -13,6 +13,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import HDate from "../../helpers/HDate";
+import BadgeEstado from "../Common/BadgeEstado";
+import { EDescansoMedico } from "@/enums/EDescansoMedico";
 // import { formatDate } from "date-fns";
 
 interface Props {
@@ -32,16 +34,19 @@ export const DescansoMedicoRow: React.FC<Props> = ({ desc }) => {
       key={desc.id}
       className="hover:bg-blue-100 hover:cursor-pointer transition-colors duration-200"
     >
-      <TableCell className="py-3">{desc.codigo}</TableCell>
+      {/* <TableCell className="py-3">{desc.codigo}</TableCell> */}
       <TableCell className="py-3">{colaborador}</TableCell>
       <TableCell className="py-3">
-        {HDate.formatDateLocal(desc.fecha_inicio)}
+        {HDate.formatDateTimezone(desc.fecha_inicio, "dd/MM/yyyy")}
       </TableCell>
       <TableCell className="py-3">
-        {HDate.formatDateLocal(desc.fecha_final)}
+        {HDate.formatDateTimezone(desc.fecha_final, "dd/MM/yyyy")}
       </TableCell>
       <TableCell className="py-3">{desc.total_dias}</TableCell>
-      <TableCell className="py-3">{desc.estado_registro}</TableCell>
+      <TableCell className="py-3">{desc.mes_devengado}</TableCell>
+      <TableCell className="py-3">
+        <BadgeEstado estado={desc.estado_registro as EDescansoMedico} />
+      </TableCell>
       <TableCell className="py-3">
         <DropdownMenu>
           <DropdownMenuTrigger

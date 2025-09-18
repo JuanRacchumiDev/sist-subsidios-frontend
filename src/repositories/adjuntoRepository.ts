@@ -110,14 +110,9 @@ export const upload = async (formData: FormData): Promise<AdjuntoResponse> => {
         formData.append("id_tipoadjunto", idTipoAdjunto)
 
         // Obteniendo el código temporal del usuario autenticado
-        const auth = localStorage.getItem("auth") || null
+        const codigo_temp = localStorage.getItem("codigo_temp") || null
 
-        if (auth) {
-
-            const authJson = JSON.parse(auth)
-
-            const { codigo_temp } = authJson
-
+        if (codigo_temp) {
             formData.append("codigo_temp", codigo_temp)
         }
 
@@ -128,6 +123,7 @@ export const upload = async (formData: FormData): Promise<AdjuntoResponse> => {
         })
 
         const { data: { result, data, message, error, status } } = response
+
         return {
             result,
             data,

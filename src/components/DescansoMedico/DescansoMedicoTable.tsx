@@ -67,7 +67,7 @@ export const DescansoMedicoTable = () => {
           response = await getDescansosWithPaginate(currentPage, limit);
         }
 
-        console.log("response list descansos médicos", response);
+        // console.log("response list descansos médicos", response);
 
         // const response = await getDescansosWithPaginate(currentPage, limit);
 
@@ -153,9 +153,9 @@ export const DescansoMedicoTable = () => {
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-100">
-              <TableHead className="text-gray-600 font-medium">
+              {/* <TableHead className="text-gray-600 font-medium">
                 Código
-              </TableHead>
+              </TableHead> */}
               <TableHead className="text-gray-600 font-medium">
                 Colaborador
               </TableHead>
@@ -167,6 +167,9 @@ export const DescansoMedicoTable = () => {
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
                 Total días
+              </TableHead>
+              <TableHead className="text-gray-600 font-medium">
+                Mes devengado
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
                 Estado

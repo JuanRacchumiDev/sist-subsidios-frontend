@@ -10,6 +10,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "../../components/ui/command";
 import { Button } from "../../components/ui/button";
 import { Check, ChevronsUpDown } from "lucide-react";
@@ -25,6 +26,7 @@ interface SearchableComboboxProps<T extends { [key: string]: any }> {
   onChange: (value: string) => void;
   displayKey: keyof T;
   valueKey: keyof T;
+  searchKeys: (keyof T)[];
   disabled?: boolean;
 }
 
@@ -36,6 +38,7 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
   onChange,
   displayKey,
   valueKey,
+  searchKeys,
   disabled,
 }: SearchableComboboxProps<T>) => {
   const [open, setOpen] = useState(false);
@@ -58,7 +61,7 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
               variant="outline"
               role="combobox"
               className={cn(
-                "w-full justify-between overflow-hidden text-ellipsis whitespace-nowrap",
+                "w-full justify-between overflow-hidden text-ellipsis whitespace-nowrap cursor-pointer",
                 !value && "text-muted-foreground"
               )}
               disabled={disabled}
@@ -73,47 +76,71 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
             <CommandInput
               placeholder={`Buscar ${label ? label.toLowerCase() : ""}...`}
             />
-            <CommandEmpty>
-              No se encontró {label ? label.toLowerCase() : ""}
-            </CommandEmpty>
-            <CommandGroup className="max-h-[300px] overflow-y-auto">
-              {Array.isArray(options) &&
-                options.map((option) => (
-                  <CommandItem
-                    key={option[valueKey] as string}
-                    value={option[displayKey] as string}
-                    onSelect={(currentValue) => {
-                      const selectedItem = options.find(
-                        (item) =>
-                          (item[displayKey] as string).toLowerCase() ===
-                          currentValue.toLowerCase()
-                      );
+            <CommandList className="max-h-[300px] overflow-y-auto">
+              <CommandEmpty>
+                No se encontró {label ? label.toLowerCase() : ""}
+              </CommandEmpty>
+              <CommandGroup className="max-h-[300px] overflow-y-auto bg-gray-400">
+                {Array.isArray(options) &&
+                  options.map((option) => {
+                    // Generar un valor de búsqueda que combine los campos especificados en `searchKeys`
+                    const searchValue = searchKeys
+                      .map((key) => option[key])
+                      .join(" ")
+                      .toLowerCase();
 
-                      const selectedItemValue = selectedItem?.[
-                        valueKey
-                      ] as string;
+                    return (
+                      <CommandItem
+                        key={option[valueKey] as string}
+                        value={searchValue}
+                        onSelect={() => {
+                          onChange(option[valueKey] as string);
+                          setOpen(false);
+                        }}
+                        // onSelect={(currentValue) => {
+                        //   const selectedItem = options.find(
+                        //     (item) =>
+                        //       (item[displayKey] as string).toLowerCase() ===
+                        //       currentValue.toLowerCase()
+                        //   );
 
-                      onChange(
-                        selectedItemValue === value ? "" : selectedItemValue
-                      );
+                        //   const selectedItemValue = selectedItem?.[
+                        //     valueKey
+                        //   ] as string;
 
-                      setOpen(false);
-                    }}
-                    className="cursor-pointer px-3 py-2 text-sm transition-colors duration-150 ease-in-out
-                      hover:bg-blue-100 dark:hover:bg-blue-900
-                      data-[state=checked]:bg-blue-50 dark:data-[state=checked]:bg-blue-950
-                      data-[state=checked]:font-semibold data-[state=checked]:text-blue-600 dark:data-[state=checked]:text-blue-300"
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        value === option[valueKey] ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    {option[displayKey] as string}
-                  </CommandItem>
-                ))}
-            </CommandGroup>
+                        //   onChange(
+                        //     selectedItemValue === value ? "" : selectedItemValue
+                        //   );
+
+                        //   setOpen(false);
+                        // }}
+                        className="
+                          cursor-pointer
+                          px-3
+                          py-2
+                          text-sm
+                          transition-colors
+                          duration-150
+                          ease-in-out
+                        hover:bg-gray-100
+                        data-[state=checked]:bg-blue-50
+                          data-[state=checked]:font-semibold 
+                        data-[state=checked]:text-blue-600"
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            value === option[valueKey]
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                        {option[displayKey] as string}
+                      </CommandItem>
+                    );
+                  })}
+              </CommandGroup>
+            </CommandList>
           </Command>
         </PopoverContent>
       </Popover>

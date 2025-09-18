@@ -12,12 +12,18 @@ import * as z from "zod";
 import { formSchema } from "../DescansoMedicoForm";
 import { getDiagnosticos } from "../../../services/diagnosticoService";
 import { Diagnostico } from "../../../interfaces/IDiagnostico";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useToast } from "../../../context/ToastContext";
 import SearchableCombobox from "../../../components/Common/SearchableCombobox";
 
 interface DatosMedicosProps {
   form: UseFormReturn<z.infer<typeof formSchema>>;
+  isModeLetter?: boolean;
+}
+
+// Interfaz para el diagnóstico formateado
+interface DiagnosticoConFormato extends Diagnostico {
+  display: string;
 }
 
 const dataDiagnosticos = async () => {
@@ -30,13 +36,16 @@ const dataDiagnosticos = async () => {
   return diagnosticos;
 };
 
-export const DatosMedicos = ({ form }: DatosMedicosProps) => {
+export const DatosMedicos = ({
+  form,
+  isModeLetter = false,
+}: DatosMedicosProps) => {
   const { showToast } = useToast();
 
   const [dxs, setDxs] = useState<Diagnostico[]>([]);
 
   // Id del diagnóstico seleccionado
-  const selectedDiagnosticoId = form.watch("idDiagnostico");
+  // const selectedDiagnosticoId = form.watch("idDiagnostico");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,6 +61,19 @@ export const DatosMedicos = ({ form }: DatosMedicosProps) => {
 
     fetchData();
   }, []);
+
+  const formattedDxs: DiagnosticoConFormato[] = useMemo(() => {
+    return dxs.map((dx) => ({
+      ...dx,
+      display: `${dx.codCie10} - ${dx.nombre}`,
+    }));
+  }, [dxs]);
+
+  // Id del diagnóstico seleccionado
+  const selectedDiagnosticoId = form.watch("idDiagnostico");
+  const selectedDiagnostico = formattedDxs.find(
+    (dx) => dx.codCie10 === selectedDiagnosticoId
+  );
 
   return (
     <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -75,6 +97,7 @@ export const DatosMedicos = ({ form }: DatosMedicosProps) => {
                   }
                     transition-all duration-300
                 `}
+                disabled={isModeLetter}
               />
             </FormControl>
             <FormMessage />
@@ -102,6 +125,7 @@ export const DatosMedicos = ({ form }: DatosMedicosProps) => {
                   }
                     transition-all duration-300
                 `}
+                disabled={isModeLetter}
               />
             </FormControl>
             <FormMessage />
@@ -113,27 +137,28 @@ export const DatosMedicos = ({ form }: DatosMedicosProps) => {
         control={form.control}
         name="idDiagnostico"
         render={({ field, fieldState }) => {
-          const selectedDiagnostico = dxs.find(
-            (dx) => dx.codCie10 === field.value
-          );
+          // const selectedDiagnostico = dxs.find(
+          //   (dx) => dx.codCie10 === field.value
+          // );
 
           return (
             <FormItem className="flex flex-col">
               <RequiredLabel>Diagnóstico</RequiredLabel>
-              <SearchableCombobox<Diagnostico>
+              <SearchableCombobox<DiagnosticoConFormato>
                 placeholder="Buscar un diagnóstico"
-                options={dxs}
+                options={formattedDxs}
                 value={field.value}
                 onChange={field.onChange}
-                displayKey="nombre"
+                displayKey="display"
                 valueKey="codCie10"
-                // isInvalid={fieldState.invalid}
+                searchKeys={["codCie10", "nombre"]}
+                disabled={isModeLetter}
               />
-              {selectedDiagnostico && (
+              {/* {selectedDiagnostico && (
                 <FormDescription>
                   Diagnóstico seleccionado: <b>{selectedDiagnostico.nombre}</b>
                 </FormDescription>
-              )}
+              )} */}
               <FormMessage />
             </FormItem>
           );
@@ -152,7 +177,15 @@ export const DatosMedicos = ({ form }: DatosMedicosProps) => {
                 autoComplete="off"
                 maxLength={100}
                 {...field}
-                className={fieldState.invalid ? "border-red-500" : ""}
+                className={`
+                  ${
+                    fieldState.invalid
+                      ? "border-red-500 focus:ring-red-500"
+                      : "focus:ring-blue-500"
+                  }
+                    transition-all duration-300
+                `}
+                disabled={isModeLetter}
               />
             </FormControl>
             <FormMessage />

@@ -136,6 +136,8 @@ export const ColaboradorForm = () => {
   const [camposHabilitadosPersona, setCamposHabilitadosPersona] =
     useState(false);
 
+  const isEditMode = !!id;
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -326,10 +328,14 @@ export const ColaboradorForm = () => {
       <Card className="shadow-lg border-gray-200">
         <CardHeader className="border-b border-gray-200">
           <CardTitle className="text-xl font-bold text-gray-800">
-            Información Personal y Laboral
+            {isEditMode
+              ? "Actualización de colaborador"
+              : "Registro de colaborador"}
           </CardTitle>
           <CardDescription className="text-sm text-gray-500">
-            Ingrese los datos del colaborador
+            {isEditMode
+              ? "Formulario de actualización de colaborador"
+              : "Complete el formulario para registrar un colaborador"}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
@@ -358,18 +364,18 @@ export const ColaboradorForm = () => {
                                     ? "border-red-500 focus:ring-red-500"
                                     : "focus:ring-blue-500"
                                 }
-                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300
+                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
                               `}
                             >
                               <SelectValue placeholder="Seleccionar tipo de documento" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent className="bg-gray-400">
                             {tipos.map((tipo) => (
                               <SelectItem
                                 value={tipo.id}
                                 key={tipo.id}
-                                className="cursor-pointer hover:bg-blue-100 transition-colors"
+                                className="cursor-pointer hover:bg-gray-100 transition-colors"
                               >
                                 {tipo.abreviatura}
                               </SelectItem>
@@ -618,18 +624,18 @@ export const ColaboradorForm = () => {
                                     ? "border-red-500 focus:ring-red-500"
                                     : "focus:ring-blue-500"
                                 }
-                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300
+                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
                               `}
                             >
                               <SelectValue placeholder="Seleccionar empresa" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent className="bg-gray-400">
                             {empresas.map((empresa) => (
                               <SelectItem
                                 value={empresa.id}
                                 key={empresa.id}
-                                className="cursor-pointer hover:bg-blue-100 transition-colors"
+                                className="cursor-pointer hover:bg-gray-100 transition-colors"
                               >
                                 {empresa.nombre_o_razon_social}
                               </SelectItem>
@@ -659,18 +665,18 @@ export const ColaboradorForm = () => {
                                     ? "border-red-500 focus:ring-red-500"
                                     : "focus:ring-blue-500"
                                 }
-                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300
+                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
                               `}
                             >
                               <SelectValue placeholder="Seleccionar cargo" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent className="bg-gray-400">
                             {cargos.map((cargo) => (
                               <SelectItem
                                 value={cargo.id}
                                 key={cargo.id}
-                                className="cursor-pointer hover:bg-blue-100 transition-colors"
+                                className="cursor-pointer hover:bg-gray-100 transition-colors"
                               >
                                 {cargo.nombre}
                               </SelectItem>
@@ -914,8 +920,10 @@ export const ColaboradorForm = () => {
                   {isSubmitting ? (
                     <>
                       <Spinner className="mr-2 h-4 w-4 animate-spin" />
-                      Registrando...
+                      {isEditMode ? "Actualizando..." : "Registrando..."}
                     </>
+                  ) : isEditMode ? (
+                    "Actualizar"
                   ) : (
                     "Registrar"
                   )}

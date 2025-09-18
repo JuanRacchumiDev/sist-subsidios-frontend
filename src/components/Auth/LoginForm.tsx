@@ -67,10 +67,7 @@ export const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
   return (
     <form onSubmit={handleLogin} className="space-y-4">
       <div>
-        <label
-          htmlFor="email"
-          className="text-sm font-medium text-slate-700 dark:text-slate-300"
-        >
+        <label htmlFor="email" className="text-sm font-medium text-slate-700">
           Email
         </label>
         <input
@@ -78,7 +75,7 @@ export const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
           id="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 w-full p-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          className="mt-1 w-full p-3 border border-slate-300 rounded-xl bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           placeholder="you@example.com"
           autoComplete="off"
           required
@@ -87,7 +84,7 @@ export const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
       <div>
         <label
           htmlFor="password"
-          className="text-sm font-medium text-slate-700 dark:text-slate-300"
+          className="text-sm font-medium text-slate-700"
         >
           Password
         </label>
@@ -97,7 +94,7 @@ export const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 pr-10 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            className="w-full p-3 pr-10 border border-slate-300 rounded-xl bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             placeholder="••••••••"
             autoComplete="off"
             required
@@ -105,7 +102,7 @@ export const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 dark:text-slate-400"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? (
@@ -120,7 +117,7 @@ export const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
         <div className="text-sm">
           <a
             href="#"
-            className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+            className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
           >
             ¿Olvidaste te contraseña?
           </a>

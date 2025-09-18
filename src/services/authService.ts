@@ -1,4 +1,8 @@
-import { login, logout } from '../repositories/authRepository'
+import {
+    login,
+    logout,
+    createCodigoTemp
+} from '../repositories/authRepository'
 
 export const loginAuth = async (email: string, password: string) => {
     const response = await login(email, password)
@@ -10,6 +14,14 @@ export const loginAuth = async (email: string, password: string) => {
 
 export const logoutAuth = async (id: string) => {
     const response = await logout(id)
+
+    return {
+        ...response
+    }
+}
+
+export const createCodigoTempAuth = async () => {
+    const response = await createCodigoTemp()
 
     return {
         ...response

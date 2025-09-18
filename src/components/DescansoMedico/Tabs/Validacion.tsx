@@ -23,54 +23,104 @@ import { useParams } from "react-router-dom";
 
 interface ValidacionProps {
   form: UseFormReturn<z.infer<typeof formSchema>>;
+  isModeLetter?: boolean;
 }
 
-export const Validacion = ({ form }: ValidacionProps) => {
+export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
   const { id } = useParams<{ id: string }>();
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
   const isEditMode = !!id;
+
+  const estadoRegistro = form.watch("estadoRegistro");
 
   const { estadosPermitidos, isDisabled } = useMemo(() => {
     const estadosPermitidos: EDescansoMedico[] = [];
     let isDisabled = false;
 
-    // Lógica con usuarios con perfil id_colaborador
-    if (userProfile?.id_colaborador) {
+    // Lógica para el perfil "especialista"
+    if (userProfile?.slug_perfil === "especialista") {
       if (isEditMode) {
-        // En modo edición, el colaborador solo puede ver el estado actual, no cambiarlo.
+        console.log("aa");
+        // En modo edición, el especialista puede cambiar el estado, pero ciertos campos pueden estar deshabilitados.
+        // Aquí no hay campos deshabilitados explícitamente, pero podrías agregar esa lógica.
+        // Muestra todos los estados excepto "Registro exitoso"
+        Object.values(EDescansoMedico).forEach((estado) => {
+          if (estado !== EDescansoMedico.REGISTRO_INGRESADO) {
+            estadosPermitidos.push(estado);
+          }
+        });
+        isDisabled = false; // El especialista tiene permiso para editar
+      } else {
+        console.log("bb");
+        // En nuevo registro, el especialista también podría tener permisos para editar
+        Object.values(EDescansoMedico).forEach((estado) => {
+          if (estado !== EDescansoMedico.REGISTRO_EXITOSO) {
+            estadosPermitidos.push(estado);
+          }
+        });
+        isDisabled = false;
+      }
+    } else if (userProfile?.slug_perfil === "colaborador") {
+      // Lógica para el perfil "colaborador"
+      if (isEditMode) {
+        // En modo edición, el colaborador solo puede ver, no cambiar el estado.
         estadosPermitidos.push(
           form.getValues("estadoRegistro") as EDescansoMedico
         );
         isDisabled = true;
       } else {
-        // En nuevo registro, el estado por defecto es "Registro ingresado" y está deshabilitado.
+        // En nuevo registro, el estado por defecto es "Registro ingresado"
         estadosPermitidos.push(EDescansoMedico.REGISTRO_INGRESADO);
         isDisabled = true;
       }
-    } else {
-      // Lógica para id_especialista o id_administrador
-      // Se muestran todos los estados excepto "Registro exitoso"
+    } else if (userProfile?.slug_perfil === "administrador") {
+      // Lógica para el perfil "administrador"
       Object.values(EDescansoMedico).forEach((estado) => {
         if (estado !== EDescansoMedico.REGISTRO_EXITOSO) {
           estadosPermitidos.push(estado);
         }
       });
+      isDisabled = false; // El administrador tiene permiso para editar
     }
+
+    // Lógica con usuarios con perfil id_colaborador
+
+    // if (userProfile?.id_colaborador) {
+    //   if (isEditMode) {
+    //     // En modo edición, el colaborador solo puede ver el estado actual, no cambiarlo.
+    //     estadosPermitidos.push(
+    //       form.getValues("estadoRegistro") as EDescansoMedico
+    //     );
+    //     isDisabled = true;
+    //   } else {
+    //     // En nuevo registro, el estado por defecto es "Registro ingresado" y está deshabilitado.
+    //     estadosPermitidos.push(EDescansoMedico.REGISTRO_INGRESADO);
+    //     isDisabled = true;
+    //   }
+    // } else {
+    //   // Lógica para id_especialista o id_administrador
+    //   // Se muestran todos los estados excepto "Registro exitoso"
+    //   Object.values(EDescansoMedico).forEach((estado) => {
+    //     if (estado !== EDescansoMedico.REGISTRO_EXITOSO) {
+    //       estadosPermitidos.push(estado);
+    //     }
+    //   });
+    // }
 
     return { estadosPermitidos, isDisabled };
   }, [userProfile, isEditMode, form]);
 
   useEffect(() => {
-    // Si el estado es "Documentación incorrecta", se establece la observación por defecto
-    // Se elimina la dependencia de MENSAJES_OBSERVACION
     if (
-      form.watch("estadoRegistro") ===
-        EDescansoMedico.DOCUMENTACION_INCORRECTA &&
+      estadoRegistro === EDescansoMedico.DOCUMENTACION_INCORRECTA &&
       !form.getValues("observacion")
     ) {
       form.setValue("observacion", "Pendiente adjuntar documentación.");
     }
-  }, [form.watch("estadoRegistro"), form]);
+  }, [estadoRegistro, form]);
+
+  const showObservacion =
+    estadoRegistro === EDescansoMedico.DOCUMENTACION_INCORRECTA;
 
   return (
     <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -80,11 +130,7 @@ export const Validacion = ({ form }: ValidacionProps) => {
         render={({ field, fieldState }) => (
           <FormItem>
             <RequiredLabel>Estado del registro</RequiredLabel>
-            <Select
-              onValueChange={field.onChange}
-              value={field.value ?? ""}
-              disabled={isDisabled}
-            >
+            <Select onValueChange={field.onChange} value={field.value ?? ""}>
               <FormControl>
                 <SelectTrigger
                   className={`
@@ -93,13 +139,13 @@ export const Validacion = ({ form }: ValidacionProps) => {
                         ? "border-red-500 focus:ring-red-500"
                         : "focus:ring-blue-500"
                     }
-                      focus:ring-2 focus:ring-offset-2 transition-all duration-300
+                      focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
                   `}
                 >
                   <SelectValue placeholder="Seleccionar estado" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent>
+              <SelectContent className="bg-gray-400">
                 {estadosPermitidos.map((estado) => (
                   <SelectItem
                     key={estado}
@@ -116,30 +162,32 @@ export const Validacion = ({ form }: ValidacionProps) => {
         )}
       />
 
-      <FormField
-        control={form.control}
-        name="observacion"
-        render={({ field, fieldState }) => (
-          <FormItem>
-            <RequiredLabel>Observación</RequiredLabel>
-            <FormControl>
-              <Textarea
-                placeholder="Detalle la documentación pendiente..."
-                {...field}
-                className={`
-                  ${
-                    fieldState.invalid
-                      ? "border-red-500 focus:ring-red-500"
-                      : "focus:ring-blue-500"
-                  }
-                  transition-all duration-300
-                `}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      {showObservacion && (
+        <FormField
+          control={form.control}
+          name="observacion"
+          render={({ field, fieldState }) => (
+            <FormItem>
+              <RequiredLabel>Observación</RequiredLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Detalle la documentación pendiente..."
+                  {...field}
+                  className={`
+                    ${
+                      fieldState.invalid
+                        ? "border-red-500 focus:ring-red-500"
+                        : "focus:ring-blue-500"
+                    }
+                    transition-all duration-300
+                  `}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
     </div>
   );
 };

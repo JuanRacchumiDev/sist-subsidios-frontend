@@ -1,4 +1,5 @@
 import { EDescansoMedico } from "../enums/EDescansoMedico"
+import { Adjunto } from "./IAdjunto"
 import { Colaborador } from "./IColaborador"
 import { Diagnostico } from "./IDiagnostico"
 import { TipoContingencia } from "./ITipoContingencia"
@@ -47,6 +48,7 @@ export interface DescansoMedico {
     tipoDescansoMedico?: TipoDescansoMedico
     tipoContingencia?: TipoContingencia
     diagnostico?: Diagnostico
+    adjuntos?: Adjunto
 }
 
 export interface DescansoMedicoResponse {

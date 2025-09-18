@@ -1,4 +1,5 @@
 import { ECanje } from "../enums/ECanje"
+import { DescansoMedico } from "./IDescansoMedico"
 
 export interface Canje {
     id?: string
@@ -24,6 +25,7 @@ export interface Canje {
     observacion?: string
     mes_devengado?: string
     estado_registro?: ECanje
+    descansoMedico?: DescansoMedico
 }
 
 export interface CanjeResponse {
