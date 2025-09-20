@@ -1,30 +1,17 @@
-import { EstadoCobro } from "../enums/EDescansoMedico";
+import { ECobro } from "../enums/ECobro";
+import { Reembolso } from "./IReembolso";
 
 export interface Cobro {
     id?: string
-    idCanje?: string
-    idReembolso?: string
-    idDescansoMedico?: string
-    idEmpresa?: string
-    idColaborador?: string
-    idTipoDescansoMedico?: string
-    idTipoContingencia?: string
-    numeroDocumento?: string
-    fechaInicioDescanso?: string
-    fechaFinalDescanso?: string
-    fechaInicioSubsidio?: string
-    fechaFinalSubsidio?: string
-    fechaMaximaCobro?: string
-    fechaCobro?: string
-    codigoVoucher?: string
-    codigoCheque?: string
-    numeroExpediente?: string
-    empresaName?: string
-    colaboradorName?: string
-    tipoDescansoMedicoName?: string
-    tipoContingenciaName?: string
+    id_reembolso?: string
+    codigo?: string
+    codigo_cheque?: string
+    codigo_voucher?: string
+    fecha_cobro?: string
+    fecha_maxima_cobro?: string
     observacion?: string
-    estadoRegistro?: EstadoCobro
+    estado_registro?: ECobro
+    reembolso?: Reembolso
 }
 
 export interface CobroResponse {
@@ -32,5 +19,22 @@ export interface CobroResponse {
     message?: string
     data?: Cobro | Cobro[]
     error?: string
+    status?: number
+}
+
+export interface Pagination {
+    currentPage: number
+    limit: number
+    totalPages: number
+    totalItems: number
+    nextPage: number | null
+    previousPage: number | null
+}
+
+export interface CobroPaginateResponse {
+    result: boolean
+    data?: Cobro[]
+    pagination?: Pagination
+    errors?: string
     status?: number
 }

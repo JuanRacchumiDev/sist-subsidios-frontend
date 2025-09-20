@@ -25,7 +25,9 @@ export const getAll = async (): Promise<ColaboradorResponse> => {
 export const getAllWithPaginate = async (page: number, limit: number) => {
     try {
         const urlApi = `${'/colaboradores/paginate?page='}${page}${'&limit='}${limit}`
+
         const response = await apiClient.get(urlApi)
+
         const { data: dataColaboradores } = response
 
         const { result, data, pagination, status } = dataColaboradores
@@ -47,8 +49,11 @@ export const getAllWithPaginate = async (page: number, limit: number) => {
 export const getById = async (id: string): Promise<ColaboradorResponse> => {
     try {
         const urlApi = `${'/colaboradores/'}${id}`
+
         const response = await apiClient.get(urlApi)
+
         const { data: { result, message, data, error, status } } = response
+
         return {
             result,
             message,

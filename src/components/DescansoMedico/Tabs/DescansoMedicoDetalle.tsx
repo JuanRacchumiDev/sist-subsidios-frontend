@@ -134,7 +134,7 @@ export const DescansoMedicoDetalle = ({
   const selectedEmpresaId = form.watch("idEmpresa");
 
   // Id del colaborador seleccionado
-  const selectedColaboradorId = form.watch("idColaborador");
+  // const selectedColaboradorId = form.watch("idColaborador");
 
   // Id del tipo de contingencia seleccionado
   const selectedTipoContingenciaId = form.watch("idTipoContingencia");
@@ -168,13 +168,37 @@ export const DescansoMedicoDetalle = ({
         setTipoContingencias(tipoContingenciasRes);
         setAdjuntos(adjuntosRes);
 
-        console.log({ userProfile });
+        // Lógica para preseleccionar la empresa y el colaborador
+        // if (userProfile?.id_empresa && userProfile?.id_colaborador) {
+        //   console.log("existe id_empresa, id_colaborador");
+        //   form.setValue("idEmpresa", userProfile.id_empresa);
+        //   // Actualiza el listado de colaboradores para la empresa seleccionada
+        //   const colaboradoresEmpresa = await dataColaboradores(
+        //     userProfile.id_empresa
+        //   );
+        //   setColaboradores(colaboradoresEmpresa);
+        //   form.setValue("idColaborador", userProfile.id_colaborador);
+        //   setIsDisabled(true);
+        // } else {
+        //   console.log("no existe id_empresa, id_colaborador");
+        //   setIsDisabled(false);
+        // }
 
-        if (userProfile?.id_empresa && userProfile?.id_colaborador) {
-          form.setValue("idEmpresa", userProfile.id_empresa);
-          form.setValue("idColaborador", userProfile.id_colaborador);
-          setIsDisabled(true); // Deshabilita los campos si hay datos de perfil
-        }
+        // console.log("userprofile in descansomedicodetalle", userProfile);
+
+        // const { id_empresa, id_colaborador } = userProfile;
+
+        // if (id_empresa && id_colaborador) {
+        //   form.setValue("idEmpresa", id_empresa);
+        //   form.setValue("idColaborador", id_colaborador);
+        //   setIsDisabled(true);
+        // }
+
+        // if (userProfile?.id_empresa && userProfile?.id_colaborador) {
+        //   form.setValue("idEmpresa", userProfile.id_empresa);
+        //   form.setValue("idColaborador", userProfile.id_colaborador);
+        //   setIsDisabled(true); // Deshabilita los campos si hay datos de perfil
+        // }
       } catch (error) {
         console.error("Error al obtener datos", error);
         showToast("error", "Error al cargar los datos del formulario.");
@@ -182,7 +206,8 @@ export const DescansoMedicoDetalle = ({
     };
 
     fetchData();
-  }, [form, showToast, userProfile]);
+  }, [form, id, userProfile]);
+  // [form, showToast, userProfile]
 
   useEffect(() => {
     if (selectedEmpresaId) {
@@ -191,10 +216,11 @@ export const DescansoMedicoDetalle = ({
           const colaboradoresRes = await dataColaboradores(selectedEmpresaId);
           setColaboradores(colaboradoresRes);
           // form.setValue("idColaborador", "");
+
           // Solo si no estamos en un perfil de usuario, reseteamos el valor
-          if (!userProfile?.id_empresa) {
-            form.setValue("idColaborador", "");
-          }
+          // if (!userProfile?.id_empresa) {
+          //   form.setValue("idColaborador", "");
+          // }
         } catch (error) {
           console.error("Error al obtener colaboradores", error);
           showToast("error", "Error al cargar los colaboradores.");
@@ -203,7 +229,8 @@ export const DescansoMedicoDetalle = ({
 
       fetchColaboradores();
     }
-  }, [selectedEmpresaId, form, showToast, userProfile]);
+  }, [selectedEmpresaId]);
+  // [selectedEmpresaId, form, showToast, userProfile]
 
   useEffect(() => {
     const fetchDocumentos = async () => {
@@ -234,7 +261,8 @@ export const DescansoMedicoDetalle = ({
       }
     };
     fetchDocumentos();
-  }, [selectedTipoContingenciaId, showToast]);
+  }, [selectedTipoContingenciaId]);
+  // [selectedTipoContingenciaId, showToast]
 
   useEffect(() => {
     if (fechaInicio && fechaFinal) {
@@ -253,6 +281,39 @@ export const DescansoMedicoDetalle = ({
     // <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <FormField
+        control={form.control}
+        name="idEmpresa"
+        render={({ field, fieldState }) => {
+          // const selectedColaborador = colaboradores.find(
+          //   (c) => c.id === field.value
+          // );
+
+          return (
+            <FormItem className="flex flex-col">
+              <RequiredLabel>Empresa</RequiredLabel>
+              <SearchableCombobox<Empresa>
+                placeholder="Buscar una empresa"
+                options={empresas}
+                value={field.value}
+                onChange={field.onChange}
+                displayKey="nombre_o_razon_social"
+                valueKey="id"
+                searchKeys={["nombre_o_razon_social"]}
+                // disabled={isModeLetter}
+              />
+              {/* {selectedColaborador && (
+                <FormDescription>
+                  Colaborador seleccionado:{" "}
+                  <b>{selectedColaborador.nombre_completo}</b>
+                </FormDescription>
+              )} */}
+              <FormMessage />
+            </FormItem>
+          );
+        }}
+      />
+
+      {/* <FormField
         control={form.control}
         name="idEmpresa"
         render={({ field, fieldState }) => (
@@ -292,7 +353,7 @@ export const DescansoMedicoDetalle = ({
             <FormMessage />
           </FormItem>
         )}
-      />
+      /> */}
 
       <FormField
         control={form.control}

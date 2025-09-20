@@ -169,9 +169,9 @@ export const DescansoMedicoForm = () => {
 
   useEffect(() => {
     const fecthDescansoMedico = async () => {
-      let idEmpresa = "";
-
       if (isEditMode && id) {
+        let idEmpresa = "";
+
         try {
           const responseDescanso = await getDescansoById(id);
           const { result, data } = responseDescanso;
@@ -193,7 +193,7 @@ export const DescansoMedicoForm = () => {
               idEmpresa = id_empresa;
             }
 
-            const payload = {
+            const dataForm = {
               // id: descanso.id || "",
               idEmpresa,
               idColaborador: descanso.id_colaborador,
@@ -218,8 +218,8 @@ export const DescansoMedicoForm = () => {
               estadoRegistro: descanso.estado_registro,
               observacion: descanso.observacion || "",
             };
-            console.log("payload data descanso médico", payload);
-            form.reset(payload);
+            console.log("dataForm descanso médico", dataForm);
+            form.reset(dataForm);
           }
         } catch (error) {
           showToast("error", "Error al cargar los datos del descanso médico.");
@@ -227,11 +227,19 @@ export const DescansoMedicoForm = () => {
         }
       } else {
         // Crea un código temporal único por cada nuevo descanso médico
-        const response = await createCodigoTempAuth();
-        console.log(
-          "response create codigo_temp in new descanso médico",
-          response
-        );
+        if (userProfile) {
+          const { id_empresa, id_colaborador } = userProfile;
+          console.log({ id_empresa });
+          console.log({ id_colaborador });
+          form.setValue("idEmpresa", id_empresa);
+          form.setValue("idColaborador", id_colaborador);
+        }
+        await createCodigoTempAuth();
+        // const response = await createCodigoTempAuth();
+        // console.log(
+        //   "response create codigo_temp in new descanso médico",
+        //   response
+        // );
       }
     };
     fecthDescansoMedico();

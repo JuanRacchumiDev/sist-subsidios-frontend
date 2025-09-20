@@ -30,13 +30,18 @@ import { Button } from "../../ui/button";
 import { RequiredLabel } from "../../Common/RequiredLabel";
 
 import { getTipoContingencias } from "../../../services/tipoContingenciaService";
-import { createDocumentoTipoCont } from "../../../services/documentoTipoContService";
+import {
+  createDocumentoTipoCont,
+  getDocumentosTipoCont,
+  updateDocumentoTipoCont,
+} from "../../../services/documentoTipoContService";
 import {
   DocumentoTipoContingencia,
   DocumentoTipoContingenciaResponse,
 } from "../../../interfaces/IDocumentoTipoContingencia";
 import { TipoContingencia } from "../../../interfaces/ITipoContingencia";
 import { Input } from "../../../components/ui/input";
+import { getDocumentoTipoContById } from "../../../services/documentoTipoContService";
 
 const formSchema = z.object({
   idTipoContingencia: z
@@ -71,6 +76,9 @@ export const DocumentoTipoContigenciaForm = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      let messageError: string = "";
+      let response: DocumentoTipoContingenciaResponse;
+
       const { idTipoContingencia, nombre } = values;
 
       const payloadDocumentoTC: DocumentoTipoContingencia = {
@@ -78,21 +86,42 @@ export const DocumentoTipoContigenciaForm = () => {
         nombre,
       };
 
-      const response = await createDocumentoTipoCont(payloadDocumentoTC);
-      const { result, message } = response as DocumentoTipoContingenciaResponse;
+      if (isEditMode && id) {
+        messageError = "Error al actualizar el documento";
+        response = await updateDocumentoTipoCont(id, payloadDocumentoTC);
+      } else {
+        messageError = "Error al registrar el documento";
+        response = await createDocumentoTipoCont(payloadDocumentoTC);
+      }
+
+      const { result, message, error } = response;
 
       if (result) {
         showToast("success", message);
         navigate("/mantenimiento/documento-tipo-contingencia");
       } else {
-        showToast(
-          "error",
-          message || "Error al registrara el documento por tipo de contingencia"
-        );
+        showToast("error", error || messageError);
         return;
       }
+
+      // const response = await createDocumentoTipoCont(payloadDocumentoTC);
+      // const { result, message } = response as DocumentoTipoContingenciaResponse;
+
+      // if (result) {
+      //   showToast("success", message);
+      //   navigate("/mantenimiento/documento-tipo-contingencia");
+      // } else {
+      //   showToast(
+      //     "error",
+      //     message || "Error al registrara el documento por tipo de contingencia"
+      //   );
+      //   return;
+      // }
     } catch (error) {
-      console.error("Error al registrar colaborador", error);
+      console.error(
+        "Error al registrar documento de tipo de contingencia",
+        error
+      );
       showToast("error", error);
     }
   };
@@ -100,32 +129,6 @@ export const DocumentoTipoContigenciaForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // if (isEditMode) {
-        //   const responseDocumentoTipoCont = await getDocumentoTipoContById(id);
-
-        //   const {
-        //     result: resultDocumento,
-        //     data: dataDocumento,
-        //     message,
-        //   } = responseDocumentoTipoCont;
-
-        //   if (resultDocumento && dataDocumento) {
-        //     const documento = data as DocumentoTipoContingencia;
-        //     const { id_tipocontingencia, nombre } = documento;
-
-        //     form.reset({
-        //       idTipoContingencia: id_tipocontingencia ?? "",
-        //       nombre: nombre ?? "",
-        //     });
-        //   } else {
-        //     showToast(
-        //       "error",
-        //       message || "Documento tipo de contingencia no encontrado"
-        //     );
-        //     navigate("/mantenimiento/documento-tipo-contingencia/nuevo");
-        //   }
-        // }
-
         let listTipoContingencias: TipoContingencia[] = [];
 
         const response = await getTipoContingencias();
@@ -138,30 +141,21 @@ export const DocumentoTipoContigenciaForm = () => {
 
         setTipoContingencias(listTipoContingencias);
 
-        // if (id) {
-        //   const responseDocumentoTipoCont = await getDocumentoTipoContById(id);
-        //   const {
-        //     result: resultDocumento,
-        //     data: dataDocumento,
-        //     message,
-        //   } = responseDocumentoTipoCont;
+        if (isEditMode && id) {
+          const responseDocumento = await getDocumentoTipoContById(id);
+          const { result, data } = responseDocumento;
 
-        //   if (resultDocumento && dataDocumento) {
-        //     const documento = data as DocumentoTipoContingencia;
-        //     const { id_tipocontingencia, nombre } = documento;
+          if (result && data) {
+            const documento = data as DocumentoTipoContingencia;
 
-        //     form.reset({
-        //       idTipoContingencia: id_tipocontingencia ?? "",
-        //       nombre: nombre ?? "",
-        //     });
-        //   } else {
-        //     showToast(
-        //       "error",
-        //       message || "Documento tipo de contingencia no encontrado"
-        //     );
-        //     navigate("/mantenimiento/documento-tipo-contingencia/nuevo");
-        //   }
-        // }
+            const dataForm = {
+              idTipoContingencia: documento.id_tipocontingencia,
+              nombre: documento.nombre || "",
+            };
+            console.log("dataForm documento tipo contingencia", dataForm);
+            form.reset(dataForm);
+          }
+        }
       } catch (error) {
         console.error("Error al obtener datos", error);
         showToast("error", "Error al cargar los datos del formulario.");
@@ -169,17 +163,22 @@ export const DocumentoTipoContigenciaForm = () => {
     };
 
     fetchData();
-  }, [form, navigate, showToast]);
+  }, [id, isEditMode]);
+  // [form, navigate, showToast]
 
   return (
     <>
       <Card className="shadow-lg border-gray-200">
         <CardHeader className="border-b border-gray-200">
           <CardTitle className="text-xl font-bold text-gray-800">
-            Información de documento
+            {isEditMode
+              ? "Actualización de documento"
+              : "Registro de documento"}
           </CardTitle>
           <CardDescription className="text-sm text-gray-500">
-            Ingrese los datos del documento
+            {isEditMode
+              ? "Formulario de actualización de documento"
+              : "Complete el formulario para registrar un documento"}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
@@ -210,12 +209,12 @@ export const DocumentoTipoContigenciaForm = () => {
                             <SelectValue placeholder="Seleccionar tipo de contingencia" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="bg-gray-400">
                           {tipoContingencias.map((tipo) => (
                             <SelectItem
                               value={tipo.id}
                               key={tipo.id}
-                              className="cursor-pointer hover:bg-blue-100 transition-colors"
+                              className="cursor-pointer hover:bg-gray-100 transition-colors"
                             >
                               {tipo.nombre}
                             </SelectItem>
@@ -264,8 +263,10 @@ export const DocumentoTipoContigenciaForm = () => {
                   {isSubmitting ? (
                     <>
                       <Spinner className="mr-2 h-4 w-4 animate-spin" />
-                      Registrando...
+                      {isEditMode ? "Actualizando..." : "Registrando..."}
                     </>
+                  ) : isEditMode ? (
+                    "Actualizar"
                   ) : (
                     "Registrar"
                   )}

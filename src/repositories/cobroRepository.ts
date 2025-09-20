@@ -1,11 +1,13 @@
-import { Perfil, PerfilResponse } from "../interfaces/IPerfil"
+import { Cobro, CobroResponse } from "@/interfaces/ICobro"
 import apiClient from "./apiClient"
 
-export const getAll = async () => {
+export const getAll = async (): Promise<CobroResponse> => {
     try {
-        const response = await apiClient.get('/perfiles')
-        const { data: dataPerfiles } = response
-        const { result, data, message, status, error } = dataPerfiles
+        const response = await apiClient.get('/cobros')
+
+        const { data: dataCobros } = response
+
+        const { result, data, message, status, error } = dataCobros
 
         return {
             result,
@@ -21,15 +23,16 @@ export const getAll = async () => {
     }
 }
 
+
 export const getAllWithPaginate = async (page: number, limit: number) => {
     try {
-        const urlApi = `${'/perfiles/paginate?page='}${page}${'&limit='}${limit}`
+        const urlApi = `${'/cobros/paginate?page='}${page}${'&limit='}${limit}`
 
         const response = await apiClient.get(urlApi)
 
-        const { data: dataPerfiles } = response
+        const { data: dataCobros } = response
 
-        const { result, data, pagination, status } = dataPerfiles
+        const { result, data, pagination, status } = dataCobros
 
         return {
             result,
@@ -45,60 +48,67 @@ export const getAllWithPaginate = async (page: number, limit: number) => {
     }
 }
 
-export const getById = async (id: string): Promise<PerfilResponse> => {
+export const getById = async (id: string): Promise<CobroResponse> => {
     try {
-        const urlApi = `${'/perfiles/'}${id}`
+        const urlApi = `${'/cobros/'}${id}`
+
         const response = await apiClient.get(urlApi)
-        const { data: { result, message, data, error, status } } = response
+
+        const { data: { result, data, message, error, status } } = response
+
         return {
             result,
-            message,
             data,
+            message,
             error,
             status
         }
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
         console.log('errorMessage', errorMessage)
-        return { result: false, error: errorMessage, status: 500 }
+        return { result: false, data: [], error: errorMessage, status: 500 }
     }
 }
 
-export const create = async (payload: Perfil): Promise<PerfilResponse> => {
+export const create = async (payload: Cobro): Promise<CobroResponse> => {
     try {
-        const response = await apiClient.post('/perfiles', payload)
+        // console.log('payload new canje', payload)
 
-        const { data: { result, data, status, message, error } } = response
+        const response = await apiClient.post('/cobros', payload)
+
+        const { data: { result, message, status } } = response
+
+        return {
+            result,
+            message,
+            status
+        }
+
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+        console.log('errorMessage', errorMessage)
+        return { result: false, data: [], error: errorMessage, status: 500 }
+    }
+}
+
+export const update = async (id: string, payload: Cobro): Promise<CobroResponse> => {
+    try {
+        const urlApi = `${'/cobros/'}${id}`
+
+        const response = await apiClient.patch(urlApi, payload)
+
+        const { data: { result, data, message, error, status } } = response
 
         return {
             result,
             data,
-            status,
             message,
-            error
+            error,
+            status
         }
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
         console.log('errorMessage', errorMessage)
-        return { result: false, error: errorMessage, status: 500 }
-    }
-}
-
-export const update = async (id: string, payload: Perfil): Promise<PerfilResponse> => {
-    try {
-        const urlApi = `${'/perfiles/'}${id}`
-        const response = await apiClient.put(urlApi, payload)
-        const { data: { result, data, status, message, error } } = response
-        return {
-            result,
-            data,
-            status,
-            message,
-            error
-        }
-    } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-        console.log('errorMessage', errorMessage)
-        return { result: false, error: errorMessage, status: 500 }
+        return { result: false, data: [], error: errorMessage, status: 500 }
     }
 }

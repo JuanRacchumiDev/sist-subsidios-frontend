@@ -1,9 +1,9 @@
-import { Canje, CanjeResponse } from "@/interfaces/ICanje"
+import { Reembolso, ReembolsoResponse } from "@/interfaces/IReembolso"
 import apiClient from "./apiClient"
 
-export const getAll = async (): Promise<CanjeResponse> => {
+export const getAll = async (): Promise<ReembolsoResponse> => {
     try {
-        const response = await apiClient.get('/canjes')
+        const response = await apiClient.get('/reembolsos')
 
         const { data: dataCanjes } = response
 
@@ -26,7 +26,7 @@ export const getAll = async (): Promise<CanjeResponse> => {
 
 export const getAllWithPaginate = async (page: number, limit: number) => {
     try {
-        const urlApi = `${'/canjes/paginate?page='}${page}${'&limit='}${limit}`
+        const urlApi = `${'/reembolsos/paginate?page='}${page}${'&limit='}${limit}`
 
         const response = await apiClient.get(urlApi)
 
@@ -48,9 +48,9 @@ export const getAllWithPaginate = async (page: number, limit: number) => {
     }
 }
 
-export const getById = async (id: string): Promise<CanjeResponse> => {
+export const getById = async (id: string): Promise<ReembolsoResponse> => {
     try {
-        const urlApi = `${'/canjes/'}${id}`
+        const urlApi = `${'/reembolsos/'}${id}`
 
         const response = await apiClient.get(urlApi)
 
@@ -70,11 +70,11 @@ export const getById = async (id: string): Promise<CanjeResponse> => {
     }
 }
 
-export const create = async (payload: Canje): Promise<CanjeResponse> => {
+export const create = async (payload: Reembolso): Promise<ReembolsoResponse> => {
     try {
         // console.log('payload new canje', payload)
 
-        const response = await apiClient.post('/canjes', payload)
+        const response = await apiClient.post('/reembolsos', payload)
 
         const { data: { result, message, status } } = response
 
@@ -91,24 +91,24 @@ export const create = async (payload: Canje): Promise<CanjeResponse> => {
     }
 }
 
-export const update = async (id: string, payload: Canje): Promise<CanjeResponse> => {
-    try {
-        const urlApi = `${'/canjes/'}${id}`
+// export const update = async (id: string, payload: Canje): Promise<ReembolsoResponse> => {
+//     try {
+//         const urlApi = `${'/reembolsos/'}${id}`
 
-        const response = await apiClient.patch(urlApi, payload)
+//         const response = await apiClient.patch(urlApi, payload)
 
-        const { data: { result, data, message, error, status } } = response
+//         const { data: { result, data, message, error, status } } = response
 
-        return {
-            result,
-            data,
-            message,
-            error,
-            status
-        }
-    } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-        console.log('errorMessage', errorMessage)
-        return { result: false, data: [], error: errorMessage, status: 500 }
-    }
-}
+//         return {
+//             result,
+//             data,
+//             message,
+//             error,
+//             status
+//         }
+//     } catch (error) {
+//         const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+//         console.log('errorMessage', errorMessage)
+//         return { result: false, data: [], error: errorMessage, status: 500 }
+//     }
+// }

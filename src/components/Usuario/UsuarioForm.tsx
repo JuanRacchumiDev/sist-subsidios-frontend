@@ -79,6 +79,8 @@ export const UsuarioForm = () => {
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [perfiles, setPerfiles] = useState<Perfil[]>([]);
 
+  const isEditMode = !!id;
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -90,7 +92,6 @@ export const UsuarioForm = () => {
   });
 
   const { isSubmitting } = form.formState;
-  const isEditMode = !!id;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -187,36 +188,18 @@ export const UsuarioForm = () => {
 
   return (
     <>
-      {/* <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            {isEditMode ? "Editar" : "Registrar"} Usuario
-          </h1>
-          <p className="text-gray-600">
-            {isEditMode
-              ? "Actualice los datos del usuario"
-              : "Complete el formulario para registrar un nuevo usuario"}
-          </p>
-        </div>
-        <Link
-          to="/usuario"
-          className="text-sm text-blue-600 hover:underline mt-2 md:mt-0"
-        >
-          ← Volver al listado
-        </Link>
-      </div> */}
       <Card className="shadow-lg border-gray-200">
         <CardHeader className="border-b border-gray-200">
           <CardTitle className="text-xl font-bold text-gray-800">
-            Información de usuario
+            {isEditMode ? "Actualización de usuario" : "Registro de usuario"}
           </CardTitle>
           <CardDescription className="text-sm text-gray-500">
             {isEditMode
-              ? "Actualice los datos del usuario"
-              : "Ingrese los datos del usuario"}
+              ? "Formulario de actualización de usuario"
+              : "Complete el formulario para registrar un usuario"}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -354,8 +337,10 @@ export const UsuarioForm = () => {
                   {isSubmitting ? (
                     <>
                       <Spinner className="mr-2 h-4 w-4 animate-spin" />
-                      Registrando...
+                      {isEditMode ? "Actualizando..." : "Registrando..."}
                     </>
+                  ) : isEditMode ? (
+                    "Actualizar"
                   ) : (
                     "Registrar"
                   )}

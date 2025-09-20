@@ -25,7 +25,9 @@ export const getAll = async (): Promise<AdjuntoResponse> => {
 export const getAllWithPaginate = async (page: number, limit: number) => {
     try {
         const urlApi = `${'/adjuntos/paginate?page='}${page}${'&limit='}${limit}`
+
         const response = await apiClient.get(urlApi)
+
         const { data: dataAdjuntos } = response
 
         const { result, data, pagination, status } = dataAdjuntos
@@ -47,7 +49,9 @@ export const getAllWithPaginate = async (page: number, limit: number) => {
 export const getById = async (id: string): Promise<AdjuntoResponse> => {
     try {
         const urlApi = `${'/adjuntos/'}${id}`
+
         const response = await apiClient.get(urlApi)
+
         const { data: { result, data, message, error, status } } = response
 
         return {
@@ -86,8 +90,11 @@ export const create = async (payload: Adjunto): Promise<AdjuntoResponse> => {
 export const update = async (id: string, payload: Adjunto): Promise<AdjuntoResponse> => {
     try {
         const urlApi = `${'/adjuntos/'}${id}`
+
         const response = await apiClient.patch(urlApi, payload)
+
         const { data: { result, data, message, error, status } } = response
+
         return {
             result,
             data,
@@ -105,9 +112,9 @@ export const update = async (id: string, payload: Adjunto): Promise<AdjuntoRespo
 export const upload = async (formData: FormData): Promise<AdjuntoResponse> => {
     try {
         // Añadiendo tipo adjunto a formData
-        const idTipoAdjunto = "c9d53225-6644-4e53-90be-97678693146f";
+        // const idTipoAdjunto = "c9d53225-6644-4e53-90be-97678693146f";
 
-        formData.append("id_tipoadjunto", idTipoAdjunto)
+        // formData.append("id_tipoadjunto", idTipoAdjunto)
 
         // Obteniendo el código temporal del usuario autenticado
         const codigo_temp = localStorage.getItem("codigo_temp") || null

@@ -4,6 +4,7 @@ import { Usuario, UsuarioResponse } from "../interfaces/IUsuario"
 export const getAll = async (): Promise<UsuarioResponse> => {
     try {
         const response = await apiClient.get('/usuarios')
+
         const { data: dataUsuarios } = response
 
         const { result, data, status, message, error } = dataUsuarios
@@ -25,7 +26,9 @@ export const getAll = async (): Promise<UsuarioResponse> => {
 export const getAllWithPaginate = async (page: number, limit: number) => {
     try {
         const urlApi = `${'/usuarios/paginate?page='}${page}${'&limit='}${limit}`
+
         const response = await apiClient.get(urlApi)
+
         const { data: dataUsuarios } = response
 
         const { result, data, pagination, status } = dataUsuarios
@@ -47,7 +50,9 @@ export const getAllWithPaginate = async (page: number, limit: number) => {
 export const getById = async (id: string): Promise<UsuarioResponse> => {
     try {
         const urlApi = `${'/usuarios/'}${id}`
+
         const response = await apiClient.get(urlApi)
+
         const { data: { result, data, message, error, status } } = response
 
         return {
@@ -78,10 +83,6 @@ export const create = async (payload: Usuario): Promise<UsuarioResponse> => {
             error
         }
     } catch (error) {
-        // if (error.response) {
-        //     throw new Error(error.response.data.message || 'Error al crear empresa')
-        // }
-        // throw new Error('Error de conexión con el servidor')
         const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
         console.log('errorMessage', errorMessage)
         return { result: false, error: errorMessage, status: 500 }
@@ -91,8 +92,11 @@ export const create = async (payload: Usuario): Promise<UsuarioResponse> => {
 export const update = async (id: string, payload: Usuario): Promise<UsuarioResponse> => {
     try {
         const urlApi = `${'/usuarios/'}${id}`
+
         const response = await apiClient.patch(urlApi, payload)
+
         const { data: { result, data, message, error, status } } = response
+
         return {
             result,
             data,

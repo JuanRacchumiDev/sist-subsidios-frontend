@@ -1,4 +1,5 @@
 import { Adjunto } from '../interfaces/IAdjunto'
+import { TipoAdjunto } from '../interfaces/ITipoAdjunto'
 import { responseViewFile } from '../types/TFile';
 import {
     getAll,
@@ -9,6 +10,7 @@ import {
     upload,
     viewFile
 } from '../repositories/adjuntoRepository'
+import { getByNombre } from '../repositories/tipoAdjuntoRepository'
 
 export const getAdjuntos = async () => {
     const response = await getAll()
@@ -51,6 +53,20 @@ export const updateAdjunto = async (id: string, payload: Adjunto) => {
 }
 
 export const uploadAdjunto = async (formData: FormData) => {
+    const responseTipoAdjunto = await getByNombre("GENERAL");
+
+    console.log({ responseTipoAdjunto })
+
+    const { data } = responseTipoAdjunto
+
+    const dataTipoAdjunto = data as TipoAdjunto
+
+    const { id } = dataTipoAdjunto
+
+    if (id) {
+        formData.append("id_tipoadjunto", id)
+    }
+
     const response = await upload(formData)
 
     return {

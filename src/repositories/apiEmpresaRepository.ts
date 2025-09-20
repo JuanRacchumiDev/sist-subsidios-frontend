@@ -6,7 +6,7 @@ export const searchForRuc = async (ruc: string): Promise<EmpresaResponse> => {
     try {
         const urlApi = `${'/empresas/consulta-api?ruc='}${ruc}`
 
-        const response = await apiClient.get(`${urlApi}`, {
+        const response = await apiClient.get(urlApi, {
             headers: {
                 Authorization: `Bearer ${token}`
             }

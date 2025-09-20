@@ -111,32 +111,16 @@ export const CargoForm = () => {
   }, [id, isEditMode, form, navigate, showToast]);
 
   return (
-    <div className="flex justify-center w-full">
-      {/* <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            {isEditMode ? "Editar" : "Registrar"} Cargo
-          </h1>
-          <p className="text-gray-600">
-            {isEditMode
-              ? "Actualice los datos del cargo"
-              : "Complete el formulario para registrar un nuevo cargo"}
-          </p>
-        </div>
-        <Link
-          to="/mantenimiento/cargo"
-          className="text-sm text-blue-600 hover:underline mt-2 md:mt-0"
-        >
-          ← Volver al listado
-        </Link>
-      </div> */}
-      <Card className="shadow-lg border-gray-200">
+    <div className="flex justify-center w-full mx-auto max-w-md">
+      <Card className="shadow-lg border-gray-200 w-full">
         <CardHeader className="border-b border-gray-200">
           <CardTitle className="text-xl font-bold text-gray-800">
-            Información
+            {isEditMode ? "Actualización de cargo" : "Registro de cargo"}
           </CardTitle>
           <CardDescription className="text-sm text-gray-500">
-            Ingrese los datos del cargo
+            {isEditMode
+              ? "Formulario de actualización de cargo"
+              : "Complete el formulario para registrar nuevo cargo"}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">

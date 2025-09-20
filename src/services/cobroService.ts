@@ -1,13 +1,13 @@
-import { Canje } from '@/interfaces/ICanje'
+import { Cobro } from '@/interfaces/ICobro'
 import {
     getAll,
     getById,
     getAllWithPaginate,
     create,
     update
-} from '../repositories/canjeRepository'
+} from '../repositories/cobroRepository'
 
-export const getCanjes = async () => {
+export const getCobros = async () => {
     const response = await getAll()
 
     return {
@@ -15,7 +15,7 @@ export const getCanjes = async () => {
     }
 }
 
-export const getCanjesWithPaginate = async (page: number, limit: number) => {
+export const getCobrosWithPaginate = async (page: number, limit: number) => {
     const response = await getAllWithPaginate(page, limit)
 
     return {
@@ -23,7 +23,7 @@ export const getCanjesWithPaginate = async (page: number, limit: number) => {
     }
 }
 
-export const getCanjeById = async (id: string) => {
+export const getCobroById = async (id: string) => {
     const response = await getById(id)
 
     return {
@@ -31,7 +31,7 @@ export const getCanjeById = async (id: string) => {
     }
 }
 
-export const createCanje = async (payload: Canje) => {
+export const createCobro = async (payload: Cobro) => {
     const response = await create(payload)
 
     return {
@@ -39,7 +39,7 @@ export const createCanje = async (payload: Canje) => {
     }
 }
 
-export const updateCanje = async (id: string, payload: Canje) => {
+export const updateCobro = async (id: string, payload: Cobro) => {
     const response = await update(id, payload)
 
     return {

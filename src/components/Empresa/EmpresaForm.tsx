@@ -46,6 +46,8 @@ import {
   createRepresentante,
   updateRepresentante,
 } from "../../services/representanteService";
+import SearchableCombobox from "../Common/SearchableCombobox";
+import { Cargo } from "@/interfaces/ICargo";
 
 const formSchema = z.object({
   ruc: z.string().min(2, {
@@ -65,7 +67,7 @@ const formSchema = z.object({
   numeroDocumento: z
     .string()
     .min(8, { message: "Número de documento inválido." }),
-  apellidoPateno: z
+  apellidoPaterno: z
     .string()
     .min(2, { message: "El apellido paterno es requerido." }),
   apellidoMaterno: z
@@ -88,14 +90,31 @@ const formSchema = z.object({
   ospe: z.string().min(1, { message: "El OSPE es requerido." }),
 });
 
-type TipoDocumento = {
+type TTipoDocumento = {
   id: string;
   abreviatura: string;
 };
 
-type Cargo = {
+type TCargo = {
   id: string;
   nombre: string;
+};
+
+type TEmpresa = {
+  ruc?: string;
+  razonSocial?: string;
+  direccion?: string;
+  idTipoDocumento?: string;
+  numeroDocumento?: string;
+  apellidoPaterno?: string;
+  apellidoMaterno?: string;
+  nombres?: string;
+  direccionFiscal?: string;
+  partidaRegistral?: string;
+  idCargo?: string;
+  telefono?: string;
+  correo?: string;
+  ospe?: string;
 };
 
 export const EmpresaForm = () => {
@@ -103,8 +122,8 @@ export const EmpresaForm = () => {
   const { id } = useParams<{ id: string }>();
   const { showToast } = useToast();
 
-  const [tipos, setTipos] = useState<TipoDocumento[]>([]);
-  const [cargos, setCargos] = useState<Cargo[]>([]);
+  const [tipos, setTipos] = useState<TTipoDocumento[]>([]);
+  const [cargos, setCargos] = useState<TCargo[]>([]);
   const [idEmpresa, setIdEmpresa] = useState<string>("");
   const [idRepresentante, setIdRepresentante] = useState<string>("");
 
@@ -122,7 +141,7 @@ export const EmpresaForm = () => {
       direccion: "",
       idTipoDocumento: "",
       numeroDocumento: "",
-      apellidoPateno: "",
+      apellidoPaterno: "",
       apellidoMaterno: "",
       nombres: "",
       direccionFiscal: "",
@@ -152,7 +171,7 @@ export const EmpresaForm = () => {
         idCargo,
         numeroDocumento,
         nombres,
-        apellidoPateno,
+        apellidoPaterno,
         apellidoMaterno,
         direccionFiscal,
         partidaRegistral,
@@ -167,7 +186,7 @@ export const EmpresaForm = () => {
         id_cargo: idCargo,
         numero_documento: numeroDocumento,
         nombres,
-        apellido_paterno: apellidoPateno,
+        apellido_paterno: apellidoPaterno,
         apellido_materno: apellidoMaterno,
         direccion_fiscal: direccionFiscal,
         partida_registral: partidaRegistral,
@@ -181,7 +200,7 @@ export const EmpresaForm = () => {
         response = await updateRepresentante(idRepresentante, payload);
       } else {
         messageError = "Error al registrar el representante legal";
-        response = await await createRepresentante(payload);
+        response = await createRepresentante(payload);
       }
 
       const { result, message, error } = response as RepresentanteLegalResponse;
@@ -194,7 +213,7 @@ export const EmpresaForm = () => {
         return;
       }
     } catch (error) {
-      console.error("Error al registrar cargo", error);
+      console.error("Error al registrar empresa", error);
       showToast("error", error);
     }
   };
@@ -202,25 +221,8 @@ export const EmpresaForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let dataForm = {
-          ruc: "",
-          razonSocial: "",
-          direccion: "",
-          idTipoDocumento: "",
-          numeroDocumento: "",
-          apellidoPateno: "",
-          apellidoMaterno: "",
-          nombres: "",
-          direccionFiscal: "",
-          partidaRegistral: "",
-          idCargo: "",
-          telefono: "",
-          correo: "",
-          ospe: "",
-        };
-
-        let listTipoDocumentos: TipoDocumento[] = [];
-        let listCargos: Cargo[] = [];
+        let listTipoDocumentos: TTipoDocumento[] = [];
+        let listCargos: TCargo[] = [];
 
         const [responseTipoDocumentos, responseCargos] = await Promise.all([
           getTipoDocumentos(),
@@ -230,12 +232,12 @@ export const EmpresaForm = () => {
         const { result: resultTipoDocs, data: dataTipoDocs } =
           responseTipoDocumentos;
         if (resultTipoDocs && dataTipoDocs) {
-          listTipoDocumentos = dataTipoDocs as TipoDocumento[];
+          listTipoDocumentos = dataTipoDocs as TTipoDocumento[];
         }
 
         const { result: resultCargos, data: dataCargos } = responseCargos;
         if (resultCargos && dataCargos) {
-          listCargos = dataCargos as Cargo[];
+          listCargos = dataCargos as TCargo[];
         }
 
         setTipos(listTipoDocumentos);
@@ -243,11 +245,14 @@ export const EmpresaForm = () => {
 
         if (isEditMode && id) {
           const responseEmpresa = await getEmpresaById(id);
-
           const { result, data } = responseEmpresa;
 
           if (result && data) {
+            let dataForm: TEmpresa = {};
+
             const empresa = data as Empresa;
+
+            console.log({ empresa });
 
             const {
               id: idEmpresa,
@@ -257,9 +262,9 @@ export const EmpresaForm = () => {
               representantes,
             } = empresa;
 
-            dataForm.ruc = numero;
-            dataForm.razonSocial = nombre_o_razon_social;
-            dataForm.direccion = direccion;
+            dataForm.ruc = numero || "";
+            dataForm.razonSocial = nombre_o_razon_social || "";
+            dataForm.direccion = direccion || "";
 
             setIdEmpresa(idEmpresa);
 
@@ -269,6 +274,8 @@ export const EmpresaForm = () => {
 
             if (totalRepresentantes === 1) {
               const representante = listRepresentantes[0] as RepresentanteLegal;
+
+              console.log({ representante });
 
               const {
                 id_tipodocumento,
@@ -284,27 +291,22 @@ export const EmpresaForm = () => {
                 ospe,
               } = representante;
 
+              dataForm.idTipoDocumento = id_tipodocumento;
+              dataForm.numeroDocumento = numero_documento || "";
+              dataForm.apellidoPaterno = apellido_paterno || "";
+              dataForm.apellidoMaterno = apellido_materno || "";
+              dataForm.nombres = nombres || "";
+              dataForm.direccionFiscal = direccion_fiscal || "";
+              dataForm.partidaRegistral = partida_registral || "";
+              dataForm.idCargo = id_cargo;
+              dataForm.telefono = telefono;
+              dataForm.correo = correo;
+              dataForm.ospe = ospe;
+
               setIdRepresentante(representante.id);
-
-              dataForm = {
-                ...dataForm,
-                idTipoDocumento: id_tipodocumento,
-                numeroDocumento: numero_documento,
-                apellidoPateno: apellido_paterno,
-                apellidoMaterno: apellido_materno,
-                nombres,
-                direccionFiscal: direccion_fiscal,
-                partidaRegistral: partida_registral,
-                idCargo: id_cargo,
-                telefono,
-                correo,
-                ospe,
-              };
-
-              // console.log({ dataForm });
-
-              form.reset(dataForm);
             }
+
+            form.reset(dataForm);
 
             // Deshabilita los siguientes campos
             form.setValue("idTipoDocumento", dataForm.idTipoDocumento);
@@ -314,12 +316,12 @@ export const EmpresaForm = () => {
           }
         }
       } catch (error) {
-        console.error("Error al obtener datos", error);
+        showToast("error", "Error al cargar los datos de la empresa.");
+        console.error("Error fetching empresa:", error);
       }
     };
-
     fetchData();
-  }, [id]);
+  }, [id, isEditMode]);
 
   return (
     <>
@@ -386,8 +388,8 @@ export const EmpresaForm = () => {
                                     setCamposHabilitadosEmpresa(false);
                                   } else {
                                     showToast(
-                                      "error",
-                                      "Error información de emoresa"
+                                      "warning",
+                                      "No se encontraron datos de empresa"
                                     );
                                     setCamposHabilitadosEmpresa(true);
                                   }
@@ -395,7 +397,7 @@ export const EmpresaForm = () => {
                                   setCamposHabilitadosEmpresa(true);
                                   showToast(
                                     "error",
-                                    "No se encontró la empresa"
+                                    `Error de información de empresa: ${error}`
                                   );
                                 }
                               }
@@ -561,7 +563,7 @@ export const EmpresaForm = () => {
                                     form.setValue("nombres", nombres);
 
                                     form.setValue(
-                                      "apellidoPateno",
+                                      "apellidoPaterno",
                                       apellido_paterno
                                     );
 
@@ -599,7 +601,7 @@ export const EmpresaForm = () => {
 
                   <FormField
                     control={form.control}
-                    name="apellidoPateno"
+                    name="apellidoPaterno"
                     render={({ field, fieldState }) => (
                       <FormItem>
                         <RequiredLabel>Apellido paterno</RequiredLabel>
@@ -738,6 +740,28 @@ export const EmpresaForm = () => {
                   <FormField
                     control={form.control}
                     name="idCargo"
+                    render={({ field, fieldState }) => {
+                      return (
+                        <FormItem className="flex flex-col">
+                          <RequiredLabel>Cargo</RequiredLabel>
+                          <SearchableCombobox<Cargo>
+                            placeholder="Buscar un cargo"
+                            options={cargos}
+                            value={field.value}
+                            onChange={field.onChange}
+                            displayKey="nombre"
+                            valueKey="id"
+                            searchKeys={["nombre"]}
+                          />
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
+
+                  {/* <FormField
+                    control={form.control}
+                    name="idCargo"
                     render={({ field, fieldState }) => (
                       <FormItem>
                         <FormLabel>Cargo</FormLabel>
@@ -774,7 +798,7 @@ export const EmpresaForm = () => {
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
+                  /> */}
 
                   <FormField
                     control={form.control}

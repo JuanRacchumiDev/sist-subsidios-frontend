@@ -68,7 +68,7 @@ export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
           {/* Conditional Rendering */}
           {!collapsed && (
             <div>
-              <h1 className="text-xl font-bold text-slate-800">Nexus</h1>
+              <h1 className="text-xl font-bold text-slate-800">DMS</h1>
               <p className="text-xs text-slate-500">Admin Panel</p>
             </div>
           )}
@@ -135,9 +135,12 @@ export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
                       to={subitem.path}
                       className={({ isActive }) =>
                         `w-full block text-left p-2 text-sm rounded-lg transition-all ${
+                          // isActive
+                          //   ? "text-blue-600 font-semibold bg-blue-50"
+                          //   : "text-slate-600 hover:text-slate-800 hover:bg-slate-100"
                           isActive
-                            ? "text-blue-600 font-semibold bg-blue-50"
-                            : "text-slate-600 hover:text-slate-800 hover:bg-slate-100"
+                            ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25"
+                            : "text-slate-600 hover:bg-slate-100"
                         }`
                       }
                     >

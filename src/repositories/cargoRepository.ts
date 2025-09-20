@@ -4,7 +4,9 @@ import { Cargo, CargoResponse } from '../interfaces/ICargo'
 export const getAll = async (): Promise<CargoResponse> => {
     try {
         const response = await apiClient.get('/cargos')
+
         const { data: dataCargos } = response
+
         const { result, data, message, status, error } = dataCargos
 
         return {
@@ -24,7 +26,9 @@ export const getAll = async (): Promise<CargoResponse> => {
 export const getAllWithPaginate = async (page: number, limit: number) => {
     try {
         const urlApi = `${'/cargos/paginate?page='}${page}${'&limit='}${limit}`
+
         const response = await apiClient.get(urlApi)
+
         const { data: dataCargos } = response
 
         const { result, data, pagination, status } = dataCargos
@@ -46,7 +50,9 @@ export const getAllWithPaginate = async (page: number, limit: number) => {
 export const getById = async (id: string): Promise<CargoResponse> => {
     try {
         const urlApi = `${'/cargos/'}${id}`
+
         const response = await apiClient.get(urlApi)
+
         const { data: { result, data, message, error, status } } = response
 
         return {
@@ -85,8 +91,11 @@ export const create = async (payload: Cargo): Promise<CargoResponse> => {
 export const update = async (id: string, payload: Cargo): Promise<CargoResponse> => {
     try {
         const urlApi = `${'/cargos/'}${id}`
+
         const response = await apiClient.patch(urlApi, payload)
+
         const { data: { result, data, message, error, status } } = response
+
         return {
             result,
             data,

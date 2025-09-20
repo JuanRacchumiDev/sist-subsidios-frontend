@@ -4,6 +4,7 @@ import { TrabajadorSocial, TrabajadorSocialResponse } from "../interfaces/ITraba
 export const getAll = async (): Promise<TrabajadorSocialResponse> => {
     try {
         const response = await apiClient.get('/trab-sociales')
+
         const { data: { result, message, data, error, status } } = response
 
         return {
@@ -24,8 +25,11 @@ export const getAll = async (): Promise<TrabajadorSocialResponse> => {
 export const getById = async (id: string): Promise<TrabajadorSocialResponse> => {
     try {
         const urlApi = `${'/trab-sociales/'}${id}`
+
         const response = await apiClient.get(urlApi)
+
         const { data: { result, message, data, error, status } } = response
+
         return {
             result,
             message,
@@ -42,8 +46,11 @@ export const getById = async (id: string): Promise<TrabajadorSocialResponse> => 
 
 export const getByIdTipoDocAndNumDoc = async (idTipoDoc: string, numDoc: string): Promise<TrabajadorSocialResponse> => {
     const urlApi = `${'/trab-sociales/buscar-por-tipodoc-numdoc?idTipoDoc='}${idTipoDoc}${'&numDoc='}${numDoc}`
+
     const response = await apiClient.get(urlApi)
+
     const { data: { result, message, data, error, status } } = response
+
     return {
         result,
         message,
@@ -75,8 +82,18 @@ export const create = async (payload: TrabajadorSocial): Promise<TrabajadorSocia
 export const update = async (id: string, payload: TrabajadorSocial): Promise<TrabajadorSocialResponse> => {
     try {
         const urlApi = `${'/trab-sociales/'}${id}`
+
         const response = await apiClient.put(urlApi, payload)
-        // console.log('response update trabsocial', response)
+
+        const { data: { result, data, message, error, status } } = response
+
+        return {
+            result,
+            data,
+            message,
+            error,
+            status
+        }
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
         console.log('errorMessage', errorMessage)

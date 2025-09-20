@@ -4,7 +4,9 @@ import { DescansoMedico, DescansoMedicoResponse } from '../interfaces/IDescansoM
 export const getAll = async (): Promise<DescansoMedicoResponse> => {
     try {
         const response = await apiClient.get('/descansos')
+
         const { data: dataDescansos } = response
+
         const { result, data, message, status, error } = dataDescansos
 
         return {
@@ -24,7 +26,9 @@ export const getAll = async (): Promise<DescansoMedicoResponse> => {
 export const getAllWithPaginate = async (page: number, limit: number) => {
     try {
         const urlApi = `${'/descansos/paginate?page='}${page}${'&limit='}${limit}`
+
         const response = await apiClient.get(urlApi)
+
         const { data: dataDescansos } = response
 
         const { result, data, pagination, status } = dataDescansos
@@ -48,6 +52,7 @@ export const getAllByColaboradorPaginate = async (idColaborador: string, page: n
         const urlApi = `${'/descansos/colaborador/paginate?idColaborador='}${idColaborador}${'&page='}${page}${'&limit='}${limit}`
         // console.log('urlApi getAllByColaboradorPaginate', urlApi)
         const response = await apiClient.get(urlApi)
+
         const { data: dataDescansos } = response
 
         const { result, data, pagination, status } = dataDescansos
@@ -69,7 +74,9 @@ export const getAllByColaboradorPaginate = async (idColaborador: string, page: n
 export const getById = async (id: string): Promise<DescansoMedicoResponse> => {
     try {
         const urlApi = `${'/descansos/'}${id}`
+
         const response = await apiClient.get(urlApi)
+
         const { data: { result, data, message, error, status } } = response
 
         return {
@@ -118,8 +125,11 @@ export const create = async (payload: DescansoMedico): Promise<DescansoMedicoRes
 export const update = async (id: string, payload: DescansoMedico): Promise<DescansoMedicoResponse> => {
     try {
         const urlApi = `${'/descansos/'}${id}`
+
         const response = await apiClient.patch(urlApi, payload)
+
         const { data: { result, data, message, error, status } } = response
+
         return {
             result,
             data,

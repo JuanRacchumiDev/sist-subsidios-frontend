@@ -321,7 +321,8 @@ export const ColaboradorForm = () => {
     };
 
     fetchData();
-  }, [id, form, navigate, showToast]);
+  }, [id, form]);
+  // [id, form, navigate, showToast]
 
   return (
     <>
@@ -589,11 +590,11 @@ export const ColaboradorForm = () => {
                             `}
                           />
                         </FormControl>
-                        <FormDescription>
+                        {/* <FormDescription>
                           {field.value
                             ? format(field.value, "PPP")
                             : "Seleccione una fecha"}
-                        </FormDescription>
+                        </FormDescription> */}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -852,11 +853,11 @@ export const ColaboradorForm = () => {
                             `}
                           />
                         </FormControl>
-                        <FormDescription>
+                        {/* <FormDescription>
                           {field.value
                             ? format(field.value, "PPP")
                             : "Seleccione una fecha"}
-                        </FormDescription>
+                        </FormDescription> */}
                         <FormMessage />
                       </FormItem>
                     )}

@@ -136,7 +136,7 @@ function App() {
 
                     <Route path="/canje" element={<CanjeListPage />}></Route>
                     <Route
-                      path="/canje/nuevo"
+                      path="/canje/editar/:id"
                       element={<CanjeFormPage />}
                     ></Route>
 

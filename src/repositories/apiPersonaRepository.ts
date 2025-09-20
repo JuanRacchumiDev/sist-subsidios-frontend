@@ -23,7 +23,7 @@ export const searchForTipoDocAndNumDoc = async (idTipoDocumento: string, numeroD
 
         const urlApi = `${'/personas/consulta-api?abreviatura='}${abreviatura}${'&numeroDocumento='}${numeroDocumento}`
 
-        const responseApi = await apiClient.get(`${urlApi}`, {
+        const responseApi = await apiClient.get(urlApi, {
             headers: {
                 Authorization: `Bearer ${token}`
             }

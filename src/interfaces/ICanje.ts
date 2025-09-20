@@ -6,10 +6,13 @@ export interface Canje {
     id_descansomedico?: string
     correlativo?: number
     codigo?: string
+    codigo_canje?: string
+    codigo_citt?: string
     fecha_inicio_subsidio?: string
     fecha_final_subsidio?: string
     fecha_inicio_dm?: string
     fecha_final_dm?: string
+    fecha_canje?: string
     fecha_maxima_canje?: string
     fecha_registro?: string
     fecha_actualiza?: string

@@ -1,4 +1,4 @@
-import { DocumentoContingencia } from './IDocumentoTipoContingencia'
+import { DocumentoTipoContingencia } from './IDocumentoTipoContingencia'
 
 export interface TipoContingencia {
     id?: string
@@ -6,7 +6,7 @@ export interface TipoContingencia {
     nombre_url?: string,
     sistema?: boolean
     estado?: boolean
-    documentoTipoCont?: DocumentoContingencia[]
+    documentoTipoCont?: DocumentoTipoContingencia[]
 }
 
 export interface TipoContingenciaResponse {

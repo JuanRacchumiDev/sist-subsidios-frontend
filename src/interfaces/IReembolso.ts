@@ -1,29 +1,21 @@
-import { EstadoReembolso } from "../enums/EDescansoMedico"
+import { EReembolso } from "../enums/EReembolso"
+import { Canje } from "./ICanje"
 
 export interface Reembolso {
     id?: string
-    idCanje?: string
-    idDescansoMedico?: string
-    idEmpresa?: string
-    idColaborador?: string
-    idTipoDescansoMedico?: string
-    idTipoContingencia?: string
-    numeroDocumento?: string
-    fechaInicioDescanso?: string
-    fechaFinalDescanso?: string
-    fechaInicioSubsidio?: string
-    fechaFinalSubsidio?: string
-    fechaMaximaReembolso?: string
-    fechaReembolso?: string
+    id_canje?: string
+    correlativo?: string
     codigo?: string
-    numeroExpediente?: string
-    empresaName?: string
-    colaboradorName?: string
-    tipoDescansoMedicoName?: string
-    tipoContingenciaName?: string
+    codigo_reembolso?: string
+    numero_expediente?: string
+    fecha_registro?: string
+    fecha_reembolso?: string
+    fecha_maxima_reembolso?: string
+    fecha_maxima_subsanar?: string
+    is_cobrable?: boolean
     observacion?: string
-    esCobrable?: boolean
-    estadoRegistro?: EstadoReembolso
+    estado_registro?: EReembolso
+    canje?: Canje
 }
 
 export interface ReembolsoResponse {
@@ -31,5 +23,22 @@ export interface ReembolsoResponse {
     message?: string
     data?: Reembolso | Reembolso[]
     error?: string
+    status?: number
+}
+
+export interface Pagination {
+    currentPage: number
+    limit: number
+    totalPages: number
+    totalItems: number
+    nextPage: number | null
+    previousPage: number | null
+}
+
+export interface ReembolsoPaginateResponse {
+    result: boolean
+    data?: Reembolso[]
+    pagination?: Pagination
+    errors?: string
     status?: number
 }
