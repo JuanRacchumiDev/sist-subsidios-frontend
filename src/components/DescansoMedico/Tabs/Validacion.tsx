@@ -33,14 +33,16 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
 
   const estadoRegistro = form.watch("estadoRegistro");
 
-  const { estadosPermitidos, isDisabled } = useMemo(() => {
+  const { estadosPermitidos } = useMemo(() => {
     const estadosPermitidos: EDescansoMedico[] = [];
     let isDisabled = false;
+
+    console.log({ userProfile });
 
     // Lógica para el perfil "especialista"
     if (userProfile?.slug_perfil === "especialista") {
       if (isEditMode) {
-        console.log("aa");
+        console.log("modo edición");
         // En modo edición, el especialista puede cambiar el estado, pero ciertos campos pueden estar deshabilitados.
         // Aquí no hay campos deshabilitados explícitamente, pero podrías agregar esa lógica.
         // Muestra todos los estados excepto "Registro exitoso"
@@ -51,10 +53,10 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
         });
         isDisabled = false; // El especialista tiene permiso para editar
       } else {
-        console.log("bb");
+        console.log("modo creación");
         // En nuevo registro, el especialista también podría tener permisos para editar
         Object.values(EDescansoMedico).forEach((estado) => {
-          if (estado !== EDescansoMedico.REGISTRO_EXITOSO) {
+          if (estado !== EDescansoMedico.REGISTRO_INGRESADO) {
             estadosPermitidos.push(estado);
           }
         });
@@ -83,29 +85,7 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
       isDisabled = false; // El administrador tiene permiso para editar
     }
 
-    // Lógica con usuarios con perfil id_colaborador
-
-    // if (userProfile?.id_colaborador) {
-    //   if (isEditMode) {
-    //     // En modo edición, el colaborador solo puede ver el estado actual, no cambiarlo.
-    //     estadosPermitidos.push(
-    //       form.getValues("estadoRegistro") as EDescansoMedico
-    //     );
-    //     isDisabled = true;
-    //   } else {
-    //     // En nuevo registro, el estado por defecto es "Registro ingresado" y está deshabilitado.
-    //     estadosPermitidos.push(EDescansoMedico.REGISTRO_INGRESADO);
-    //     isDisabled = true;
-    //   }
-    // } else {
-    //   // Lógica para id_especialista o id_administrador
-    //   // Se muestran todos los estados excepto "Registro exitoso"
-    //   Object.values(EDescansoMedico).forEach((estado) => {
-    //     if (estado !== EDescansoMedico.REGISTRO_EXITOSO) {
-    //       estadosPermitidos.push(estado);
-    //     }
-    //   });
-    // }
+    form.setValue("estadoRegistro", "");
 
     return { estadosPermitidos, isDisabled };
   }, [userProfile, isEditMode, form]);

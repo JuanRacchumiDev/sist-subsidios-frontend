@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormMessage,
@@ -129,12 +128,13 @@ export const DescansoMedicoDetalle = ({
 
   const [totalDias, setTotalDias] = useState<number | null>(null);
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
+  const [isCitt, setIsCitt] = useState<boolean | null>(false);
 
   // Id de la empresa seleccionada
   const selectedEmpresaId = form.watch("idEmpresa");
 
-  // Id del colaborador seleccionado
-  // const selectedColaboradorId = form.watch("idColaborador");
+  // Id del tipo de descanso
+  const selectedTipoDescansoId = form.watch("idTipoDescansoMedico");
 
   // Id del tipo de contingencia seleccionado
   const selectedTipoContingenciaId = form.watch("idTipoContingencia");
@@ -168,37 +168,17 @@ export const DescansoMedicoDetalle = ({
         setTipoContingencias(tipoContingenciasRes);
         setAdjuntos(adjuntosRes);
 
-        // Lógica para preseleccionar la empresa y el colaborador
-        // if (userProfile?.id_empresa && userProfile?.id_colaborador) {
-        //   console.log("existe id_empresa, id_colaborador");
-        //   form.setValue("idEmpresa", userProfile.id_empresa);
-        //   // Actualiza el listado de colaboradores para la empresa seleccionada
-        //   const colaboradoresEmpresa = await dataColaboradores(
-        //     userProfile.id_empresa
-        //   );
-        //   setColaboradores(colaboradoresEmpresa);
-        //   form.setValue("idColaborador", userProfile.id_colaborador);
-        //   setIsDisabled(true);
-        // } else {
-        //   console.log("no existe id_empresa, id_colaborador");
-        //   setIsDisabled(false);
-        // }
-
-        // console.log("userprofile in descansomedicodetalle", userProfile);
-
-        // const { id_empresa, id_colaborador } = userProfile;
-
-        // if (id_empresa && id_colaborador) {
-        //   form.setValue("idEmpresa", id_empresa);
-        //   form.setValue("idColaborador", id_colaborador);
-        //   setIsDisabled(true);
-        // }
-
-        // if (userProfile?.id_empresa && userProfile?.id_colaborador) {
-        //   form.setValue("idEmpresa", userProfile.id_empresa);
-        //   form.setValue("idColaborador", userProfile.id_colaborador);
-        //   setIsDisabled(true); // Deshabilita los campos si hay datos de perfil
-        // }
+        if (userProfile.id_empresa && userProfile.id_colaborador) {
+          console.log("abcdef");
+          setIsDisabled(true);
+        } else {
+          console.log("pqrstu");
+          const isDisabledIdEmpresaIdColaborador = isModeLetter
+            ? isModeLetter
+            : false;
+          setIsDisabled(isDisabledIdEmpresaIdColaborador);
+        }
+        console.log({ isModeLetter });
       } catch (error) {
         console.error("Error al obtener datos", error);
         showToast("error", "Error al cargar los datos del formulario.");
@@ -210,17 +190,31 @@ export const DescansoMedicoDetalle = ({
   // [form, showToast, userProfile]
 
   useEffect(() => {
+    console.log({ selectedTipoDescansoId });
+
+    if (selectedTipoDescansoId) {
+      let isTipoDescansoCitt = false;
+
+      const tipoSeleccionado = tipoDescansos.find(
+        (tipodescanso) => tipodescanso.id === selectedTipoDescansoId
+      );
+
+      console.log({ tipoSeleccionado });
+
+      if (tipoSeleccionado) {
+        const { nombre } = tipoSeleccionado;
+        isTipoDescansoCitt = nombre === "CITT" ? true : false;
+        setIsCitt(isTipoDescansoCitt);
+      }
+    }
+  });
+
+  useEffect(() => {
     if (selectedEmpresaId) {
       const fetchColaboradores = async () => {
         try {
           const colaboradoresRes = await dataColaboradores(selectedEmpresaId);
           setColaboradores(colaboradoresRes);
-          // form.setValue("idColaborador", "");
-
-          // Solo si no estamos en un perfil de usuario, reseteamos el valor
-          // if (!userProfile?.id_empresa) {
-          //   form.setValue("idColaborador", "");
-          // }
         } catch (error) {
           console.error("Error al obtener colaboradores", error);
           showToast("error", "Error al cargar los colaboradores.");
@@ -248,6 +242,20 @@ export const DescansoMedicoDetalle = ({
             const tipoContingencia = data as TipoContingencia;
             const { documentoTipoCont } = tipoContingencia;
             listDocumentos = documentoTipoCont as DocumentoTipoContingencia[];
+
+            // console.log(listDocumentos);
+
+            // console.log({ isCitt });
+
+            // Filtrar los documentos para el caso tipoDescansoMedico igual a CITT
+            if (isCitt) {
+              // console.log("isCitt true");
+              listDocumentos = listDocumentos.filter(
+                (doc) => doc.nombre_url! === "descanso-medico"
+              );
+              // console.log("listDocumentos filtered");
+              // console.log({ listDocumentos });
+            }
           }
 
           setDocumentosTipoContingencia(listDocumentos);
@@ -284,10 +292,6 @@ export const DescansoMedicoDetalle = ({
         control={form.control}
         name="idEmpresa"
         render={({ field, fieldState }) => {
-          // const selectedColaborador = colaboradores.find(
-          //   (c) => c.id === field.value
-          // );
-
           return (
             <FormItem className="flex flex-col">
               <RequiredLabel>Empresa</RequiredLabel>
@@ -299,70 +303,19 @@ export const DescansoMedicoDetalle = ({
                 displayKey="nombre_o_razon_social"
                 valueKey="id"
                 searchKeys={["nombre_o_razon_social"]}
-                // disabled={isModeLetter}
+                disabled={isDisabled}
+                isInvalid={fieldState.invalid}
               />
-              {/* {selectedColaborador && (
-                <FormDescription>
-                  Colaborador seleccionado:{" "}
-                  <b>{selectedColaborador.nombre_completo}</b>
-                </FormDescription>
-              )} */}
               <FormMessage />
             </FormItem>
           );
         }}
       />
 
-      {/* <FormField
-        control={form.control}
-        name="idEmpresa"
-        render={({ field, fieldState }) => (
-          <FormItem>
-            <RequiredLabel>Empresa</RequiredLabel>
-            <Select
-              onValueChange={field.onChange}
-              value={field.value ?? ""}
-              // disabled={isModeLetter}
-            >
-              <FormControl>
-                <SelectTrigger
-                  className={`
-                    ${
-                      fieldState.invalid
-                        ? "border-red-500 focus:ring-red-500"
-                        : "focus:ring-blue-500"
-                    }
-                      focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
-                  `}
-                >
-                  <SelectValue placeholder="Seleccionar empresa" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent className="bg-gray-400">
-                {empresas.map((empresa) => (
-                  <SelectItem
-                    value={empresa.id}
-                    key={empresa.id}
-                    className="cursor-pointer hover:bg-gray-100 transition-colors"
-                  >
-                    {empresa.nombre_o_razon_social}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      /> */}
-
       <FormField
         control={form.control}
         name="idColaborador"
         render={({ field, fieldState }) => {
-          // const selectedColaborador = colaboradores.find(
-          //   (c) => c.id === field.value
-          // );
-
           return (
             <FormItem className="flex flex-col">
               <RequiredLabel>Colaborador</RequiredLabel>
@@ -374,14 +327,9 @@ export const DescansoMedicoDetalle = ({
                 displayKey="nombre_completo"
                 valueKey="id"
                 searchKeys={["nombre_completo"]}
-                // disabled={isModeLetter}
+                disabled={isDisabled}
+                isInvalid={fieldState.invalid}
               />
-              {/* {selectedColaborador && (
-                <FormDescription>
-                  Colaborador seleccionado:{" "}
-                  <b>{selectedColaborador.nombre_completo}</b>
-                </FormDescription>
-              )} */}
               <FormMessage />
             </FormItem>
           );
@@ -429,6 +377,35 @@ export const DescansoMedicoDetalle = ({
           </FormItem>
         )}
       />
+
+      {isCitt && (
+        <FormField
+          control={form.control}
+          name="codigoCitt"
+          render={({ field, fieldState }) => (
+            <FormItem>
+              <RequiredLabel>Código CITT</RequiredLabel>
+              <FormControl>
+                <Input
+                  placeholder="0253523"
+                  maxLength={30}
+                  autoComplete="off"
+                  {...field}
+                  className={`
+                    ${
+                      fieldState.invalid
+                        ? "border-red-500 focus:ring-red-500"
+                        : "focus:ring-blue-500"
+                    }
+                      transition-all duration-300
+                  `}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
 
       <FormField
         control={form.control}
@@ -508,11 +485,6 @@ export const DescansoMedicoDetalle = ({
                   `}
                 />
               </FormControl>
-              {/* <FormDescription>
-                {field.value
-                  ? format(field.value, "PPP")
-                  : "Seleccione una fecha"}
-              </FormDescription> */}
               <FormMessage />
             </FormItem>
           )}
@@ -544,11 +516,6 @@ export const DescansoMedicoDetalle = ({
                   `}
                 />
               </FormControl>
-              {/* <FormDescription>
-                {field.value
-                  ? format(field.value, "PPP")
-                  : "Seleccione una fecha"}
-              </FormDescription> */}
               <FormMessage />
             </FormItem>
           )}
@@ -580,11 +547,6 @@ export const DescansoMedicoDetalle = ({
                   `}
                 />
               </FormControl>
-              {/* <FormDescription>
-                {field.value
-                  ? format(field.value, "PPP")
-                  : "Seleccione una fecha"}
-              </FormDescription> */}
               <FormMessage />
             </FormItem>
           )}

@@ -1,15 +1,18 @@
 import { ECanje } from "../enums/ECanje"
+import { Colaborador } from "./IColaborador"
 import { DescansoMedico } from "./IDescansoMedico"
 
 export interface Canje {
     id?: string
     id_descansomedico?: string
+    id_colaborador?: string
     correlativo?: number
     codigo?: string
     codigo_canje?: string
     codigo_citt?: string
     fecha_inicio_subsidio?: string
     fecha_final_subsidio?: string
+    fecha_otorgamiento?: string
     fecha_inicio_dm?: string
     fecha_final_dm?: string
     fecha_canje?: string
@@ -24,11 +27,15 @@ export interface Canje {
     dia_fecha_final_subsidio?: number
     mes_fecha_final_subsidio?: number
     anio_fecha_final_subsidio?: number
+    total_dias?: number
     is_reembolsable?: boolean
     observacion?: string
     mes_devengado?: string
+    nombre_tipodescansomedico?: string
+    nombre_tipocontingencia?: string
     estado_registro?: ECanje
     descansoMedico?: DescansoMedico
+    colaborador?: Colaborador
 }
 
 export interface CanjeResponse {
@@ -54,4 +61,12 @@ export interface CanjePaginateResponse {
     pagination?: Pagination
     errors?: string
     status?: number
+}
+
+export interface CanjeFilter {
+    nombre_colaborador?: string
+    codigo_canje?: string
+    codigo_citt?: string
+    fecha_inicio_subsidio?: string
+    fecha_final_subsidio?: string
 }

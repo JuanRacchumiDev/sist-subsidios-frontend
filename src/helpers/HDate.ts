@@ -1,23 +1,8 @@
-import { parseISO } from "date-fns";
-// import { es } from 'date-fns/locale';
+import { parseISO, format } from "date-fns";
 import { TIMEZONE_AMERICA_LIMA } from '../params/constants';
-import { formatInTimeZone } from 'date-fns-tz'
+import { formatInTimeZone, toZonedTime } from 'date-fns-tz'
 
 export default class HDate {
-    // static formatDate = (dateString: string | null | undefined, dateFormat: string): string => {
-    //     if (!dateString) {
-    //         return '';
-    //     }
-
-    //     try {
-    //         const date = parseISO(dateString);
-    //         return format(date, dateFormat, { locale: es });
-    //     } catch (error) {
-    //         console.error('Error al formatear la fecha:', error);
-    //         return '';
-    //     }
-    // }
-
     static formatDateTimezone = (dateInput: string | Date, formatOutput: string = 'yyyy-MM-dd'): string => {
         let dateToProcess: Date = null
 
@@ -32,5 +17,15 @@ export default class HDate {
 
         // Formateo de fecha
         return zonedDate
+    }
+
+    /**
+     * Obtiene la fecha actual
+     * @returns {string} La fecha en formato 'YYYY-MM-DD'
+     */
+    static getCurrentDateToString(formatDate: string): string {
+        const now = new Date();
+        const dateLima = toZonedTime(now, TIMEZONE_AMERICA_LIMA)
+        return format(dateLima, formatDate)
     }
 }

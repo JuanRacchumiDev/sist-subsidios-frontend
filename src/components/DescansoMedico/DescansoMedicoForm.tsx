@@ -40,81 +40,124 @@ import { useToast } from "../../context/ToastContext";
 import { EDescansoMedico } from "../../enums/EDescansoMedico";
 import { getAuthData } from "../../utils/authMemo";
 import HDate from "../../helpers/HDate";
-import { parseISO } from "date-fns";
+import { isAfter, isBefore, parseISO } from "date-fns";
 
-export const formSchema = z.object({
-  id: z.string().optional(),
-  idEmpresa: z
-    .string({
-      message: "Debe seleccionar una empresa",
-    })
-    .min(1, "Debe seleccionar una empresa"),
-  idColaborador: z
-    .string({
-      message: "Debe seleccionar un colaborador",
-    })
-    .min(1, "Debe seleccionar un colaborador"),
-  idTipoDescansoMedico: z
-    .string({
-      message: "Debe seleccionar un tipo de descanso médico",
-    })
-    .min(1, "Debe seleccionar un tipo de descanso médico"),
-  idTipoContingencia: z
-    .string({
-      message: "Debe seleccionar un tipo de contingencia",
-    })
-    .min(1, "Debe seleccionar un tipo de contingencia"),
-  fechaOtorgamiento: z
-    .date({
-      message: "La fecha de otorgamiento es requerida",
-    })
-    .nullable()
-    .refine((val) => val !== null, {
-      message: "La fecha de otorgamiento es requerida",
+export const formSchema = z
+  .object({
+    id: z.string().optional(),
+    idEmpresa: z
+      .string({
+        message: "Debe seleccionar una empresa",
+      })
+      .min(1, "Debe seleccionar una empresa"),
+    idColaborador: z
+      .string({
+        message: "Debe seleccionar un colaborador",
+      })
+      .min(1, "Debe seleccionar un colaborador"),
+    idTipoDescansoMedico: z
+      .string({
+        message: "Debe seleccionar un tipo de descanso médico",
+      })
+      .min(1, "Debe seleccionar un tipo de descanso médico"),
+    idTipoContingencia: z
+      .string({
+        message: "Debe seleccionar un tipo de contingencia",
+      })
+      .min(1, "Debe seleccionar un tipo de contingencia"),
+    fechaOtorgamiento: z
+      .date({
+        message: "La fecha de otorgamiento es requerida",
+      })
+      .nullable()
+      .refine((val) => val !== null, {
+        message: "La fecha de otorgamiento es requerida",
+      }),
+    fechaInicio: z
+      .date({
+        message: "La fecha de inicio es requerida",
+      })
+      .nullable()
+      .refine((val) => val !== null, {
+        message: "La fecha de inicio es requerida",
+      }),
+    fechaFinal: z
+      .date({
+        message: "La fecha final es requerida",
+      })
+      .nullable()
+      .refine((val) => val !== null, {
+        message: "La fecha final es requerida",
+      }),
+    codigoCitt: z.string().optional(),
+    totalDias: z.string().optional(),
+    colegiadoMedico: z.string().min(1, "El número de colegiado es requerido"),
+    medicoTratante: z
+      .string()
+      .min(1, "El nombre del médico tratante es requerido"),
+    idDiagnostico: z
+      .string({
+        message: "Debe seleccionar un diagnóstico",
+      })
+      .min(1, "Debe seleccionar un diagnóstico"),
+    nombreEstablecimiento: z
+      .string()
+      .min(1, "El nombre del médico tratante es requerido"),
+    documentos: z.record(z.string(), z.any()).optional(),
+    aceptaResponsabilidad: z.boolean().refine((val) => val === true, {
+      message: "Debe aceptar la declaración de responsabilidad",
     }),
-  fechaInicio: z
-    .date({
-      message: "La fecha de inicio es requerida",
-    })
-    .nullable()
-    .refine((val) => val !== null, {
-      message: "La fecha de inicio es requerida",
+    aceptaPoliticaSubsidio: z.boolean().refine((val) => val === true, {
+      message: "Debe aceptar la política de subsidio",
     }),
-  fechaFinal: z
-    .date({
-      message: "La fecha final es requerida",
-    })
-    .nullable()
-    .refine((val) => val !== null, {
-      message: "La fecha final es requerida",
-    }),
-  totalDias: z.string().optional(),
-  colegiadoMedico: z.string().min(1, "El número de colegiado es requerido"),
-  medicoTratante: z
-    .string()
-    .min(1, "El nombre del médico tratante es requerido"),
-  idDiagnostico: z
-    .string({
-      message: "Debe seleccionar un diagnóstico",
-    })
-    .min(1, "Debe seleccionar un diagnóstico"),
-  nombreEstablecimiento: z
-    .string()
-    .min(1, "El nombre del médico tratante es requerido"),
-  documentos: z.record(z.string(), z.any()).optional(),
-  aceptaResponsabilidad: z.boolean().refine((val) => val === true, {
-    message: "Debe aceptar la declaración de responsabilidad",
-  }),
-  aceptaPoliticaSubsidio: z.boolean().refine((val) => val === true, {
-    message: "Debe aceptar la política de subsidio",
-  }),
-  estadoRegistro: z
-    .string({
-      message: "Debe seleccionar un estado",
-    })
-    .min(1, "Debe seleccionar un estado"),
-  observacion: z.string().optional(),
-});
+    estadoRegistro: z
+      .string({
+        message: "Debe seleccionar un estado",
+      })
+      .min(1, "Debe seleccionar un estado"),
+    observacion: z.string().optional(),
+  })
+  .superRefine(async (data, ctx) => {
+    const {
+      idTipoDescansoMedico,
+      codigoCitt,
+      fechaOtorgamiento,
+      fechaInicio,
+      fechaFinal,
+    } = data;
+
+    if (
+      idTipoDescansoMedico === "972d5ed2-26f9-4ffd-b7cf-127384fad9db" &&
+      !codigoCitt
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "El código CITT es requerido para este tipo de descanso",
+        path: ["codigoCitt"],
+      });
+    }
+
+    if (fechaOtorgamiento && fechaInicio) {
+      if (isBefore(fechaInicio, fechaOtorgamiento)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "La fecha de inicio debe ser posterior o igual fecha de otorgamiento",
+          path: ["fechaInicio"],
+        });
+      }
+    }
+
+    if (fechaFinal && fechaInicio) {
+      if (!isAfter(fechaFinal, fechaInicio)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "La fecha final debe ser posterior a la fecha de inicio",
+          path: ["fechaFinal"],
+        });
+      }
+    }
+  });
 
 export const DescansoMedicoForm = () => {
   const [showResponsabilidad, setShowResponsabilidad] = useState(false);
@@ -150,6 +193,7 @@ export const DescansoMedicoForm = () => {
       fechaOtorgamiento: null,
       fechaInicio: null,
       fechaFinal: null,
+      codigoCitt: "",
       totalDias: "",
       colegiadoMedico: "",
       medicoTratante: "",
@@ -199,6 +243,12 @@ export const DescansoMedicoForm = () => {
               idColaborador: descanso.id_colaborador,
               idTipoDescansoMedico: descanso.id_tipodescansomedico,
               idTipoContingencia: descanso.id_tipocontingencia,
+              codigoCitt: descanso.codigo_citt || "",
+              // fechaOtorgamiento: descanso.fecha_otorgamiento
+              //   ? descanso.fecha_otorgamiento
+              //   : "",
+              // fechaInicio: descanso.fecha_inicio ? descanso.fecha_inicio : "",
+              // fechaFinal: descanso.fecha_final ? descanso.fecha_final : "",
               fechaOtorgamiento: descanso.fecha_otorgamiento
                 ? parseISO(descanso.fecha_otorgamiento)
                 : null,
@@ -256,6 +306,7 @@ export const DescansoMedicoForm = () => {
         fechaOtorgamiento,
         fechaInicio,
         fechaFinal,
+        codigoCitt,
         colegiadoMedico,
         medicoTratante,
         totalDias,
@@ -326,6 +377,7 @@ export const DescansoMedicoForm = () => {
         id_tipodescansomedico: idTipoDescansoMedico,
         id_tipocontingencia: idTipoContingencia,
         codcie10_diagnostico: idDiagnostico,
+        codigo_citt: codigoCitt,
         fecha_otorgamiento: HDate.formatDateTimezone(fechaOtorgamiento),
         fecha_inicio: HDate.formatDateTimezone(fechaInicio),
         fecha_final: HDate.formatDateTimezone(fechaFinal),
@@ -361,21 +413,6 @@ export const DescansoMedicoForm = () => {
       } else {
         showToast("error", message || "Error al procesar el descanso médico.");
       }
-
-      // const responseNewDescanso = await createDescanso(payloadDescansoMedico);
-      // const { result: resultNewDescanso, message: messageNewDescanso } =
-      //   responseNewDescanso;
-
-      // if (resultNewDescanso) {
-      //   showToast("success", messageNewDescanso);
-      //   navigate("/descanso-medico");
-      // } else {
-      //   showToast(
-      //     "error",
-      //     messageNewDescanso || "Error al registrar el descanso médico"
-      //   );
-      //   return;
-      // }
     } catch (error) {
       console.error("Error al registrar cargo", error);
       showToast("error", error);
@@ -454,25 +491,42 @@ export const DescansoMedicoForm = () => {
                           onChange={field.onChange}
                           id="responsabilidad"
                           className={
-                            fieldState.invalid
-                              ? "border-red-500 text-red-500 focus:ring-red-500"
-                              : ""
+                            // Apply ring-red-500 for invalid state
+                            `ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300
+                            ${
+                              fieldState.invalid
+                                ? "text-red-500 focus-visible:ring-red-500 border-red-500"
+                                : "text-blue-600 focus-visible:ring-blue-600 border-gray-300"
+                            }`
                           }
+                          // className={
+                          //   fieldState.invalid
+                          //     ? "border-red-500 text-red-500 focus:ring-red-500"
+                          //     : ""
+                          // }
                         />
-                        <label
-                          htmlFor="responsabilidad"
-                          className="text-sm text-gray-700"
-                        >
-                          Declaro que la información proporcionada es verdadera
-                          y es mi responsabilidad
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => setShowResponsabilidad(true)}
-                          className="text-blue-500 underline text-sm"
-                        >
-                          Ver más
-                        </button>
+                        <div className="grid gap-1.5 leading-none">
+                          <div className="flex items-center">
+                            <label
+                              htmlFor="responsabilidad"
+                              className={`text-sm text-gray-700 font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
+                                fieldState.invalid ? "text-red-600" : ""
+                              }`}
+                              // className="text-sm text-gray-700"
+                            >
+                              <span className="text-red-500 mr-1">*</span>
+                              Declaro que la información proporcionada es
+                              verdadera y es mi responsabilidad
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => setShowResponsabilidad(true)}
+                              className="text-blue-500 underline text-sm text-left ml-2"
+                            >
+                              Ver más
+                            </button>
+                          </div>
+                        </div>
                       </div>
                       <FormMessage />
                     </FormItem>
@@ -490,26 +544,40 @@ export const DescansoMedicoForm = () => {
                           checked={field.value}
                           onChange={field.onChange}
                           id="politicaSubsidio"
-                          className={
-                            fieldState.invalid
-                              ? "border-red-500 text-red-500 focus:ring-red-500"
-                              : ""
-                          }
+                          className={`ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300
+                            ${
+                              fieldState.invalid
+                                ? "text-red-500 focus-visible:ring-red-500 border-red-500"
+                                : "text-blue-600 focus-visible:ring-blue-600 border-gray-300"
+                            }`}
+                          // className={
+                          //   fieldState.invalid
+                          //     ? "border-red-500 text-red-500 focus:ring-red-500"
+                          //     : ""
+                          // }
                         />
-                        <label
-                          htmlFor="politicaSubsidio"
-                          className="text-sm text-gray-700"
-                        >
-                          Acepto la política de la empresa en caso de subsidio
-                          por documentación incorrecta
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => setShowPoliticaSubsidio(true)}
-                          className="text-blue-500 underline text-sm"
-                        >
-                          Ver más
-                        </button>
+                        <div className="grid gap-1.5 leading-none">
+                          <div className="flex items-center">
+                            <label
+                              htmlFor="politicaSubsidio"
+                              className={`text-sm text-gray-700 font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
+                                fieldState.invalid ? "text-red-600" : ""
+                              }`}
+                              // className="text-sm text-gray-700"
+                            >
+                              <span className="text-red-500 mr-1">*</span>
+                              Acepto la política de la empresa en caso de
+                              subsidio por documentación incorrecta
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => setShowPoliticaSubsidio(true)}
+                              className="text-blue-500 underline text-sm text-left ml-2"
+                            >
+                              Ver más
+                            </button>
+                          </div>
+                        </div>
                       </div>
                       <FormMessage />
                     </FormItem>

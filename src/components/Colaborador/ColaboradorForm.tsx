@@ -44,6 +44,7 @@ import {
   createColaborador,
   getColaboradorById,
 } from "../../services/colaboradorService";
+import SearchableCombobox from "../Common/SearchableCombobox";
 
 const formSchema = z.object({
   idTipoDocumento: z
@@ -448,12 +449,14 @@ export const ColaboradorForm = () => {
                                         fechaParsed
                                       );
                                     }
-
-                                    showToast("success", message);
-
                                     setCamposHabilitadosPersona(false);
+                                    showToast("success", message);
                                   } else {
                                     setCamposHabilitadosPersona(true);
+                                    showToast(
+                                      "warning",
+                                      "No se encontraron datos de persona"
+                                    );
                                   }
                                 } catch (error) {
                                   setCamposHabilitadosPersona(true);
@@ -588,6 +591,7 @@ export const ColaboradorForm = () => {
                               }
                                 transition-all duration-300
                             `}
+                            disabled={!camposHabilitadosPersona}
                           />
                         </FormControl>
                         {/* <FormDescription>
@@ -607,7 +611,7 @@ export const ColaboradorForm = () => {
                   Información laboral
                 </legend>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
+                  {/* <FormField
                     control={form.control}
                     name="idEmpresa"
                     render={({ field, fieldState }) => (
@@ -646,9 +650,31 @@ export const ColaboradorForm = () => {
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
+                  /> */}
 
                   <FormField
+                    control={form.control}
+                    name="idEmpresa"
+                    render={({ field, fieldState }) => {
+                      return (
+                        <FormItem className="flex flex-col">
+                          <RequiredLabel>Empresa</RequiredLabel>
+                          <SearchableCombobox<Empresa>
+                            placeholder="Buscar una empresa"
+                            options={empresas}
+                            value={field.value}
+                            onChange={field.onChange}
+                            displayKey="nombre_o_razon_social"
+                            valueKey="id"
+                            searchKeys={["nombre_o_razon_social"]}
+                          />
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
+
+                  {/* <FormField
                     control={form.control}
                     name="idCargo"
                     render={({ field, fieldState }) => (
@@ -687,6 +713,28 @@ export const ColaboradorForm = () => {
                         <FormMessage />
                       </FormItem>
                     )}
+                  /> */}
+
+                  <FormField
+                    control={form.control}
+                    name="idCargo"
+                    render={({ field, fieldState }) => {
+                      return (
+                        <FormItem className="flex flex-col">
+                          <RequiredLabel>Cargo</RequiredLabel>
+                          <SearchableCombobox<Cargo>
+                            placeholder="Buscar un cargo"
+                            options={cargos}
+                            value={field.value}
+                            onChange={field.onChange}
+                            displayKey="nombre"
+                            valueKey="id"
+                            searchKeys={["nombre"]}
+                          />
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
 
                   <FormField

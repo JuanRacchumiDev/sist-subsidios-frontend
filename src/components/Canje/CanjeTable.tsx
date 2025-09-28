@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CanjeRow } from "./CanjeRow";
 import { getAuthData } from "@/utils/authMemo";
 import {
   Canje,
+  CanjeFilter,
   CanjePaginateResponse,
   Pagination as PaginationType,
 } from "../../interfaces/ICanje";
@@ -25,6 +26,17 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { Button } from "../ui/button";
+import { FilterIcon } from "lucide-react";
+import { CanjeFilterModal } from "./CanjeFilterModal";
+
+// Definimos el estado inicial de los filtros
+const initialFilters: CanjeFilter = {
+  codigo_canje: undefined,
+  codigo_citt: undefined,
+  fecha_inicio_subsidio: undefined,
+  fecha_final_subsidio: undefined,
+};
 
 export const CanjeTable = () => {
   const [canjes, setCanjes] = useState<Canje[]>([]);
@@ -37,7 +49,24 @@ export const CanjeTable = () => {
     previousPage: null,
   });
 
-  const userProfile = useMemo(() => getAuthData()?.usuario, []);
+  const [filters, setFilters] = useState<CanjeFilter>(initialFilters);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+
+  // const userProfile = useMemo(() => getAuthData()?.usuario, []);
+
+  const handleApplyFilters = (newFilters: CanjeFilter) => {
+    // Asegurar que las cadenas vacías de los Inputs se conviertan a `undefined` al aplicar
+    const cleanedFilters: CanjeFilter = Object.fromEntries(
+      Object.entries(newFilters).map(([key, value]) => [
+        key,
+        value === "" || value === null ? undefined : value,
+      ])
+    ) as CanjeFilter;
+
+    setFilters(cleanedFilters);
+    setPagination((prev) => ({ ...prev, currentPage: 1 }));
+    setIsFilterModalOpen(false);
+  };
 
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= pagination.totalPages) {
@@ -45,36 +74,52 @@ export const CanjeTable = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const { currentPage, limit } = pagination;
-        const response = await getCanjesWithPaginate(currentPage, limit);
-        console.log("response canjes", response);
+  // useEffect(() => {
+  const fetchData = useCallback(async () => {
+    try {
+      const { currentPage, limit } = pagination;
 
-        const { result, data, pagination: detailtPagination } = response;
+      // Limpia los filtros (elimina `undefined` para no enviar el query param)
+      const cleanFilters = Object.fromEntries(
+        Object.entries(filters).filter(
+          ([, value]) => value !== undefined && value !== null && value !== ""
+        )
+      );
 
-        if (result && data && detailtPagination) {
-          setCanjes(data as Canje[]);
-          setPagination(detailtPagination);
-        } else {
-          setCanjes([]);
-          setPagination({
-            currentPage: 1,
-            limit: 10,
-            totalPages: 1,
-            totalItems: 0,
-            nextPage: null,
-            previousPage: null,
-          });
-        }
-      } catch (error) {
-        console.error("Error al obtener canjes", error);
+      const response = await getCanjesWithPaginate(
+        currentPage,
+        limit,
+        cleanFilters
+      );
+      console.log("response canjes", response);
+
+      const { result, data, pagination: detailtPagination } = response;
+
+      if (result && data && detailtPagination) {
+        setCanjes(data as Canje[]);
+        setPagination(detailtPagination);
+      } else {
+        setCanjes([]);
+        setPagination({
+          currentPage: 1,
+          limit: 10,
+          totalPages: 1,
+          totalItems: 0,
+          nextPage: null,
+          previousPage: null,
+        });
       }
-    };
+    } catch (error) {
+      console.error("Error al obtener canjes", error);
+    }
+  }, [pagination.currentPage, pagination.limit, filters]);
 
+  useEffect(() => {
     fetchData();
-  }, [pagination.currentPage, pagination.limit]);
+  }, [fetchData]);
+
+  //   fetchData();
+  // }, [pagination.currentPage, pagination.limit]);
 
   const renderPaginationItems = () => {
     const items = [];
@@ -123,11 +168,28 @@ export const CanjeTable = () => {
   return (
     <div className="w-full space-y-4 pt-4">
       <div className="flex justify-end items-center space-x-2 pb-4">
-        <Input
+        <Button
+          variant="outline"
+          onClick={() => setIsFilterModalOpen(true)}
+          className="flex items-center space-x-2 border-blue-500 text-blue-500 hover:bg-blue-50 hover:text-blue-600 hover:cursor-pointer transition"
+        >
+          <FilterIcon className="w-4 h-4" />
+          {/* Contar los filtros aplicados (valores que no son undefined/null/vacío) */}
+          <span>
+            Filtros (
+            {
+              Object.values(filters).filter(
+                (v) => v !== undefined && v !== null && v !== ""
+              ).length
+            }
+            )
+          </span>
+        </Button>
+        {/* <Input
           type="text"
           placeholder="Buscar por razón social o RUC"
           className="w-72 border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
-        />
+        /> */}
       </div>
       <div className="rounded-md border border-gray-200 shadow-sm">
         <Table>
@@ -137,13 +199,34 @@ export const CanjeTable = () => {
                 Colaborador
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
-                Fecha Inicio Subsidio
+                Fecha Otorgamiento
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
-                Fecha Final Subsidio
+                Fecha Inicio
+              </TableHead>
+              <TableHead className="text-gray-600 font-medium">
+                Fecha Final
+              </TableHead>
+              <TableHead className="text-gray-600 font-medium">
+                Total días
+              </TableHead>
+              <TableHead className="text-gray-600 font-medium">
+                Fecha Máxima Canje
+              </TableHead>
+              <TableHead className="text-gray-600 font-medium">
+                Tipo descanso
+              </TableHead>
+              <TableHead className="text-gray-600 font-medium">
+                Tipo contingencia
+              </TableHead>
+              <TableHead className="text-gray-600 font-medium">
+                Mes devengado
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
                 Estado
+              </TableHead>
+              <TableHead className="text-gray-600 font-medium">
+                Subsidiado
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
                 Acciones
@@ -156,7 +239,7 @@ export const CanjeTable = () => {
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={12}
                   className="text-center text-gray-500 py-6"
                 >
                   No se encontraron canjes registrados
@@ -191,6 +274,13 @@ export const CanjeTable = () => {
           </PaginationContent>
         </Pagination>
       </div>
+
+      <CanjeFilterModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        currentFilters={filters}
+        onApplyFilters={handleApplyFilters}
+      />
     </div>
   );
 };

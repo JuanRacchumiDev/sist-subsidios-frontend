@@ -134,11 +134,14 @@ export const UsuarioTable = () => {
           <TableHeader>
             <TableRow className="bg-gray-100">
               <TableHead className="text-gray-600 font-medium">
-                Razón Social
+                Nombre de Usuario
               </TableHead>
-              <TableHead className="text-gray-600 font-medium">RUC</TableHead>
               <TableHead className="text-gray-600 font-medium">
-                Dirección
+                Persona
+              </TableHead>
+              <TableHead className="text-gray-600 font-medium">Email</TableHead>
+              <TableHead className="text-gray-600 font-medium">
+                Perfil
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
                 Estado

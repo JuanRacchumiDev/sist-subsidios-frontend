@@ -36,7 +36,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "../ui/collapsible";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 import { DescansoMedico } from "@/interfaces/IDescansoMedico";
 import { Canje } from "../../interfaces/ICanje";
@@ -72,6 +72,8 @@ export const CanjeForm = () => {
   const isEditMode = !!id;
 
   const { showToast } = useToast();
+
+  const [isOpen, setIsOpen] = useState(false); // Estado para controlar el Collapsible
 
   const estadosPermitidos: ECanje[] = useMemo(() => {
     return Object.values(ECanje);
@@ -146,9 +148,6 @@ export const CanjeForm = () => {
         observacion,
       } = values;
 
-      // Obteniendo la fecha actual en formato yyyy-mm-dd
-      const fechaRegistro = HDate.formatDateTimezone(new Date());
-
       const payloadCanje: Canje = {
         fecha_canje: HDate.formatDateTimezone(fechaCanje),
         codigo_canje: codigoCanje,
@@ -192,15 +191,22 @@ export const CanjeForm = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Sección de campos de solo lectura */}
-              <Collapsible className="mx-auto max-w-3xl space-y-2">
+              <Collapsible
+                className="w-full space-y-2"
+                open={isOpen}
+                onOpenChange={setIsOpen}
+              >
                 <div className="flex items-center justify-between rounded-md border border-gray-200 bg-white px-4 py-2 font-medium transition-all hover:bg-gray-100 focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 cursor-pointer">
                   <span className="text-gray-700">
                     Ver datos del descanso médico
                   </span>
                   <CollapsibleTrigger asChild>
                     <Button variant="ghost" size="sm" className="w-9 p-0">
-                      {/* Aquí se aplica la rotación de la flecha */}
-                      <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      {isOpen ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
                       <span className="sr-only">Toggle</span>
                     </Button>
                   </CollapsibleTrigger>
@@ -215,7 +221,7 @@ export const CanjeForm = () => {
                         </label>
                         <Input
                           disabled
-                          value={descanso?.colaborador.nombre_completo || ""}
+                          value={descanso?.colaborador_dm.nombre_completo || ""}
                         />
                       </div>
                       <div>
@@ -236,17 +242,39 @@ export const CanjeForm = () => {
                           value={descanso?.nombre_tipocontingencia || ""}
                         />
                       </div>
-                      <div>
+                    </div>
+                    <div className="flex flex-wrap gap-4 mt-3">
+                      <div className="flex-1 min-w-[150px]">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Inicio Descanso
                         </label>
-                        <Input disabled value={descanso?.fecha_inicio || ""} />
+                        <Input
+                          disabled
+                          value={
+                            descanso?.fecha_inicio
+                              ? HDate.formatDateTimezone(
+                                  descanso.fecha_inicio,
+                                  "dd/MM/yyyy"
+                                )
+                              : ""
+                          }
+                        />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Fin Descanso
                         </label>
-                        <Input disabled value={descanso?.fecha_final || ""} />
+                        <Input
+                          disabled
+                          value={
+                            descanso?.fecha_final
+                              ? HDate.formatDateTimezone(
+                                  descanso.fecha_final,
+                                  "dd/MM/yyyy"
+                                )
+                              : ""
+                          }
+                        />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -258,7 +286,17 @@ export const CanjeForm = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Fecha Máxima Canje
                         </label>
-                        <Input disabled value={fechaMaximaCanje || ""} />
+                        <Input
+                          disabled
+                          value={
+                            fechaMaximaCanje
+                              ? HDate.formatDateTimezone(
+                                  fechaMaximaCanje,
+                                  "dd/MM/yyyy"
+                                )
+                              : ""
+                          }
+                        />
                       </div>
                     </div>
                   </div>
@@ -404,7 +442,7 @@ export const CanjeForm = () => {
                           <Input
                             placeholder="Código CITT"
                             autoComplete="off"
-                            maxLength={30}
+                            maxLength={20}
                             {...field}
                             className={`
                             ${

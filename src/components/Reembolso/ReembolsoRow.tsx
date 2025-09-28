@@ -13,6 +13,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import HDate from "../../helpers/HDate";
 import { Reembolso } from "@/interfaces/IReembolso";
+import { Canje } from "@/interfaces/ICanje";
+import { DescansoMedico } from "@/interfaces/IDescansoMedico";
 import BadgeEstado from "../Common/BadgeEstado";
 import { EReembolso } from "@/enums/EReembolso";
 
@@ -22,10 +24,18 @@ interface Props {
 
 export const ReembolsoRow: React.FC<Props> = ({ reembolso }) => {
   const navigate = useNavigate();
-  const colaborador = `
-    ${reembolso.canje.descansoMedico.colaborador.apellido_paterno}
-    ${reembolso.canje.descansoMedico.colaborador.apellido_materno}
-    ${reembolso.canje.descansoMedico.colaborador.nombres}`;
+
+  const { canje } = reembolso;
+
+  const dataCanje = canje as Canje;
+
+  const { descansoMedico } = dataCanje;
+
+  const dataDescansoMedico = descansoMedico as DescansoMedico;
+
+  const { colaborador_dm: colaborador } = dataDescansoMedico;
+
+  const { nombre_completo: nombreColaborador } = colaborador;
 
   const handleShowDetail = () => {
     navigate(`/reembolso/editar/${reembolso.id}`);
@@ -36,9 +46,17 @@ export const ReembolsoRow: React.FC<Props> = ({ reembolso }) => {
       key={reembolso.id}
       className="hover:bg-blue-100 hover:cursor-pointer transition-colors duration-200"
     >
-      <TableCell className="py-3">{colaborador}</TableCell>
+      <TableCell className="py-3">{nombreColaborador}</TableCell>
       <TableCell className="py-3">
-        {HDate.formatDateTimezone(reembolso.fecha_reembolso, "dd/MM/yyyy")}
+        {reembolso.fecha_reembolso
+          ? HDate.formatDateTimezone(reembolso.fecha_reembolso, "dd/MM/yyyy")
+          : ""}
+      </TableCell>
+      <TableCell className="py-3">
+        {HDate.formatDateTimezone(
+          reembolso.fecha_maxima_reembolso,
+          "dd/MM/yyyy"
+        )}
       </TableCell>
       <TableCell className="py-3">{reembolso.codigo}</TableCell>
       <TableCell className="py-3">{reembolso.numero_expediente}</TableCell>

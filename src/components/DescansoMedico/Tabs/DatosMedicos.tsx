@@ -44,9 +44,6 @@ export const DatosMedicos = ({
 
   const [dxs, setDxs] = useState<Diagnostico[]>([]);
 
-  // Id del diagnóstico seleccionado
-  // const selectedDiagnosticoId = form.watch("idDiagnostico");
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -68,12 +65,6 @@ export const DatosMedicos = ({
       display: `${dx.codCie10} - ${dx.nombre}`,
     }));
   }, [dxs]);
-
-  // Id del diagnóstico seleccionado
-  const selectedDiagnosticoId = form.watch("idDiagnostico");
-  const selectedDiagnostico = formattedDxs.find(
-    (dx) => dx.codCie10 === selectedDiagnosticoId
-  );
 
   return (
     <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -137,10 +128,6 @@ export const DatosMedicos = ({
         control={form.control}
         name="idDiagnostico"
         render={({ field, fieldState }) => {
-          // const selectedDiagnostico = dxs.find(
-          //   (dx) => dx.codCie10 === field.value
-          // );
-
           return (
             <FormItem className="flex flex-col">
               <RequiredLabel>Diagnóstico</RequiredLabel>
@@ -153,12 +140,8 @@ export const DatosMedicos = ({
                 valueKey="codCie10"
                 searchKeys={["codCie10", "nombre"]}
                 disabled={isModeLetter}
+                isInvalid={fieldState.invalid}
               />
-              {/* {selectedDiagnostico && (
-                <FormDescription>
-                  Diagnóstico seleccionado: <b>{selectedDiagnostico.nombre}</b>
-                </FormDescription>
-              )} */}
               <FormMessage />
             </FormItem>
           );

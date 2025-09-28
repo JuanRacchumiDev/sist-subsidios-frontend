@@ -30,9 +30,11 @@ export const UsuarioRow: React.FC<Props> = ({ usuario }) => {
       className="hover:bg-blue-100 hover:cursor-pointer transition-colors duration-200"
     >
       <TableCell className="py-3">{usuario.username}</TableCell>
+      <TableCell className="py-3">
+        {usuario.persona ? usuario.persona.nombre_completo : <></>}
+      </TableCell>
       <TableCell className="py-3">{usuario.email}</TableCell>
       <TableCell className="py-3">{usuario.perfil.nombre}</TableCell>
-      {/* <TableCell>{usuario.perfil.nombre}</TableCell> */}
       <TableCell className="py-3">
         {usuario.estado ? (
           <CircleCheck className="text-green-500 w-5 h-5" />

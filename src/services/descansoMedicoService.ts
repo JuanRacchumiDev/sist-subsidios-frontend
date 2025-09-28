@@ -4,9 +4,11 @@ import {
     getById,
     getAllWithPaginate,
     getAllByColaboradorPaginate,
+    getAllForReports,
     create,
     update
 } from '../repositories/descansoMedicoRepository'
+import { DescansoMedicoFilter } from '../interfaces/IDescansoMedico'
 
 export const getDescansos = async () => {
     const response = await getAll()
@@ -16,20 +18,54 @@ export const getDescansos = async () => {
     }
 }
 
-export const getDescansosWithPaginate = async (page: number, limit: number) => {
-    const response = await getAllWithPaginate(page, limit)
+export const getDescansosWithPaginate = async (
+    page: number,
+    limit: number,
+    filters: DescansoMedicoFilter = {}
+) => {
+    // Construir la cadena de query parameters
+    const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...Object.fromEntries(
+            Object.entries(filters).filter(([, value]) => value)
+        )
+    }).toString()
+
+    // const response = await getAllWithPaginate(page, limit)
+    const response = await getAllWithPaginate(queryParams)
 
     return {
         ...response
     }
 }
 
-export const getDescansosByColaboradorWithPaginate = async (idColaborador: string, page: number, limit: number) => {
-    const response = await getAllByColaboradorPaginate(idColaborador, page, limit)
+export const getDescansosByColaboradorWithPaginate = async (
+    idColaborador: string,
+    page: number,
+    limit: number,
+    filters: DescansoMedicoFilter = {}
+) => {
+    const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...Object.fromEntries(
+            Object.entries(filters).filter(([, value]) => value)
+        )
+    }).toString()
+
+    // const response = await getAllByColaboradorPaginate(idColaborador, page, limit)
+    const response = await getAllByColaboradorPaginate(idColaborador, queryParams)
 
     return {
         ...response
     }
+}
+
+export const getDescansosForReport = async (tipo: string) => {
+    const response = await getAllForReports(tipo)
+
+    return response
 }
 
 export const getDescansoById = async (id: string) => {

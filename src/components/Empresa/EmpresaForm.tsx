@@ -272,6 +272,14 @@ export const EmpresaForm = () => {
 
             const totalRepresentantes = listRepresentantes.length;
 
+            if (isEditMode && totalRepresentantes === 0) {
+              console.log("inhabilitar campos persona");
+              setCamposHabilitadosPersona(false);
+            } else {
+              console.log("habilitar campos persona");
+              setCamposHabilitadosPersona(true);
+            }
+
             if (totalRepresentantes === 1) {
               const representante = listRepresentantes[0] as RepresentanteLegal;
 
@@ -387,11 +395,11 @@ export const EmpresaForm = () => {
                                     form.setValue("direccion", direccion);
                                     setCamposHabilitadosEmpresa(false);
                                   } else {
+                                    setCamposHabilitadosEmpresa(true);
                                     showToast(
                                       "warning",
                                       "No se encontraron datos de empresa"
                                     );
-                                    setCamposHabilitadosEmpresa(true);
                                   }
                                 } catch (error) {
                                   setCamposHabilitadosEmpresa(true);
@@ -489,7 +497,7 @@ export const EmpresaForm = () => {
                         <Select
                           onValueChange={field.onChange}
                           value={field.value ?? ""}
-                          disabled={isEditMode}
+                          disabled={camposHabilitadosPersona}
                         >
                           <FormControl>
                             <SelectTrigger
@@ -534,7 +542,8 @@ export const EmpresaForm = () => {
                             autoComplete="off"
                             maxLength={8}
                             {...field}
-                            disabled={isEditMode}
+                            disabled={camposHabilitadosPersona}
+                            // disabled={isEditMode}
                             onKeyDown={async (e) => {
                               if (e.key === "Enter") {
                                 e.preventDefault();
@@ -571,12 +580,16 @@ export const EmpresaForm = () => {
                                       "apellidoMaterno",
                                       apellido_materno
                                     );
-                                    setCamposHabilitadosPersona(false);
-                                  } else {
                                     setCamposHabilitadosPersona(true);
+                                  } else {
+                                    setCamposHabilitadosPersona(false);
+                                    showToast(
+                                      "warning",
+                                      "No se encontraron datos de persona"
+                                    );
                                   }
                                 } catch (error) {
-                                  setCamposHabilitadosPersona(true);
+                                  setCamposHabilitadosPersona(false);
                                   showToast(
                                     "error",
                                     "Error al buscar una persona"
@@ -611,7 +624,8 @@ export const EmpresaForm = () => {
                             autoComplete="off"
                             maxLength={30}
                             {...field}
-                            disabled={!camposHabilitadosPersona}
+                            disabled={camposHabilitadosPersona}
+                            // disabled={!camposHabilitadosPersona}
                             className={`
                               ${
                                 fieldState.invalid
@@ -639,7 +653,8 @@ export const EmpresaForm = () => {
                             autoComplete="off"
                             maxLength={30}
                             {...field}
-                            disabled={!camposHabilitadosPersona}
+                            disabled={camposHabilitadosPersona}
+                            // disabled={!camposHabilitadosPersona}
                             className={`
                               ${
                                 fieldState.invalid
@@ -667,7 +682,8 @@ export const EmpresaForm = () => {
                             autoComplete="off"
                             maxLength={40}
                             {...field}
-                            disabled={!camposHabilitadosPersona}
+                            disabled={camposHabilitadosPersona}
+                            // disabled={!camposHabilitadosPersona}
                             className={`
                               ${
                                 fieldState.invalid
@@ -752,6 +768,7 @@ export const EmpresaForm = () => {
                             displayKey="nombre"
                             valueKey="id"
                             searchKeys={["nombre"]}
+                            isInvalid={fieldState.invalid}
                           />
                           <FormMessage />
                         </FormItem>

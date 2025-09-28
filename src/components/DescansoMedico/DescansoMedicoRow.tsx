@@ -23,7 +23,7 @@ interface Props {
 
 export const DescansoMedicoRow: React.FC<Props> = ({ desc }) => {
   const navigate = useNavigate();
-  const colaborador = `${desc.colaborador.apellido_paterno} ${desc.colaborador.apellido_materno} ${desc.colaborador.nombres}`;
+  const colaborador = `${desc.colaborador_dm.apellido_paterno} ${desc.colaborador_dm.apellido_materno} ${desc.colaborador_dm.nombres}`;
 
   const handleShowDetail = () => {
     navigate(`/descanso-medico/editar/${desc.id}`);
@@ -37,16 +37,24 @@ export const DescansoMedicoRow: React.FC<Props> = ({ desc }) => {
       {/* <TableCell className="py-3">{desc.codigo}</TableCell> */}
       <TableCell className="py-3">{colaborador}</TableCell>
       <TableCell className="py-3">
+        {HDate.formatDateTimezone(desc.fecha_otorgamiento, "dd/MM/yyyy")}
+      </TableCell>
+      <TableCell className="py-3 font-semibold text-sm text-gray-700 bg-purple-100 border-r border-purple-200">
         {HDate.formatDateTimezone(desc.fecha_inicio, "dd/MM/yyyy")}
       </TableCell>
-      <TableCell className="py-3">
+      <TableCell className="py-3 font-semibold text-sm text-gray-700 bg-purple-100 border-r border-purple-200">
         {HDate.formatDateTimezone(desc.fecha_final, "dd/MM/yyyy")}
       </TableCell>
-      <TableCell className="py-3">{desc.total_dias}</TableCell>
+      <TableCell className="py-3 font-bold text-center text-lg text-blue-600 bg-blue-50 border-r border-blue-200">
+        {desc.total_dias}
+      </TableCell>
+      <TableCell className="py-3">{desc.nombre_tipodescansomedico}</TableCell>
+      <TableCell className="py-3">{desc.nombre_tipocontingencia}</TableCell>
       <TableCell className="py-3">{desc.mes_devengado}</TableCell>
       <TableCell className="py-3">
         <BadgeEstado estado={desc.estado_registro as EDescansoMedico} />
       </TableCell>
+      {/* <TableCell>SI/NO</TableCell> */}
       <TableCell className="py-3">
         <DropdownMenu>
           <DropdownMenuTrigger

@@ -13,6 +13,9 @@ export interface DescansoMedico {
     codcie10_diagnostico?: string
     correlativo?: number
     codigo?: string
+    codigo_citt?: string
+    fecha_inicio_ingresado?: string
+    fecha_final_ingresado?: string
     fecha_otorgamiento?: string
     fecha_inicio?: string
     fecha_final?: string
@@ -44,11 +47,13 @@ export interface DescansoMedico {
     sistema?: boolean
     estado?: boolean
     codigo_temp?: string
-    colaborador?: Colaborador
+    colaborador_dm?: Colaborador
     tipoDescansoMedico?: TipoDescansoMedico
     tipoContingencia?: TipoContingencia
     diagnostico?: Diagnostico
     adjuntos?: Adjunto
+    id_usuario?: string
+    slug_perfil?: string
 }
 
 export interface DescansoMedicoResponse {
@@ -74,4 +79,12 @@ export interface DescansoMedicoPaginateResponse {
     pagination?: Pagination
     errors?: string
     status?: number
+}
+
+export interface DescansoMedicoFilter {
+    id_tipodescansomedico?: string
+    id_tipocontingencia?: string
+    nombre_colaborador?: string
+    fecha_inicio?: string
+    fecha_final?: string
 }

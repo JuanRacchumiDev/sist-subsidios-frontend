@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
-import { Input } from "../ui/input";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import {
   Pagination,
   PaginationContent,
@@ -25,9 +24,22 @@ import {
   DescansoMedico,
   DescansoMedicoPaginateResponse,
   Pagination as PaginationType,
+  DescansoMedicoFilter,
 } from "../../interfaces/IDescansoMedico";
 import { DescansoMedicoRow } from "./DescansoMedicoRow";
 import { getAuthData } from "../../utils/authMemo";
+import { FilterIcon } from "lucide-react";
+import { DescansoMedicoFilterModal } from "./DescansoMedicoFilterModal";
+import { Button } from "../ui/button";
+
+// Definimos el estado inicial de los filtros
+const initialFilters: DescansoMedicoFilter = {
+  id_tipodescansomedico: undefined,
+  id_tipocontingencia: undefined,
+  nombre_colaborador: undefined,
+  fecha_inicio: undefined,
+  fecha_final: undefined,
+};
 
 export const DescansoMedicoTable = () => {
   const [descansos, setDescansos] = useState<DescansoMedico[]>([]);
@@ -40,7 +52,24 @@ export const DescansoMedicoTable = () => {
     previousPage: null,
   });
 
+  const [filters, setFilters] = useState<DescansoMedicoFilter>(initialFilters);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
+
+  const handleApplyFilters = (newFilters: DescansoMedicoFilter) => {
+    // Asegurar que las cadenas vacías de los Inputs se conviertan a `undefined` al aplicar
+    const cleanedFilters: DescansoMedicoFilter = Object.fromEntries(
+      Object.entries(newFilters).map(([key, value]) => [
+        key,
+        value === "" || value === null ? undefined : value,
+      ])
+    ) as DescansoMedicoFilter;
+
+    setFilters(cleanedFilters);
+    setPagination((prev) => ({ ...prev, currentPage: 1 }));
+    setIsFilterModalOpen(false);
+  };
 
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= pagination.totalPages) {
@@ -48,52 +77,64 @@ export const DescansoMedicoTable = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        let response: DescansoMedicoPaginateResponse = null;
+  // useEffect(() => {
+  const fetchData = useCallback(async () => {
+    try {
+      let response: DescansoMedicoPaginateResponse = null;
 
-        const { slug_perfil, id_colaborador } = userProfile;
+      const { slug_perfil, id_colaborador } = userProfile;
 
-        const { currentPage, limit } = pagination;
+      const { currentPage, limit } = pagination;
 
-        if (slug_perfil && id_colaborador) {
-          response = await getDescansosByColaboradorWithPaginate(
-            id_colaborador,
-            currentPage,
-            limit
-          );
-        } else {
-          response = await getDescansosWithPaginate(currentPage, limit);
-        }
+      // Limpia los filtros (elimina `undefined` para no enviar el query param)
+      const cleanFilters = Object.fromEntries(
+        Object.entries(filters).filter(
+          ([, value]) => value !== undefined && value !== null && value !== ""
+        )
+      );
 
-        // console.log("response list descansos médicos", response);
-
-        // const response = await getDescansosWithPaginate(currentPage, limit);
-
-        const { result, data, pagination: detailPagination } = response;
-
-        if (result && data && detailPagination) {
-          setDescansos(data);
-          setPagination(detailPagination);
-        } else {
-          setDescansos([]);
-          setPagination({
-            currentPage: 1,
-            limit: 10,
-            totalPages: 1,
-            totalItems: 0,
-            nextPage: null,
-            previousPage: null,
-          });
-        }
-      } catch (error) {
-        console.error("Error al obtener colaboradores", error);
+      if (slug_perfil && id_colaborador) {
+        response = await getDescansosByColaboradorWithPaginate(
+          id_colaborador,
+          currentPage,
+          limit,
+          cleanFilters
+        );
+      } else {
+        response = await getDescansosWithPaginate(
+          currentPage,
+          limit,
+          cleanFilters
+        );
       }
-    };
 
+      const { result, data, pagination: detailPagination } = response;
+
+      if (result && data && detailPagination) {
+        setDescansos(data);
+        setPagination(detailPagination);
+      } else {
+        setDescansos([]);
+        setPagination({
+          currentPage: 1,
+          limit: 10,
+          totalPages: 1,
+          totalItems: 0,
+          nextPage: null,
+          previousPage: null,
+        });
+      }
+    } catch (error) {
+      console.error("Error al obtener colaboradores", error);
+    }
+  }, [pagination.currentPage, pagination.limit, userProfile, filters]);
+
+  //   fetchData();
+  // }, [pagination.currentPage, pagination.limit]);
+
+  useEffect(() => {
     fetchData();
-  }, [pagination.currentPage, pagination.limit]);
+  }, [fetchData]);
 
   const renderPaginationItems = () => {
     const items = [];
@@ -142,12 +183,23 @@ export const DescansoMedicoTable = () => {
   return (
     <div className="w-full space-y-4 pt-4">
       <div className="flex justify-end items-center space-x-2 pb-4">
-        {/* <h2 className="text-xl font-semibold">Listado de descansos médicos</h2> */}
-        <Input
-          type="text"
-          placeholder="Buscar por razón social o RUC"
-          className="w-72 border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
-        />
+        <Button
+          variant="outline"
+          onClick={() => setIsFilterModalOpen(true)}
+          className="flex items-center space-x-2 border-blue-500 text-blue-500 hover:bg-blue-50 hover:text-blue-600 hover:cursor-pointer transition"
+        >
+          <FilterIcon className="w-4 h-4" />
+          {/* Contar los filtros aplicados (valores que no son undefined/null/vacío) */}
+          <span>
+            Filtros (
+            {
+              Object.values(filters).filter(
+                (v) => v !== undefined && v !== null && v !== ""
+              ).length
+            }
+            )
+          </span>
+        </Button>
       </div>
       <div className="rounded-md border border-gray-200 shadow-sm">
         <Table>
@@ -160,6 +212,9 @@ export const DescansoMedicoTable = () => {
                 Colaborador
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
+                Fecha Otorgamiento
+              </TableHead>
+              <TableHead className="text-gray-600 font-medium">
                 Fecha Inicio
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
@@ -169,11 +224,20 @@ export const DescansoMedicoTable = () => {
                 Total días
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
+                Tipo Descanso
+              </TableHead>
+              <TableHead className="text-gray-600 font-medium">
+                Tipo Contingencia
+              </TableHead>
+              <TableHead className="text-gray-600 font-medium">
                 Mes devengado
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
                 Estado
               </TableHead>
+              {/* <TableHead className="text-gray-600 font-medium">
+                Subsidiado
+              </TableHead> */}
               <TableHead className="text-gray-600 font-medium">
                 Acciones
               </TableHead>
@@ -187,7 +251,7 @@ export const DescansoMedicoTable = () => {
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={7}
+                  colSpan={10}
                   className="text-center text-gray-500 py-6"
                 >
                   No se encontraron descansos médicos registrados
@@ -222,6 +286,13 @@ export const DescansoMedicoTable = () => {
           </PaginationContent>
         </Pagination>
       </div>
+
+      <DescansoMedicoFilterModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        currentFilters={filters}
+        onApplyFilters={handleApplyFilters}
+      />
     </div>
   );
 };

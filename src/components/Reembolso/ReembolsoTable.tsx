@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ReembolsoRow } from "./ReelmbosoRow";
+import { ReembolsoRow } from "./ReembolsoRow";
 import { getAuthData } from "@/utils/authMemo";
 import {
   Reembolso,
@@ -40,7 +40,7 @@ export const ReembolsoTable = () => {
     previousPage: null,
   });
 
-  const userProfile = useMemo(() => getAuthData()?.usuario, []);
+  // const userProfile = useMemo(() => getAuthData()?.usuario, []);
 
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= pagination.totalPages) {
@@ -53,7 +53,6 @@ export const ReembolsoTable = () => {
       try {
         const { currentPage, limit } = pagination;
         const response = await getReembolsosWithPaginate(currentPage, limit);
-        console.log("response reembolsos", response);
 
         const { result, data, pagination: detailtPagination } = response;
 
@@ -143,6 +142,9 @@ export const ReembolsoTable = () => {
                 Fecha Reembolso
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
+                Fecha Máxima Reembolso
+              </TableHead>
+              <TableHead className="text-gray-600 font-medium">
                 Código
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
@@ -164,7 +166,7 @@ export const ReembolsoTable = () => {
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={6}
+                  colSpan={7}
                   className="text-center text-gray-500 py-6"
                 >
                   No se encontraron reembolsos registrados

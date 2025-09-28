@@ -28,6 +28,7 @@ interface SearchableComboboxProps<T extends { [key: string]: any }> {
   valueKey: keyof T;
   searchKeys: (keyof T)[];
   disabled?: boolean;
+  isInvalid?: boolean;
 }
 
 const SearchableCombobox = <T extends { [key: string]: any }>({
@@ -40,6 +41,7 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
   valueKey,
   searchKeys,
   disabled,
+  isInvalid,
 }: SearchableComboboxProps<T>) => {
   const [open, setOpen] = useState(false);
 
@@ -61,8 +63,12 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
               variant="outline"
               role="combobox"
               className={cn(
-                "w-full justify-between overflow-hidden text-ellipsis whitespace-nowrap cursor-pointer",
-                !value && "text-muted-foreground"
+                "w-full justify-between overflow-hidden text-ellipsis whitespace-nowrap cursor-pointe",
+                !value && "text-muted-foreground",
+                isInvalid
+                  ? "border-red-500 focus:ring-red-500"
+                  : "focus:ring-blue-500",
+                "focus:ring-2 focus:ring-offset-2 transition-all duration-300"
               )}
               disabled={disabled}
             >
@@ -122,10 +128,7 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
                           transition-colors
                           duration-150
                           ease-in-out
-                        hover:bg-gray-100
-                        data-[state=checked]:bg-blue-50
-                          data-[state=checked]:font-semibold 
-                        data-[state=checked]:text-blue-600"
+                        hover:bg-gray-100"
                       >
                         <Check
                           className={cn(

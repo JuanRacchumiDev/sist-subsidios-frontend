@@ -37,7 +37,7 @@ export const CobroTable = () => {
     previousPage: null,
   });
 
-  const userProfile = useMemo(() => getAuthData()?.usuario, []);
+  // const userProfile = useMemo(() => getAuthData()?.usuario, []);
 
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= pagination.totalPages) {
