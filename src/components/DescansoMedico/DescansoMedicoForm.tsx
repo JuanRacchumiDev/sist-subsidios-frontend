@@ -41,6 +41,7 @@ import { EDescansoMedico } from "../../enums/EDescansoMedico";
 import { getAuthData } from "../../utils/authMemo";
 import HDate from "../../helpers/HDate";
 import { isAfter, isBefore, parseISO } from "date-fns";
+import { ArrowLeft } from "lucide-react";
 
 export const formSchema = z
   .object({
@@ -174,6 +175,10 @@ export const DescansoMedicoForm = () => {
 
   const isEditMode = !!id;
 
+  const handleGoBack = () => {
+    navigate("/descanso-medico");
+  };
+
   // Deshabilitando campos para el perfil especialista
   const isModeLetter =
     (userProfile.slug_perfil === "especialista" ||
@@ -223,7 +228,7 @@ export const DescansoMedicoForm = () => {
           if (result && data) {
             const descanso = data as DescansoMedico;
 
-            console.log({ descanso });
+            // console.log({ descanso });
 
             const responseColaborador = await getColaboradorById(
               descanso.id_colaborador
@@ -268,7 +273,7 @@ export const DescansoMedicoForm = () => {
               estadoRegistro: descanso.estado_registro,
               observacion: descanso.observacion || "",
             };
-            console.log("dataForm descanso médico", dataForm);
+            // console.log("dataForm descanso médico", dataForm);
             form.reset(dataForm);
           }
         } catch (error) {
@@ -279,8 +284,8 @@ export const DescansoMedicoForm = () => {
         // Crea un código temporal único por cada nuevo descanso médico
         if (userProfile) {
           const { id_empresa, id_colaborador } = userProfile;
-          console.log({ id_empresa });
-          console.log({ id_colaborador });
+          // console.log({ id_empresa });
+          // console.log({ id_colaborador });
           form.setValue("idEmpresa", id_empresa);
           form.setValue("idColaborador", id_colaborador);
         }
@@ -396,7 +401,7 @@ export const DescansoMedicoForm = () => {
         observacion,
       };
 
-      console.log({ payloadDescansoMedico });
+      // console.log({ payloadDescansoMedico });
 
       let response: DescansoMedicoResponse;
 
@@ -422,17 +427,36 @@ export const DescansoMedicoForm = () => {
   return (
     <>
       <Card className="shadow-lg border-gray-200">
-        <CardHeader className="border-b border-gray-200">
-          <CardTitle className="text-xl font-bold text-gray-800">
-            {isEditMode
-              ? "Actualización de descanso médico"
-              : "Registro de descanso médico"}
-          </CardTitle>
-          <CardDescription className="text-sm text-gray-500">
-            {isEditMode
-              ? "Formulario de actualización de descanso médico"
-              : "Complete el formulario para registrar un descanso médico"}
-          </CardDescription>
+        <CardHeader className="border-b border-gray-200 flex flex-row items-center justify-between">
+          <div className="flex-shrink min-w-0">
+            <CardTitle className="text-xl font-bold text-gray-800">
+              {isEditMode
+                ? "Actualización de descanso médico"
+                : "Registro de descanso médico"}
+            </CardTitle>
+            <CardDescription className="text-sm text-gray-500">
+              {isEditMode
+                ? "Formulario de actualización de descanso médico"
+                : "Complete el formulario para registrar un descanso médico"}
+            </CardDescription>
+          </div>
+          <button
+            onClick={handleGoBack}
+            className="
+              flex items-center text-sm font-semibold 
+              text-blue-600 
+              hover:text-blue-800 
+              hover:bg-blue-50 
+              transition-colors 
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 
+              rounded-md p-2 ml-4 
+              cursor-pointer
+            "
+            aria-label="Volver al listado"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Volver
+          </button>
         </CardHeader>
         <CardContent className="pt-6">
           <Form {...form}>

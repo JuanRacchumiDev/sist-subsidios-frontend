@@ -14,8 +14,18 @@ export const getEmpresas = async () => {
     }
 }
 
-export const getEmpresasWithPaginate = async (page: number, limit: number) => {
-    const response = await getAllWithPaginate(page, limit)
+export const getEmpresasWithPaginate = async (
+    page: number,
+    limit: number,
+    filter: string
+) => {
+    const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        filter: filter
+    }).toString()
+
+    const response = await getAllWithPaginate(queryParams)
 
     return {
         ...response

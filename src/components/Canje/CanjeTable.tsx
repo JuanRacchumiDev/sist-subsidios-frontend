@@ -91,7 +91,7 @@ export const CanjeTable = () => {
         limit,
         cleanFilters
       );
-      console.log("response canjes", response);
+      // console.log("response canjes", response);
 
       const { result, data, pagination: detailtPagination } = response;
 

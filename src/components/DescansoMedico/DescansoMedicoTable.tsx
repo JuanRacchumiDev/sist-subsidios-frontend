@@ -108,6 +108,8 @@ export const DescansoMedicoTable = () => {
         );
       }
 
+      console.log({ response });
+
       const { result, data, pagination: detailPagination } = response;
 
       if (result && data && detailPagination) {
@@ -232,6 +234,7 @@ export const DescansoMedicoTable = () => {
               <TableHead className="text-gray-600 font-medium">
                 Mes devengado
               </TableHead>
+              <TableHead className="text-gray-600 font-medium">Año</TableHead>
               <TableHead className="text-gray-600 font-medium">
                 Estado
               </TableHead>
@@ -251,7 +254,7 @@ export const DescansoMedicoTable = () => {
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={10}
+                  colSpan={11}
                   className="text-center text-gray-500 py-6"
                 >
                   No se encontraron descansos médicos registrados

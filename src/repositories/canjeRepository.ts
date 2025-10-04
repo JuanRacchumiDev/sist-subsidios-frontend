@@ -28,7 +28,7 @@ export const getAllWithPaginate = async (queryParams: string) => {
     try {
         // const urlApi = `${'/canjes/paginate?page='}${page}${'&limit='}${limit}`
         const urlApi = `${'/canjes/paginate?'}${queryParams}`
-        console.log({ urlApi })
+        // console.log({ urlApi })
 
         const response = await apiClient.get(urlApi)
 
@@ -43,6 +43,30 @@ export const getAllWithPaginate = async (queryParams: string) => {
             status
         }
 
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+        console.log('errorMessage', errorMessage)
+        return { result: false, error: errorMessage, status: 500 }
+    }
+}
+
+export const getAllForReports = async (outputType: string, reportType: string, limit: number) => {
+    try {
+        const urlApi = `${'/canjes/reportes/subsidios?type='}${reportType}${'&limit='}${limit}${'&output='}${outputType}`
+
+        console.log({ urlApi })
+
+        const response = await apiClient.get(urlApi, {
+            responseType: 'blob'
+        })
+
+        // return response
+        return {
+            result: true,
+            data: response.data,
+            status: response.status,
+            message: "Reporte generado correctamente"
+        };
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
         console.log('errorMessage', errorMessage)

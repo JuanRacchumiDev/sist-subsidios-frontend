@@ -169,16 +169,16 @@ export const DescansoMedicoDetalle = ({
         setAdjuntos(adjuntosRes);
 
         if (userProfile.id_empresa && userProfile.id_colaborador) {
-          console.log("abcdef");
+          // console.log("abcdef");
           setIsDisabled(true);
         } else {
-          console.log("pqrstu");
+          // console.log("pqrstu");
           const isDisabledIdEmpresaIdColaborador = isModeLetter
             ? isModeLetter
             : false;
           setIsDisabled(isDisabledIdEmpresaIdColaborador);
         }
-        console.log({ isModeLetter });
+        // console.log({ isModeLetter });
       } catch (error) {
         console.error("Error al obtener datos", error);
         showToast("error", "Error al cargar los datos del formulario.");
@@ -190,7 +190,7 @@ export const DescansoMedicoDetalle = ({
   // [form, showToast, userProfile]
 
   useEffect(() => {
-    console.log({ selectedTipoDescansoId });
+    // console.log({ selectedTipoDescansoId });
 
     if (selectedTipoDescansoId) {
       let isTipoDescansoCitt = false;
@@ -199,7 +199,7 @@ export const DescansoMedicoDetalle = ({
         (tipodescanso) => tipodescanso.id === selectedTipoDescansoId
       );
 
-      console.log({ tipoSeleccionado });
+      // console.log({ tipoSeleccionado });
 
       if (tipoSeleccionado) {
         const { nombre } = tipoSeleccionado;

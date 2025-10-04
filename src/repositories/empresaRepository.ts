@@ -22,9 +22,11 @@ export const getAll = async (): Promise<EmpresaResponse> => {
     }
 }
 
-export const getAllWithPaginate = async (page: number, limit: number) => {
+export const getAllWithPaginate = async (queryParams: string) => {
     try {
-        const urlApi = `${'/empresas/paginate?page='}${page}${'&limit='}${limit}`
+        // const urlApi = `${'/empresas/paginate?page='}${page}${'&limit='}${limit}`
+        const urlApi = `${'/empresas/paginate?'}${queryParams}`
+        // console.log({ urlApi })
         const response = await apiClient.get(urlApi)
         const { data: dataEmpresas } = response
 

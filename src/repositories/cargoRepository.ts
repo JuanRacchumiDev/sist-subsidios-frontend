@@ -23,9 +23,11 @@ export const getAll = async (): Promise<CargoResponse> => {
     }
 }
 
-export const getAllWithPaginate = async (page: number, limit: number) => {
+export const getAllWithPaginate = async (queryParams: string) => {
     try {
-        const urlApi = `${'/cargos/paginate?page='}${page}${'&limit='}${limit}`
+        // const urlApi = `${'/cargos/paginate?page='}${page}${'&limit='}${limit}`
+        const urlApi = `${'/cargos/paginate/?'}${queryParams}`
+        console.log({ urlApi })
 
         const response = await apiClient.get(urlApi)
 

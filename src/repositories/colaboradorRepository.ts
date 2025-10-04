@@ -22,9 +22,11 @@ export const getAll = async (): Promise<ColaboradorResponse> => {
     }
 }
 
-export const getAllWithPaginate = async (page: number, limit: number) => {
+export const getAllWithPaginate = async (queryParams: string) => {
     try {
-        const urlApi = `${'/colaboradores/paginate?page='}${page}${'&limit='}${limit}`
+        // const urlApi = `${'/colaboradores/paginate?page='}${page}${'&limit='}${limit}`
+        const urlApi = `${'/colaboradores/paginate?'}${queryParams}`
+        // console.log({ urlApi })
 
         const response = await apiClient.get(urlApi)
 
@@ -123,7 +125,7 @@ export const update = async (id: string, payload: Colaborador): Promise<Colabora
     try {
         const urlApi = `${'/colaboradores/'}${id}`
         const response = await apiClient.patch(urlApi, payload)
-        // console.log('response update colaborador', response)
+        console.log('response update colaborador', response)
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
         console.log('errorMessage', errorMessage)

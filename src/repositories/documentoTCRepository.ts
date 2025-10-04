@@ -24,10 +24,14 @@ export const getAll = async (): Promise<DocumentoTipoContingenciaResponse> => {
     }
 }
 
-export const getAllWithPaginate = async (page: number, limit: number) => {
+export const getAllWithPaginate = async (queryParams: string) => {
     try {
-        const urlApi = `${'/documentos-tipo-contingencia/paginate?page='}${page}${'&limit='}${limit}`
+        // const urlApi = `${'/documentos-tipo-contingencia/paginate?page='}${page}${'&limit='}${limit}`
+        const urlApi = `${'/documentos-tipo-contingencia/paginate?'}${queryParams}`
+        console.log({ urlApi })
+
         const response = await apiClient.get(urlApi)
+
         const { data: dataDescansos } = response
 
         const { result, data, pagination, status } = dataDescansos

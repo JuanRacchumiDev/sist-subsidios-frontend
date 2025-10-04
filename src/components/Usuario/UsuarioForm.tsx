@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import * as z from "zod";
 import {
   Card,
@@ -23,7 +23,6 @@ import { Usuario, UsuarioResponse } from "../../interfaces/IUsuario";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormMessage,
@@ -39,6 +38,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Button } from "../ui/button";
+import { ArrowLeft } from "lucide-react";
 
 export const formSchema = z.object({
   idPerfil: z
@@ -80,6 +80,19 @@ export const UsuarioForm = () => {
   const [perfiles, setPerfiles] = useState<Perfil[]>([]);
 
   const isEditMode = !!id;
+
+  const handleGoBack = () => {
+    navigate("/usuario");
+  };
+
+  const resetForm = () => {
+    form.reset({
+      idPersona: "",
+      idPerfil: "",
+      username: "",
+      email: "",
+    });
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -189,15 +202,34 @@ export const UsuarioForm = () => {
   return (
     <>
       <Card className="shadow-lg border-gray-200">
-        <CardHeader className="border-b border-gray-200">
-          <CardTitle className="text-xl font-bold text-gray-800">
-            {isEditMode ? "Actualización de usuario" : "Registro de usuario"}
-          </CardTitle>
-          <CardDescription className="text-sm text-gray-500">
-            {isEditMode
-              ? "Formulario de actualización de usuario"
-              : "Complete el formulario para registrar un usuario"}
-          </CardDescription>
+        <CardHeader className="border-b border-gray-200 flex flex-row items-center justify-between">
+          <div className="flex-shrink min-w-0">
+            <CardTitle className="text-xl font-bold text-gray-800">
+              {isEditMode ? "Actualización de usuario" : "Registro de usuario"}
+            </CardTitle>
+            <CardDescription className="text-sm text-gray-500">
+              {isEditMode
+                ? "Formulario de actualización de usuario"
+                : "Complete el formulario para registrar un usuario"}
+            </CardDescription>
+          </div>
+          <button
+            onClick={handleGoBack}
+            className="
+              flex items-center text-sm font-semibold 
+              text-blue-600 
+              hover:text-blue-800 
+              hover:bg-blue-50 
+              transition-colors 
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 
+              rounded-md p-2 ml-4 
+              cursor-pointer
+            "
+            aria-label="Volver al listado"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Volver
+          </button>
         </CardHeader>
         <CardContent className="pt-6">
           <Form {...form}>
@@ -206,19 +238,15 @@ export const UsuarioForm = () => {
                 <FormField
                   control={form.control}
                   name="idPersona"
-                  render={({ field }) => {
+                  render={({ field, fieldState }) => {
                     const selectedPersona = personas.find(
                       (c) => c.id === field.value
                     );
 
                     if (selectedPersona) {
                       const { email } = selectedPersona;
-
-                      if (email) {
-                        form.setValue("email", email);
-                      } else {
-                        form.setValue("email", "");
-                      }
+                      const valueEmail = email ? email : "";
+                      form.setValue("email", valueEmail);
                     }
 
                     return (
@@ -232,13 +260,8 @@ export const UsuarioForm = () => {
                           displayKey="nombre_completo"
                           valueKey="id"
                           searchKeys={["nombre_completo"]}
+                          isInvalid={fieldState.invalid}
                         />
-                        {/* {selectedPersona && (
-                          <FormDescription>
-                            Persona seleccionada:{" "}
-                            <b>{selectedPersona.nombre_completo}</b>
-                          </FormDescription>
-                        )} */}
                         <FormMessage />
                       </FormItem>
                     );
@@ -296,7 +319,7 @@ export const UsuarioForm = () => {
                         <Input
                           placeholder="Ingrese nombre de usuario"
                           autoComplete="off"
-                          maxLength={10}
+                          maxLength={12}
                           {...field}
                           className={fieldState.invalid ? "border-red-500" : ""}
                         />
@@ -349,10 +372,12 @@ export const UsuarioForm = () => {
                   type="button"
                   variant="outline"
                   disabled={isSubmitting}
-                  onClick={() => navigate("/usuario")}
+                  onClick={() => resetForm()}
+                  // onClick={() => navigate("/usuario")}
                   className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
-                  {isSubmitting ? "Cancelando..." : "Cancelar"}
+                  Cancelar
+                  {/* {isSubmitting ? "Cancelando..." : "Cancelar"} */}
                 </Button>
               </div>
             </form>

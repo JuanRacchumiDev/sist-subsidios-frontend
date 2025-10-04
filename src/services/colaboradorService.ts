@@ -1,4 +1,4 @@
-import { Colaborador } from '../interfaces/IColaborador'
+import { Colaborador, ColaboradorFilter } from '../interfaces/IColaborador'
 import {
     getAll,
     getById,
@@ -16,8 +16,22 @@ export const getColaboradores = async () => {
     }
 }
 
-export const getColaboradoresWithPaginate = async (page: number, limit: number) => {
-    const response = await getAllWithPaginate(page, limit)
+export const getColaboradoresWithPaginate = async (
+    page: number,
+    limit: number,
+    filters: ColaboradorFilter = {}
+) => {
+    // Construir la cadena de query parameters
+    const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...Object.fromEntries(
+            Object.entries(filters).filter(([, value]) => value)
+        )
+    }).toString()
+
+    // const response = await getAllWithPaginate(page, limit)
+    const response = await getAllWithPaginate(queryParams)
 
     return {
         ...response

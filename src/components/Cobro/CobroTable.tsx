@@ -50,7 +50,7 @@ export const CobroTable = () => {
       try {
         const { currentPage, limit } = pagination;
         const response = await getCobrosWithPaginate(currentPage, limit);
-        console.log("response cobros", response);
+        // console.log("response cobros", response);
 
         const { result, data, pagination: detailtPagination } = response;
 

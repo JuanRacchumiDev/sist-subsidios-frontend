@@ -3,6 +3,7 @@ import {
     getAll,
     getById,
     getAllWithPaginate,
+    getAllForReports,
     create,
     update
 } from '../repositories/canjeRepository'
@@ -35,6 +36,12 @@ export const getCanjesWithPaginate = async (
     return {
         ...response
     }
+}
+
+export const getCanjesForReport = async (outputType: string, reportType: string, limit: number) => {
+    const response = await getAllForReports(outputType, reportType, limit)
+
+    return response
 }
 
 export const getCanjeById = async (id: string) => {

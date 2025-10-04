@@ -12,6 +12,7 @@ export interface Usuario {
     username?: string
     email?: string
     password?: string
+    nombre_persona?: string
     sistema?: boolean
     estado?: boolean
     perfil?: Perfil
@@ -43,4 +44,9 @@ export interface UsuarioPaginateResponse {
     pagination?: Pagination
     errors?: string
     status?: number
+}
+
+export interface UsuarioFilter {
+    nombre_persona?: string
+    id_perfil?: string
 }

@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { getColaboradoresWithPaginate } from "../../services/colaboradorService";
-import { Input } from "../ui/input";
 import {
   Pagination,
   PaginationContent,
@@ -21,8 +20,21 @@ import {
 import { ColaboradorRow } from "./ColaboradorRow";
 import {
   Colaborador,
+  ColaboradorFilter,
   Pagination as PaginationType,
 } from "../../interfaces/IColaborador";
+import { Button } from "../ui/button";
+import { FilterIcon } from "lucide-react";
+import { ColaboradorFilterModal } from "./ColaboradorFilterModal";
+
+// Definimos el estado inicial de los filtros
+const initialFilters: ColaboradorFilter = {
+  id_tipodocumento: undefined,
+  id_cargo: undefined,
+  id_empresa: undefined,
+  numero_documento: undefined,
+  nombre_completo: undefined,
+};
 
 export const ColaboradorTable: React.FC = () => {
   const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
@@ -35,40 +47,72 @@ export const ColaboradorTable: React.FC = () => {
     previousPage: null,
   });
 
+  const [filters, setFilters] = useState<ColaboradorFilter>(initialFilters);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+
+  const handleApplyFilters = (newFilters: ColaboradorFilter) => {
+    // Asegurar que las cadenas vacías de los Inputs se conviertan a `undefined` al aplicar
+    const cleanedFilters: ColaboradorFilter = Object.fromEntries(
+      Object.entries(newFilters).map(([key, value]) => [
+        key,
+        value === "" || value === null ? undefined : value,
+      ])
+    ) as ColaboradorFilter;
+
+    setFilters(cleanedFilters);
+    setPagination((prev) => ({ ...prev, currentPage: 1 }));
+    setIsFilterModalOpen(false);
+  };
+
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= pagination.totalPages) {
       setPagination((prev) => ({ ...prev, currentPage: page }));
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const { currentPage, limit } = pagination;
+  // useEffect(() => {
+  const fetchData = useCallback(async () => {
+    try {
+      const { currentPage, limit } = pagination;
 
-        const response = await getColaboradoresWithPaginate(currentPage, limit);
+      // Limpia los filtros (elimina `undefined` para no enviar el query param)
+      const cleanFilters = Object.fromEntries(
+        Object.entries(filters).filter(
+          ([, value]) => value !== undefined && value !== null && value !== ""
+        )
+      );
 
-        if (response.result && response.data && response.pagination) {
-          setColaboradores(response.data);
-          setPagination(response.pagination);
-        } else {
-          setColaboradores([]);
-          setPagination({
-            currentPage: 1,
-            limit: 10,
-            totalPages: 1,
-            totalItems: 0,
-            nextPage: null,
-            previousPage: null,
-          });
-        }
-      } catch (error) {
-        console.error("Error al obtener colaboradores", error);
+      const response = await getColaboradoresWithPaginate(
+        currentPage,
+        limit,
+        cleanFilters
+      );
+
+      if (response.result && response.data && response.pagination) {
+        setColaboradores(response.data);
+        setPagination(response.pagination);
+      } else {
+        setColaboradores([]);
+        setPagination({
+          currentPage: 1,
+          limit: 10,
+          totalPages: 1,
+          totalItems: 0,
+          nextPage: null,
+          previousPage: null,
+        });
       }
-    };
+    } catch (error) {
+      console.error("Error al obtener colaboradores", error);
+    }
+  }, [pagination.currentPage, pagination.limit, filters]);
 
+  // fetchData();
+  // }, [pagination.currentPage, pagination.limit]);
+
+  useEffect(() => {
     fetchData();
-  }, [pagination.currentPage, pagination.limit]);
+  }, [fetchData]);
 
   const renderPaginationItems = () => {
     const items = [];
@@ -119,11 +163,27 @@ export const ColaboradorTable: React.FC = () => {
       {/* <div className="pb-4 pt-4 flex justify-between items-center"> */}
       <div className="flex justify-end items-center space-x-2 pb-4">
         {/* <h2 className="text-xl font-semibold">Listado de colaboradores</h2> */}
-        <Input
+        <Button
+          variant="outline"
+          onClick={() => setIsFilterModalOpen(true)}
+          className="flex items-center space-x-2 border-blue-500 text-blue-500 hover:bg-blue-50 hover:text-blue-600 hover:cursor-pointer transition"
+        >
+          <FilterIcon className="w-4 h-4" />
+          <span>
+            Filtros (
+            {
+              Object.values(filters).filter(
+                (v) => v !== undefined && v !== null && v !== ""
+              ).length
+            }
+            )
+          </span>
+        </Button>
+        {/* <Input
           type="text"
           placeholder="Buscar por nombre o documento..."
           className="w-72 border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
-        />
+        /> */}
       </div>
       <div className="rounded-md border border-gray-200 shadow-sm">
         <Table>
@@ -195,6 +255,13 @@ export const ColaboradorTable: React.FC = () => {
           </PaginationContent>
         </Pagination>
       </div>
+
+      <ColaboradorFilterModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        currentFilters={filters}
+        onApplyFilters={handleApplyFilters}
+      />
     </div>
   );
 };

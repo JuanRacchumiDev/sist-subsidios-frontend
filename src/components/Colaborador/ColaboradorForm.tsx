@@ -16,7 +16,6 @@ import { Spinner } from "../../components/Common/Spinner";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormMessage,
@@ -45,6 +44,7 @@ import {
   getColaboradorById,
 } from "../../services/colaboradorService";
 import SearchableCombobox from "../Common/SearchableCombobox";
+import { ArrowLeft } from "lucide-react";
 
 const formSchema = z.object({
   idTipoDocumento: z
@@ -64,7 +64,6 @@ const formSchema = z.object({
   apellidoMaterno: z.string().min(2, {
     message: "El apellido materno es requerido.",
   }),
-  // fechaNacimiento: z.string().optional(),
   fechaNacimiento: z
     .date({
       message: "La fecha de nacimiento es requerida",
@@ -98,31 +97,49 @@ const formSchema = z.object({
     message: "El número de celular debe tener al menos 9 dígitos.",
   }),
   fechaIngreso: z.date().optional(),
-  // fechaIngreso: z.string().optional(),
   esAsociadoSindicato: z.boolean().optional(),
   esPresentaInconvenientes: z.boolean().optional(),
 });
 
-type Empresa = {
+type TEmpresa = {
   id: string;
   nombre_o_razon_social: string;
 };
 
-type TipoDocumento = {
+type TTipoDocumento = {
   id: string;
   abreviatura: string;
 };
 
-type Cargo = {
+type TCargo = {
   id: string;
   nombre: string;
 };
 
-type Persona = {
+type TPersona = {
   nombres: string;
   apellido_paterno: string;
   apellido_materno: string;
   fecha_nacimiento: string;
+};
+
+type TColaborador = {
+  idTipoDocumento?: string;
+  numeroDocumento?: string;
+  nombres?: string;
+  apellidoPaterno?: string;
+  apellidoMaterno?: string;
+  fechaNacimiento?: null;
+  idEmpresa?: string;
+  idCargo?: string;
+  nombreArea?: string;
+  nombreSede?: string;
+  emailInstitucional?: string;
+  emailPersonal?: string;
+  numeroCelular?: string;
+  fechaIngreso?: null;
+  esAsociadoSindicato?: boolean;
+  esPresentaInconvenientes?: boolean;
 };
 
 export const ColaboradorForm = () => {
@@ -130,14 +147,41 @@ export const ColaboradorForm = () => {
   const { id } = useParams<{ id: string }>();
   const { showToast } = useToast();
 
-  const [empresas, setEmpresas] = useState<Empresa[]>([]);
-  const [tipos, setTipos] = useState<TipoDocumento[]>([]);
-  const [cargos, setCargos] = useState<Cargo[]>([]);
+  const [empresas, setEmpresas] = useState<TEmpresa[]>([]);
+  const [tipos, setTipos] = useState<TTipoDocumento[]>([]);
+  const [cargos, setCargos] = useState<TCargo[]>([]);
 
   const [camposHabilitadosPersona, setCamposHabilitadosPersona] =
     useState(false);
 
   const isEditMode = !!id;
+
+  const handleGoBack = () => {
+    navigate("/colaborador");
+  };
+
+  const resetForm = () => {
+    const dataForm: TColaborador = {
+      idTipoDocumento: "",
+      numeroDocumento: "",
+      nombres: "",
+      apellidoPaterno: "",
+      apellidoMaterno: "",
+      fechaNacimiento: null,
+      idEmpresa: "",
+      idCargo: "",
+      nombreArea: "",
+      nombreSede: "",
+      emailInstitucional: "",
+      emailPersonal: "",
+      numeroCelular: "",
+      fechaIngreso: null,
+      esAsociadoSindicato: false,
+      esPresentaInconvenientes: false,
+    };
+
+    form.reset(dataForm);
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -189,11 +233,14 @@ export const ColaboradorForm = () => {
       const fechaNacimientoToString: string | null = fechaNacimiento
         ? fechaNacimiento.toISOString()
         : null;
+
       const partsFechaNacimientoStr: string[] =
         fechaNacimientoToString.split("T");
+
       const fechaNacimientoStr: string = partsFechaNacimientoStr[0];
 
       let fechaIngresoStr: string | null = null;
+
       if (fechaIngreso) {
         const fechaIngresoToString: string | null = fechaIngreso.toISOString();
         const partsFechaIngreso: string[] = fechaIngresoToString.split("T");
@@ -239,26 +286,26 @@ export const ColaboradorForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let listEmpresas: Empresa[] = [];
-        let listTipoDocumentos: TipoDocumento[] = [];
-        let listCargos: Cargo[] = [];
+        let listEmpresas: TEmpresa[] = [];
+        let listTipoDocumentos: TTipoDocumento[] = [];
+        let listCargos: TCargo[] = [];
 
         const [responseEmpresas, responseTipoDocumentos, responseCargos] =
           await Promise.all([getEmpresas(), getTipoDocumentos(), getCargos()]);
 
         const { result: resultEmpresas, data: dataEmpresas } = responseEmpresas;
         if (resultEmpresas && dataEmpresas) {
-          listEmpresas = dataEmpresas as Empresa[];
+          listEmpresas = dataEmpresas as TEmpresa[];
         }
 
         const { result: resultTipos, data: dataTipos } = responseTipoDocumentos;
         if (resultTipos && dataTipos) {
-          listTipoDocumentos = dataTipos as TipoDocumento[];
+          listTipoDocumentos = dataTipos as TTipoDocumento[];
         }
 
         const { result: resultCargos, data: dataCargos } = responseCargos;
         if (resultCargos && dataCargos) {
-          listCargos = dataCargos as Cargo[];
+          listCargos = dataCargos as TCargo[];
         }
 
         setEmpresas(listEmpresas);
@@ -270,7 +317,9 @@ export const ColaboradorForm = () => {
           const { result, data, message } = responseColaborador;
 
           if (result && data) {
+            let dataForm: TColaborador = {};
             const colaborador = data as Colaborador;
+
             const {
               id_tipodocumento,
               numero_documento,
@@ -290,26 +339,29 @@ export const ColaboradorForm = () => {
               is_presenta_inconvenientes,
             } = colaborador;
 
-            form.reset({
-              idTipoDocumento: id_tipodocumento ?? "",
-              numeroDocumento: numero_documento ?? "",
-              nombres: nombres ?? "",
-              apellidoPaterno: apellido_paterno ?? "",
-              apellidoMaterno: apellido_materno ?? "",
-              fechaNacimiento: fecha_nacimiento
-                ? parseISO(fecha_nacimiento)
-                : null,
-              fechaIngreso: fecha_ingreso ? parseISO(fecha_ingreso) : null,
-              idEmpresa: id_empresa ?? "",
-              idCargo: id_cargo ?? "",
-              nombreArea: nombre_area ?? "",
-              nombreSede: nombre_sede ?? "",
-              emailInstitucional: correo_institucional ?? "",
-              emailPersonal: correo_personal ?? "",
-              numeroCelular: numero_celular ?? "",
-              esAsociadoSindicato: is_asociado_sindicato ?? false,
-              esPresentaInconvenientes: is_presenta_inconvenientes ?? false,
-            });
+            dataForm.idTipoDocumento = id_tipodocumento || "";
+            dataForm.numeroDocumento = numero_documento || "";
+            (dataForm.nombres = nombres || ""),
+              (dataForm.apellidoPaterno = apellido_paterno || "");
+            dataForm.apellidoMaterno = apellido_materno || "";
+            dataForm.fechaNacimiento = fecha_nacimiento
+              ? parseISO(fecha_nacimiento)
+              : null;
+            dataForm.fechaIngreso = fecha_ingreso
+              ? parseISO(fecha_ingreso)
+              : null;
+            dataForm.idEmpresa = id_empresa || "";
+            dataForm.idCargo = id_cargo || "";
+            dataForm.nombreArea = nombre_area || "";
+            dataForm.nombreSede = nombre_sede || "";
+            dataForm.emailInstitucional = correo_institucional || "";
+            dataForm.emailPersonal = correo_personal || "";
+            dataForm.numeroCelular = numero_celular || "";
+            dataForm.esAsociadoSindicato = is_asociado_sindicato || false;
+            dataForm.esPresentaInconvenientes =
+              is_presenta_inconvenientes || false;
+
+            form.reset(dataForm);
           } else {
             showToast("error", message || "Colaborador no encontrado");
             navigate("/colaborador/nuevo");
@@ -328,17 +380,36 @@ export const ColaboradorForm = () => {
   return (
     <>
       <Card className="shadow-lg border-gray-200">
-        <CardHeader className="border-b border-gray-200">
-          <CardTitle className="text-xl font-bold text-gray-800">
-            {isEditMode
-              ? "Actualización de colaborador"
-              : "Registro de colaborador"}
-          </CardTitle>
-          <CardDescription className="text-sm text-gray-500">
-            {isEditMode
-              ? "Formulario de actualización de colaborador"
-              : "Complete el formulario para registrar un colaborador"}
-          </CardDescription>
+        <CardHeader className="border-b border-gray-200 p-4 sm:p-6 flex flex-row items-center justify-between">
+          <div className="flex-shrink min-w-0">
+            <CardTitle className="text-xl font-bold text-gray-800 truncate">
+              {isEditMode
+                ? "Actualización de colaborador"
+                : "Registro de colaborador"}
+            </CardTitle>
+            <CardDescription className="text-sm text-gray-500">
+              {isEditMode
+                ? "Formulario de actualización de colaborador"
+                : "Complete el formulario para registrar un colaborador"}
+            </CardDescription>
+          </div>
+          <button
+            onClick={handleGoBack}
+            className="
+              flex items-center text-sm font-semibold 
+              text-blue-600 
+              hover:text-blue-800 
+              hover:bg-blue-50 
+              transition-colors 
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 
+              rounded-md p-2 ml-4 
+              cursor-pointer
+            "
+            aria-label="Volver al listado"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Volver
+          </button>
         </CardHeader>
         <CardContent className="pt-6">
           <Form {...form}>
@@ -420,7 +491,7 @@ export const ColaboradorForm = () => {
                                     responsePersona;
 
                                   if (result && data) {
-                                    const persona = data as Persona;
+                                    const persona = data as TPersona;
 
                                     const {
                                       nombres,
@@ -594,11 +665,6 @@ export const ColaboradorForm = () => {
                             disabled={!camposHabilitadosPersona}
                           />
                         </FormControl>
-                        {/* <FormDescription>
-                          {field.value
-                            ? format(field.value, "PPP")
-                            : "Seleccione una fecha"}
-                        </FormDescription> */}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -611,47 +677,6 @@ export const ColaboradorForm = () => {
                   Información laboral
                 </legend>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* <FormField
-                    control={form.control}
-                    name="idEmpresa"
-                    render={({ field, fieldState }) => (
-                      <FormItem>
-                        <RequiredLabel>Empresa</RequiredLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value ?? ""}
-                        >
-                          <FormControl>
-                            <SelectTrigger
-                              className={`
-                                ${
-                                  fieldState.invalid
-                                    ? "border-red-500 focus:ring-red-500"
-                                    : "focus:ring-blue-500"
-                                }
-                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
-                              `}
-                            >
-                              <SelectValue placeholder="Seleccionar empresa" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-gray-400">
-                            {empresas.map((empresa) => (
-                              <SelectItem
-                                value={empresa.id}
-                                key={empresa.id}
-                                className="cursor-pointer hover:bg-gray-100 transition-colors"
-                              >
-                                {empresa.nombre_o_razon_social}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  /> */}
-
                   <FormField
                     control={form.control}
                     name="idEmpresa"
@@ -659,7 +684,7 @@ export const ColaboradorForm = () => {
                       return (
                         <FormItem className="flex flex-col">
                           <RequiredLabel>Empresa</RequiredLabel>
-                          <SearchableCombobox<Empresa>
+                          <SearchableCombobox<TEmpresa>
                             placeholder="Buscar una empresa"
                             options={empresas}
                             value={field.value}
@@ -667,54 +692,13 @@ export const ColaboradorForm = () => {
                             displayKey="nombre_o_razon_social"
                             valueKey="id"
                             searchKeys={["nombre_o_razon_social"]}
+                            isInvalid={fieldState.invalid}
                           />
                           <FormMessage />
                         </FormItem>
                       );
                     }}
                   />
-
-                  {/* <FormField
-                    control={form.control}
-                    name="idCargo"
-                    render={({ field, fieldState }) => (
-                      <FormItem>
-                        <RequiredLabel>Cargo</RequiredLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value ?? ""}
-                        >
-                          <FormControl>
-                            <SelectTrigger
-                              className={`
-                                ${
-                                  fieldState.invalid
-                                    ? "border-red-500 focus:ring-red-500"
-                                    : "focus:ring-blue-500"
-                                }
-                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
-                              `}
-                            >
-                              <SelectValue placeholder="Seleccionar cargo" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-gray-400">
-                            {cargos.map((cargo) => (
-                              <SelectItem
-                                value={cargo.id}
-                                key={cargo.id}
-                                className="cursor-pointer hover:bg-gray-100 transition-colors"
-                              >
-                                {cargo.nombre}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  /> */}
-
                   <FormField
                     control={form.control}
                     name="idCargo"
@@ -722,7 +706,7 @@ export const ColaboradorForm = () => {
                       return (
                         <FormItem className="flex flex-col">
                           <RequiredLabel>Cargo</RequiredLabel>
-                          <SearchableCombobox<Cargo>
+                          <SearchableCombobox<TCargo>
                             placeholder="Buscar un cargo"
                             options={cargos}
                             value={field.value}
@@ -730,13 +714,13 @@ export const ColaboradorForm = () => {
                             displayKey="nombre"
                             valueKey="id"
                             searchKeys={["nombre"]}
+                            isInvalid={fieldState.invalid}
                           />
                           <FormMessage />
                         </FormItem>
                       );
                     }}
                   />
-
                   <FormField
                     control={form.control}
                     name="nombreArea"
@@ -763,7 +747,6 @@ export const ColaboradorForm = () => {
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="nombreSede"
@@ -790,7 +773,6 @@ export const ColaboradorForm = () => {
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="emailInstitucional"
@@ -817,7 +799,6 @@ export const ColaboradorForm = () => {
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="emailPersonal"
@@ -981,10 +962,12 @@ export const ColaboradorForm = () => {
                   type="button"
                   variant="outline"
                   disabled={isSubmitting}
-                  onClick={() => navigate("/colaborador")}
+                  onClick={() => resetForm()}
+                  // onClick={() => navigate("/colaborador")}
                   className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
-                  {isSubmitting ? "Cancelando..." : "Cancelar"}
+                  Cancelar
+                  {/* {isSubmitting ? "Cancelando..." : "Cancelar"} */}
                 </Button>
               </div>
             </form>

@@ -1,5 +1,5 @@
 import apiClient from "./apiClient"
-import { DescansoMedico, DescansoMedicoResponse, DescansoMedicoFilter } from '../interfaces/IDescansoMedico'
+import { DescansoMedico, DescansoMedicoResponse } from '../interfaces/IDescansoMedico'
 import { AuthData } from "@/interfaces/IAuth"
 
 export const getAll = async (): Promise<DescansoMedicoResponse> => {
@@ -28,7 +28,7 @@ export const getAllWithPaginate = async (queryParams: string) => {
     try {
         // const urlApi = `${'/descansos/paginate?page='}${page}${'&limit='}${limit}`
         const urlApi = `${'/descansos/paginate?'}${queryParams}`
-        console.log({ urlApi })
+        // console.log({ urlApi })
 
         const response = await apiClient.get(urlApi)
 
@@ -54,7 +54,7 @@ export const getAllByColaboradorPaginate = async (idColaborador: string, queryPa
     try {
         // const urlApi = `${'/descansos/colaborador/paginate?idColaborador='}${idColaborador}${'&page='}${page}${'&limit='}${limit}`
         const urlApi = `${'/descansos/colaborador/paginate?idColaborador='}${idColaborador}${'&'}${queryParams}`
-        console.log({ urlApi })
+        // console.log({ urlApi })
 
         const response = await apiClient.get(urlApi)
 
@@ -78,7 +78,10 @@ export const getAllByColaboradorPaginate = async (idColaborador: string, queryPa
 
 export const getAllForReports = async (tipo: string) => {
     try {
-        const urlApi = `${'/descansos/reportes?tipo='}${tipo}`
+        // const urlApi = `${'/descansos/reportes?tipo='}${tipo}`
+        const urlApi = `${'/descansos/reportes/subsidiados?tipo='}${tipo}`
+
+        console.log({ urlApi })
 
         const response = await apiClient.get(urlApi, {
             responseType: 'blob'
@@ -124,7 +127,7 @@ export const create = async (payload: DescansoMedico): Promise<DescansoMedicoRes
     try {
         // Obteniendo el código temporal del usuario autenticado
         const codigo_temp = localStorage.getItem("codigo_temp") || null
-        console.log('localStorage codigo_temp', codigo_temp)
+        // console.log('localStorage codigo_temp', codigo_temp)
 
         const auth = localStorage.getItem("auth")
 

@@ -68,13 +68,13 @@ export const DescansoMedicoList = () => {
           ) : (
             <>
               {/* Botón para reporte PDF */}
-              <Button
+              {/* <Button
                 onClick={() => handleDownloadReport("pdf")}
                 className="bg-transparent border border-gray-400 text-red-600 hover:bg-red-50 hover:border-red-600 hover:text-red-700 transition-colors shadow-none px-2 py-2 cursor-pointer"
                 title="Generar reporte PDF"
               >
                 <FileDown className="h-6 w-6" />
-              </Button>
+              </Button> */}
               {/* Botón para reporte Excel */}
               <Button
                 onClick={() => handleDownloadReport("excel")}

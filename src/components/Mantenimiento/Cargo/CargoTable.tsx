@@ -23,6 +23,8 @@ import {
   PaginationPrevious,
 } from "../../ui/pagination";
 import { CargoRow } from "./CargoRow";
+import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 
 export const CargoTable: React.FC = () => {
   const [cargos, setCargos] = useState<Cargo[]>([]);
@@ -35,9 +37,23 @@ export const CargoTable: React.FC = () => {
     previousPage: null,
   });
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterQuery, setFilterQuery] = useState("");
+
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= pagination.totalPages) {
       setPagination((prev) => ({ ...prev, currentPage: page }));
+    }
+  };
+
+  const applySearch = () => {
+    setFilterQuery(searchTerm);
+    setPagination((prev) => ({ ...prev, currentPage: 1 }));
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      applySearch();
     }
   };
 
@@ -46,7 +62,11 @@ export const CargoTable: React.FC = () => {
       try {
         const { currentPage, limit } = pagination;
 
-        const response = await getCargosWithPaginate(currentPage, limit);
+        const response = await getCargosWithPaginate(
+          currentPage,
+          limit,
+          filterQuery
+        );
 
         if (response.result && response.data && response.pagination) {
           setCargos(response.data);
@@ -68,7 +88,7 @@ export const CargoTable: React.FC = () => {
     };
 
     fetchData();
-  }, [pagination.currentPage, pagination.limit]);
+  }, [pagination.currentPage, pagination.limit, filterQuery]);
 
   const renderPaginationItems = () => {
     const items = [];
@@ -83,7 +103,6 @@ export const CargoTable: React.FC = () => {
       );
     }
 
-    // for (let i = 1; i < pagination.totalPages; i++) {
     for (let i = startPage; i < endPage; i++) {
       items.push(
         <PaginationItem key={i}>
@@ -117,12 +136,21 @@ export const CargoTable: React.FC = () => {
   return (
     <div className="w-full space-y-4 pt-4">
       <div className="flex justify-end items-center space-x-2 pb-4">
-        {/* <h2 className="text-xl font-semibold">Listado de cargos</h2> */}
         <Input
           type="text"
           placeholder="Buscar por nombre"
           className="w-72 border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={handleKeyDown}
         />
+        <Button
+          onClick={applySearch}
+          className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-md flex items-center space-x-2"
+        >
+          <Search className="h-4 w-4" />
+          <span>Buscar</span>
+        </Button>
       </div>
       <div className="rounded-md border border-gray-200 shadow-sm">
         <Table>

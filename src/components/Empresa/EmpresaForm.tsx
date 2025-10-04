@@ -17,7 +17,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "../ui/form";
 import {
@@ -48,6 +47,7 @@ import {
 } from "../../services/representanteService";
 import SearchableCombobox from "../Common/SearchableCombobox";
 import { Cargo } from "@/interfaces/ICargo";
+import { ArrowLeft } from "lucide-react";
 
 const formSchema = z.object({
   ruc: z.string().min(2, {
@@ -156,11 +156,33 @@ export const EmpresaForm = () => {
   const { isSubmitting } = form.formState;
   const isEditMode = !!id;
 
+  const handleGoBack = () => {
+    navigate("/empresa");
+  };
+
+  const resetForm = () => {
+    const dataForm: TEmpresa = {
+      ruc: "",
+      razonSocial: "",
+      direccion: "",
+      idTipoDocumento: "",
+      numeroDocumento: "",
+      apellidoPaterno: "",
+      apellidoMaterno: "",
+      nombres: "",
+      direccionFiscal: "",
+      partidaRegistral: "",
+      idCargo: "",
+      telefono: "",
+      correo: "",
+      ospe: "",
+    };
+
+    form.reset(dataForm);
+  };
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      // console.log({ values });
-      // console.log({ idRepresentante });
-
       let messageError: string = "";
 
       let response: RepresentanteLegalResponse;
@@ -245,14 +267,13 @@ export const EmpresaForm = () => {
 
         if (isEditMode && id) {
           const responseEmpresa = await getEmpresaById(id);
+          console.log({ responseEmpresa });
           const { result, data } = responseEmpresa;
 
           if (result && data) {
             let dataForm: TEmpresa = {};
 
             const empresa = data as Empresa;
-
-            console.log({ empresa });
 
             const {
               id: idEmpresa,
@@ -273,17 +294,13 @@ export const EmpresaForm = () => {
             const totalRepresentantes = listRepresentantes.length;
 
             if (isEditMode && totalRepresentantes === 0) {
-              console.log("inhabilitar campos persona");
               setCamposHabilitadosPersona(false);
             } else {
-              console.log("habilitar campos persona");
               setCamposHabilitadosPersona(true);
             }
 
             if (totalRepresentantes === 1) {
               const representante = listRepresentantes[0] as RepresentanteLegal;
-
-              console.log({ representante });
 
               const {
                 id_tipodocumento,
@@ -334,15 +351,34 @@ export const EmpresaForm = () => {
   return (
     <>
       <Card className="shadow-lg border-gray-200">
-        <CardHeader className="border-b border-gray-200">
-          <CardTitle className="text-xl font-bold text-gray-800">
-            {isEditMode ? "Actualización de empresa" : "Registro de empresa"}
-          </CardTitle>
-          <CardDescription className="text-sm text-gray-500">
-            {isEditMode
-              ? "Formulario de actualización de empresa"
-              : "Complete el formulario para registrar nueva empresa"}
-          </CardDescription>
+        <CardHeader className="border-b border-gray-200 p-4 sm:p-6 flex flex-row items-center justify-between">
+          <div className="flex-shrink min-w-0">
+            <CardTitle className="text-xl font-bold text-gray-800 truncate">
+              {isEditMode ? "Actualización de empresa" : "Registro de empresa"}
+            </CardTitle>
+            <CardDescription className="text-sm text-gray-500">
+              {isEditMode
+                ? "Formulario de actualización de empresa"
+                : "Complete el formulario para registrar nueva empresa"}
+            </CardDescription>
+          </div>
+          <button
+            onClick={handleGoBack}
+            className="
+              flex items-center text-sm font-semibold 
+              text-blue-600 
+              hover:text-blue-800 
+              hover:bg-blue-50 
+              transition-colors 
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 
+              rounded-md p-2 ml-4 
+              cursor-pointer
+            "
+            aria-label="Volver al listado"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Volver
+          </button>
         </CardHeader>
         <CardContent className="pt-6">
           <Form {...form}>
@@ -776,47 +812,6 @@ export const EmpresaForm = () => {
                     }}
                   />
 
-                  {/* <FormField
-                    control={form.control}
-                    name="idCargo"
-                    render={({ field, fieldState }) => (
-                      <FormItem>
-                        <FormLabel>Cargo</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger
-                              className={`
-                                ${
-                                  fieldState.invalid
-                                    ? "border-red-500 focus:ring-red-500"
-                                    : "focus:ring-blue-500"
-                                }
-                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
-                              `}
-                            >
-                              <SelectValue placeholder="Seleccionar cargo" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-gray-400">
-                            {cargos.map((cargo) => (
-                              <SelectItem
-                                key={cargo.id}
-                                value={cargo.id}
-                                className="cursor-pointer hover:bg-gray-100 transition-colors"
-                              >
-                                {cargo.nombre}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  /> */}
-
                   <FormField
                     control={form.control}
                     name="telefono"
@@ -922,10 +917,12 @@ export const EmpresaForm = () => {
                   type="button"
                   variant="outline"
                   disabled={isSubmitting}
-                  onClick={() => navigate("/empresa")}
+                  onClick={() => resetForm()}
+                  // onClick={() => navigate("/empresa")}
                   className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
-                  {isSubmitting ? "Cancelando..." : "Cancelar"}
+                  Cancelar
+                  {/* {isSubmitting ? "Cancelando..." : "Cancelar"} */}
                 </Button>
               </div>
             </form>

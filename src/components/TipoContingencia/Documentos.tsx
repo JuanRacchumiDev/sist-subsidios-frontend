@@ -73,7 +73,7 @@ export const Documentos = ({
 
     try {
       const response = await uploadAdjunto(formData);
-      console.log("response upload file", response);
+      // console.log("response upload file", response);
 
       const { result, data, message } = response;
 

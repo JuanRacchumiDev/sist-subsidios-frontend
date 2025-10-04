@@ -109,7 +109,7 @@ export const CanjeForm = () => {
           if (result && data) {
             const canje = data as Canje;
 
-            console.log({ canje });
+            // console.log({ canje });
 
             const dataForm = {
               fechaCanje: canje.fecha_canje
@@ -120,7 +120,7 @@ export const CanjeForm = () => {
               estadoRegistro: canje.estado_registro,
               observacion: canje.observacion || "",
             };
-            console.log("dataForm canje", dataForm);
+            // console.log("dataForm canje", dataForm);
             form.reset(dataForm);
 
             const { fecha_maxima_canje } = canje;
@@ -156,7 +156,7 @@ export const CanjeForm = () => {
         observacion,
       };
 
-      console.log({ payloadCanje });
+      // console.log({ payloadCanje });
 
       const response = await updateCanje(id, payloadCanje);
 

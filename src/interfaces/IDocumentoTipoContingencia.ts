@@ -34,3 +34,8 @@ export interface DocumentoTipoContingenciaPaginateResponse {
     errors?: string
     status?: number
 }
+
+export interface DocumentoTipoContingenciaFilter {
+    id_tipocontingencia?: string
+    nombre?: string
+}

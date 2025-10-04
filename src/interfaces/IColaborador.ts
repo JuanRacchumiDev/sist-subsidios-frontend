@@ -70,3 +70,11 @@ export interface ColaboradorPaginateResponse {
     errors?: string
     status?: number
 }
+
+export interface ColaboradorFilter {
+    id_tipodocumento?: string
+    id_cargo?: string
+    id_empresa?: string
+    numero_documento?: string
+    nombre_completo?: string
+}

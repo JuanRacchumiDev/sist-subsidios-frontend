@@ -1,4 +1,4 @@
-import { DocumentoTipoContingencia } from '../interfaces/IDocumentoTipoContingencia'
+import { DocumentoTipoContingencia, DocumentoTipoContingenciaFilter } from '../interfaces/IDocumentoTipoContingencia'
 import {
     getAll,
     getById,
@@ -15,8 +15,24 @@ export const getDocumentosTipoCont = async () => {
     }
 }
 
-export const getDocumentosTipoContWithPaginate = async (page: number, limit: number) => {
-    const response = await getAllWithPaginate(page, limit)
+export const getDocumentosTipoContWithPaginate = async (
+    page: number,
+    limit: number,
+    filters: DocumentoTipoContingenciaFilter = {}
+) => {
+    // Construir la cadena de query parameters
+    const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...Object.fromEntries(
+            Object.entries(filters).filter(([, value]) => value)
+        )
+    }).toString()
+
+    console.log({ queryParams })
+
+    // const response = await getAllWithPaginate(page, limit)
+    const response = await getAllWithPaginate(queryParams)
 
     return {
         ...response

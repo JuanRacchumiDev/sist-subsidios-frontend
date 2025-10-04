@@ -1,4 +1,4 @@
-import { Usuario } from '../interfaces/IUsuario'
+import { Usuario, UsuarioFilter } from '../interfaces/IUsuario'
 import {
     getAll,
     getById,
@@ -15,8 +15,22 @@ export const getUsuarios = async () => {
     }
 }
 
-export const getUsuariosWithPaginate = async (page: number, limit: number) => {
-    const response = await getAllWithPaginate(page, limit)
+export const getUsuariosWithPaginate = async (
+    page: number,
+    limit: number,
+    filters: UsuarioFilter = {}
+) => {
+    // Construir la cadena de query parameters
+    const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...Object.fromEntries(
+            Object.entries(filters).filter(([, value]) => value)
+        )
+    }).toString()
+
+    // const response = await getAllWithPaginate(page, limit)
+    const response = await getAllWithPaginate(queryParams)
 
     return {
         ...response

@@ -32,7 +32,6 @@ import { RequiredLabel } from "../../Common/RequiredLabel";
 import { getTipoContingencias } from "../../../services/tipoContingenciaService";
 import {
   createDocumentoTipoCont,
-  getDocumentosTipoCont,
   updateDocumentoTipoCont,
 } from "../../../services/documentoTipoContService";
 import {
@@ -42,6 +41,7 @@ import {
 import { TipoContingencia } from "../../../interfaces/ITipoContingencia";
 import { Input } from "../../../components/ui/input";
 import { getDocumentoTipoContById } from "../../../services/documentoTipoContService";
+import { ArrowLeft } from "lucide-react";
 
 const formSchema = z.object({
   idTipoContingencia: z
@@ -74,6 +74,17 @@ export const DocumentoTipoContigenciaForm = () => {
   const { isSubmitting } = form.formState;
   const isEditMode = !!id;
 
+  const handleGoBack = () => {
+    navigate("/mantenimiento/documento-tipo-contingencia");
+  };
+
+  const resetForm = () => {
+    form.reset({
+      idTipoContingencia: "",
+      nombre: "",
+    });
+  };
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       let messageError: string = "";
@@ -103,20 +114,6 @@ export const DocumentoTipoContigenciaForm = () => {
         showToast("error", error || messageError);
         return;
       }
-
-      // const response = await createDocumentoTipoCont(payloadDocumentoTC);
-      // const { result, message } = response as DocumentoTipoContingenciaResponse;
-
-      // if (result) {
-      //   showToast("success", message);
-      //   navigate("/mantenimiento/documento-tipo-contingencia");
-      // } else {
-      //   showToast(
-      //     "error",
-      //     message || "Error al registrara el documento por tipo de contingencia"
-      //   );
-      //   return;
-      // }
     } catch (error) {
       console.error(
         "Error al registrar documento de tipo de contingencia",
@@ -152,7 +149,7 @@ export const DocumentoTipoContigenciaForm = () => {
               idTipoContingencia: documento.id_tipocontingencia,
               nombre: documento.nombre || "",
             };
-            console.log("dataForm documento tipo contingencia", dataForm);
+            // console.log("dataForm documento tipo contingencia", dataForm);
             form.reset(dataForm);
           }
         }
@@ -169,17 +166,36 @@ export const DocumentoTipoContigenciaForm = () => {
   return (
     <>
       <Card className="shadow-lg border-gray-200">
-        <CardHeader className="border-b border-gray-200">
-          <CardTitle className="text-xl font-bold text-gray-800">
-            {isEditMode
-              ? "Actualización de documento"
-              : "Registro de documento"}
-          </CardTitle>
-          <CardDescription className="text-sm text-gray-500">
-            {isEditMode
-              ? "Formulario de actualización de documento"
-              : "Complete el formulario para registrar un documento"}
-          </CardDescription>
+        <CardHeader className="border-b border-gray-200 flex flex-row items-center justify-between">
+          <div className="flex-shrink min-w-0">
+            <CardTitle className="text-xl font-bold text-gray-800">
+              {isEditMode
+                ? "Actualización de documento"
+                : "Registro de documento"}
+            </CardTitle>
+            <CardDescription className="text-sm text-gray-500">
+              {isEditMode
+                ? "Formulario de actualización de documento"
+                : "Complete el formulario para registrar un documento"}
+            </CardDescription>
+          </div>
+          <button
+            onClick={handleGoBack}
+            className="
+              flex items-center text-sm font-semibold 
+              text-blue-600 
+              hover:text-blue-800 
+              hover:bg-blue-50 
+              transition-colors 
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 
+              rounded-md p-2 ml-4 
+              cursor-pointer
+            "
+            aria-label="Volver al listado"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Volver
+          </button>
         </CardHeader>
         <CardContent className="pt-6">
           <Form {...form}>
@@ -275,12 +291,12 @@ export const DocumentoTipoContigenciaForm = () => {
                   type="button"
                   variant="outline"
                   disabled={isSubmitting}
-                  onClick={() =>
-                    navigate("/mantenimiento/documento-tipo-contingencia")
-                  }
+                  onClick={() => resetForm()}
+                  // onClick={() => navigate("/mantenimiento/documento-tipo-contingencia")}
                   className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
-                  {isSubmitting ? "Cancelando..." : "Cancelar"}
+                  Cancelar
+                  {/* {isSubmitting ? "Cancelando..." : "Cancelar"} */}
                 </Button>
               </div>
             </form>

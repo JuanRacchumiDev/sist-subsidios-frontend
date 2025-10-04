@@ -51,6 +51,7 @@ export const DescansoMedicoRow: React.FC<Props> = ({ desc }) => {
       <TableCell className="py-3">{desc.nombre_tipodescansomedico}</TableCell>
       <TableCell className="py-3">{desc.nombre_tipocontingencia}</TableCell>
       <TableCell className="py-3">{desc.mes_devengado}</TableCell>
+      <TableCell className="py-3">{desc.anio_fecha_inicio}</TableCell>
       <TableCell className="py-3">
         <BadgeEstado estado={desc.estado_registro as EDescansoMedico} />
       </TableCell>

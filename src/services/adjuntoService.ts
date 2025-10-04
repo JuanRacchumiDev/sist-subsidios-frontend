@@ -55,7 +55,7 @@ export const updateAdjunto = async (id: string, payload: Adjunto) => {
 export const uploadAdjunto = async (formData: FormData) => {
     const responseTipoAdjunto = await getByNombre("GENERAL");
 
-    console.log({ responseTipoAdjunto })
+    // console.log({ responseTipoAdjunto })
 
     const { data } = responseTipoAdjunto
 

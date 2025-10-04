@@ -1,15 +1,22 @@
 import {
     BarChart3,
+    Briefcase,
+    Building,
     Calendar,
     ChevronDown,
     CreditCard,
+    DollarSign,
     FileText,
+    HeartPulse,
     LayoutDashboard,
     MessagesSquare,
     Package,
+    RefreshCw,
     Settings,
     ShoppingBag,
+    UserCheck,
     Users,
+    Wallet,
     Zap,
 } from "lucide-react";
 
@@ -24,7 +31,7 @@ export const MENU_ITEMS = [
     },
     {
         id: "empresa",
-        icon: Users,
+        icon: Building,
         label: "Empresas",
         active: false,
         path: "/empresa",
@@ -39,46 +46,56 @@ export const MENU_ITEMS = [
     },
     {
         id: "descanso-medico",
-        icon: Users,
+        icon: HeartPulse,
         label: "Descansos médicos",
         active: false,
         path: "/descanso-medico",
     },
     {
         id: "canje",
-        icon: Users,
+        icon: RefreshCw,
         label: "Canjes",
         active: false,
         path: "/canje",
     },
     {
         id: "reembolso",
-        icon: Users,
+        icon: Wallet,
         label: "Reembolsos",
         active: false,
         path: "/reembolso",
     },
     {
         id: "cobro",
-        icon: Users,
+        icon: DollarSign,
         label: "Cobros",
         active: false,
         path: "/cobro",
     },
     {
         id: "usuario",
-        icon: Users,
+        icon: UserCheck,
         label: "Usuarios",
         active: false,
         path: "/usuario",
     },
     {
         id: "mantenimiento",
-        icon: Users,
+        icon: Settings,
         label: "Mantenimiento",
         submenu: [
-            { id: "cargo", label: "Cargo", path: "/mantenimiento/cargo" },
-            { id: "documento-tipo-contingencia", label: "Documentos Tipo Contingencia", path: "/mantenimiento/documento-tipo-contingencia" }
+            {
+                id: "cargo",
+                label: "Cargo",
+                icon: Briefcase,
+                path: "/mantenimiento/cargo"
+            },
+            {
+                id: "documento-tipo-contingencia",
+                label: "Documentos Tipo Contingencia",
+                icon: FileText,
+                path: "/mantenimiento/documento-tipo-contingencia"
+            }
         ],
     },
 ];

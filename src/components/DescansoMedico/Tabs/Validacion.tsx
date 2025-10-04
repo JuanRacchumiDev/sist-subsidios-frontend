@@ -37,12 +37,12 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
     const estadosPermitidos: EDescansoMedico[] = [];
     let isDisabled = false;
 
-    console.log({ userProfile });
+    // console.log({ userProfile });
 
     // Lógica para el perfil "especialista"
     if (userProfile?.slug_perfil === "especialista") {
       if (isEditMode) {
-        console.log("modo edición");
+        // console.log("modo edición");
         // En modo edición, el especialista puede cambiar el estado, pero ciertos campos pueden estar deshabilitados.
         // Aquí no hay campos deshabilitados explícitamente, pero podrías agregar esa lógica.
         // Muestra todos los estados excepto "Registro exitoso"
@@ -53,7 +53,7 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
         });
         isDisabled = false; // El especialista tiene permiso para editar
       } else {
-        console.log("modo creación");
+        // console.log("modo creación");
         // En nuevo registro, el especialista también podría tener permisos para editar
         Object.values(EDescansoMedico).forEach((estado) => {
           if (estado !== EDescansoMedico.REGISTRO_INGRESADO) {
