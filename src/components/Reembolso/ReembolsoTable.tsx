@@ -1,15 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ReembolsoRow } from "./ReembolsoRow";
-import { getAuthData } from "@/utils/authMemo";
 import {
   Reembolso,
-  ReembolsoPaginateResponse,
   Pagination as PaginationType,
 } from "../../interfaces/IReembolso";
-import {
-  getReembolsos,
-  getReembolsosWithPaginate,
-} from "@/services/reembolsoService";
+import { getReembolsosWithPaginate } from "@/services/reembolsoService";
 import {
   Pagination,
   PaginationContent,
@@ -20,6 +15,7 @@ import {
   PaginationPrevious,
 } from "../ui/pagination";
 import { Input } from "../ui/input";
+import { TableSpinner } from "../Common/TableSpinner";
 import {
   Table,
   TableBody,
@@ -39,6 +35,7 @@ export const ReembolsoTable = () => {
     nextPage: null,
     previousPage: null,
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   // const userProfile = useMemo(() => getAuthData()?.usuario, []);
 
@@ -50,6 +47,7 @@ export const ReembolsoTable = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const { currentPage, limit } = pagination;
         const response = await getReembolsosWithPaginate(currentPage, limit);
@@ -72,6 +70,8 @@ export const ReembolsoTable = () => {
         }
       } catch (error) {
         console.error("Error al obtener reembolsos", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -92,7 +92,7 @@ export const ReembolsoTable = () => {
     }
 
     // for (let i = 1; i < pagination.totalPages; i++) {
-    for (let i = startPage; i < endPage; i++) {
+    for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
           <PaginationLink
@@ -159,7 +159,9 @@ export const ReembolsoTable = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {reembolsos.length > 0 ? (
+            {isLoading ? (
+              <TableSpinner colSpan={7} />
+            ) : reembolsos.length > 0 ? (
               reembolsos.map((reembolso) => (
                 <ReembolsoRow key={reembolso.id} reembolso={reembolso} />
               ))

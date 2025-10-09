@@ -4,7 +4,8 @@ import {
     getById,
     getAllWithPaginate,
     create,
-    update
+    update,
+    updateEstado
 } from '../repositories/documentoTCRepository'
 
 export const getDocumentosTipoCont = async () => {
@@ -57,6 +58,14 @@ export const createDocumentoTipoCont = async (payload: DocumentoTipoContingencia
 
 export const updateDocumentoTipoCont = async (id: string, payload: DocumentoTipoContingencia) => {
     const response = await update(id, payload)
+
+    return {
+        ...response
+    }
+}
+
+export const updateDocumentoTipoContByEstado = async (id: string, payload: DocumentoTipoContingencia) => {
+    const response = await updateEstado(id, payload)
 
     return {
         ...response

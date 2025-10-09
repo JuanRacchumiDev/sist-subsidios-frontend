@@ -3,7 +3,8 @@ import {
     getAll,
     getById,
     create,
-    getAllWithPaginate
+    getAllWithPaginate,
+    updateEstado
 } from '../repositories/empresaRepository'
 
 export const getEmpresas = async () => {
@@ -42,6 +43,14 @@ export const getEmpresaById = async (id: string) => {
 
 export const createEmpresa = async (payload: Empresa) => {
     const response = await create(payload)
+
+    return {
+        ...response
+    }
+}
+
+export const updateEmpresaByEstado = async (id: string, payload: Empresa) => {
+    const response = await updateEstado(id, payload)
 
     return {
         ...response

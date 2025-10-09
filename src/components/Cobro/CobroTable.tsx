@@ -1,12 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { CobroRow } from "./CobroRow";
-import { getAuthData } from "@/utils/authMemo";
-import {
-  Cobro,
-  CobroPaginateResponse,
-  Pagination as PaginationType,
-} from "../../interfaces/ICobro";
-import { getCobros, getCobrosWithPaginate } from "@/services/cobroService";
+import { Cobro, Pagination as PaginationType } from "../../interfaces/ICobro";
+import { getCobrosWithPaginate } from "@/services/cobroService";
 import {
   Pagination,
   PaginationContent,
@@ -25,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { TableSpinner } from "../Common/TableSpinner";
 
 export const CobroTable = () => {
   const [cobros, setCobros] = useState<Cobro[]>([]);
@@ -37,6 +33,8 @@ export const CobroTable = () => {
     previousPage: null,
   });
 
+  const [isLoading, setIsLoading] = useState(true);
+
   // const userProfile = useMemo(() => getAuthData()?.usuario, []);
 
   const handlePageChange = (page: number) => {
@@ -47,6 +45,7 @@ export const CobroTable = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const { currentPage, limit } = pagination;
         const response = await getCobrosWithPaginate(currentPage, limit);
@@ -70,6 +69,8 @@ export const CobroTable = () => {
         }
       } catch (error) {
         console.error("Error al obtener cobros", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -90,7 +91,7 @@ export const CobroTable = () => {
     }
 
     // for (let i = 1; i < pagination.totalPages; i++) {
-    for (let i = startPage; i < endPage; i++) {
+    for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
           <PaginationLink
@@ -154,7 +155,9 @@ export const CobroTable = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {cobros.length > 0 ? (
+            {isLoading ? (
+              <TableSpinner colSpan={5} />
+            ) : cobros.length > 0 ? (
               cobros.map((cobro) => <CobroRow key={cobro.id} cobro={cobro} />)
             ) : (
               <TableRow>

@@ -1,13 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CanjeRow } from "./CanjeRow";
-import { getAuthData } from "@/utils/authMemo";
 import {
   Canje,
   CanjeFilter,
-  CanjePaginateResponse,
   Pagination as PaginationType,
 } from "../../interfaces/ICanje";
-import { getCanjes, getCanjesWithPaginate } from "@/services/canjeService";
+import { getCanjesWithPaginate } from "@/services/canjeService";
 import {
   Pagination,
   PaginationContent,
@@ -17,7 +15,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "../ui/pagination";
-import { Input } from "../ui/input";
 import {
   Table,
   TableBody,
@@ -29,6 +26,7 @@ import {
 import { Button } from "../ui/button";
 import { FilterIcon } from "lucide-react";
 import { CanjeFilterModal } from "./CanjeFilterModal";
+import { TableSpinner } from "../Common/TableSpinner";
 
 // Definimos el estado inicial de los filtros
 const initialFilters: CanjeFilter = {
@@ -49,6 +47,7 @@ export const CanjeTable = () => {
     previousPage: null,
   });
 
+  const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<CanjeFilter>(initialFilters);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
@@ -76,6 +75,7 @@ export const CanjeTable = () => {
 
   // useEffect(() => {
   const fetchData = useCallback(async () => {
+    setIsLoading(true);
     try {
       const { currentPage, limit } = pagination;
 
@@ -91,7 +91,8 @@ export const CanjeTable = () => {
         limit,
         cleanFilters
       );
-      // console.log("response canjes", response);
+
+      console.log("response canjes", response);
 
       const { result, data, pagination: detailtPagination } = response;
 
@@ -111,6 +112,8 @@ export const CanjeTable = () => {
       }
     } catch (error) {
       console.error("Error al obtener canjes", error);
+    } finally {
+      setIsLoading(false);
     }
   }, [pagination.currentPage, pagination.limit, filters]);
 
@@ -135,7 +138,7 @@ export const CanjeTable = () => {
     }
 
     // for (let i = 1; i < pagination.totalPages; i++) {
-    for (let i = startPage; i < endPage; i++) {
+    for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
           <PaginationLink
@@ -234,7 +237,9 @@ export const CanjeTable = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {canjes.length > 0 ? (
+            {isLoading ? (
+              <TableSpinner colSpan={12} />
+            ) : canjes.length > 0 ? (
               canjes.map((canje) => <CanjeRow key={canje.id} canje={canje} />)
             ) : (
               <TableRow>

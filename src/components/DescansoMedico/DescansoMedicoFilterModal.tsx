@@ -292,7 +292,7 @@ export const DescansoMedicoFilterModal: React.FC<
             variant="ghost"
             onClick={handleClear}
             type="button"
-            className="text-red-600 hover:bg-red-50"
+            className="text-red-600 hover:bg-red-50 cursor-pointer"
           >
             Limpiar filtros
           </Button>
@@ -301,14 +301,14 @@ export const DescansoMedicoFilterModal: React.FC<
               variant="outline"
               onClick={onClose}
               type="button"
-              className="border-gray-300 hover:bg-gray-100"
+              className="border-gray-300 hover:bg-gray-100 cursor-pointer"
             >
               Cancelar
             </Button>
             <Button
               onClick={handleApply}
               type="button"
-              className="bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+              className="bg-blue-600 hover:bg-blue-700 text-white shadow-md cursor-pointer"
             >
               Aplicar filtros
             </Button>

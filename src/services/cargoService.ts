@@ -4,7 +4,8 @@ import {
     getById,
     create,
     update,
-    getAllWithPaginate
+    getAllWithPaginate,
+    updateEstado
 } from '../repositories/cargoRepository'
 
 export const getCargos = async () => {
@@ -51,6 +52,14 @@ export const createCargo = async (payload: Cargo) => {
 
 export const updateCargo = async (id: string, payload: Cargo) => {
     const response = await update(id, payload)
+
+    return {
+        ...response
+    }
+}
+
+export const updateCargoByEstado = async (id: string, payload: Cargo) => {
+    const response = await updateEstado(id, payload)
 
     return {
         ...response

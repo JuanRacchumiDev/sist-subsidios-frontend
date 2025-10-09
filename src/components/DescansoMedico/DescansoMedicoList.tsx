@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "../ui/card";
 import { DescansoMedicoTable } from "./DescansoMedicoTable";
-import { FileDown, FileSpreadsheet } from "lucide-react";
+import { FileSpreadsheet } from "lucide-react";
 import { Spinner } from "../Common/Spinner";
 import { useState } from "react";
 import { Button } from "../ui/button";

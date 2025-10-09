@@ -5,7 +5,8 @@ import {
     getByIdTipoDocAndNumcDoc,
     getAllByIdEmpresa,
     getAllWithPaginate,
-    create
+    create,
+    updateEstado
 } from '../repositories/colaboradorRepository'
 
 export const getColaboradores = async () => {
@@ -64,6 +65,14 @@ export const getColaboradoresByIdEmpresa = async (idEmpresa: string) => {
 
 export const createColaborador = async (payload: Colaborador) => {
     const response = await create(payload)
+
+    return {
+        ...response
+    }
+}
+
+export const updateColaboradorByEstado = async (id: string, payload: Colaborador) => {
+    const response = await updateEstado(id, payload)
 
     return {
         ...response

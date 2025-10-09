@@ -26,6 +26,7 @@ import {
 import { Button } from "../ui/button";
 import { FilterIcon } from "lucide-react";
 import { ColaboradorFilterModal } from "./ColaboradorFilterModal";
+import { TableSpinner } from "../../components/Common/TableSpinner";
 
 // Definimos el estado inicial de los filtros
 const initialFilters: ColaboradorFilter = {
@@ -47,8 +48,15 @@ export const ColaboradorTable: React.FC = () => {
     previousPage: null,
   });
 
+  const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<ColaboradorFilter>(initialFilters);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [refreshToggle, setRefreshToggle] = useState(0);
+
+  const handleColaboradorStatusChange = () => {
+    // Incrementa el toggle. Esto NO cambia la tabla, pero fuerza el useEffect a ejecutarse.
+    setRefreshToggle((prev) => prev + 1);
+  };
 
   const handleApplyFilters = (newFilters: ColaboradorFilter) => {
     // Asegurar que las cadenas vacías de los Inputs se conviertan a `undefined` al aplicar
@@ -72,6 +80,7 @@ export const ColaboradorTable: React.FC = () => {
 
   // useEffect(() => {
   const fetchData = useCallback(async () => {
+    setIsLoading(true);
     try {
       const { currentPage, limit } = pagination;
 
@@ -104,8 +113,10 @@ export const ColaboradorTable: React.FC = () => {
       }
     } catch (error) {
       console.error("Error al obtener colaboradores", error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [pagination.currentPage, pagination.limit, filters]);
+  }, [pagination.currentPage, pagination.limit, filters, refreshToggle]);
 
   // fetchData();
   // }, [pagination.currentPage, pagination.limit]);
@@ -128,7 +139,7 @@ export const ColaboradorTable: React.FC = () => {
     }
 
     // for (let i = 1; i < pagination.totalPages; i++) {
-    for (let i = startPage; i < endPage; i++) {
+    for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
           <PaginationLink
@@ -213,9 +224,15 @@ export const ColaboradorTable: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {colaboradores.length > 0 ? (
+            {isLoading ? (
+              <TableSpinner colSpan={7} />
+            ) : colaboradores.length > 0 ? (
               colaboradores.map((col) => (
-                <ColaboradorRow key={col.id} col={col} />
+                <ColaboradorRow
+                  key={col.id}
+                  col={col}
+                  onStatusChange={handleColaboradorStatusChange}
+                />
               ))
             ) : (
               <TableRow>

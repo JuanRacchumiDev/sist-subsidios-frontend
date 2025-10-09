@@ -4,7 +4,8 @@ import {
     getById,
     create,
     update,
-    getAllWithPaginate
+    getAllWithPaginate,
+    updateEstado
 } from '../repositories/usuarioRepository'
 
 export const getUsuarios = async () => {
@@ -55,6 +56,14 @@ export const createUsuario = async (payload: Usuario) => {
 
 export const updateUsuario = async (id: string, payload: Usuario) => {
     const response = await update(id, payload)
+
+    return {
+        ...response
+    }
+}
+
+export const updateUsuarioByEstado = async (id: string, payload: Usuario) => {
+    const response = await updateEstado(id, payload)
 
     return {
         ...response

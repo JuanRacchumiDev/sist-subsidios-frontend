@@ -16,7 +16,7 @@ export const InfoModal: React.FC<InfoModalProps> = ({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black opacity-90 z-50">
       <div className="bg-white p-6 rounded shadow-md max-w-md">
         <h2 className="text-lg font-bold mb-2">{title}</h2>
         <p className="mb-4">{content}</p>

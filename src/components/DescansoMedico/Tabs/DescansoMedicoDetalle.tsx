@@ -127,11 +127,16 @@ export const DescansoMedicoDetalle = ({
   const [adjuntos, setAdjuntos] = useState<Adjunto[]>([]);
 
   const [totalDias, setTotalDias] = useState<number | null>(null);
+  // const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const [isCitt, setIsCitt] = useState<boolean | null>(false);
 
   // Id de la empresa seleccionada
   const selectedEmpresaId = form.watch("idEmpresa");
+
+  // Lógica para determinar si los campos dependientes deben estar deshabilitados.
+  // Serán deshabilitados si NO hay un idEmpresa seleccionado O si estamos en modo "carta" (isModeLetter)
+  // const isDependentFieldsDisabled = isModeLetter || !selectedEmpresaId;
 
   // Id del tipo de descanso
   const selectedTipoDescansoId = form.watch("idTipoDescansoMedico");
@@ -170,6 +175,7 @@ export const DescansoMedicoDetalle = ({
 
         if (userProfile.id_empresa && userProfile.id_colaborador) {
           // console.log("abcdef");
+          // setIsFormDisabled(true);
           setIsDisabled(true);
         } else {
           // console.log("pqrstu");
@@ -177,6 +183,7 @@ export const DescansoMedicoDetalle = ({
             ? isModeLetter
             : false;
           setIsDisabled(isDisabledIdEmpresaIdColaborador);
+          // setIsFormDisabled(isDisabledIdEmpresaIdColaborador);
         }
         // console.log({ isModeLetter });
       } catch (error) {
@@ -303,6 +310,7 @@ export const DescansoMedicoDetalle = ({
                 displayKey="nombre_o_razon_social"
                 valueKey="id"
                 searchKeys={["nombre_o_razon_social"]}
+                // disabled={isFormDisabled || isModeLetter}
                 disabled={isDisabled}
                 isInvalid={fieldState.invalid}
               />
@@ -328,6 +336,7 @@ export const DescansoMedicoDetalle = ({
                 valueKey="id"
                 searchKeys={["nombre_completo"]}
                 disabled={isDisabled}
+                // disabled={isDependentFieldsDisabled}
                 isInvalid={fieldState.invalid}
               />
               <FormMessage />
@@ -345,6 +354,7 @@ export const DescansoMedicoDetalle = ({
             <Select
               onValueChange={field.onChange}
               value={field.value ?? ""}
+              // disabled={isDependentFieldsDisabled}
               disabled={isModeLetter}
             >
               <FormControl>
@@ -416,6 +426,7 @@ export const DescansoMedicoDetalle = ({
             <Select
               onValueChange={field.onChange}
               value={field.value ?? ""}
+              // disabled={isDependentFieldsDisabled}
               disabled={isModeLetter}
             >
               <FormControl>

@@ -25,6 +25,7 @@ import {
 import { CargoRow } from "./CargoRow";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
+import { TableSpinner } from "../../../components/Common/TableSpinner";
 
 export const CargoTable: React.FC = () => {
   const [cargos, setCargos] = useState<Cargo[]>([]);
@@ -37,8 +38,15 @@ export const CargoTable: React.FC = () => {
     previousPage: null,
   });
 
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterQuery, setFilterQuery] = useState("");
+  const [refreshToggle, setRefreshToggle] = useState(0);
+
+  const handleCargoStatusChange = () => {
+    // Incrementa el toggle. Esto NO cambia la tabla, pero fuerza el useEffect a ejecutarse.
+    setRefreshToggle((prev) => prev + 1);
+  };
 
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= pagination.totalPages) {
@@ -59,6 +67,7 @@ export const CargoTable: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const { currentPage, limit } = pagination;
 
@@ -84,11 +93,13 @@ export const CargoTable: React.FC = () => {
         }
       } catch (error) {
         console.error("Error al obtener cargos", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [pagination.currentPage, pagination.limit, filterQuery]);
+  }, [pagination.currentPage, pagination.limit, filterQuery, refreshToggle]);
 
   const renderPaginationItems = () => {
     const items = [];
@@ -103,7 +114,7 @@ export const CargoTable: React.FC = () => {
       );
     }
 
-    for (let i = startPage; i < endPage; i++) {
+    for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
           <PaginationLink
@@ -168,12 +179,20 @@ export const CargoTable: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {cargos.length > 0 ? (
-              cargos.map((cargo) => <CargoRow key={cargo.id} cargo={cargo} />)
+            {isLoading ? (
+              <TableSpinner colSpan={3} />
+            ) : cargos.length > 0 ? (
+              cargos.map((cargo) => (
+                <CargoRow
+                  key={cargo.id}
+                  cargo={cargo}
+                  onStatusChange={handleCargoStatusChange}
+                />
+              ))
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={4}
+                  colSpan={3}
                   className="text-center text-gray-500 py-6"
                 >
                   No se encontraron cargos registrados

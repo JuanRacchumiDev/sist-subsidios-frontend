@@ -25,6 +25,7 @@ import {
 import { EmpresaRow } from "./EmpresaRow";
 import { Button } from "../ui/button";
 import { Search } from "lucide-react";
+import { TableSpinner } from "../../components/Common/TableSpinner";
 
 export const EmpresaTable = () => {
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
@@ -37,8 +38,15 @@ export const EmpresaTable = () => {
     previousPage: null,
   });
 
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterQuery, setFilterQuery] = useState("");
+  const [refreshToggle, setRefreshToggle] = useState(0);
+
+  const handleEmpresaStatusChange = () => {
+    // Incrementa el toggle. Esto NO cambia la tabla, pero fuerza el useEffect a ejecutarse.
+    setRefreshToggle((prev) => prev + 1);
+  };
 
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= pagination.totalPages) {
@@ -59,6 +67,7 @@ export const EmpresaTable = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const { currentPage, limit } = pagination;
 
@@ -86,11 +95,13 @@ export const EmpresaTable = () => {
         }
       } catch (error) {
         console.error("Error al obtener empresas", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [pagination.currentPage, pagination.limit, filterQuery]);
+  }, [pagination.currentPage, pagination.limit, filterQuery, refreshToggle]);
 
   const renderPaginationItems = () => {
     const items = [];
@@ -105,7 +116,7 @@ export const EmpresaTable = () => {
       );
     }
 
-    for (let i = startPage; i < endPage; i++) {
+    for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
           <PaginationLink
@@ -174,9 +185,15 @@ export const EmpresaTable = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {empresas.length > 0 ? (
+            {isLoading ? (
+              <TableSpinner colSpan={5} />
+            ) : empresas.length > 0 ? (
               empresas.map((empresa) => (
-                <EmpresaRow key={empresa.id} emp={empresa} />
+                <EmpresaRow
+                  key={empresa.id}
+                  emp={empresa}
+                  onStatusChange={handleEmpresaStatusChange}
+                />
               ))
             ) : (
               <TableRow>

@@ -107,3 +107,26 @@ export const update = async (id: string, payload: DocumentoTipoContingencia): Pr
         return { result: false, data: [], error: errorMessage, status: 500 }
     }
 }
+
+export const updateEstado = async (id: string, payload: DocumentoTipoContingencia): Promise<DocumentoTipoContingenciaResponse> => {
+    try {
+        const urlApi = `${'/documentos-tipo-contingencia/update-estado/'}${id}`
+
+        const response = await apiClient.patch(urlApi, payload)
+
+        const { data: { result, data, status, message, error } } = response
+
+        return {
+            result,
+            data,
+            status,
+            message,
+            error
+        }
+
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+        console.log('errorMessage', errorMessage)
+        return { result: false, error: errorMessage, status: 500 }
+    }
+}

@@ -1,6 +1,6 @@
 import React from "react";
 import { TableCell, TableRow } from "../ui/table";
-import { MoreHorizontal } from "lucide-react";
+import { Edit, MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -103,28 +103,39 @@ export const CanjeRow: React.FC<Props> = ({ canje }) => {
             asChild
             // Deshabilitar el botón si no es reembolsable
             disabled={!canje.is_reembolsable}
-            className={`bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-300 ${
+            className={`focus:outline-none focus:ring-2 z-40 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer ${
               !canje.is_reembolsable && "opacity-50 cursor-not-allowed"
             }`}
+            // className={`bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-300 ${
+            //   !canje.is_reembolsable && "opacity-50 cursor-not-allowed"
+            // }`}
             // className="bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer"
           >
             <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Abrir menú</span>
+              <span className="sr-only">Abrir menú de acciones</span>
               <MoreHorizontal className="h-4 w-4 text-gray-500" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-gray-400">
-            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+
+          <DropdownMenuContent
+            align="end"
+            className="bg-white border shadow-lg"
+          >
+            <DropdownMenuLabel className="font-semibold text-gray-700">
+              Acciones
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={handleShowDetail}
-              className="cursor-pointer hover:bg-gray-100 transition-colors"
+              className="cursor-pointer hover:bg-gray-100 transition-colors flex items-center space-x-2 text-blue-600"
             >
-              Ver detalle
+              <Edit className="h-4 w-4" />
+              <span>Ver/Editar Detalle</span>
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
+            {/* <DropdownMenuSeparator />
             <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 transition-colors">
               Eliminar
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>

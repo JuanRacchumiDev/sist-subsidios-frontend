@@ -26,6 +26,7 @@ import { getUsuariosWithPaginate } from "../../services/usuarioService";
 import { Button } from "../ui/button";
 import { FilterIcon } from "lucide-react";
 import { UsuarioFilterModal } from "./UsuarioFilterModal";
+import { TableSpinner } from "../Common/TableSpinner";
 
 const initialFilters: UsuarioFilter = {
   id_perfil: undefined,
@@ -43,8 +44,15 @@ export const UsuarioTable = () => {
     previousPage: null,
   });
 
+  const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<UsuarioFilter>(initialFilters);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [refreshToggle, setRefreshToggle] = useState(0);
+
+  const handleUsuarioStatusChange = () => {
+    // Incrementa el toggle. Esto NO cambia la tabla, pero fuerza el useEffect a ejecutarse.
+    setRefreshToggle((prev) => prev + 1);
+  };
 
   const handleApplyFilters = (newFilters: UsuarioFilter) => {
     // Asegurar que las cadenas vacías de los Inputs se conviertan a `undefined` al aplicar
@@ -68,6 +76,7 @@ export const UsuarioTable = () => {
 
   // useEffect(() => {
   const fetchData = useCallback(async () => {
+    setIsLoading(true);
     try {
       const { currentPage, limit } = pagination;
 
@@ -104,8 +113,10 @@ export const UsuarioTable = () => {
       }
     } catch (error) {
       console.error("Error al obtener usuarios", error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [pagination.currentPage, pagination.limit, filters]);
+  }, [pagination.currentPage, pagination.limit, filters, refreshToggle]);
 
   // fetchData();
   // }, [pagination.currentPage, pagination.limit]);
@@ -128,7 +139,7 @@ export const UsuarioTable = () => {
     }
 
     // for (let i = 1; i < pagination.totalPages; i++) {
-    for (let i = startPage; i < endPage; i++) {
+    for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
           <PaginationLink
@@ -208,14 +219,20 @@ export const UsuarioTable = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {usuarios.length > 0 ? (
+            {isLoading ? (
+              <TableSpinner colSpan={6} />
+            ) : usuarios.length > 0 ? (
               usuarios.map((usuario) => (
-                <UsuarioRow key={usuario.id} usuario={usuario} />
+                <UsuarioRow
+                  key={usuario.id}
+                  usuario={usuario}
+                  onStatusChange={handleUsuarioStatusChange}
+                />
               ))
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={6}
                   className="text-center text-gray-500 py-6"
                 >
                   No se encontraron usuarios registrados

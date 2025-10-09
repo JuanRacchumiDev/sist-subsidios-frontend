@@ -27,6 +27,7 @@ import {
 import { FilterIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DocumentoTipoContingenciaFilterModal } from "./DocumentoTipoContingenciaFilterModal";
+import { TableSpinner } from "../../../components/Common/TableSpinner";
 
 // Definimos el estado inicial de los filtros
 const initialFilters: DocumentoTipoContingenciaFilter = {
@@ -45,9 +46,16 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
     previousPage: null,
   });
 
+  const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] =
     useState<DocumentoTipoContingenciaFilter>(initialFilters);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [refreshToggle, setRefreshToggle] = useState(0);
+
+  const handleDocumentoStatusChange = () => {
+    // Incrementa el toggle. Esto NO cambia la tabla, pero fuerza el useEffect a ejecutarse.
+    setRefreshToggle((prev) => prev + 1);
+  };
 
   const handleApplyFilters = (newFilters: DocumentoTipoContingenciaFilter) => {
     // Asegurar que las cadenas vacías de los Inputs se conviertan a `undefined` al aplicar
@@ -71,6 +79,7 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
 
   // useEffect(() => {
   const fetchData = useCallback(async () => {
+    setIsLoading(true);
     try {
       const { currentPage, limit } = pagination;
 
@@ -110,8 +119,10 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
         "Error al obtener documentos por tipo de contingencia",
         error
       );
+    } finally {
+      setIsLoading(false);
     }
-  }, [pagination.currentPage, pagination.limit, filters]);
+  }, [pagination.currentPage, pagination.limit, filters, refreshToggle]);
 
   // fetchData();
   // }, [pagination.currentPage, pagination.limit]);
@@ -212,17 +223,20 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {documentos.length > 0 ? (
+            {isLoading ? (
+              <TableSpinner colSpan={4} />
+            ) : documentos.length > 0 ? (
               documentos.map((documento) => (
                 <DocumentoTipoContingenciaRow
                   key={documento.id}
                   documento={documento}
+                  onStatusChange={handleDocumentoStatusChange}
                 />
               ))
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={7}
+                  colSpan={4}
                   className="text-center text-gray-500 py-6"
                 >
                   No se encontraron documentos registrados

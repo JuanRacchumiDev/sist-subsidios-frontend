@@ -31,6 +31,7 @@ import { getAuthData } from "../../utils/authMemo";
 import { FilterIcon } from "lucide-react";
 import { DescansoMedicoFilterModal } from "./DescansoMedicoFilterModal";
 import { Button } from "../ui/button";
+import { TableSpinner } from "../Common/TableSpinner";
 
 // Definimos el estado inicial de los filtros
 const initialFilters: DescansoMedicoFilter = {
@@ -52,6 +53,7 @@ export const DescansoMedicoTable = () => {
     previousPage: null,
   });
 
+  const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<DescansoMedicoFilter>(initialFilters);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
@@ -79,6 +81,7 @@ export const DescansoMedicoTable = () => {
 
   // useEffect(() => {
   const fetchData = useCallback(async () => {
+    setIsLoading(true);
     try {
       let response: DescansoMedicoPaginateResponse = null;
 
@@ -128,6 +131,8 @@ export const DescansoMedicoTable = () => {
       }
     } catch (error) {
       console.error("Error al obtener colaboradores", error);
+    } finally {
+      setIsLoading(false);
     }
   }, [pagination.currentPage, pagination.limit, userProfile, filters]);
 
@@ -152,7 +157,7 @@ export const DescansoMedicoTable = () => {
     }
 
     // for (let i = 1; i < pagination.totalPages; i++) {
-    for (let i = startPage; i < endPage; i++) {
+    for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
           <PaginationLink
@@ -247,7 +252,9 @@ export const DescansoMedicoTable = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {descansos.length > 0 ? (
+            {isLoading ? (
+              <TableSpinner colSpan={11} />
+            ) : descansos.length > 0 ? (
               descansos.map((descanso) => (
                 <DescansoMedicoRow key={descanso.id} desc={descanso} />
               ))

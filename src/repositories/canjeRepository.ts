@@ -28,7 +28,7 @@ export const getAllWithPaginate = async (queryParams: string) => {
     try {
         // const urlApi = `${'/canjes/paginate?page='}${page}${'&limit='}${limit}`
         const urlApi = `${'/canjes/paginate?'}${queryParams}`
-        // console.log({ urlApi })
+        console.log({ urlApi })
 
         const response = await apiClient.get(urlApi)
 

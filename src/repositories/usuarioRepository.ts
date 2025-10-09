@@ -111,3 +111,26 @@ export const update = async (id: string, payload: Usuario): Promise<UsuarioRespo
         return { result: false, data: [], error: errorMessage, status: 500 }
     }
 }
+
+export const updateEstado = async (id: string, payload: Usuario): Promise<UsuarioResponse> => {
+    try {
+        const urlApi = `${'/usuarios/update-estado/'}${id}`
+
+        const response = await apiClient.patch(urlApi, payload)
+
+        const { data: { result, data, status, message, error } } = response
+
+        return {
+            result,
+            data,
+            status,
+            message,
+            error
+        }
+
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+        console.log('errorMessage', errorMessage)
+        return { result: false, error: errorMessage, status: 500 }
+    }
+}

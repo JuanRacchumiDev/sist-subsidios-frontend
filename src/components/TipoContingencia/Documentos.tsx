@@ -16,6 +16,10 @@ import { Button } from "../ui/button";
 import { useToast } from "../../context/ToastContext";
 import { uploadAdjunto, viewAdjunto } from "../../services/adjuntoService";
 import { responseViewFile } from "../../types/TFile";
+import { getEmpresaById } from "../../services/empresaService";
+import { Empresa } from "@/interfaces/IEmpresa";
+import { getColaboradorById } from "@/services/colaboradorService";
+import { Colaborador } from "@/interfaces/IColaborador";
 
 interface DocumentosRequeridosProps {
   documentos: DocumentoTipoContingencia[];
@@ -66,10 +70,39 @@ export const Documentos = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const idEmpresa = form.getValues("idEmpresa");
+    console.log({ idEmpresa });
+
+    const idColaborador = form.getValues("idColaborador");
+    console.log({ idColaborador });
+
     // Create FormData object
     const formData = new FormData();
     formData.append("file", file);
     formData.append("id_documento", idDocumento);
+
+    // Obteniendo datos de la empresa seleccionada
+    if (idEmpresa) {
+      const responseEmpresa = await getEmpresaById(idEmpresa);
+      console.log("response empresa", responseEmpresa);
+      const { result, data } = responseEmpresa;
+      if (result && data) {
+        const { numero } = data as Empresa;
+        formData.append("ruc", numero);
+      }
+    }
+
+    // Obteniendo datos del colaborador seleccionado
+    if (idColaborador) {
+      const responseColaborador = await getColaboradorById(idColaborador);
+      const { result, data } = responseColaborador;
+      if (result && data) {
+        const { numero_documento } = data as Colaborador;
+        formData.append("numero_documento", numero_documento);
+      }
+    }
+
+    console.log({ formData });
 
     try {
       const response = await uploadAdjunto(formData);
@@ -136,9 +169,6 @@ export const Documentos = ({
                       >
                         <Upload className="mr-2 h-4 w-4" />
                         {fileIdToUse ? "Cambiar Documento" : "Subir Documento"}
-                        {/* {uploadedFileId
-                          ? "Cambiar Documento"
-                          : "Subir Documento"} */}
                       </label>
                       <input
                         id={`file-input-${doc.id}`}
@@ -159,16 +189,6 @@ export const Documentos = ({
                           <Eye className="h-4 w-4" />
                         </Button>
                       )}
-                      {/* {uploadedFileId && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => handleViewDocument(uploadedFileId)}
-                        >
-                          <Eye className="h-4 w-4 cursor-pointer hover:bg-blue-100" />
-                        </Button>
-                      )} */}
                     </div>
                   </FormControl>
                   <FormMessage />
