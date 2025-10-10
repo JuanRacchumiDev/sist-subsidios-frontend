@@ -125,6 +125,7 @@ export const CanjeRow: React.FC<Props> = ({ canje }) => {
               Acciones
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+
             <DropdownMenuItem
               onClick={handleShowDetail}
               className="cursor-pointer hover:bg-gray-100 transition-colors flex items-center space-x-2 text-blue-600"

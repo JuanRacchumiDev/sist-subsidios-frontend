@@ -160,6 +160,25 @@ export const formSchema = z
     }
   });
 
+type TDescanso = {
+  idEmpresa?: string;
+  idColaborador?: string;
+  idTipoDescansoMedico?: string;
+  idTipoContingencia?: string;
+  fechaOtorgamiento?: null;
+  fechaInicio?: null;
+  fechaFinal?: null;
+  codigoCitt?: string;
+  totalDias?: string;
+  colegiadoMedico?: string;
+  medicoTratante?: string;
+  idDiagnostico?: string;
+  nombreEstablecimiento?: string;
+  aceptaResponsabilidad?: boolean;
+  aceptaPoliticaSubsidio?: boolean;
+  observacion?: string;
+};
+
 export const DescansoMedicoForm = () => {
   const [showResponsabilidad, setShowResponsabilidad] = useState(false);
   const [showPoliticaSubsidio, setShowPoliticaSubsidio] = useState(false);
@@ -177,6 +196,28 @@ export const DescansoMedicoForm = () => {
 
   const handleGoBack = () => {
     navigate("/descanso-medico");
+  };
+
+  const resetForm = () => {
+    const dataForm: TDescanso = {
+      idEmpresa: "",
+      idColaborador: "",
+      idTipoDescansoMedico: "",
+      idTipoContingencia: "",
+      fechaOtorgamiento: null,
+      fechaInicio: null,
+      fechaFinal: null,
+      totalDias: "",
+      colegiadoMedico: "",
+      medicoTratante: "",
+      idDiagnostico: "",
+      nombreEstablecimiento: "",
+      aceptaResponsabilidad: false,
+      aceptaPoliticaSubsidio: false,
+      observacion: "",
+    };
+
+    form.reset(dataForm);
   };
 
   // Deshabilitando campos para el perfil especialista
@@ -630,10 +671,12 @@ export const DescansoMedicoForm = () => {
                   type="button"
                   variant="outline"
                   disabled={isSubmitting}
-                  onClick={() => navigate("/descanso-medico")}
+                  // onClick={() => navigate("/descanso-medico")}
+                  onClick={() => resetForm()}
                   className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
-                  {isSubmitting ? "Cancelando..." : "Cancelar"}
+                  Cancelar
+                  {/* {isSubmitting ? "Cancelando..." : "Cancelar"} */}
                 </Button>
               </div>
             </form>

@@ -8,7 +8,7 @@ import { getCanjesForReport } from "@/services/canjeService";
 import HDate from "@/helpers/HDate";
 
 // Definición de los tipos de reporte
-type ReportType = "non_consecutive" | "consecutive" | "global";
+type ReportType = "no_consecutivos" | "consecutivos" | "global";
 
 export const CanjeList = () => {
   const [loading, setLoading] = useState(false);
@@ -43,7 +43,7 @@ export const CanjeList = () => {
       const fileExtension = outputType === "pdf" ? "pdf" : "xlsx";
 
       // const filename = `reporte_canjes_${dateSuffix}.${fileExtension}`;
-      const filename = `reporte_subsidios_${reportType}_${limit}dias_${dateSuffix}.${fileExtension}`;
+      const filename = `reporte_subsidios_${limit}_dias_${reportType}_${dateSuffix}.${fileExtension}`;
 
       const downloadUrl = window.URL.createObjectURL(blob);
 
@@ -77,7 +77,7 @@ export const CanjeList = () => {
               {/* Ícono 1: 90 días No Consecutivos */}
               <Button
                 onClick={() =>
-                  handleDownloadReport("excel", "non_consecutive", 90)
+                  handleDownloadReport("excel", "no_consecutivos", 90)
                 }
                 className="bg-transparent border border-gray-400 text-red-600 hover:bg-red-50 hover:border-red-600 hover:text-red-700 transition-colors shadow-none p-2 cursor-pointer"
                 title="Reporte 90 días No Consecutivos (Excel)"
@@ -88,7 +88,7 @@ export const CanjeList = () => {
               {/* Ícono 2: 150 días Consecutivos */}
               <Button
                 onClick={() =>
-                  handleDownloadReport("excel", "consecutive", 150)
+                  handleDownloadReport("excel", "consecutivos", 150)
                 }
                 className="bg-transparent border border-gray-400 text-yellow-600 hover:bg-yellow-50 hover:border-yellow-600 hover:text-yellow-700 transition-colors shadow-none p-2 cursor-pointer"
                 title="Reporte 150 días Consecutivos (Excel)"
