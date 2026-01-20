@@ -23,9 +23,9 @@ interface Props {
 export const CobroRow: React.FC<Props> = ({ cobro }) => {
   const navigate = useNavigate();
   const colaborador = `
-    ${cobro.reembolso.canje.descansoMedico.colaborador.apellido_paterno}
-    ${cobro.reembolso.canje.descansoMedico.colaborador.apellido_materno}
-    ${cobro.reembolso.canje.descansoMedico.colaborador.nombres}`;
+    ${cobro.reembolso.canje.descansoMedico.colaborador_dm.apellido_paterno}
+    ${cobro.reembolso.canje.descansoMedico.colaborador_dm.apellido_materno}
+    ${cobro.reembolso.canje.descansoMedico.colaborador_dm.nombres}`;
 
   const handleShowDetail = () => {
     navigate(`/cobro/editar/${cobro.id}`);

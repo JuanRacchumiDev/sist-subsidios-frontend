@@ -55,7 +55,7 @@ export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
 
   const handleShowDetail = () => {
     navigate(
-      `/mantenimiento/documento-tipo-contingencia/editar/${documento.id}`
+      `/mantenimiento/documento-tipo-contingencia/editar/${documento.id}`,
     );
   };
 
@@ -81,7 +81,7 @@ export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
 
       const response = await updateDocumentoTipoContByEstado(
         documento.id,
-        payload
+        payload,
       );
 
       const { result, data, message, error } =
@@ -90,7 +90,7 @@ export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
       if (result && data) {
         showToast(
           "success",
-          message || "Estado del documento actualizado con éxito."
+          message || "Estado del documento actualizado con éxito.",
         );
 
         // Si hay una función de callback, llamarla para actualizar la tabla padre
@@ -124,7 +124,7 @@ export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
         className="hover:bg-blue-100 hover:cursor-pointer transition-colors duration-200"
       >
         <TableCell className="py-3">
-          {documento.detalleParametro.nombre}
+          {documento.tipoContingencia.nombre}
         </TableCell>
         <TableCell className="py-3">{documento.nombre}</TableCell>
         <TableCell className="py-3">
