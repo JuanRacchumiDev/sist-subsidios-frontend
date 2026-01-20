@@ -2,6 +2,7 @@
   "name": "dms-sophia-human-v3",
   "private": true,
   "version": "0.0.0",
+  "homepage": "http://18.227.0.225/dms-front",
   "type": "module",
   "scripts": {
     "dev": "vite",

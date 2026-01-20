@@ -1,6 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { getDocumentosTipoContWithPaginate } from "../../../services/documentoTipoContService";
-// import { getDetallesWithPaginate } from "../../../services/detalleParametroService";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Pagination,
   PaginationContent,
@@ -9,7 +7,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "../../ui/pagination";
+} from "../ui/pagination";
 import {
   Table,
   TableBody,
@@ -17,29 +15,50 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../../ui/table";
-import { DocumentoTipoContingenciaRow } from "./DocumentoTipoContingenciaRow";
-import { useCallback } from "react";
+} from "../ui/table";
+// import { TrabajadorSocialRow } from "./TrabajadorSocialRow";
+// import {
+//   TrabajadorSocial,
+//   TrabajadorSocialFilter,
+//   Pagination as PaginationType,
+// } from "../../interfaces/ITrabajadorSocial";
 import {
-  DocumentoTipoContingencia,
-  DocumentoTipoContingenciaFilter,
+  Persona,
+  PersonaFilter,
   Pagination as PaginationType,
-} from "../../../interfaces/IDocumentoTipoContingencia";
-import {} from "../../../interfaces/IDetalleParametro";
+} from "../../interfaces/IPersona";
+import { Button } from "../ui/button";
 import { FilterIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { DocumentoTipoContingenciaFilterModal } from "./DocumentoTipoContingenciaFilterModal";
-import { TableSpinner } from "../../../components/Common/TableSpinner";
-// import { ParametroClase } from "../../../constants/parametroClase";
+import { TrabajadorSocialFilterModal } from "./TrabajadorSocialFilterModal";
+import { TableSpinner } from "../../components/Common/TableSpinner";
+// import { getTrabjadoresSocialesWithPaginate } from "../../services/trabajadorSocialService";
+import { TrabajadorSocialRow } from "./TrabajadorSocialRow";
+import { getPersonasWithPaginate } from "../../services/personaService";
 
-// Definimos el estado inicial de los filtros
-const initialFilters: DocumentoTipoContingenciaFilter = {
-  id_tipocontingencia: undefined,
-  nombre: undefined,
+// const initialFilters: TrabajadorSocialFilter = {
+//   id_tipodocumento: undefined,
+//   //   id_cargo: undefined,
+//   //   id_empresa: undefined,
+//   numero_documento: undefined,
+//   nombre_completo: undefined,
+// };
+
+const initialFilters: PersonaFilter = {
+  id_tipodocumento: undefined,
+  //   id_cargo: undefined,
+  //   id_empresa: undefined,
+  numero_documento: undefined,
+  nombre_completo: undefined,
 };
 
-export const DocumentoTipoContingenciaTable: React.FC = () => {
-  const [documentos, setDocumentos] = useState<DocumentoTipoContingencia[]>([]);
+export const TrabajadorSocialTable: React.FC = () => {
+  // const [trabajadoresSociales, setTrabajadoresSociales] = useState<
+  //   TrabajadorSocial[]
+  // >([]);
+  const [trabajadoresSociales, setTrabajadoresSociales] = useState<Persona[]>(
+    []
+  );
+
   const [pagination, setPagination] = useState<PaginationType>({
     currentPage: 1,
     limit: 10,
@@ -50,24 +69,25 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
   });
 
   const [isLoading, setIsLoading] = useState(true);
-  const [filters, setFilters] =
-    useState<DocumentoTipoContingenciaFilter>(initialFilters);
+  // const [filters, setFilters] =
+  // useState<TrabajadorSocialFilter>(initialFilters);
+  const [filters, setFilters] = useState<PersonaFilter>(initialFilters);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [refreshToggle, setRefreshToggle] = useState(0);
 
-  const handleDocumentoStatusChange = () => {
+  const handleTrabajadorSocialStatusChange = () => {
     // Incrementa el toggle. Esto NO cambia la tabla, pero fuerza el useEffect a ejecutarse.
     setRefreshToggle((prev) => prev + 1);
   };
 
-  const handleApplyFilters = (newFilters: DocumentoTipoContingenciaFilter) => {
+  const handleApplyFilters = (newFilters: PersonaFilter) => {
     // Asegurar que las cadenas vacías de los Inputs se conviertan a `undefined` al aplicar
-    const cleanedFilters: DocumentoTipoContingenciaFilter = Object.fromEntries(
+    const cleanedFilters: PersonaFilter = Object.fromEntries(
       Object.entries(newFilters).map(([key, value]) => [
         key,
         value === "" || value === null ? undefined : value,
       ])
-    ) as DocumentoTipoContingenciaFilter;
+    ) as PersonaFilter;
 
     setFilters(cleanedFilters);
     setPagination((prev) => ({ ...prev, currentPage: 1 }));
@@ -80,47 +100,41 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
     }
   };
 
-  // useEffect(() => {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
       const { currentPage, limit } = pagination;
 
       // Limpia los filtros (elimina `undefined` para no enviar el query param)
-      const cleanFilters = Object.fromEntries(
+      const cleanFilters: PersonaFilter = Object.fromEntries(
         Object.entries(filters).filter(
           ([, value]) => value !== undefined && value !== null && value !== ""
         )
-      );
+      ) as PersonaFilter;
+
+      cleanFilters["nombreGrupo"] = "GRUPO TRABAJADOR SOCIAL";
 
       console.log({ cleanFilters });
 
-      const filterString = cleanFilters.nombre
-        ? String(cleanFilters.nombre)
-        : "";
+      // const response = await getTrabjadoresSocialesWithPaginate(
+      //   currentPage,
+      //   limit,
+      //   cleanFilters
+      // );
 
-      console.log({ filterString });
-
-      const response = await getDocumentosTipoContWithPaginate(
+      const response = await getPersonasWithPaginate(
         currentPage,
         limit,
         cleanFilters
       );
 
-      // const response = await getDetallesWithPaginate(
-      //   ParametroClase.TIPO_CONTINGENCIA,
-      //   currentPage,
-      //   limit,
-      //   filterString
-      // );
-
-      console.log("response documentos", response);
+      console.log({ response });
 
       if (response.result && response.data && response.pagination) {
-        setDocumentos(response.data);
+        setTrabajadoresSociales(response.data);
         setPagination(response.pagination);
       } else {
-        setDocumentos([]);
+        setTrabajadoresSociales([]);
         setPagination({
           currentPage: 1,
           limit: 10,
@@ -131,17 +145,11 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
         });
       }
     } catch (error) {
-      console.error(
-        "Error al obtener documentos por tipo de contingencia",
-        error
-      );
+      console.error("Error al obtener trabajadores sociales", error);
     } finally {
       setIsLoading(false);
     }
   }, [pagination.currentPage, pagination.limit, filters, refreshToggle]);
-
-  // fetchData();
-  // }, [pagination.currentPage, pagination.limit]);
 
   useEffect(() => {
     fetchData();
@@ -168,12 +176,12 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
             onClick={() => handlePageChange(i)}
             isActive={i === pagination.currentPage}
             className={`
-              ${
-                i === pagination.currentPage
-                  ? "bg-blue-500 text-white"
-                  : "hover:bg-gray-200 transition-colors"
-              }
-            `}
+                ${
+                  i === pagination.currentPage
+                    ? "bg-blue-500 text-white"
+                    : "hover:bg-gray-200 transition-colors"
+                }
+              `}
           >
             {i}
           </PaginationLink>
@@ -195,14 +203,7 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
     <div className="w-full space-y-4 pt-4">
       {/* <div className="pb-4 pt-4 flex justify-between items-center"> */}
       <div className="flex justify-end items-center space-x-2 pb-4">
-        {/* <h2 className="text-xl font-semibold text-gray-800">
-          Listado de documentos
-        </h2> */}
-        {/* <Input
-          type="text"
-          placeholder="Buscar por nombre o documento..."
-          className="w-72 border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
-        /> */}
+        {/* <h2 className="text-xl font-semibold">Listado de trabajadores sociales</h2> */}
         <Button
           variant="outline"
           onClick={() => setIsFilterModalOpen(true)}
@@ -219,43 +220,57 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
             )
           </span>
         </Button>
+        {/* <Input
+            type="text"
+            placeholder="Buscar por nombre o documento..."
+            className="w-72 border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+          /> */}
       </div>
       <div className="rounded-md border border-gray-200 shadow-sm">
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-100">
               <TableHead className="text-gray-600 font-medium">
-                Tipo Contingencia
+                Tipo Documento
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
-                Nombre
+                Número Documento
+              </TableHead>
+              <TableHead className="text-gray-600 font-medium">
+                Nombres y Apellidos
+              </TableHead>
+              <TableHead className="text-gray-600 font-medium">
+                Empresa
+              </TableHead>
+              <TableHead className="text-gray-600 font-medium">
+                Teléfono
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
                 Estado
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
-                Opciones
+                Acciones
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableSpinner colSpan={4} />
-            ) : documentos.length > 0 ? (
-              documentos.map((documento) => (
-                <DocumentoTipoContingenciaRow
-                  key={documento.id}
-                  documento={documento}
-                  onStatusChange={handleDocumentoStatusChange}
+              <TableSpinner colSpan={7} />
+            ) : trabajadoresSociales.length > 0 ? (
+              trabajadoresSociales.map((trabajadorSocial) => (
+                <TrabajadorSocialRow
+                  key={trabajadorSocial.id}
+                  trabajadorSocial={trabajadorSocial}
+                  onStatusChange={handleTrabajadorSocialStatusChange}
                 />
               ))
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={4}
+                  colSpan={7}
                   className="text-center text-gray-500 py-6"
                 >
-                  No se encontraron documentos registrados
+                  No se encontraron trabajadores sociales registrados
                 </TableCell>
               </TableRow>
             )}
@@ -288,7 +303,7 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
         </Pagination>
       </div>
 
-      <DocumentoTipoContingenciaFilterModal
+      <TrabajadorSocialFilterModal
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
         currentFilters={filters}

@@ -1,8 +1,10 @@
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 
 // Crea una instancia de axios con la URL base
 const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    // baseURL: import.meta.env.VITE_API_URL,
+    // baseUrl: "http://localhost:3000/api/v1",
+    baseURL: "http://18.227.0.225/api-dms/api/v1",
     headers: {
         'Content-Type': 'application/json'
     }
@@ -23,6 +25,21 @@ apiClient.interceptors.request.use(
         return config
     },
     (error) => Promise.reject(error)
+)
+
+apiClient.interceptors.response.use(
+    (response) => response,
+    (error: AxiosError) => {
+        // Verifica si el error es 401 (Unauthorized)
+        if (error.response && error.response.status === 401) {
+            console.error('Error 401 detectado. Redirigiendo al login...');
+
+            localStorage.removeItem('auth');
+
+            window.location.href = '/login';
+        }
+        return Promise.reject(error);
+    }
 )
 
 export default apiClient

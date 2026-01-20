@@ -1,15 +1,66 @@
-import { Persona } from '../interfaces/IPersona'
+import { Persona, PersonaFilter } from '../interfaces/IPersona'
 import {
     getAll,
+    getAllWithPaginate,
+    getAllByEmpresa,
+    getAllByEmpresaWithGrupo,
     getById,
     getByIdTipoDocAndNumDoc,
     create,
     update
 } from '../repositories/personaRepository'
 import { searchForTipoDocAndNumDoc } from '../repositories/apiPersonaRepository'
+// import { getAllWithPaginate } from '../repositories/detalleParametroRepository';
 
 export const getPersonas = async () => {
     const response = await getAll()
+
+    return {
+        ...response
+    }
+}
+
+export const getPersonasWithPaginate = async (
+    page: number,
+    limit: number,
+    filters: PersonaFilter = {}
+) => {
+    // Construir la cadena de query parameters
+    const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...Object.fromEntries(
+            Object.entries(filters).filter(([, value]) => value)
+        )
+    }).toString()
+
+    // const response = await getAllWithPaginate(page, limit)
+    const response = await getAllWithPaginate(queryParams)
+
+    return {
+        ...response
+    }
+}
+
+export const getPersonasByEmpresa = async (idEmpresa: string) => {
+    const response = await getAllByEmpresa(idEmpresa)
+
+    return {
+        ...response
+    }
+}
+
+export const getPersonasByEmpresaWithGrupo = async (
+    idEmpresa: string,
+    nombreGrupo: string
+) => {
+    const queryParams = new URLSearchParams({
+        idEmpresa,
+        nombreGrupo
+    }).toString()
+
+    // const response = await getAllWithPaginate(page, limit)
+    const response = await getAllByEmpresaWithGrupo(queryParams)
 
     return {
         ...response

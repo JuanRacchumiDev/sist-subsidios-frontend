@@ -24,7 +24,11 @@ export const getAll = async (): Promise<TipoDocumentoResponse> => {
 
 export const getById = async (id: string): Promise<TipoDocumentoResponse> => {
     try {
-        const urlApi = `${'/tipo-documentos/'}${id}`
+        // const urlApi = `${'/tipo-documentos/'}${id}`
+        const urlApi = `${'/detalles/'}${id}`
+
+        console.log('urlApi getById tipoDocumentoRepository')
+        console.log({ urlApi })
 
         const response = await apiClient.get(urlApi)
 

@@ -1,8 +1,11 @@
 import apiClient from "./apiClient";
 import { token } from "../helpers/HToken"
 import { PersonaResponse } from "../interfaces/IPersona"
-import { getById as tipoDocumentoById } from './tipoDocumentoRepository'
-import { TipoDocumento } from "../interfaces/ITipoDocumento";
+import { getById as tipoDocumentoById } from './detalleParametroRepository'
+import { Detalle } from '../interfaces/IDetalleParametro'
+// import { getById as tipoDocumentoById } from './tipoDocumentoRepository'
+// import { TipoDocumento } from "../interfaces/ITipoDocumento";
+// import { DetalleParametro } from '../../../dms-backend-node/src/app/models/DetalleParametro';
 
 export const searchForTipoDocAndNumDoc = async (idTipoDocumento: string, numeroDocumento: string): Promise<PersonaResponse> => {
     try {
@@ -19,9 +22,11 @@ export const searchForTipoDocAndNumDoc = async (idTipoDocumento: string, numeroD
             }
         }
 
-        const { abreviatura } = data as TipoDocumento
+        // const { abreviatura } = data as TipoDocumento
+        const { abreviatura } = data as Detalle
 
         const urlApi = `${'/personas/consulta-api?abreviatura='}${abreviatura}${'&numeroDocumento='}${numeroDocumento}`
+        console.log({ urlApi })
 
         const responseApi = await apiClient.get(urlApi, {
             headers: {

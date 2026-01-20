@@ -119,9 +119,13 @@ export const upload = async (formData: FormData): Promise<AdjuntoResponse> => {
         // Obteniendo el código temporal del usuario autenticado
         const codigo_temp = localStorage.getItem("codigo_temp") || null
 
+        console.log({ codigo_temp })
+
         if (codigo_temp) {
             formData.append("codigo_temp", codigo_temp)
         }
+
+        console.log({ formData })
 
         const response = await apiClient.post('/adjuntos', formData, {
             headers: {

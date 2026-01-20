@@ -2,7 +2,8 @@ import {
   Cargo,
   Pagination as PaginationType,
 } from "../../../interfaces/ICargo";
-import { getCargosWithPaginate } from "../../../services/cargoService";
+// import { getCargosWithPaginate } from "../../../services/cargoService";
+import { getDetallesWithPaginate } from "../../../services/detalleParametroService";
 import React, { useEffect, useState } from "react";
 import { Input } from "../../ui/input";
 import {
@@ -26,6 +27,7 @@ import { CargoRow } from "./CargoRow";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { TableSpinner } from "../../../components/Common/TableSpinner";
+import { ParametroClase } from "../../../constants/parametroClase";
 
 export const CargoTable: React.FC = () => {
   const [cargos, setCargos] = useState<Cargo[]>([]);
@@ -71,11 +73,25 @@ export const CargoTable: React.FC = () => {
       try {
         const { currentPage, limit } = pagination;
 
-        const response = await getCargosWithPaginate(
+        console.log({ pagination });
+        console.log(ParametroClase.CARGO);
+        console.log({ filterQuery });
+
+        // const response = await getCargosWithPaginate(
+        //   currentPage,
+        //   limit,
+        //   filterQuery
+        // );
+
+        const response = await getDetallesWithPaginate(
+          ParametroClase.CARGO,
           currentPage,
           limit,
           filterQuery
         );
+
+        console.log("---- response listCargos ----");
+        console.log({ response });
 
         if (response.result && response.data && response.pagination) {
           setCargos(response.data);

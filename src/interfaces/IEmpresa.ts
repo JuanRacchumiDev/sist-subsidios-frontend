@@ -1,4 +1,5 @@
-import { RepresentanteLegal } from "./IRepresentanteLegal"
+// import { RepresentanteLegal } from "./IRepresentanteLegal"
+import { Persona } from "./IPersona"
 
 export interface Empresa {
     id?: string
@@ -15,7 +16,7 @@ export interface Empresa {
     condicionSunat?: string
     es_agente_de_retencion?: boolean
     estado?: boolean
-    representantes?: RepresentanteLegal[]
+    representantes?: Persona[]
 }
 
 export interface EmpresaResponse {

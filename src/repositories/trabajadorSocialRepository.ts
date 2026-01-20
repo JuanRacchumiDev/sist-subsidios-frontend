@@ -22,6 +22,31 @@ export const getAll = async (): Promise<TrabajadorSocialResponse> => {
     }
 }
 
+export const getAllWithPaginate = async (queryParams: string) => {
+    try {
+        const urlApi = `${'/trab-sociales/paginate?'}${queryParams}`
+        // console.log({ urlApi })
+
+        const response = await apiClient.get(urlApi)
+
+        const { data: dataTrabSociales } = response
+
+        const { result, data, pagination, status } = dataTrabSociales
+
+        return {
+            result,
+            data,
+            pagination,
+            status
+        }
+
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+        console.log('errorMessage', errorMessage)
+        return { result: false, error: errorMessage, status: 500 }
+    }
+}
+
 export const getById = async (id: string): Promise<TrabajadorSocialResponse> => {
     try {
         const urlApi = `${'/trab-sociales/'}${id}`
@@ -94,6 +119,29 @@ export const update = async (id: string, payload: TrabajadorSocial): Promise<Tra
             error,
             status
         }
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+        console.log('errorMessage', errorMessage)
+        return { result: false, error: errorMessage, status: 500 }
+    }
+}
+
+export const updateEstado = async (id: string, payload: TrabajadorSocial): Promise<TrabajadorSocialResponse> => {
+    try {
+        const urlApi = `${'/trab-sociales/update-estado/'}${id}`
+
+        const response = await apiClient.patch(urlApi, payload)
+
+        const { data: { result, data, status, message, error } } = response
+
+        return {
+            result,
+            data,
+            status,
+            message,
+            error
+        }
+
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
         console.log('errorMessage', errorMessage)

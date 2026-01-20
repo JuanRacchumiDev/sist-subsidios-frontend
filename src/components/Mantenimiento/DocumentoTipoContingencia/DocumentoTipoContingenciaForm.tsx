@@ -29,7 +29,9 @@ import {
 import { Button } from "../../ui/button";
 import { RequiredLabel } from "../../Common/RequiredLabel";
 
-import { getTipoContingencias } from "../../../services/tipoContingenciaService";
+// import { getTipoContingencias } from "../../../services/tipoContingenciaService";
+import { getDetalles } from "../../../services/detalleParametroService";
+
 import {
   createDocumentoTipoCont,
   updateDocumentoTipoCont,
@@ -38,10 +40,12 @@ import {
   DocumentoTipoContingencia,
   DocumentoTipoContingenciaResponse,
 } from "../../../interfaces/IDocumentoTipoContingencia";
-import { TipoContingencia } from "../../../interfaces/ITipoContingencia";
+// import { TipoContingencia } from "../../../interfaces/ITipoContingencia";
 import { Input } from "../../../components/ui/input";
 import { getDocumentoTipoContById } from "../../../services/documentoTipoContService";
 import { ArrowLeft } from "lucide-react";
+import { Detalle } from "../../../interfaces/IDetalleParametro";
+import { ParametroClase } from "@/constants/parametroClase";
 
 const formSchema = z.object({
   idTipoContingencia: z
@@ -59,9 +63,11 @@ export const DocumentoTipoContigenciaForm = () => {
   const { id } = useParams<{ id: string }>();
   const { showToast } = useToast();
 
-  const [tipoContingencias, setTipoContingencias] = useState<
-    DocumentoTipoContingencia[]
-  >([]);
+  // const [tipoContingencias, setTipoContingencias] = useState<
+  //   DocumentoTipoContingencia[]
+  // >([]);
+
+  const [tipoContingencias, setTipoContingencias] = useState<Detalle[]>([]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -126,14 +132,22 @@ export const DocumentoTipoContigenciaForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let listTipoContingencias: TipoContingencia[] = [];
+        // let listTipoContingencias: TipoContingencia[] = [];
+        let listTipoContingencias: Detalle[] = [];
 
-        const response = await getTipoContingencias();
+        // const response = await getTipoContingencias();
+        const response = await getDetalles(
+          ParametroClase.TIPO_CONTINGENCIA,
+          true
+        );
+
+        console.log({ response });
 
         const { result, data } = response;
 
         if (result && data) {
-          listTipoContingencias = data as TipoContingencia[];
+          // listTipoContingencias = data as TipoContingencia[];
+          listTipoContingencias = data as Detalle[];
         }
 
         setTipoContingencias(listTipoContingencias);

@@ -49,3 +49,28 @@ export interface TrabajadorSocialResponse {
     error?: string
     status?: number
 }
+
+export interface Pagination {
+    currentPage: number
+    limit: number
+    totalPages: number
+    totalItems: number
+    nextPage: number | null
+    previousPage: number | null
+}
+
+export interface TrabajadorSocialPaginateResponse {
+    result: boolean
+    data?: TrabajadorSocial[]
+    pagination?: Pagination
+    errors?: string
+    status?: number
+}
+
+export interface TrabajadorSocialFilter {
+    id_tipodocumento?: string
+    // id_cargo?: string
+    // id_empresa?: string
+    numero_documento?: string
+    nombre_completo?: string
+}

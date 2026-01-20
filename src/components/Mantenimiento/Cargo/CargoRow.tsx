@@ -46,7 +46,9 @@ export const CargoRow: React.FC<Props> = ({ cargo, onStatusChange }) => {
   const modalMessage = `¿Deseas <strong>${action}</strong> el cargo: <strong>${cargo.nombre}</strong>?`;
 
   const handleShowDetail = () => {
-    navigate(`/mantenimiento/cargo/editar/${cargo.id}`);
+    const url = `/mantenimiento/cargo/editar/${cargo.id}`;
+    console.log({ url });
+    navigate(url);
   };
 
   // Abre el modal

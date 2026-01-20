@@ -19,14 +19,24 @@ import * as z from "zod";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { Spinner } from "../../Common/Spinner";
+// import {
+//   createCargo,
+//   getCargoById,
+//   updateCargo,
+// } from "../../../services/cargoService";
 import {
-  createCargo,
-  getCargoById,
-  updateCargo,
-} from "../../../services/cargoService";
-import { Cargo, CargoResponse } from "../../../interfaces/ICargo";
+  createDetalle,
+  updateDetalle,
+  getDetalleById,
+} from "../../../services/detalleParametroService";
+// import { Cargo, CargoResponse } from "../../../interfaces/ICargo";
+import {
+  Detalle,
+  DetalleResponse,
+} from "../../../interfaces/IDetalleParametro";
 import { useToast } from "../../../context/ToastContext";
 import { RequiredLabel } from "../../../components/Common/RequiredLabel";
+import { ParametroClase } from "../../../constants/parametroClase";
 import { useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 
@@ -65,19 +75,30 @@ export const CargoForm = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       let messageError: string = "";
-      let response: CargoResponse;
+      // let response: CargoResponse;
+      let response: DetalleResponse;
 
-      const payloadData: Cargo = {
+      // const payloadData: Cargo = {
+      //   ...values,
+      //   estado: true,
+      // };
+
+      console.log({ values });
+
+      const payloadData: Detalle = {
         ...values,
+        parametro_clase: ParametroClase.CARGO,
         estado: true,
       };
 
       if (isEditMode && id) {
         messageError = "Error al actualizar el cargo";
-        response = await updateCargo(id, payloadData);
+        response = await updateDetalle(id, payloadData);
+        // response = await updateCargo(id, payloadData);
       } else {
         messageError = "Error al registrar el cargo";
-        response = await createCargo(payloadData);
+        // response = await createCargo(payloadData);
+        response = await createDetalle(payloadData);
       }
 
       const { result, message, error } = response;
@@ -99,11 +120,13 @@ export const CargoForm = () => {
     const fetchData = async () => {
       try {
         if (isEditMode) {
-          const responseCargo = await getCargoById(id);
+          // const responseCargo = await getCargoById(id);
+          const responseCargo = await getDetalleById(id);
           const { result, data, message } = responseCargo;
 
           if (result && data) {
-            const cargo = data as Cargo;
+            // const cargo = data as Cargo;
+            const cargo = data as Detalle;
             form.reset({
               nombre: cargo.nombre,
             });

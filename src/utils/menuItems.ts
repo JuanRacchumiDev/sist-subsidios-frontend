@@ -14,6 +14,7 @@ import {
     RefreshCw,
     Settings,
     ShoppingBag,
+    User2Icon,
     UserCheck,
     Users,
     Wallet,
@@ -35,6 +36,13 @@ export const MENU_ITEMS = [
         label: "Empresas",
         active: false,
         path: "/empresa",
+    },
+    {
+        id: "trabajador-social",
+        icon: User2Icon,
+        label: "Trabajadores sociales",
+        active: false,
+        path: "/trabajador-social"
     },
     {
         id: "colaborador",

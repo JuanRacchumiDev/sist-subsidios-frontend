@@ -33,10 +33,11 @@ export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
     switch (slug_perfil) {
       case "colaborador":
         return MENU_ITEMS.filter((item) => item.id === "descanso-medico");
-      case "especialista":
+      case "especialista-sophia-human":
         return MENU_ITEMS.filter(
           (item) =>
             item.id === "colaborador" ||
+            item.id === "trabajador-social" ||
             item.id === "empresa" ||
             item.id === "descanso-medico" ||
             item.id === "canje" ||

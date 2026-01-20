@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { getColaboradoresWithPaginate } from "../../services/colaboradorService";
+// import { getColaboradoresWithPaginate } from "../../services/colaboradorService";
 import {
   Pagination,
   PaginationContent,
@@ -17,28 +17,45 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { ColaboradorRow } from "./ColaboradorRow";
+// import { ColaboradorRow } from "./ColaboradorRow";
+// import {
+//   Colaborador,
+//   ColaboradorFilter,
+//   Pagination as PaginationType,
+// } from "../../interfaces/IColaborador";
 import {
-  Colaborador,
-  ColaboradorFilter,
+  Persona,
+  PersonaFilter,
   Pagination as PaginationType,
-} from "../../interfaces/IColaborador";
+} from "../../interfaces/IPersona";
 import { Button } from "../ui/button";
 import { FilterIcon } from "lucide-react";
 import { ColaboradorFilterModal } from "./ColaboradorFilterModal";
 import { TableSpinner } from "../../components/Common/TableSpinner";
+import { ColaboradorRow } from "./ColaboradorRow";
+import { getPersonasWithPaginate } from "../../services/personaService";
 
 // Definimos el estado inicial de los filtros
-const initialFilters: ColaboradorFilter = {
+// const initialFilters: ColaboradorFilter = {
+//   id_tipodocumento: undefined,
+//   id_cargo: undefined,
+//   id_empresa: undefined,
+//   numero_documento: undefined,
+//   nombre_completo: undefined,
+// };
+
+const initialFilters: PersonaFilter = {
   id_tipodocumento: undefined,
-  id_cargo: undefined,
-  id_empresa: undefined,
+  // id_cargo: undefined,
+  // id_empresa: undefined,
   numero_documento: undefined,
   nombre_completo: undefined,
 };
 
 export const ColaboradorTable: React.FC = () => {
-  const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
+  // const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
+  const [colaboradores, setColaboradores] = useState<Persona[]>([]);
+
   const [pagination, setPagination] = useState<PaginationType>({
     currentPage: 1,
     limit: 10,
@@ -49,7 +66,8 @@ export const ColaboradorTable: React.FC = () => {
   });
 
   const [isLoading, setIsLoading] = useState(true);
-  const [filters, setFilters] = useState<ColaboradorFilter>(initialFilters);
+  // const [filters, setFilters] = useState<ColaboradorFilter>(initialFilters);
+  const [filters, setFilters] = useState<PersonaFilter>(initialFilters);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [refreshToggle, setRefreshToggle] = useState(0);
 
@@ -58,14 +76,14 @@ export const ColaboradorTable: React.FC = () => {
     setRefreshToggle((prev) => prev + 1);
   };
 
-  const handleApplyFilters = (newFilters: ColaboradorFilter) => {
+  const handleApplyFilters = (newFilters: PersonaFilter) => {
     // Asegurar que las cadenas vacías de los Inputs se conviertan a `undefined` al aplicar
-    const cleanedFilters: ColaboradorFilter = Object.fromEntries(
+    const cleanedFilters: PersonaFilter = Object.fromEntries(
       Object.entries(newFilters).map(([key, value]) => [
         key,
         value === "" || value === null ? undefined : value,
       ])
-    ) as ColaboradorFilter;
+    ) as PersonaFilter;
 
     setFilters(cleanedFilters);
     setPagination((prev) => ({ ...prev, currentPage: 1 }));
@@ -89,13 +107,25 @@ export const ColaboradorTable: React.FC = () => {
         Object.entries(filters).filter(
           ([, value]) => value !== undefined && value !== null && value !== ""
         )
-      );
+      ) as PersonaFilter;
 
-      const response = await getColaboradoresWithPaginate(
+      cleanFilters["nombreGrupo"] = "GRUPO COLABORADOR";
+
+      console.log({ cleanFilters });
+
+      // const response = await getColaboradoresWithPaginate(
+      //   currentPage,
+      //   limit,
+      //   cleanFilters
+      // );
+
+      const response = await getPersonasWithPaginate(
         currentPage,
         limit,
         cleanFilters
       );
+
+      console.log({ response });
 
       if (response.result && response.data && response.pagination) {
         setColaboradores(response.data);

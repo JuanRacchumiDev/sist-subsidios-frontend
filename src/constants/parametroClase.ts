@@ -1,0 +1,13 @@
+export enum ParametroClase {
+    TIPO_DOCUMENTO = 1000,
+    PERFIL = 1001,
+    GRUPO = 1002,
+    TIPO_DESCANSO_MEDICO = 1003,
+    TIPO_CONTINGENCIA = 1004,
+    TIPO_ESTABLECIMIENTO = 1005,
+    TIPO_ADJUNTO = 1006,
+    AREA = 1007,
+    CARGO = 1008,
+    PAIS = 1009,
+    SEDE = 1010
+}

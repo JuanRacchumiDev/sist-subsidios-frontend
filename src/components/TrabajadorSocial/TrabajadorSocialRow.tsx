@@ -1,7 +1,7 @@
 // import {
-//   Colaborador,
-//   ColaboradorResponse,
-// } from "../../interfaces/IColaborador";
+//   TrabajadorSocial,
+//   TrabajadorSocialResponse,
+// } from "../../interfaces/ITrabajadorSocial";
 import { Persona, PersonaResponse } from "../../interfaces/IPersona";
 import { TableCell, TableRow } from "../ui/table";
 import {
@@ -25,15 +25,19 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { useToast } from "../../context/ToastContext";
 import { useState } from "react";
-import { updateColaboradorByEstado } from "@/services/colaboradorService";
+import { updateTrabajadorSocialByEstado } from "@/services/trabajadorSocialService";
 import { ConfirmDialog } from "../Common/ConfirmDialog";
 
 interface Props {
-  col: Persona;
-  onStatusChange?: (colaboradorId: string) => void;
+  // trabajadorSocial: TrabajadorSocial;
+  trabajadorSocial: Persona;
+  onStatusChange?: (trabajadorSocialId: string) => void;
 }
 
-export const ColaboradorRow: React.FC<Props> = ({ col, onStatusChange }) => {
+export const TrabajadorSocialRow: React.FC<Props> = ({
+  trabajadorSocial,
+  onStatusChange,
+}) => {
   const { showToast } = useToast();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -42,16 +46,15 @@ export const ColaboradorRow: React.FC<Props> = ({ col, onStatusChange }) => {
 
   const navigate = useNavigate();
 
-  const nuevoEstado = !col.estado;
+  const nuevoEstado = !trabajadorSocial.estado;
   const action = nuevoEstado ? "activar" : "desactivar";
   const modalTitle = `${
     action.charAt(0).toUpperCase() + action.slice(1)
-  } Colaborador`;
-  const modalMessage = `¿Deseas <strong>${action}</strong> al colaborador: <strong>${col.nombre_completo}</strong>?`;
+  } Trabajador social`;
+  const modalMessage = `¿Deseas <strong>${action}</strong> al trabajador social: <strong>${trabajadorSocial.nombre_completo}</strong>?`;
 
   const handleShowDetail = () => {
-    // navigate(`/colaborador/editar/${col.id}`);
-    const urlEdit = `/colaborador/editar/${col.id}`;
+    const urlEdit = `/trabajador-social/editar/${trabajadorSocial.id}`;
     console.log({ urlEdit });
     navigate(urlEdit);
   };
@@ -72,26 +75,39 @@ export const ColaboradorRow: React.FC<Props> = ({ col, onStatusChange }) => {
     setIsProcessing(true);
 
     try {
+      // const payload: TrabajadorSocial = {
+      //   estado: nuevoEstado,
+      // };
+
       const payload: Persona = {
         estado: nuevoEstado,
       };
 
-      const response = await updateColaboradorByEstado(col.id, payload);
+      const response = await updateTrabajadorSocialByEstado(
+        trabajadorSocial.id,
+        payload
+      );
+
+      // const { result, data, message, error } =
+      //   response as TrabajadorSocialResponse;
 
       const { result, data, message, error } = response as PersonaResponse;
 
       if (result && data) {
         showToast(
           "success",
-          message || "Estado del colaborador actualizado con éxito."
+          message || "Estado del trabajador social actualizado con éxito."
         );
 
         // Si hay una función de callback, llamarla para actualizar la tabla padre
         if (onStatusChange) {
-          onStatusChange(col.id);
+          onStatusChange(trabajadorSocial.id);
         }
       } else {
-        showToast("error", error || "Error al actualizar al colaborador.");
+        showToast(
+          "error",
+          error || "Error al actualizar al trabajador social."
+        );
       }
     } catch (error) {
       console.error("Error en la actualización de estado:", error);
@@ -103,24 +119,34 @@ export const ColaboradorRow: React.FC<Props> = ({ col, onStatusChange }) => {
   };
 
   // Determinar texto y color de acción
-  const actionText = col.estado ? "Desactivar" : "Activar";
-  const ActionIcon = col.estado ? ToggleLeft : ToggleRight;
-  const actionColor = col.estado ? "text-red-600" : "text-green-600";
-  const hoverBgColor = col.estado ? "hover:bg-red-100" : "hover:bg-green-100";
+  const actionText = trabajadorSocial.estado ? "Desactivar" : "Activar";
+  const ActionIcon = trabajadorSocial.estado ? ToggleLeft : ToggleRight;
+  const actionColor = trabajadorSocial.estado
+    ? "text-red-600"
+    : "text-green-600";
+  const hoverBgColor = trabajadorSocial.estado
+    ? "hover:bg-red-100"
+    : "hover:bg-green-100";
 
   return (
     <>
       <TableRow
-        key={col.id}
+        key={trabajadorSocial.id}
         className="hover:bg-blue-100 hover:cursor-pointer transition-colors duration-200"
       >
-        <TableCell className="py-3">{col.abreviatura}</TableCell>
-        <TableCell className="py-3">{col.numero_documento}</TableCell>
-        <TableCell className="py-3">{col.nombre_completo}</TableCell>
-        <TableCell className="py-3">{col.nombre_o_razon_social}</TableCell>
-        <TableCell className="py-3">{col.telefono}</TableCell>
+        <TableCell className="py-3">{trabajadorSocial.abreviatura}</TableCell>
         <TableCell className="py-3">
-          {col.estado ? (
+          {trabajadorSocial.numero_documento}
+        </TableCell>
+        <TableCell className="py-3">
+          {trabajadorSocial.nombre_completo}
+        </TableCell>
+        <TableCell className="py-3">
+          {trabajadorSocial.nombre_o_razon_social}
+        </TableCell>
+        <TableCell className="py-3">{trabajadorSocial.telefono}</TableCell>
+        <TableCell className="py-3">
+          {trabajadorSocial.estado ? (
             <CircleCheck className="text-green-500 w-5 h-5" />
           ) : (
             <CircleX className="text-red-500 w-5 h-5" />
@@ -160,7 +186,7 @@ export const ColaboradorRow: React.FC<Props> = ({ col, onStatusChange }) => {
                 className={`cursor-pointer ${hoverBgColor} transition-colors flex items-center space-x-2 ${actionColor}`}
               >
                 <ActionIcon className="h-4 w-4" />
-                <span>{actionText} Colaborador</span>
+                <span>{actionText} Trabajador Social</span>
               </DropdownMenuItem>
               {/* <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 transition-colors">
                 Eliminar
@@ -180,7 +206,9 @@ export const ColaboradorRow: React.FC<Props> = ({ col, onStatusChange }) => {
         isProcessing={isProcessing}
         icon={
           <AlertTriangle
-            className={col.estado ? "text-red-500" : "text-green-500"}
+            className={
+              trabajadorSocial.estado ? "text-red-500" : "text-green-500"
+            }
           />
         }
       />

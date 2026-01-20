@@ -22,6 +22,79 @@ export const getAll = async (): Promise<PersonaResponse> => {
     }
 }
 
+export const getAllWithPaginate = async (queryParams: string) => {
+    try {
+        // const urlApi = `${'/trab-sociales/paginate?'}${queryParams}`
+        const urlApi = `${'/personas/buscar-por-grupo/paginate?'}${queryParams}`
+        console.log({ urlApi })
+
+        const response = await apiClient.get(urlApi)
+
+        const { data: dataPersonas } = response
+
+        const { result, data, pagination, status } = dataPersonas
+
+        return {
+            result,
+            data,
+            pagination,
+            status
+        }
+
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+        console.log('errorMessage', errorMessage)
+        return { result: false, error: errorMessage, status: 500 }
+    }
+}
+
+export const getAllByEmpresa = async (idEmpresa: string): Promise<PersonaResponse> => {
+    try {
+        const urlApi = `${'/personas/empresa/'}${idEmpresa}`
+        console.log({ urlApi })
+        const response = await apiClient.get(urlApi)
+        const { data: { result, data, status, message, error } } = response
+
+        return {
+            result,
+            data,
+            status,
+            message,
+            error
+        }
+
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+        console.log('errorMessage', errorMessage)
+        return { result: false, error: errorMessage, status: 500 }
+    }
+}
+
+export const getAllByEmpresaWithGrupo = async (queryParams: string) => {
+    try {
+        // const urlApi = `${'/trab-sociales/paginate?'}${queryParams}`
+        const urlApi = `${'/personas/buscar-por-empresa-por-grupo?'}${queryParams}`
+        console.log({ urlApi })
+
+        const response = await apiClient.get(urlApi)
+
+        const { data: { result, data, status, message, error } } = response
+
+        return {
+            result,
+            data,
+            status,
+            message,
+            error
+        }
+
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+        console.log('errorMessage', errorMessage)
+        return { result: false, error: errorMessage, status: 500 }
+    }
+}
+
 export const getById = async (id: string): Promise<PersonaResponse> => {
     try {
         const urlApi = `${'/personas/'}${id}`
@@ -83,7 +156,7 @@ export const create = async (payload: Persona): Promise<PersonaResponse> => {
 export const update = async (id: string, payload: Persona): Promise<PersonaResponse> => {
     try {
         const urlApi = `${'/personas/'}${id}`
-        const response = await apiClient.put(urlApi, payload)
+        const response = await apiClient.patch(urlApi, payload)
         const { data: { result, data, status, message, error } } = response
         return {
             result,

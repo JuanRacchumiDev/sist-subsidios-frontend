@@ -1,13 +1,37 @@
-import { TrabajadorSocial } from '../interfaces/ITrabajadorSocial'
+import { TrabajadorSocial, TrabajadorSocialFilter } from '../interfaces/ITrabajadorSocial'
 import {
     getAll,
     getById,
     getByIdTipoDocAndNumDoc,
-    create
+    getAllWithPaginate,
+    create,
+    updateEstado
 } from '../repositories/trabajadorSocialRepository'
 
 export const getTrabajadoresSociales = async () => {
     const response = await getAll()
+
+    return {
+        ...response
+    }
+}
+
+export const getTrabjadoresSocialesWithPaginate = async (
+    page: number,
+    limit: number,
+    filters: TrabajadorSocialFilter = {}
+) => {
+    // Construir la cadena de query parameters
+    const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...Object.fromEntries(
+            Object.entries(filters).filter(([, value]) => value)
+        )
+    }).toString()
+
+    // const response = await getAllWithPaginate(page, limit)
+    const response = await getAllWithPaginate(queryParams)
 
     return {
         ...response
@@ -32,6 +56,14 @@ export const getTrabSocialByIdTipoDocAndNumDoc = async (idTipoDoc: string, numDo
 
 export const createTrabajadorSocial = async (payload: TrabajadorSocial) => {
     const response = await create(payload)
+
+    return {
+        ...response
+    }
+}
+
+export const updateTrabajadorSocialByEstado = async (id: string, payload: TrabajadorSocial) => {
+    const response = await updateEstado(id, payload)
 
     return {
         ...response

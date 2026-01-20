@@ -18,22 +18,33 @@ import { useToast } from "../../../context/ToastContext";
 import { Empresa } from "../../../interfaces/IEmpresa";
 import { getEmpresas } from "../../../services/empresaService";
 import SearchableCombobox from "../../../components/Common/SearchableCombobox";
+// import {
+//   Colaborador,
+//   ColaboradorResponse,
+// } from "../../../interfaces/IColaborador";
+import { Persona, PersonaResponse } from "../../../interfaces/IPersona";
+// import {
+//   getColaboradores,
+//   getColaboradoresByIdEmpresa,
+// } from "../../../services/colaboradorService";
 import {
-  Colaborador,
-  ColaboradorResponse,
-} from "../../../interfaces/IColaborador";
+  getPersonas,
+  getPersonasByEmpresaWithGrupo,
+  // getPersonasByEmpresa,
+} from "../../../services/personaService";
+import { Detalle } from "../../../interfaces/IDetalleParametro";
 import {
-  getColaboradores,
-  getColaboradoresByIdEmpresa,
-} from "../../../services/colaboradorService";
-import { TipoDescansoMedico } from "../../../interfaces/ITipoDescansoMedico";
-import { getTipoDescansosMedicos } from "../../../services/tipoDescansoMedicoService";
-import { TipoContingencia } from "../../../interfaces/ITipoContingencia";
+  getDetalleById,
+  getDetalles,
+} from "../../../services/detalleParametroService";
+// import { TipoDescansoMedico } from "../../../interfaces/ITipoDescansoMedico";
+// import { getTipoDescansosMedicos } from "../../../services/tipoDescansoMedicoService";
+// import { TipoContingencia } from "../../../interfaces/ITipoContingencia";
 import { DocumentoTipoContingencia } from "../../../interfaces/IDocumentoTipoContingencia";
-import {
-  getTipoContingencias,
-  getTipoContingenciaById,
-} from "../../../services/tipoContingenciaService";
+// import {
+//   getTipoContingencias,
+//   getTipoContingenciaById,
+// } from "../../../services/tipoContingenciaService";
 import { Input } from "../../../components/ui/input";
 import * as z from "zod";
 import { UseFormReturn } from "react-hook-form";
@@ -61,27 +72,40 @@ const dataEmpresas = async () => {
 };
 
 const dataColaboradores = async (idEmpresa: string | null = null) => {
-  let colaboradores: Colaborador[] = [];
-  let response: ColaboradorResponse;
+  let colaboradores: Persona[] = [];
+  let response: PersonaResponse;
+  const nombreGrupo: string = "GRUPO COLABORADOR";
+
   if (idEmpresa) {
-    response = await getColaboradoresByIdEmpresa(idEmpresa);
+    // response = await getPersonasByEmpresa(idEmpresa);
+    response = await getPersonasByEmpresaWithGrupo(idEmpresa, nombreGrupo);
   } else {
-    response = await getColaboradores();
+    response = await getPersonas();
   }
+
+  console.log("---- response dataColaboradores ----");
+  console.log({ response });
+
   const { result, data } = response;
   if (result && data) {
-    colaboradores = data as Colaborador[];
+    colaboradores = data as Persona[];
   }
   return colaboradores;
 };
 
 const dataTipoDescansosMedicos = async () => {
-  let tipoDescansos: TipoDescansoMedico[] = [];
-  const response = await getTipoDescansosMedicos();
+  let tipoDescansos: Detalle[] = [];
+  const claseTDM: number = 1003;
+  const estadoTDM: boolean = true;
+
+  const response = await getDetalles(claseTDM, estadoTDM);
+
   const { result, data } = response;
+
   if (result && data) {
-    tipoDescansos = data as TipoDescansoMedico[];
+    tipoDescansos = data as Detalle[];
   }
+
   return tipoDescansos;
 };
 
@@ -100,12 +124,19 @@ const dataAdjuntos = async (idDescansoMedico: string) => {
 };
 
 const dataTipoContingencias = async () => {
-  let tipoContingencias: TipoContingencia[] = [];
-  const response = await getTipoContingencias();
+  let tipoContingencias: Detalle[] = [];
+
+  const claseTC: number = 1004;
+  const estadoTC: boolean = true;
+
+  const response = await getDetalles(claseTC, estadoTC);
+
   const { result, data } = response;
+
   if (result && data) {
-    tipoContingencias = data as TipoContingencia[];
+    tipoContingencias = data as Detalle[];
   }
+
   return tipoContingencias;
 };
 
@@ -116,11 +147,9 @@ export const DescansoMedicoDetalle = ({
   const { id } = useParams<{ id: string }>();
   const { showToast } = useToast();
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
-  const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
-  const [tipoDescansos, setTipoDescansos] = useState<TipoDescansoMedico[]>([]);
-  const [tipoContingencias, setTipoContingencias] = useState<
-    TipoContingencia[]
-  >([]);
+  const [colaboradores, setColaboradores] = useState<Persona[]>([]);
+  const [tipoDescansos, setTipoDescansos] = useState<Detalle[]>([]);
+  const [tipoContingencias, setTipoContingencias] = useState<Detalle[]>([]);
   const [documentosTipoContingencia, setDocumentosTipoContingencia] = useState<
     DocumentoTipoContingencia[]
   >([]);
@@ -203,7 +232,7 @@ export const DescansoMedicoDetalle = ({
       let isTipoDescansoCitt = false;
 
       const tipoSeleccionado = tipoDescansos.find(
-        (tipodescanso) => tipodescanso.id === selectedTipoDescansoId
+        (tipodescanso) => tipodescanso.id === selectedTipoDescansoId,
       );
 
       // console.log({ tipoSeleccionado });
@@ -238,16 +267,25 @@ export const DescansoMedicoDetalle = ({
       let listDocumentos: DocumentoTipoContingencia[] = [];
 
       if (selectedTipoContingenciaId) {
+        console.log({ selectedTipoContingenciaId });
         try {
-          const response = await getTipoContingenciaById(
-            selectedTipoContingenciaId
-          );
+          // const response = await getTipoContingenciaById(
+          //   selectedTipoContingenciaId
+          // );
+
+          const response = await getDetalleById(selectedTipoContingenciaId);
+          console.log("---- response fetchDocumentos ----");
+          console.log({ response });
 
           const { result, data } = response;
 
           if (result && data) {
-            const tipoContingencia = data as TipoContingencia;
+            // const tipoContingencia = data as TipoContingencia;
+            const tipoContingencia = data as Detalle;
+            console.log({ tipoContingencia });
+
             const { documentoTipoCont } = tipoContingencia;
+
             listDocumentos = documentoTipoCont as DocumentoTipoContingencia[];
 
             // console.log(listDocumentos);
@@ -258,7 +296,7 @@ export const DescansoMedicoDetalle = ({
             if (isCitt) {
               // console.log("isCitt true");
               listDocumentos = listDocumentos.filter(
-                (doc) => doc.nombre_url! === "descanso-medico"
+                (doc) => doc.nombre_url! === "descanso-medico",
               );
               // console.log("listDocumentos filtered");
               // console.log({ listDocumentos });
@@ -327,7 +365,7 @@ export const DescansoMedicoDetalle = ({
           return (
             <FormItem className="flex flex-col">
               <RequiredLabel>Colaborador</RequiredLabel>
-              <SearchableCombobox<Colaborador>
+              <SearchableCombobox<Persona>
                 placeholder="Buscar un colaborador"
                 options={colaboradores}
                 value={field.value}
@@ -483,7 +521,7 @@ export const DescansoMedicoDetalle = ({
                   disabled={isModeLetter}
                   onChange={(e) =>
                     field.onChange(
-                      e.target.value ? parseISO(e.target.value) : null
+                      e.target.value ? parseISO(e.target.value) : null,
                     )
                   }
                   className={`
@@ -514,7 +552,7 @@ export const DescansoMedicoDetalle = ({
                   disabled={isModeLetter}
                   onChange={(e) =>
                     field.onChange(
-                      e.target.value ? parseISO(e.target.value) : null
+                      e.target.value ? parseISO(e.target.value) : null,
                     )
                   }
                   className={`
@@ -545,7 +583,7 @@ export const DescansoMedicoDetalle = ({
                   disabled={isModeLetter}
                   onChange={(e) =>
                     field.onChange(
-                      e.target.value ? parseISO(e.target.value) : null
+                      e.target.value ? parseISO(e.target.value) : null,
                     )
                   }
                   className={`

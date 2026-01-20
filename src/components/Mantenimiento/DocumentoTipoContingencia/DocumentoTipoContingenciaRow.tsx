@@ -36,6 +36,8 @@ export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
   documento,
   onStatusChange,
 }) => {
+  console.log("--- DocumentoTipoContingenciaRow ---");
+  console.log({ documento });
   const { showToast } = useToast();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -122,7 +124,7 @@ export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
         className="hover:bg-blue-100 hover:cursor-pointer transition-colors duration-200"
       >
         <TableCell className="py-3">
-          {documento.tipoContingencia.nombre}
+          {documento.detalleParametro.nombre}
         </TableCell>
         <TableCell className="py-3">{documento.nombre}</TableCell>
         <TableCell className="py-3">

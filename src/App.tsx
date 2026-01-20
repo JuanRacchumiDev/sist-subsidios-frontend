@@ -8,11 +8,14 @@ import { Dashboard } from "./components/Dashboard/Dashboard";
 import { LoginPage } from "./components/Auth/Page/LoginPage";
 import { NotFoundPage } from "./components/Layout/NotFoundPage";
 
-import { ColaboradorListPage } from "./components/Colaborador/Page/ColaboradorListPage";
-import { ColaboradorFormPage } from "./components/Colaborador/Page/ColaboradorFormPage";
-
 import { EmpresaListPage } from "./components/Empresa/Page/EmpresaListPage";
 import { EmpresaFormPage } from "./components/Empresa/Page/EmpresaFormPage";
+
+import { TrabajadorSocialListPage } from "./components/TrabajadorSocial/Page/TrabajadorSocialListPage";
+import { TrabajadorSocialFormPage } from "./components/TrabajadorSocial/Page/TrabajadorSocialFormPage";
+
+import { ColaboradorListPage } from "./components/Colaborador/Page/ColaboradorListPage";
+import { ColaboradorFormPage } from "./components/Colaborador/Page/ColaboradorFormPage";
 
 import { DescansoMedicoListPage } from "./components/DescansoMedico/Page/DescansoMedicoListPage";
 import { DescansoMedicoFormPage } from "./components/DescansoMedico/Page/DescansoMedicoFormPage";
@@ -106,6 +109,19 @@ function App() {
                     <Route
                       path="/colaborador/editar/:id"
                       element={<ColaboradorFormPage />}
+                    ></Route>
+
+                    <Route
+                      path="/trabajador-social"
+                      element={<TrabajadorSocialListPage />}
+                    ></Route>
+                    <Route
+                      path="/trabajador-social/nuevo"
+                      element={<TrabajadorSocialFormPage />}
+                    ></Route>
+                    <Route
+                      path="/trabajador-social/editar/:id"
+                      element={<TrabajadorSocialFormPage />}
                     ></Route>
 
                     <Route

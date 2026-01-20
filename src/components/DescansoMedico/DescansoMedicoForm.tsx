@@ -22,12 +22,16 @@ import {
   DescansoMedico,
   DescansoMedicoResponse,
 } from "../../interfaces/IDescansoMedico";
-import { getColaboradorById } from "../../services/colaboradorService";
-import { Colaborador } from "../../interfaces/IColaborador";
-import { getTipoDescansoById } from "../../services/tipoDescansoMedicoService";
-import { TipoDescansoMedico } from "../../interfaces/ITipoDescansoMedico";
-import { getTipoContingenciaById } from "../../services/tipoContingenciaService";
-import { TipoContingencia } from "../../interfaces/ITipoContingencia";
+// import { getColaboradorById } from "../../services/colaboradorService";
+// import { Colaborador } from "../../interfaces/IColaborador";
+import { getPersonaById } from "../../services/personaService";
+import { Persona } from "../../interfaces/IPersona";
+// import { getTipoDescansoById } from "../../services/tipoDescansoMedicoService";
+// import { TipoDescansoMedico } from "../../interfaces/ITipoDescansoMedico";
+// import { getTipoContingenciaById } from "../../services/tipoContingenciaService";
+// import { TipoContingencia } from "../../interfaces/ITipoContingencia";
+import { getDetalleById } from "../../services/detalleParametroService";
+import { Detalle } from "../../interfaces/IDetalleParametro";
 import { getDiagnosticoByCodigo } from "../../services/diagnosticoService";
 import { Diagnostico } from "../../interfaces/IDiagnostico";
 import {
@@ -271,7 +275,11 @@ export const DescansoMedicoForm = () => {
 
             // console.log({ descanso });
 
-            const responseColaborador = await getColaboradorById(
+            // const responseColaborador = await getColaboradorById(
+            //   descanso.id_colaborador
+            // );
+
+            const responseColaborador = await getPersonaById(
               descanso.id_colaborador
             );
 
@@ -279,7 +287,8 @@ export const DescansoMedicoForm = () => {
               responseColaborador;
 
             if (resultColaborador && dataColaborador) {
-              const { id_empresa } = dataColaborador as Colaborador;
+              // const { id_empresa } = dataColaborador as Colaborador;
+              const { id_empresa } = dataColaborador as Persona;
               idEmpresa = id_empresa;
             }
 
@@ -368,41 +377,55 @@ export const DescansoMedicoForm = () => {
 
       // Obtener el nombre del colaborador
       let nombreColaborador: string = "";
-      const responseColaborador = await getColaboradorById(idColaborador);
+      // const responseColaborador = await getColaboradorById(idColaborador);
+      const responseColaborador = await getPersonaById(idColaborador);
       // console.log({ responseColaborador });
       const { result: resultCol, data: dataCol } = responseColaborador;
 
       if (resultCol && dataCol) {
+        // const { nombres, apellido_paterno, apellido_materno } =
+        //   dataCol as Colaborador;
+
         const { nombres, apellido_paterno, apellido_materno } =
-          dataCol as Colaborador;
+          dataCol as Persona;
+
         nombreColaborador = `${nombres} ${apellido_paterno} ${apellido_materno}`;
       }
 
       // Obtener tipo de descanso médico
       let nombreTipoDescanso: string = "";
-      const responseTipoDescanso = await getTipoDescansoById(
-        idTipoDescansoMedico
-      );
+
+      // const responseTipoDescanso = await getTipoDescansoById(
+      //   idTipoDescansoMedico
+      // );
+
+      const responseTipoDescanso = await getDetalleById(idTipoDescansoMedico);
       // console.log({ responseTipoDescanso });
 
       const { result: resultTipoDescanso, data: dataTipoDescanso } =
         responseTipoDescanso;
       if (resultTipoDescanso && dataTipoDescanso) {
-        const { nombre } = dataTipoDescanso as TipoDescansoMedico;
+        // const { nombre } = dataTipoDescanso as TipoDescansoMedico;
+        const { nombre } = dataTipoDescanso as Detalle;
         nombreTipoDescanso = nombre;
       }
 
       // Obtener tipo de contingencia
       let nombreTipoContingencia: string = "";
-      const responseTipoContingencia = await getTipoContingenciaById(
-        idTipoContingencia
-      );
+
+      // const responseTipoContingencia = await getTipoContingenciaById(
+      //   idTipoContingencia
+      // );
+
+      const responseTipoContingencia = await getDetalleById(idTipoContingencia);
+
       // console.log({ responseTipoContingencia });
 
       const { result: resultTipoContingencia, data: dataTipoContingencia } =
         responseTipoContingencia;
       if (resultTipoContingencia && dataTipoContingencia) {
-        const { nombre } = dataTipoContingencia as TipoContingencia;
+        // const { nombre } = dataTipoContingencia as TipoContingencia;
+        const { nombre } = dataTipoContingencia as Detalle;
         nombreTipoContingencia = nombre;
       }
 

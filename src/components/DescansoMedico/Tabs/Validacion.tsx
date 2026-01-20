@@ -39,8 +39,8 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
 
     // console.log({ userProfile });
 
-    // Lógica para el perfil "especialista"
-    if (userProfile?.slug_perfil === "especialista") {
+    // Lógica para el perfil "especialista-sophia-human"
+    if (userProfile?.slug_perfil === "especialista-sophia-human") {
       if (isEditMode) {
         // console.log("modo edición");
         // En modo edición, el especialista puede cambiar el estado, pero ciertos campos pueden estar deshabilitados.

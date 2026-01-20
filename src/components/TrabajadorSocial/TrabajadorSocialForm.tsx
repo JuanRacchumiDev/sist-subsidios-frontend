@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { format, parseISO } from "date-fns";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Card,
@@ -27,33 +28,86 @@ import {
   SelectValue,
 } from "../ui/select";
 
+import { getEmpresas } from "../../services/empresaService";
+import { getDetalles } from "../../services/detalleParametroService";
 // import { getTipoDocumentos } from "../../services/tipoDocumentoService";
 // import { getCargos } from "../../services/cargoService";
-import { RequiredLabel } from "../Common/RequiredLabel";
+import {
+  getPersonaByIdTipoDocAndNumDoc,
+  getPersonaById,
+} from "../../services/personaService";
 import { Input } from "../ui/input";
-import { getEmpresaByApi } from "../../services/apiEmpresaService";
-import { Empresa } from "../../interfaces/IEmpresa";
-import { getPersonaByApi } from "../../services/apiPersonaService";
-import { getEmpresaById } from "../../services/empresaService";
-import { createPersona, updatePersona } from "../../services/personaService";
-import { getDetalles } from "../../services/detalleParametroService";
-import { Persona, PersonaResponse } from "../../interfaces/IPersona";
 import { Button } from "../ui/button";
-// import {
-//   RepresentanteLegal,
-//   RepresentanteLegalResponse,
-// } from "../../interfaces/IRepresentanteLegal";
-// import {
-//   createRepresentante,
-//   updateRepresentante,
-// } from "../../services/representanteService";
-import SearchableCombobox from "../Common/SearchableCombobox";
-// import { Cargo } from "@/interfaces/ICargo";
-import { ArrowLeft } from "lucide-react";
+import { RequiredLabel } from "../Common/RequiredLabel";
+import { Persona, PersonaResponse } from "../../interfaces/IPersona";
 import { Detalle } from "../../interfaces/IDetalleParametro";
-// import { Parametro } from "@/interfaces/IParametro";
-// import { RepresentanteLegalResponse } from "@/interfaces/IRepresentanteLegal";
-// import { DetalleParametro } from "../../../../dms-backend-node/src/app/models/DetalleParametro";
+import { Empresa } from "../../interfaces/IEmpresa";
+import { createPersona, updatePersona } from "../../services/personaService";
+// import {
+//   TrabajadorSocial,
+//   TrabajadorSocialResponse,
+// } from "../../interfaces/ITrabajadorSocial";
+// import {
+//   createTrabajadorSocial,
+//   getTrabajadorSocialById,
+// } from "../../services/trabajadorSocialService";
+import SearchableCombobox from "../Common/SearchableCombobox";
+import { ArrowLeft } from "lucide-react";
+
+const formSchema = z.object({
+  idTipoDocumento: z
+    .string({
+      message: "Por favor seleccione un tipo de documento.",
+    })
+    .min(1, "Por favor seleccione un tipo de documento."),
+  numeroDocumento: z.string().min(8, {
+    message: "El número de documento debe tener al menos 8 caracteres.",
+  }),
+  nombres: z.string().min(2, {
+    message: "Los nombres son requeridos.",
+  }),
+  apellidoPaterno: z.string().min(2, {
+    message: "El apellido paterno es requerido.",
+  }),
+  apellidoMaterno: z.string().min(2, {
+    message: "El apellido materno es requerido.",
+  }),
+  fechaNacimiento: z
+    .date({
+      message: "La fecha de nacimiento es requerida",
+    })
+    .refine((val) => val !== null, {
+      message: "La fecha de nacimiento es requerida",
+    }),
+  idEmpresa: z
+    .string({
+      message: "Por favor seleccione una empresa.",
+    })
+    .min(1, "Por favor seleccione una empresa"),
+  idCargo: z
+    .string({
+      message: "Por favor seleccione un cargo.",
+    })
+    .min(1, "Por favor seleccione un cargo"),
+  nombreArea: z.string().min(2, {
+    message: "El área es requerida.",
+  }),
+  nombreSede: z.string().min(2, {
+    message: "La sede es requerida.",
+  }),
+  emailInstitucional: z.string().email({
+    message: "Por favor ingrese un correo institucional válido.",
+  }),
+  emailPersonal: z.string().email({
+    message: "Por favor ingrese un correo personal válido.",
+  }),
+  telefono: z.string().min(9, {
+    message: "El número de celular debe tener al menos 9 dígitos.",
+  }),
+  fechaIngreso: z.date().optional(),
+  //   esAsociadoSindicato: z.boolean().optional(),
+  //   esPresentaInconvenientes: z.boolean().optional(),
+});
 
 const getTipoDocumentos = async (): Promise<Detalle[]> => {
   let tipos: Detalle[] = [];
@@ -99,46 +153,10 @@ const getCargos = async (): Promise<Detalle[]> => {
   }
 };
 
-const formSchema = z.object({
-  ruc: z.string().min(2, {
-    message: "El RUC es requerido.",
-  }),
-  razonSocial: z.string().min(2, {
-    message: "La razón social es requerida.",
-  }),
-  direccion: z.string().min(2, {
-    message: "La dirección es requerida.",
-  }),
-  idTipoDocumento: z
-    .string({
-      message: "Por favor seleccione un tipo de documento.",
-    })
-    .min(1, "Por favor seleccione un tipo de documento."),
-  numeroDocumento: z
-    .string()
-    .min(8, { message: "Número de documento inválido." }),
-  apellidoPaterno: z
-    .string()
-    .min(2, { message: "El apellido paterno es requerido." }),
-  apellidoMaterno: z
-    .string()
-    .min(2, { message: "El apellido materno es requerido." }),
-  nombres: z.string().min(2, { message: "Los nombres son requeridos." }),
-  direccionFiscal: z
-    .string()
-    .min(2, { message: "La dirección fiscal es requerida." }),
-  partidaRegistral: z
-    .string()
-    .min(1, { message: "Partida registral requerida." }),
-  idCargo: z
-    .string({
-      message: "Por favor seleccione un cargo.",
-    })
-    .min(1, "Por favor seleccione un cargo."),
-  telefono: z.string().min(6, { message: "Teléfono inválido." }),
-  emailPersonal: z.string().email({ message: "Correo electrónico inválido." }),
-  ospe: z.string().min(1, { message: "El OSPE es requerido." }),
-});
+// type TEmpresa = {
+//   id: string;
+//   nombre_o_razon_social: string;
+// };
 
 // type TTipoDocumento = {
 //   id: string;
@@ -150,93 +168,110 @@ const formSchema = z.object({
 //   nombre: string;
 // };
 
-type TEmpresa = {
-  ruc?: string;
-  razonSocial?: string;
-  direccion?: string;
+type TPersona = {
   idTipoDocumento?: string;
   numeroDocumento?: string;
+  nombres?: string;
   apellidoPaterno?: string;
   apellidoMaterno?: string;
-  nombres?: string;
-  direccionFiscal?: string;
-  partidaRegistral?: string;
+  fechaNacimiento?: null;
+  idEmpresa?: string;
   idCargo?: string;
-  telefono?: string;
+  nombreArea?: string;
+  nombreSede?: string;
+  emailInstitucional?: string;
   emailPersonal?: string;
-  ospe?: string;
+  telefono?: string;
+  fechaIngreso?: null;
 };
 
-export const EmpresaForm = () => {
+// type TTrabajadorSocial = {
+//   idTipoDocumento?: string;
+//   numeroDocumento?: string;
+//   nombres?: string;
+//   apellidoPaterno?: string;
+//   apellidoMaterno?: string;
+//   fechaNacimiento?: null;
+//   idEmpresa?: string;
+//   idCargo?: string;
+//   nombreArea?: string;
+//   nombreSede?: string;
+//   emailInstitucional?: string;
+//   emailPersonal?: string;
+//   numeroCelular?: string;
+//   fechaIngreso?: null;
+//   //   esAsociadoSindicato?: boolean;
+//   //   esPresentaInconvenientes?: boolean;
+// };
+
+export const TrabajadorSocialForm = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { showToast } = useToast();
 
-  console.log("---- idEmpresa ----");
+  console.log("---- idTrabajadorSocial ----");
   console.log({ id });
 
-  // const [tipos, setTipos] = useState<TTipoDocumento[]>([]);
-  // const [cargos, setCargos] = useState<TCargo[]>([]);
+  const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [tipos, setTipos] = useState<Detalle[]>([]);
   const [cargos, setCargos] = useState<Detalle[]>([]);
-  const [idEmpresa, setIdEmpresa] = useState<string>("");
   const [idPersona, setIdPersona] = useState<string>("");
-
-  const [camposHabilitadosEmpresa, setCamposHabilitadosEmpresa] =
-    useState(false);
 
   const [camposHabilitadosPersona, setCamposHabilitadosPersona] =
     useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      ruc: "",
-      razonSocial: "",
-      direccion: "",
-      idTipoDocumento: "",
-      numeroDocumento: "",
-      apellidoPaterno: "",
-      apellidoMaterno: "",
-      nombres: "",
-      direccionFiscal: "",
-      partidaRegistral: "",
-      idCargo: "",
-      telefono: "",
-      emailPersonal: "",
-      // emailInstitucional: "",
-      ospe: "",
-    },
-  });
-
-  const { isSubmitting } = form.formState;
   const isEditMode = !!id;
 
   const handleGoBack = () => {
-    navigate("/empresa");
+    navigate("/trabajador-social");
   };
 
   const resetForm = () => {
-    const dataForm: TEmpresa = {
-      ruc: "",
-      razonSocial: "",
-      direccion: "",
+    const dataForm: TPersona = {
       idTipoDocumento: "",
       numeroDocumento: "",
+      nombres: "",
       apellidoPaterno: "",
       apellidoMaterno: "",
-      nombres: "",
-      direccionFiscal: "",
-      partidaRegistral: "",
+      fechaNacimiento: null,
+      idEmpresa: "",
       idCargo: "",
-      telefono: "",
+      nombreArea: "",
+      nombreSede: "",
+      emailInstitucional: "",
       emailPersonal: "",
-      // emailInstitucional: "",
-      ospe: "",
+      telefono: "",
+      fechaIngreso: null,
+      //   esAsociadoSindicato: false,
+      //   esPresentaInconvenientes: false,
     };
 
     form.reset(dataForm);
   };
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      idTipoDocumento: "",
+      numeroDocumento: "",
+      nombres: "",
+      apellidoPaterno: "",
+      apellidoMaterno: "",
+      fechaNacimiento: null,
+      idEmpresa: "",
+      idCargo: "",
+      nombreArea: "",
+      nombreSede: "",
+      emailInstitucional: "",
+      emailPersonal: "",
+      telefono: "",
+      fechaIngreso: null,
+      //   esAsociadoSindicato: false,
+      //   esPresentaInconvenientes: false,
+    },
+  });
+
+  const { isSubmitting } = form.formState;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log({ values });
@@ -244,59 +279,78 @@ export const EmpresaForm = () => {
     // let response: RepresentanteLegalResponse;
     let response: PersonaResponse;
 
-    // Obteniendo valores del formulario
     const {
       idTipoDocumento,
       idCargo,
+      idEmpresa,
       numeroDocumento,
-      nombres,
       apellidoPaterno,
       apellidoMaterno,
-      direccionFiscal,
-      partidaRegistral,
-      telefono,
+      nombres,
+      fechaNacimiento,
+      fechaIngreso,
+      nombreArea,
+      nombreSede,
+      emailInstitucional,
       emailPersonal,
-      // emailInstitucional,
-      ospe,
+      telefono,
+      // esAsociadoSindicato,
+      // esPresentaInconvenientes,
     } = values;
 
-    // const payload: RepresentanteLegal = {
-    //   id_tipodocumento: idTipoDocumento,
-    //   id_empresa: idEmpresa,
-    //   id_cargo: idCargo,
-    //   numero_documento: numeroDocumento,
-    //   nombres,
-    //   apellido_paterno: apellidoPaterno,
-    //   apellido_materno: apellidoMaterno,
-    //   direccion_fiscal: direccionFiscal,
-    //   partida_registral: partidaRegistral,
-    //   telefono,
-    //   correo,
-    //   ospe,
-    // };
+    const nombreCompleto: string = `${nombres} ${apellidoPaterno} ${apellidoMaterno}`;
+
+    const fechaNacimientoToString: string | null = fechaNacimiento
+      ? fechaNacimiento.toISOString()
+      : null;
+
+    const partsFechaNacimientoStr: string[] =
+      fechaNacimientoToString.split("T");
+
+    const fechaNacimientoStr: string = partsFechaNacimientoStr[0];
+
+    let fechaIngresoStr: string | null = null;
+
+    if (fechaIngreso) {
+      const fechaIngresoToString: string | null = fechaIngreso.toISOString();
+      const partsFechaIngreso: string[] = fechaIngresoToString.split("T");
+      fechaIngresoStr = partsFechaIngreso[0];
+    }
 
     const payload: Persona = {
       id_tipodocumento: idTipoDocumento,
-      id_empresa: idEmpresa,
       id_cargo: idCargo,
+      id_empresa: idEmpresa,
       numero_documento: numeroDocumento,
-      nombres,
       apellido_paterno: apellidoPaterno,
       apellido_materno: apellidoMaterno,
-      direccion_fiscal: direccionFiscal,
-      partida_registral: partidaRegistral,
-      telefono,
+      nombres,
+      nombre_completo: nombreCompleto,
+      fecha_nacimiento: fechaNacimientoStr,
+      fecha_ingreso: fechaIngresoStr,
+      nombre_area: nombreArea,
+      nombre_sede: nombreSede,
+      email_institucional: emailInstitucional,
       email_personal: emailPersonal,
-      // email_institucional: emailInstitucional,
-      ospe,
-      nombre_grupo: "GRUPO REPRESENTANTE LEGAL",
+      telefono,
+      nombre_grupo: "GRUPO TRABAJADOR SOCIAL",
+      // is_asociado_sindicato: esAsociadoSindicato,
+      // is_presenta_inconvenientes: esPresentaInconvenientes,
     };
 
     console.log("---- payload persona ----");
     console.log({ payload });
 
     try {
-      // Completar registro de representante legal
+      // const response = await createTrabajadorSocial(payload);
+      // const { result, message } = response as TrabajadorSocialResponse;
+
+      // const response = await createPersona(payload);
+      // const { result, message } = response as PersonaResponse;
+
+      console.log({ isEditMode });
+      console.log({ idPersona });
+
       if (!isEditMode && idPersona) {
         console.log("create persona");
         response = await updatePersona(idPersona, payload);
@@ -308,14 +362,6 @@ export const EmpresaForm = () => {
         response = await createPersona(payload);
       }
 
-      // if (isEditMode && idPersona) {
-      //   messageError = "Error al actualizar el representante legal";
-      //   response = await updatePersona(idPersona, payload);
-      // } else {
-      //   messageError = "Error al registrar el representante legal";
-      //   response = await createPersona(payload);
-      // }
-
       console.log("---- response createPersona or updatePersona ----");
       console.log(response);
 
@@ -323,13 +369,24 @@ export const EmpresaForm = () => {
 
       if (result) {
         showToast("success", message);
-        navigate("/empresa");
+        navigate("/trabajador-social");
       } else {
         showToast("error", error || messageError);
         return;
       }
+
+      // if (result) {
+      //   showToast("success", message);
+      //   navigate("/trabajador-social");
+      // } else {
+      //   showToast(
+      //     "error",
+      //     message || "Error al registrar al trabajador social"
+      //   );
+      //   return;
+      // }
     } catch (error) {
-      console.error("Error al registrar empresa", error);
+      console.error("Error al registrar trabajador social", error);
       showToast("error", error);
     }
   };
@@ -337,24 +394,25 @@ export const EmpresaForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // let listTipoDocumentos: TTipoDocumento[] = [];
+        let listEmpresas: Empresa[] = [];
         let listTipoDocumentos: Detalle[] = [];
-        // let listCargos: TCargo[] = [];
         let listCargos: Detalle[] = [];
 
-        const [responseTipoDocumentos, responseCargos] = await Promise.all([
-          getTipoDocumentos(),
-          getCargos(),
-        ]);
+        const [responseEmpresas, responseTipoDocumentos, responseCargos] =
+          await Promise.all([getEmpresas(), getTipoDocumentos(), getCargos()]);
+
+        const { result: resultEmpresas, data: dataEmpresas } = responseEmpresas;
+        if (resultEmpresas && dataEmpresas) {
+          listEmpresas = dataEmpresas as Empresa[];
+        }
 
         listTipoDocumentos = responseTipoDocumentos as Detalle[];
 
         listCargos = responseCargos as Detalle[];
 
-        // const { result: resultTipoDocs, data: dataTipoDocs } =
-        //   responseTipoDocumentos;
-        // if (resultTipoDocs && dataTipoDocs) {
-        //   listTipoDocumentos = dataTipoDocs as TTipoDocumento[];
+        // const { result: resultTipos, data: dataTipos } = responseTipoDocumentos;
+        // if (resultTipos && dataTipos) {
+        //   listTipoDocumentos = dataTipos as TTipoDocumento[];
         // }
 
         // const { result: resultCargos, data: dataCargos } = responseCargos;
@@ -362,102 +420,79 @@ export const EmpresaForm = () => {
         //   listCargos = dataCargos as TCargo[];
         // }
 
+        setEmpresas(listEmpresas);
         setTipos(listTipoDocumentos);
         setCargos(listCargos);
 
-        console.log({ isEditMode });
+        console.log("---- fetchData id ----");
         console.log({ id });
 
-        if (isEditMode && id) {
-          const responseEmpresa = await getEmpresaById(id);
-          console.log({ responseEmpresa });
-          const { result, data } = responseEmpresa;
+        if (id) {
+          // const responseTrabajadorSocial = await getTrabajadorSocialById(id);
+          const responseTrabajadorSocial = await getPersonaById(id);
+          const { result, data, message } = responseTrabajadorSocial;
 
           if (result && data) {
-            let dataForm: TEmpresa = {};
-
-            const empresa = data as Empresa;
+            let dataForm: TPersona = {};
+            // const trabajadorSocial = data as TrabajadorSocial;
+            const trabajadorSocial = data as Persona;
 
             const {
-              id: idEmpresa,
-              numero,
-              nombre_o_razon_social,
-              direccion,
-              representantes,
-            } = empresa;
+              id_tipodocumento,
+              numero_documento,
+              nombres,
+              apellido_paterno,
+              apellido_materno,
+              fecha_nacimiento,
+              fecha_ingreso,
+              id_empresa,
+              id_cargo,
+              nombre_area,
+              nombre_sede,
+              email_institucional,
+              email_personal,
+              telefono,
+              //   is_asociado_sindicato,
+              //   is_presenta_inconvenientes,
+            } = trabajadorSocial;
 
-            dataForm.ruc = numero || "";
-            dataForm.razonSocial = nombre_o_razon_social || "";
-            dataForm.direccion = direccion || "";
-
-            setIdEmpresa(idEmpresa);
-
-            console.log({ representantes });
-
-            // const listRepresentantes = representantes as RepresentanteLegal[];
-            const listRepresentantes = representantes as Persona[];
-
-            const totalRepresentantes = listRepresentantes.length;
-
-            if (isEditMode && totalRepresentantes === 0) {
-              setCamposHabilitadosPersona(false);
-            } else {
-              setCamposHabilitadosPersona(true);
-            }
-
-            if (totalRepresentantes === 1) {
-              // const representante = listRepresentantes[0] as RepresentanteLegal;
-              const representante = listRepresentantes[0] as Persona;
-
-              const {
-                id_tipodocumento,
-                id_cargo,
-                numero_documento,
-                nombres,
-                apellido_paterno,
-                apellido_materno,
-                direccion_fiscal,
-                partida_registral,
-                telefono,
-                email_personal,
-                // email_institucional,
-                ospe,
-              } = representante;
-
-              dataForm.idTipoDocumento = id_tipodocumento;
-              dataForm.numeroDocumento = numero_documento || "";
-              dataForm.apellidoPaterno = apellido_paterno || "";
-              dataForm.apellidoMaterno = apellido_materno || "";
-              dataForm.nombres = nombres || "";
-              dataForm.direccionFiscal = direccion_fiscal || "";
-              dataForm.partidaRegistral = partida_registral || "";
-              dataForm.idCargo = id_cargo;
-              dataForm.telefono = telefono;
-              // dataForm.correo = correo;
-              dataForm.emailPersonal = email_personal || "";
-              // dataForm.emailInstitucional = email_institucional || "";
-              dataForm.ospe = ospe;
-
-              // setIdRepresentante(representante.id);
-              setIdPersona(representante.id);
-            }
+            dataForm.idTipoDocumento = id_tipodocumento || "";
+            dataForm.numeroDocumento = numero_documento || "";
+            (dataForm.nombres = nombres || ""),
+              (dataForm.apellidoPaterno = apellido_paterno || "");
+            dataForm.apellidoMaterno = apellido_materno || "";
+            dataForm.fechaNacimiento = fecha_nacimiento
+              ? parseISO(fecha_nacimiento)
+              : null;
+            dataForm.fechaIngreso = fecha_ingreso
+              ? parseISO(fecha_ingreso)
+              : null;
+            dataForm.idEmpresa = id_empresa || "";
+            dataForm.idCargo = id_cargo || "";
+            dataForm.nombreArea = nombre_area || "";
+            dataForm.nombreSede = nombre_sede || "";
+            dataForm.emailInstitucional = email_institucional || "";
+            dataForm.emailPersonal = email_personal || "";
+            dataForm.telefono = telefono || "";
+            // dataForm.esAsociadoSindicato = is_asociado_sindicato || false;
+            // dataForm.esPresentaInconvenientes =
+            //   is_presenta_inconvenientes || false;
 
             form.reset(dataForm);
-
-            // Deshabilita los siguientes campos
-            form.setValue("idTipoDocumento", dataForm.idTipoDocumento);
-            form.setValue("ruc", dataForm.ruc);
-            form.setValue("numeroDocumento", dataForm.numeroDocumento);
-            form.setValue("idCargo", dataForm.idCargo);
+          } else {
+            showToast("error", message || "Trabajador social no encontrado");
+            navigate("/trabajador-social/nuevo");
           }
         }
       } catch (error) {
-        showToast("error", "Error al cargar los datos de la empresa.");
-        console.error("Error fetching empresa:", error);
+        console.error("Error al obtener datos", error);
+        showToast("error", "Error al cargar los datos del formulario.");
       }
     };
+
     fetchData();
-  }, [id, isEditMode]);
+  }, [id, form]);
+  // [id, form, navigate, showToast]
 
   return (
     <>
@@ -465,12 +500,14 @@ export const EmpresaForm = () => {
         <CardHeader className="border-b border-gray-200 p-4 sm:p-6 flex flex-row items-center justify-between">
           <div className="flex-shrink min-w-0">
             <CardTitle className="text-xl font-bold text-gray-800 truncate">
-              {isEditMode ? "Actualización de empresa" : "Registro de empresa"}
+              {isEditMode
+                ? "Actualización de trabajador social"
+                : "Registro de trabajador social"}
             </CardTitle>
             <CardDescription className="text-sm text-gray-500">
               {isEditMode
-                ? "Formulario de actualización de empresa"
-                : "Complete el formulario para registrar nueva empresa"}
+                ? "Formulario de actualización de trabajador social"
+                : "Complete el formulario para registrar un trabajador social"}
             </CardDescription>
           </div>
           <button
@@ -496,155 +533,18 @@ export const EmpresaForm = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <fieldset className="border border-gray-300 p-4 rounded-md">
                 <legend className="text-base font-semibold text-gray-800 px-2">
-                  Datos de empresa
+                  Información personal
                 </legend>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={form.control}
-                    name="ruc"
-                    render={({ field, fieldState }) => (
-                      <FormItem>
-                        <RequiredLabel>RUC</RequiredLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="20103269319"
-                            autoComplete="off"
-                            maxLength={13}
-                            {...field}
-                            onKeyDown={async (e) => {
-                              if (e.key === "Enter") {
-                                e.preventDefault();
-                                try {
-                                  showToast("success", "Buscando empresa...");
-
-                                  const response = await getEmpresaByApi(
-                                    field.value
-                                  );
-
-                                  const { result, data, message } = response;
-
-                                  if (result && data) {
-                                    showToast("success", message);
-
-                                    const {
-                                      id,
-                                      nombre_o_razon_social,
-                                      direccion,
-                                    } = data as Empresa;
-
-                                    setIdEmpresa(id);
-
-                                    form.setValue(
-                                      "razonSocial",
-                                      nombre_o_razon_social
-                                    );
-
-                                    form.setValue("direccion", direccion);
-                                    setCamposHabilitadosEmpresa(false);
-                                  } else {
-                                    setCamposHabilitadosEmpresa(true);
-                                    showToast(
-                                      "warning",
-                                      "No se encontraron datos de empresa"
-                                    );
-                                  }
-                                } catch (error) {
-                                  setCamposHabilitadosEmpresa(true);
-                                  showToast(
-                                    "error",
-                                    `Error de información de empresa: ${error}`
-                                  );
-                                }
-                              }
-                            }}
-                            disabled={isEditMode}
-                            className={`
-                              ${
-                                fieldState.invalid
-                                  ? "border-red-500 focus:ring-red-500"
-                                  : "focus:ring-blue-500"
-                              }
-                                transition-all duration-300
-                            `}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="razonSocial"
-                    render={({ field, fieldState }) => (
-                      <FormItem>
-                        <RequiredLabel>Razón social</RequiredLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="SOPHIA HUMAN"
-                            autoComplete="off"
-                            maxLength={40}
-                            {...field}
-                            disabled={!camposHabilitadosEmpresa}
-                            className={`
-                              ${
-                                fieldState.invalid
-                                  ? "border-red-500 focus:ring-red-500"
-                                  : "focus:ring-blue-500"
-                              }
-                                transition-all duration-300
-                            `}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="direccion"
-                    render={({ field, fieldState }) => (
-                      <FormItem>
-                        <RequiredLabel>Dirección</RequiredLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Av. Libertad 203"
-                            autoComplete="off"
-                            maxLength={60}
-                            {...field}
-                            disabled={!camposHabilitadosEmpresa}
-                            className={`
-                              ${
-                                fieldState.invalid
-                                  ? "border-red-500 focus:ring-red-500"
-                                  : "focus:ring-blue-500"
-                              }
-                                transition-all duration-300
-                            `}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </fieldset>
-              <fieldset className="border border-gray-300 p-4 rounded-md">
-                <legend className="text-base font-semibold text-gray-800 px-2">
-                  Datos del representante legal
-                </legend>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                  <FormField
-                    control={form.control}
                     name="idTipoDocumento"
                     render={({ field, fieldState }) => (
-                      <FormItem>
+                      <FormItem className="mb-4">
                         <RequiredLabel>Tipo de Documento</RequiredLabel>
                         <Select
                           onValueChange={field.onChange}
                           value={field.value ?? ""}
-                          disabled={camposHabilitadosPersona}
                         >
                           <FormControl>
                             <SelectTrigger
@@ -689,8 +589,6 @@ export const EmpresaForm = () => {
                             autoComplete="off"
                             maxLength={8}
                             {...field}
-                            disabled={camposHabilitadosPersona}
-                            // disabled={isEditMode}
                             onKeyDown={async (e) => {
                               if (e.key === "Enter") {
                                 e.preventDefault();
@@ -700,12 +598,11 @@ export const EmpresaForm = () => {
                                   const idTipoDocumento =
                                     form.getValues("idTipoDocumento");
 
-                                  const responsePersona = await getPersonaByApi(
-                                    idTipoDocumento,
-                                    field.value
-                                  );
-
-                                  console.log({ responsePersona });
+                                  const responsePersona =
+                                    await getPersonaByIdTipoDocAndNumDoc(
+                                      idTipoDocumento,
+                                      field.value
+                                    );
 
                                   const { result, data, message } =
                                     responsePersona;
@@ -718,6 +615,7 @@ export const EmpresaForm = () => {
                                       nombres,
                                       apellido_paterno,
                                       apellido_materno,
+                                      fecha_nacimiento,
                                     } = persona;
 
                                     form.setValue("nombres", nombres);
@@ -732,83 +630,31 @@ export const EmpresaForm = () => {
                                       apellido_materno
                                     );
 
+                                    if (fecha_nacimiento) {
+                                      const fechaParsed =
+                                        parseISO(fecha_nacimiento);
+                                      form.setValue(
+                                        "fechaNacimiento",
+                                        fechaParsed
+                                      );
+                                    }
                                     setIdPersona(id);
-                                    setCamposHabilitadosPersona(true);
+                                    setCamposHabilitadosPersona(false);
                                     showToast("success", message);
                                   } else {
-                                    setCamposHabilitadosPersona(false);
+                                    setCamposHabilitadosPersona(true);
                                     showToast(
                                       "warning",
                                       "No se encontraron datos de persona"
                                     );
                                   }
                                 } catch (error) {
-                                  setCamposHabilitadosPersona(false);
-                                  showToast(
-                                    "error",
-                                    "Error al buscar una persona"
-                                  );
+                                  setCamposHabilitadosPersona(true);
+                                  // showErrorToast("Error al crear persona");
+                                  showToast("error", "Error al crear persona");
                                 }
                               }
                             }}
-                            className={`
-                              ${
-                                fieldState.invalid
-                                  ? "border-red-500 focus:ring-red-500"
-                                  : "focus:ring-blue-500"
-                              }
-                                transition-all duration-300
-                            `}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="apellidoPaterno"
-                    render={({ field, fieldState }) => (
-                      <FormItem>
-                        <RequiredLabel>Apellido paterno</RequiredLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Pérez"
-                            autoComplete="off"
-                            maxLength={30}
-                            {...field}
-                            disabled={camposHabilitadosPersona}
-                            // disabled={!camposHabilitadosPersona}
-                            className={`
-                              ${
-                                fieldState.invalid
-                                  ? "border-red-500 focus:ring-red-500"
-                                  : "focus:ring-blue-500"
-                              }
-                                transition-all duration-300
-                            `}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="apellidoMaterno"
-                    render={({ field, fieldState }) => (
-                      <FormItem>
-                        <RequiredLabel>Apellido materno</RequiredLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Pérez"
-                            autoComplete="off"
-                            maxLength={30}
-                            {...field}
-                            disabled={camposHabilitadosPersona}
-                            // disabled={!camposHabilitadosPersona}
                             className={`
                               ${
                                 fieldState.invalid
@@ -832,12 +678,11 @@ export const EmpresaForm = () => {
                         <RequiredLabel>Nombres</RequiredLabel>
                         <FormControl>
                           <Input
-                            placeholder="Luz Angélica"
+                            placeholder="María Angélica"
                             autoComplete="off"
                             maxLength={40}
                             {...field}
-                            disabled={camposHabilitadosPersona}
-                            // disabled={!camposHabilitadosPersona}
+                            disabled={!camposHabilitadosPersona}
                             className={`
                               ${
                                 fieldState.invalid
@@ -855,16 +700,17 @@ export const EmpresaForm = () => {
 
                   <FormField
                     control={form.control}
-                    name="direccionFiscal"
+                    name="apellidoPaterno"
                     render={({ field, fieldState }) => (
                       <FormItem>
-                        <RequiredLabel>Dirección Fiscal</RequiredLabel>
+                        <RequiredLabel>Apellido Paterno</RequiredLabel>
                         <FormControl>
                           <Input
-                            placeholder="Av. Peruanidad 412"
+                            placeholder="Pérez"
                             autoComplete="off"
-                            maxLength={60}
+                            maxLength={40}
                             {...field}
+                            disabled={!camposHabilitadosPersona}
                             className={`
                               ${
                                 fieldState.invalid
@@ -882,16 +728,17 @@ export const EmpresaForm = () => {
 
                   <FormField
                     control={form.control}
-                    name="partidaRegistral"
+                    name="apellidoMaterno"
                     render={({ field, fieldState }) => (
                       <FormItem>
-                        <RequiredLabel>Partida Registral</RequiredLabel>
+                        <RequiredLabel>Apellido Materno</RequiredLabel>
                         <FormControl>
                           <Input
-                            placeholder="0014-2020-02"
+                            placeholder="Vallejos"
                             autoComplete="off"
-                            maxLength={10}
+                            maxLength={40}
                             {...field}
+                            disabled={!camposHabilitadosPersona}
                             className={`
                               ${
                                 fieldState.invalid
@@ -907,6 +754,70 @@ export const EmpresaForm = () => {
                     )}
                   />
 
+                  <FormField
+                    control={form.control}
+                    name="fechaNacimiento"
+                    render={({ field, fieldState }) => (
+                      <FormItem>
+                        <RequiredLabel>Fecha de Nacimiento</RequiredLabel>
+                        <FormControl>
+                          <Input
+                            type="date"
+                            value={
+                              field.value
+                                ? format(field.value, "yyyy-MM-dd")
+                                : ""
+                            }
+                            onChange={(e) =>
+                              field.onChange(
+                                e.target.value ? parseISO(e.target.value) : null
+                              )
+                            }
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
+                            disabled={!camposHabilitadosPersona}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </fieldset>
+
+              <fieldset className="border border-gray-300 p-4 rounded-md">
+                <legend className="text-base font-semibold text-gray-800 px-2">
+                  Información laboral
+                </legend>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="idEmpresa"
+                    render={({ field, fieldState }) => {
+                      return (
+                        <FormItem className="flex flex-col">
+                          <RequiredLabel>Empresa</RequiredLabel>
+                          <SearchableCombobox<Empresa>
+                            placeholder="Buscar una empresa"
+                            options={empresas}
+                            value={field.value}
+                            onChange={field.onChange}
+                            displayKey="nombre_o_razon_social"
+                            valueKey="id"
+                            searchKeys={["nombre_o_razon_social"]}
+                            isInvalid={fieldState.invalid}
+                          />
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
                   <FormField
                     control={form.control}
                     name="idCargo"
@@ -929,13 +840,117 @@ export const EmpresaForm = () => {
                       );
                     }}
                   />
+                  <FormField
+                    control={form.control}
+                    name="nombreArea"
+                    render={({ field, fieldState }) => (
+                      <FormItem>
+                        <RequiredLabel>Área</RequiredLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Recursos Humanos"
+                            autoComplete="off"
+                            maxLength={40}
+                            {...field}
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="nombreSede"
+                    render={({ field, fieldState }) => (
+                      <FormItem>
+                        <RequiredLabel>Sede</RequiredLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Lima"
+                            autoComplete="off"
+                            maxLength={40}
+                            {...field}
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="emailInstitucional"
+                    render={({ field, fieldState }) => (
+                      <FormItem>
+                        <RequiredLabel>Correo Institucional</RequiredLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="maria.lopez@empresa.com"
+                            autoComplete="off"
+                            maxLength={50}
+                            {...field}
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="emailPersonal"
+                    render={({ field, fieldState }) => (
+                      <FormItem>
+                        <RequiredLabel>Correo Personal</RequiredLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="maria.lopez@gmail.com"
+                            autoComplete="off"
+                            maxLength={50}
+                            {...field}
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                transition-all duration-300
+                            `}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <FormField
                     control={form.control}
                     name="telefono"
                     render={({ field, fieldState }) => (
                       <FormItem>
-                        <RequiredLabel>Teléfono</RequiredLabel>
+                        <RequiredLabel>Número de Celular</RequiredLabel>
                         <FormControl>
                           <Input
                             placeholder="987654321"
@@ -959,17 +974,23 @@ export const EmpresaForm = () => {
 
                   <FormField
                     control={form.control}
-                    name="emailPersonal"
+                    name="fechaIngreso"
                     render={({ field, fieldState }) => (
                       <FormItem>
-                        <RequiredLabel>Email Personal</RequiredLabel>
+                        <RequiredLabel>Fecha de Ingreso</RequiredLabel>
                         <FormControl>
                           <Input
-                            placeholder="luz.perez@gmail.com"
-                            type="email"
-                            autoComplete="off"
-                            maxLength={50}
-                            {...field}
+                            type="date"
+                            value={
+                              field.value
+                                ? format(field.value, "yyyy-MM-dd")
+                                : ""
+                            }
+                            onChange={(e) =>
+                              field.onChange(
+                                e.target.value ? parseISO(e.target.value) : null
+                              )
+                            }
                             className={`
                               ${
                                 fieldState.invalid
@@ -980,6 +1001,33 @@ export const EmpresaForm = () => {
                             `}
                           />
                         </FormControl>
+                        {/* <FormDescription>
+                          {field.value
+                            ? format(field.value, "PPP")
+                            : "Seleccione una fecha"}
+                        </FormDescription> */}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* <FormField
+                    control={form.control}
+                    name="esAsociadoSindicato"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex items-center space-x-2">
+                          <Input
+                            type="checkbox"
+                            id="acceptSindicato"
+                            checked={field.value}
+                            onChange={field.onChange}
+                            className="w-4 h-4"
+                          />
+                          <label htmlFor="acceptSindicato" className="text-sm">
+                            Asociado a un sindicato
+                          </label>
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -987,30 +1035,28 @@ export const EmpresaForm = () => {
 
                   <FormField
                     control={form.control}
-                    name="ospe"
-                    render={({ field, fieldState }) => (
+                    name="esPresentaInconvenientes"
+                    render={({ field }) => (
                       <FormItem>
-                        <RequiredLabel>OSPE</RequiredLabel>
-                        <FormControl>
+                        <div className="flex items-center space-x-2">
                           <Input
-                            placeholder="Av. Libertad 203"
-                            autoComplete="off"
-                            maxLength={30}
-                            {...field}
-                            className={`
-                              ${
-                                fieldState.invalid
-                                  ? "border-red-500 focus:ring-red-500"
-                                  : "focus:ring-blue-500"
-                              }
-                                transition-all duration-300
-                            `}
+                            type="checkbox"
+                            id="acceptInconvenientes"
+                            checked={field.value}
+                            onChange={field.onChange}
+                            className="w-4 h-4"
                           />
-                        </FormControl>
+                          <label
+                            htmlFor="acceptInconvenientes"
+                            className="text-sm"
+                          >
+                            Presenta inconvenientes
+                          </label>
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
+                  /> */}
                 </div>
               </fieldset>
 
@@ -1036,7 +1082,7 @@ export const EmpresaForm = () => {
                   variant="outline"
                   disabled={isSubmitting}
                   onClick={() => resetForm()}
-                  // onClick={() => navigate("/empresa")}
+                  // onClick={() => navigate("/trabajador-social")}
                   className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
                   Cancelar

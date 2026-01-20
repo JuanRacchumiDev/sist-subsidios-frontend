@@ -17,9 +17,11 @@ import { useToast } from "../../context/ToastContext";
 import { uploadAdjunto, viewAdjunto } from "../../services/adjuntoService";
 import { responseViewFile } from "../../types/TFile";
 import { getEmpresaById } from "../../services/empresaService";
-import { Empresa } from "@/interfaces/IEmpresa";
-import { getColaboradorById } from "@/services/colaboradorService";
-import { Colaborador } from "@/interfaces/IColaborador";
+import { Empresa } from "../../interfaces/IEmpresa";
+import { getPersonaById } from "../../services/personaService";
+import { Persona } from "../../interfaces/IPersona";
+// import { getColaboradorById } from "@/services/colaboradorService";
+// import { Colaborador } from "@/interfaces/IColaborador";
 
 interface DocumentosRequeridosProps {
   documentos: DocumentoTipoContingencia[];
@@ -46,8 +48,13 @@ export const Documentos = ({
   }, [adjuntosExistentes, form]);
 
   const handleViewDocument = async (id: string) => {
+    console.log("---- id documento adjunto ----");
+    console.log({ id });
+
     try {
       const response: responseViewFile = await viewAdjunto(id);
+      console.log("---- response handleViewDocument ----");
+      console.log({ response });
 
       const { result, data } = response;
 
@@ -81,6 +88,9 @@ export const Documentos = ({
     formData.append("file", file);
     formData.append("id_documento", idDocumento);
 
+    console.log("---- formData v1 ----");
+    console.log({ formData });
+
     // Obteniendo datos de la empresa seleccionada
     if (idEmpresa) {
       const responseEmpresa = await getEmpresaById(idEmpresa);
@@ -92,21 +102,30 @@ export const Documentos = ({
       }
     }
 
+    console.log("---- formData v2 ----");
+    console.log({ formData });
+
     // Obteniendo datos del colaborador seleccionado
     if (idColaborador) {
-      const responseColaborador = await getColaboradorById(idColaborador);
+      // const responseColaborador = await getColaboradorById(idColaborador);
+      const responseColaborador = await getPersonaById(idColaborador);
+      console.log({ responseColaborador });
       const { result, data } = responseColaborador;
       if (result && data) {
-        const { numero_documento } = data as Colaborador;
+        const { numero_documento } = data as Persona;
         formData.append("numero_documento", numero_documento);
       }
     }
 
+    console.log("---- formData v3 ----");
     console.log({ formData });
 
     try {
       const response = await uploadAdjunto(formData);
       // console.log("response upload file", response);
+
+      console.log("---- response uploadAdjunto ----");
+      console.log({ response });
 
       const { result, data, message } = response;
 
