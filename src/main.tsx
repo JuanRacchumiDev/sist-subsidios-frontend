@@ -5,8 +5,8 @@ import App from "./App.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <ToastProvider>
-    <BrowserRouter>
+    <BrowserRouter basename="/dms-front">
       <App />
     </BrowserRouter>
-  </ToastProvider>
+  </ToastProvider>,
 );
