@@ -13,12 +13,17 @@ export interface Usuario {
     email?: string
     password?: string
     nombre_persona?: string
+    nombre_completo?: string
+    nombres?: string
+    apellido_paterno?: string
+    apellido_materno?: string
+    nombre_perfil?: string
     sistema?: boolean
     estado?: boolean
     perfil?: Perfil
     persona?: Persona
-    colaborador?: Colaborador
-    trabajadorSocial?: TrabajadorSocial
+    // colaborador?: Colaborador
+    // trabajadorSocial?: TrabajadorSocial
 }
 
 export interface UsuarioResponse {

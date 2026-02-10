@@ -1,12 +1,16 @@
 import { EDescansoMedico } from "../enums/EDescansoMedico"
 import { Adjunto } from "./IAdjunto"
-import { Colaborador } from "./IColaborador"
+// import { Colaborador } from "./IColaborador"
 import { Diagnostico } from "./IDiagnostico"
-import { TipoContingencia } from "./ITipoContingencia"
-import { TipoDescansoMedico } from "./ITipoDescansoMedico"
+import { Detalle } from "./IDetalleParametro"
+import { Persona } from "./IPersona"
+import { Empresa } from "./IEmpresa"
+// import { TipoContingencia } from "./ITipoContingencia"
+// import { TipoDescansoMedico } from "./ITipoDescansoMedico"
 
 export interface DescansoMedico {
     id?: string
+    id_empresa?: string
     id_colaborador?: string
     id_tipodescansomedico?: string
     id_tipocontingencia?: string
@@ -47,13 +51,14 @@ export interface DescansoMedico {
     sistema?: boolean
     estado?: boolean
     codigo_temp?: string
-    colaborador_dm?: Colaborador
-    tipoDescansoMedico?: TipoDescansoMedico
-    tipoContingencia?: TipoContingencia
+    empresa?: Empresa
+    colaborador_dm?: Persona
+    tipoDescansoMedico?: Detalle
+    tipoContingencia?: Detalle
     diagnostico?: Diagnostico
     adjuntos?: Adjunto
     id_usuario?: string
-    slug_perfil?: string
+    nombre_perfil_url?: string
 }
 
 export interface DescansoMedicoResponse {
@@ -82,9 +87,12 @@ export interface DescansoMedicoPaginateResponse {
 }
 
 export interface DescansoMedicoFilter {
+    id_colaborador?: string
     id_tipodescansomedico?: string
     id_tipocontingencia?: string
+    id_empresa?: string
     nombre_colaborador?: string
     fecha_inicio?: string
     fecha_final?: string
+    user_crea?: string
 }

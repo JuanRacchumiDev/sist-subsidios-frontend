@@ -9,9 +9,9 @@ export interface DocumentoTipoContingencia {
     nombre_url?: string
     sistema?: boolean
     estado?: boolean
-    tipoContingencia?: Parametro
+    // tipoContingencia?: Parametro
     // tipoContingencia?: TipoContingencia
-    // detalleParametro?: Detalle
+    detalleParametro?: Parametro
 }
 
 export interface DocumentoTipoContingenciaResponse {

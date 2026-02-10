@@ -138,9 +138,9 @@ export const create = async (payload: DescansoMedico): Promise<DescansoMedicoRes
         }
 
         if (authData) {
-            const { usuario: { id_usuario, slug_perfil } } = authData
+            const { usuario: { id_usuario, nombre_perfil_url } } = authData
             payload.id_usuario = id_usuario
-            payload.slug_perfil = slug_perfil
+            payload.nombre_perfil_url = nombre_perfil_url
         }
 
         // console.log('payload new descanso médico', payload)

@@ -30,6 +30,8 @@ export const getAllWithPaginate = async (queryParams: string) => {
 
         const response = await apiClient.get(urlApi)
 
+        console.log('---- response getAllWithPaginate ----')
+        console.log({ response })
         const { data: dataUsuarios } = response
 
         const { result, data, pagination, status } = dataUsuarios

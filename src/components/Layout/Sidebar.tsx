@@ -28,9 +28,11 @@ export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
       return [];
     }
 
-    const { slug_perfil } = userProfile;
+    const { nombre_perfil_url } = userProfile;
 
-    switch (slug_perfil) {
+    console.log({ nombre_perfil_url });
+
+    switch (nombre_perfil_url) {
       case "colaborador":
         return MENU_ITEMS.filter((item) => item.id === "descanso-medico");
       case "especialista-sophia-human":
@@ -38,13 +40,22 @@ export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
           (item) =>
             item.id === "colaborador" ||
             item.id === "trabajador-social" ||
-            item.id === "empresa" ||
+            // item.id === "empresa" ||
             item.id === "descanso-medico" ||
             item.id === "canje" ||
             item.id === "reembolso" ||
             item.id === "cobro" ||
-            item.id === "usuario" ||
-            item.id === "mantenimiento"
+            // item.id === "usuario" ||
+            item.id === "mantenimiento",
+        );
+      case "especialista-empresa":
+        return MENU_ITEMS.filter(
+          (item) =>
+            item.id === "colaborador" ||
+            item.id === "descanso-medico" ||
+            item.id === "canje" ||
+            item.id === "reembolso" ||
+            item.id === "cobro",
         );
       case "administrador":
         return MENU_ITEMS;

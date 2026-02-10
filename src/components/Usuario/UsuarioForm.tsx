@@ -13,7 +13,10 @@ import {
 import { useToast } from "../../context/ToastContext";
 import { Spinner } from "../../components/Common/Spinner";
 import { getPersonas } from "../../services/personaService";
-import { getPerfiles } from "../../services/perfilService";
+import { getDetalles } from "../../services/detalleParametroService";
+import { Detalle } from "../../interfaces/IDetalleParametro";
+import { Persona } from "../../interfaces/IPersona";
+// import { getPerfiles } from "../../services/perfilService";
 import {
   getUsuarioById,
   createUsuario,
@@ -57,19 +60,61 @@ export const formSchema = z.object({
   }),
 });
 
-type Persona = {
-  id: string;
-  apellido_paterno: string;
-  apellido_materno: string;
-  nombres: string;
-  email: string;
-  nombre_completo: string;
+const getDataPersonas = async (): Promise<Persona[]> => {
+  let personas: Persona[] = [];
+
+  try {
+    const response = await getPersonas();
+
+    console.log("---- response getDataPersonas ----");
+    console.log({ response });
+
+    if (response.result && response.data) {
+      personas = response.data as Persona[];
+    }
+
+    return personas;
+  } catch (error) {
+    console.error("Error al obtener personas", error);
+    return [];
+  }
 };
 
-type Perfil = {
-  id: string;
-  nombre: string;
+const getDataPerfiles = async (): Promise<Detalle[]> => {
+  let perfiles: Detalle[] = [];
+
+  try {
+    const clase: number = 1001;
+    const estado: boolean = true;
+
+    const response = await getDetalles(clase, estado);
+    console.log("---- response getPerfiles ----");
+    console.log({ response });
+
+    if (response.result && response.data) {
+      perfiles = response.data as Detalle[];
+    }
+
+    return perfiles;
+  } catch (error) {
+    console.error("Error al obtener perfiles", error);
+    return [];
+  }
 };
+
+// type Persona = {
+//   id: string;
+//   apellido_paterno: string;
+//   apellido_materno: string;
+//   nombres: string;
+//   email: string;
+//   nombre_completo: string;
+// };
+
+// type Perfil = {
+//   id: string;
+//   nombre: string;
+// };
 
 export const UsuarioForm = () => {
   const navigate = useNavigate();
@@ -77,7 +122,8 @@ export const UsuarioForm = () => {
   const { showToast } = useToast();
 
   const [personas, setPersonas] = useState<Persona[]>([]);
-  const [perfiles, setPerfiles] = useState<Perfil[]>([]);
+  const [perfiles, setPerfiles] = useState<Detalle[]>([]);
+  const [correos, setCorreos] = useState<string[]>([]);
 
   const isEditMode = !!id;
 
@@ -147,25 +193,50 @@ export const UsuarioForm = () => {
     }
   };
 
+  const watchedIdPersona = form.watch("idPersona");
+
+  useEffect(() => {
+    if (watchedIdPersona) {
+      const selectedPersona = personas.find((c) => c.id === watchedIdPersona);
+
+      if (selectedPersona) {
+        const listCorreos: string[] = [];
+        const { email_institucional, email_personal } = selectedPersona;
+
+        if (email_personal) listCorreos.push(email_personal);
+        if (email_institucional) listCorreos.push(email_institucional);
+
+        setCorreos(listCorreos);
+
+        // Opcional: Si quieres que el campo email se limpie o resetee al cambiar de persona
+        form.setValue("email", "");
+      }
+    } else {
+      setCorreos([]);
+    }
+  }, [watchedIdPersona, personas, form]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         let listPersonas: Persona[] = [];
-        let listPerfiles: Perfil[] = [];
+        let listPerfiles: Detalle[] = [];
 
         const [responsePersonas, responsePerfiles] = await Promise.all([
-          getPersonas(),
-          getPerfiles(),
+          getDataPersonas(),
+          getDataPerfiles(),
         ]);
 
-        const { result: resultPersonas, data: dataPersonas } = responsePersonas;
-        if (resultPersonas && dataPersonas) {
-          listPersonas = dataPersonas as Persona[];
+        console.log({ responsePersonas });
+
+        console.log({ responsePerfiles });
+
+        if (responsePersonas) {
+          listPersonas = responsePersonas as Persona[];
         }
 
-        const { result: resultPerfiles, data: dataPerfiles } = responsePerfiles;
-        if (resultPerfiles && dataPerfiles) {
-          listPerfiles = dataPerfiles as Perfil[];
+        if (responsePerfiles) {
+          listPerfiles = responsePerfiles as Detalle[];
         }
 
         setPersonas(listPersonas);
@@ -235,18 +306,31 @@ export const UsuarioForm = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name="idPersona"
                   render={({ field, fieldState }) => {
                     const selectedPersona = personas.find(
-                      (c) => c.id === field.value
+                      (c) => c.id === field.value,
                     );
 
+                    console.log({ selectedPersona });
+
                     if (selectedPersona) {
-                      const { email } = selectedPersona;
-                      const valueEmail = email ? email : "";
-                      form.setValue("email", valueEmail);
+                      let listCorreos: string[] = [];
+
+                      const { email_institucional, email_personal } =
+                        selectedPersona;
+
+                      if (email_personal) {
+                        listCorreos.push(email_personal);
+                      }
+
+                      if (email_institucional) {
+                        listCorreos.push(email_institucional);
+                      }
+
+                      setCorreos(listCorreos);
                     }
 
                     return (
@@ -266,6 +350,29 @@ export const UsuarioForm = () => {
                       </FormItem>
                     );
                   }}
+                /> */}
+
+                <FormField
+                  control={form.control}
+                  name="idPersona"
+                  render={(
+                    { field, fieldState }, // Quitamos toda la lógica pesada de aquí
+                  ) => (
+                    <FormItem className="flex flex-col">
+                      <RequiredLabel>Persona</RequiredLabel>
+                      <SearchableCombobox<Persona>
+                        placeholder="Buscar una persona"
+                        options={personas}
+                        value={field.value}
+                        onChange={field.onChange}
+                        displayKey="nombre_completo"
+                        valueKey="id"
+                        searchKeys={["nombre_completo"]}
+                        isInvalid={fieldState.invalid}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
 
                 <FormField
@@ -334,6 +441,47 @@ export const UsuarioForm = () => {
                   name="email"
                   render={({ field, fieldState }) => (
                     <FormItem>
+                      <RequiredLabel>Email</RequiredLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value ?? ""}
+                      >
+                        <FormControl>
+                          <SelectTrigger
+                            className={`
+                              ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
+                                focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
+                            `}
+                          >
+                            <SelectValue placeholder="Seleccionar email" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-gray-400">
+                          {correos.map((correo) => (
+                            <SelectItem
+                              value={correo}
+                              key={correo}
+                              className="cursor-pointer hover:bg-gray-100 transition-colors"
+                            >
+                              {correo}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field, fieldState }) => (
+                    <FormItem>
                       <RequiredLabel>Correo Electrónico</RequiredLabel>
                       <FormControl>
                         <Input
@@ -348,7 +496,7 @@ export const UsuarioForm = () => {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
               </div>
 
               <div className="flex justify-end space-x-4 pt-4">

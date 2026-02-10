@@ -1,10 +1,13 @@
 export interface UserAuthenticated {
     id_usuario?: string
-    id_colaborador?: string;
     id_empresa?: string;
-    nombre_completo?: string;
+    id_persona?: string;
+    username?: string;
     nombre_perfil?: string;
-    slug_perfil?: string;
+    nombre_perfil_url?: string;
+    nombre_completo?: string;
+    email_institucional?: string
+    email_personal?: string
 }
 
 export interface AuthData {

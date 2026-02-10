@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Pagination,
   PaginationContent,
@@ -16,35 +16,35 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+// import { TrabajadorSocialRow } from "./TrabajadorSocialRow";
+// import {
+//   TrabajadorSocial,
+//   TrabajadorSocialFilter,
+//   Pagination as PaginationType,
+// } from "../../interfaces/ITrabajadorSocial";
 import {
-  getDescansosWithPaginate,
-  // getDescansosByColaboradorWithPaginate,
-} from "../../services/descansoMedicoService";
-import {
-  DescansoMedico,
-  DescansoMedicoPaginateResponse,
+  Persona,
+  PersonaFilter,
   Pagination as PaginationType,
-  DescansoMedicoFilter,
-} from "../../interfaces/IDescansoMedico";
-import { DescansoMedicoRow } from "./DescansoMedicoRow";
-import { getAuthData } from "../../utils/authMemo";
-import { FilterIcon } from "lucide-react";
-import { DescansoMedicoFilterModal } from "./DescansoMedicoFilterModal";
+} from "../../interfaces/IPersona";
 import { Button } from "../ui/button";
+import { FilterIcon } from "lucide-react";
+import { EspecialistaSHFilterModal } from "./EspecialistaSHFilterModal";
 import { TableSpinner } from "../Common/TableSpinner";
+// import { getTrabjadoresSocialesWithPaginate } from "../../services/trabajadorSocialService";
+import { EspecialistaSHRow } from "./EspecialistaSHRow";
+import { getPersonasWithPaginate } from "../../services/personaService";
 
-// Definimos el estado inicial de los filtros
-const initialFilters: DescansoMedicoFilter = {
-  id_tipodescansomedico: undefined,
-  id_tipocontingencia: undefined,
-  nombre_colaborador: undefined,
-  fecha_inicio: undefined,
-  fecha_final: undefined,
-  id_empresa: undefined,
+const initialFilters: PersonaFilter = {
+  id_tipodocumento: undefined,
+  numero_documento: undefined,
+  nombre_completo: undefined,
+  nombreGrupo: undefined,
 };
 
-export const DescansoMedicoTable = () => {
-  const [descansos, setDescansos] = useState<DescansoMedico[]>([]);
+export const EspecialistaSHTable: React.FC = () => {
+  const [especialistas, setEspecialistas] = useState<Persona[]>([]);
+
   const [pagination, setPagination] = useState<PaginationType>({
     currentPage: 1,
     limit: 10,
@@ -55,19 +55,25 @@ export const DescansoMedicoTable = () => {
   });
 
   const [isLoading, setIsLoading] = useState(true);
-  const [filters, setFilters] = useState<DescansoMedicoFilter>(initialFilters);
+  // const [filters, setFilters] =
+  // useState<TrabajadorSocialFilter>(initialFilters);
+  const [filters, setFilters] = useState<PersonaFilter>(initialFilters);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [refreshToggle, setRefreshToggle] = useState(0);
 
-  const userProfile = useMemo(() => getAuthData()?.usuario, []);
+  const handleEspecialistaSHStatusChange = () => {
+    // Incrementa el toggle. Esto NO cambia la tabla, pero fuerza el useEffect a ejecutarse.
+    setRefreshToggle((prev) => prev + 1);
+  };
 
-  const handleApplyFilters = (newFilters: DescansoMedicoFilter) => {
+  const handleApplyFilters = (newFilters: PersonaFilter) => {
     // Asegurar que las cadenas vacías de los Inputs se conviertan a `undefined` al aplicar
-    const cleanedFilters: DescansoMedicoFilter = Object.fromEntries(
+    const cleanedFilters: PersonaFilter = Object.fromEntries(
       Object.entries(newFilters).map(([key, value]) => [
         key,
         value === "" || value === null ? undefined : value,
       ]),
-    ) as DescansoMedicoFilter;
+    ) as PersonaFilter;
 
     setFilters(cleanedFilters);
     setPagination((prev) => ({ ...prev, currentPage: 1 }));
@@ -80,109 +86,41 @@ export const DescansoMedicoTable = () => {
     }
   };
 
-  // useEffect(() => {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
-
     try {
-      let response: DescansoMedicoPaginateResponse = null;
-
-      console.log({ userProfile });
-
-      const { nombre_perfil_url, id_empresa, id_usuario } = userProfile;
-
-      console.log({ nombre_perfil_url });
-
-      console.log({ id_usuario });
-
       const { currentPage, limit } = pagination;
 
       // Limpia los filtros (elimina `undefined` para no enviar el query param)
-      const cleanFilters = Object.fromEntries(
+      const cleanFilters: PersonaFilter = Object.fromEntries(
         Object.entries(filters).filter(
           ([, value]) => value !== undefined && value !== null && value !== "",
         ),
-      ) as DescansoMedicoFilter;
+      ) as PersonaFilter;
 
-      if (nombre_perfil_url === "especialista-empresa") {
-        if (id_empresa) {
-          cleanFilters["id_empresa"] = id_empresa;
-        }
-
-        // if (id_usuario) {
-        //   cleanFilters["user_crea"] = id_usuario;
-        // }
-      } else if (nombre_perfil_url === "especialista-sophia-human") {
-        // if (id_usuario) {
-        //   cleanFilters["user_crea"] = id_usuario;
-        // }
-      }
+      cleanFilters["nombreGrupo"] = "GRUPO ESPECIALISTA SH";
 
       console.log({ cleanFilters });
 
-      response = await getDescansosWithPaginate(
+      // const response = await getTrabjadoresSocialesWithPaginate(
+      //   currentPage,
+      //   limit,
+      //   cleanFilters
+      // );
+
+      const response = await getPersonasWithPaginate(
         currentPage,
         limit,
         cleanFilters,
       );
 
-      // if (nombre_perfil_url === "especialista-empresa") {
-      //   if (id_empresa) {
-      //     cleanFilters["id_empresa"] = id_empresa;
-      //   }
-
-      //   response = await getDescansosByEmpresaWithPaginate(
-      //     currentPage,
-      //     limit,
-      //     cleanFilters,
-      //   );
-      // } else if (
-      //   nombre_perfil_url === "especialista-sophia-human" ||
-      //   nombre_perfil_url === "administrador"
-      // ) {
-      //   response = await getDescansosWithPaginate(
-      //     currentPage,
-      //     limit,
-      //     cleanFilters,
-      //   );
-      // } else if (nombre_perfil_url === "colaborador") {
-      //   if () {
-
-      //   }
-
-      //   response = await getDescansosByColaboradorWithPaginate(
-      //     currentPage,
-      //     limit,
-      //     cleanFilters,
-      //   );
-      // }
-
-      // if (nombre_perfil_url && id_persona) {
-      //   console.log("existe nombre_perfil_url y id_persona");
-      //   response = await getDescansosByColaboradorWithPaginate(
-      //     id_persona,
-      //     currentPage,
-      //     limit,
-      //     cleanFilters,
-      //   );
-      // } else {
-      //   console.log("no existe nombre_perfil_url y id_persona");
-      //   response = await getDescansosWithPaginate(
-      //     currentPage,
-      //     limit,
-      //     cleanFilters,
-      //   );
-      // }
-
       console.log({ response });
 
-      const { result, data, pagination: detailPagination } = response;
-
-      if (result && data && detailPagination) {
-        setDescansos(data);
-        setPagination(detailPagination);
+      if (response.result && response.data && response.pagination) {
+        setEspecialistas(response.data);
+        setPagination(response.pagination);
       } else {
-        setDescansos([]);
+        setEspecialistas([]);
         setPagination({
           currentPage: 1,
           limit: 10,
@@ -193,14 +131,11 @@ export const DescansoMedicoTable = () => {
         });
       }
     } catch (error) {
-      console.error("Error al obtener colaboradores", error);
+      console.error("Error al obtener especialistas sophia human", error);
     } finally {
       setIsLoading(false);
     }
-  }, [pagination.currentPage, pagination.limit, userProfile, filters]);
-
-  //   fetchData();
-  // }, [pagination.currentPage, pagination.limit]);
+  }, [pagination.currentPage, pagination.limit, filters, refreshToggle]);
 
   useEffect(() => {
     fetchData();
@@ -227,12 +162,12 @@ export const DescansoMedicoTable = () => {
             onClick={() => handlePageChange(i)}
             isActive={i === pagination.currentPage}
             className={`
-              ${
-                i === pagination.currentPage
-                  ? "bg-blue-500 text-white"
-                  : "hover:bg-gray-200 transition-colors"
-              }
-            `}
+                  ${
+                    i === pagination.currentPage
+                      ? "bg-blue-500 text-white"
+                      : "hover:bg-gray-200 transition-colors"
+                  }
+                `}
           >
             {i}
           </PaginationLink>
@@ -259,7 +194,6 @@ export const DescansoMedicoTable = () => {
           className="flex items-center space-x-2 border-blue-500 text-blue-500 hover:bg-blue-50 hover:text-blue-600 hover:cursor-pointer transition"
         >
           <FilterIcon className="w-4 h-4" />
-          {/* Contar los filtros aplicados (valores que no son undefined/null/vacío) */}
           <span>
             Filtros (
             {
@@ -275,40 +209,24 @@ export const DescansoMedicoTable = () => {
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-100">
-              {/* <TableHead className="text-gray-600 font-medium">
-                Código
-              </TableHead> */}
               <TableHead className="text-gray-600 font-medium">
-                Colaborador
+                Tipo Documento
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
-                Fecha Otorgamiento
+                Número Documento
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
-                Fecha Inicio
+                Nombres y Apellidos
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
-                Fecha Final
+                Empresa
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
-                Total días
+                Teléfono
               </TableHead>
-              <TableHead className="text-gray-600 font-medium">
-                Tipo Descanso
-              </TableHead>
-              <TableHead className="text-gray-600 font-medium">
-                Tipo Contingencia
-              </TableHead>
-              <TableHead className="text-gray-600 font-medium">
-                Mes devengado
-              </TableHead>
-              <TableHead className="text-gray-600 font-medium">Año</TableHead>
               <TableHead className="text-gray-600 font-medium">
                 Estado
               </TableHead>
-              {/* <TableHead className="text-gray-600 font-medium">
-                Subsidiado
-              </TableHead> */}
               <TableHead className="text-gray-600 font-medium">
                 Acciones
               </TableHead>
@@ -316,18 +234,22 @@ export const DescansoMedicoTable = () => {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableSpinner colSpan={11} />
-            ) : descansos.length > 0 ? (
-              descansos.map((descanso) => (
-                <DescansoMedicoRow key={descanso.id} desc={descanso} />
+              <TableSpinner colSpan={7} />
+            ) : especialistas.length > 0 ? (
+              especialistas.map((especialista) => (
+                <EspecialistaSHRow
+                  key={especialista.id}
+                  especialistaSH={especialista}
+                  onStatusChange={handleEspecialistaSHStatusChange}
+                />
               ))
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={11}
+                  colSpan={7}
                   className="text-center text-gray-500 py-6"
                 >
-                  No se encontraron descansos médicos registrados
+                  No se encontraron especialistas registrados
                 </TableCell>
               </TableRow>
             )}
@@ -340,7 +262,7 @@ export const DescansoMedicoTable = () => {
             <PaginationItem>
               <PaginationPrevious
                 onClick={() => handlePageChange(pagination.currentPage - 1)}
-                className="hover:bg-gray-200 transition-colors"
+                className="hover:bg-gray-200 transition-colors hover:cursor-pointer"
               >
                 Anterior
               </PaginationPrevious>
@@ -351,7 +273,7 @@ export const DescansoMedicoTable = () => {
             <PaginationItem>
               <PaginationNext
                 onClick={() => handlePageChange(pagination.currentPage + 1)}
-                className="hover:bg-gray-200 transition-colors"
+                className="hover:bg-gray-200 hover:cursor-pointer transition-colors"
               >
                 Siguiente
               </PaginationNext>
@@ -360,7 +282,7 @@ export const DescansoMedicoTable = () => {
         </Pagination>
       </div>
 
-      <DescansoMedicoFilterModal
+      <EspecialistaSHFilterModal
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
         currentFilters={filters}

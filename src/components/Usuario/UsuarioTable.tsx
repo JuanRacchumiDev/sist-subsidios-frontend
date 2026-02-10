@@ -60,7 +60,7 @@ export const UsuarioTable = () => {
       Object.entries(newFilters).map(([key, value]) => [
         key,
         value === "" || value === null ? undefined : value,
-      ])
+      ]),
     ) as UsuarioFilter;
 
     setFilters(cleanedFilters);
@@ -83,14 +83,14 @@ export const UsuarioTable = () => {
       // Limpia los filtros (elimina `undefined` para no enviar el query param)
       const cleanFilters = Object.fromEntries(
         Object.entries(filters).filter(
-          ([, value]) => value !== undefined && value !== null && value !== ""
-        )
+          ([, value]) => value !== undefined && value !== null && value !== "",
+        ),
       );
 
       const response = await getUsuariosWithPaginate(
         currentPage,
         limit,
-        cleanFilters
+        cleanFilters,
       );
 
       // console.log({ response });
@@ -134,7 +134,7 @@ export const UsuarioTable = () => {
       items.push(
         <PaginationItem key="ellipsis-start">
           <PaginationEllipsis />
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
 
@@ -155,7 +155,7 @@ export const UsuarioTable = () => {
           >
             {i}
           </PaginationLink>
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
 
@@ -163,7 +163,7 @@ export const UsuarioTable = () => {
       items.push(
         <PaginationItem key="ellipsis-end">
           <PaginationEllipsis />
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
     return items;
@@ -184,7 +184,7 @@ export const UsuarioTable = () => {
             Filtros (
             {
               Object.values(filters).filter(
-                (v) => v !== undefined && v !== null && v !== ""
+                (v) => v !== undefined && v !== null && v !== "",
               ).length
             }
             )
@@ -203,9 +203,9 @@ export const UsuarioTable = () => {
               <TableHead className="text-gray-600 font-medium">
                 Nombre de Usuario
               </TableHead>
-              <TableHead className="text-gray-600 font-medium">
+              {/* <TableHead className="text-gray-600 font-medium">
                 Persona
-              </TableHead>
+              </TableHead> */}
               <TableHead className="text-gray-600 font-medium">Email</TableHead>
               <TableHead className="text-gray-600 font-medium">
                 Perfil
@@ -220,7 +220,7 @@ export const UsuarioTable = () => {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableSpinner colSpan={6} />
+              <TableSpinner colSpan={5} />
             ) : usuarios.length > 0 ? (
               usuarios.map((usuario) => (
                 <UsuarioRow
@@ -232,7 +232,7 @@ export const UsuarioTable = () => {
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={6}
+                  colSpan={5}
                   className="text-center text-gray-500 py-6"
                 >
                   No se encontraron usuarios registrados

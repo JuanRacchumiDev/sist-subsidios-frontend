@@ -224,10 +224,20 @@ export const DescansoMedicoForm = () => {
     form.reset(dataForm);
   };
 
+  console.log({ userProfile });
+
+  const { nombre_perfil_url, id_persona, id_empresa, id_usuario } = userProfile;
+
+  console.log({ nombre_perfil_url });
+
+  console.log({ id_persona });
+
+  console.log({ id_usuario });
+
   // Deshabilitando campos para el perfil especialista
   const isModeLetter =
-    (userProfile.slug_perfil === "especialista" ||
-      userProfile.slug_perfil === "administrador") &&
+    (nombre_perfil_url === "especialista" ||
+      nombre_perfil_url === "administrador") &&
     isEditMode
       ? true
       : false;
@@ -252,9 +262,7 @@ export const DescansoMedicoForm = () => {
       documentos: {},
       aceptaResponsabilidad: false,
       aceptaPoliticaSubsidio: false,
-      estadoRegistro: userProfile.id_colaborador
-        ? EDescansoMedico.REGISTRO_INGRESADO
-        : "",
+      estadoRegistro: id_persona ? EDescansoMedico.REGISTRO_INGRESADO : "",
       observacion: "",
     },
   });
@@ -264,24 +272,34 @@ export const DescansoMedicoForm = () => {
   useEffect(() => {
     const fecthDescansoMedico = async () => {
       if (isEditMode && id) {
+        console.log("---- isEditMode ----");
+        console.log({ isEditMode });
+
+        console.log("---- id ----");
+        console.log({ id });
+
         let idEmpresa = "";
 
         try {
           const responseDescanso = await getDescansoById(id);
+          console.log({ responseDescanso });
+
           const { result, data } = responseDescanso;
 
           if (result && data) {
             const descanso = data as DescansoMedico;
 
-            // console.log({ descanso });
+            console.log({ descanso });
 
             // const responseColaborador = await getColaboradorById(
             //   descanso.id_colaborador
             // );
 
             const responseColaborador = await getPersonaById(
-              descanso.id_colaborador
+              descanso.id_colaborador,
             );
+
+            console.log({ responseColaborador });
 
             const { result: resultColaborador, data: dataColaborador } =
               responseColaborador;
@@ -323,6 +341,7 @@ export const DescansoMedicoForm = () => {
               estadoRegistro: descanso.estado_registro,
               observacion: descanso.observacion || "",
             };
+
             // console.log("dataForm descanso médico", dataForm);
             form.reset(dataForm);
           }
@@ -333,12 +352,13 @@ export const DescansoMedicoForm = () => {
       } else {
         // Crea un código temporal único por cada nuevo descanso médico
         if (userProfile) {
-          const { id_empresa, id_colaborador } = userProfile;
+          // const { id_empresa, id_colaborador } = userProfile;
           // console.log({ id_empresa });
           // console.log({ id_colaborador });
           form.setValue("idEmpresa", id_empresa);
-          form.setValue("idColaborador", id_colaborador);
+          form.setValue("idColaborador", id_persona);
         }
+
         await createCodigoTempAuth();
         // const response = await createCodigoTempAuth();
         // console.log(
@@ -347,13 +367,17 @@ export const DescansoMedicoForm = () => {
         // );
       }
     };
+
     fecthDescansoMedico();
   }, [id, isEditMode]);
   // [id, isEditMode, navigate, showToast, form]
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      console.log({ values });
+
       const {
+        idEmpresa,
         idColaborador,
         idTipoDescansoMedico,
         idTipoContingencia,
@@ -442,6 +466,7 @@ export const DescansoMedicoForm = () => {
 
       const payloadDescansoMedico: DescansoMedico = {
         // id: isEditMode && id ? id : undefined,
+        id_empresa: idEmpresa,
         id_colaborador: idColaborador,
         id_tipodescansomedico: idTipoDescansoMedico,
         id_tipocontingencia: idTipoContingencia,
@@ -465,13 +490,15 @@ export const DescansoMedicoForm = () => {
         observacion,
       };
 
-      // console.log({ payloadDescansoMedico });
+      console.log({ payloadDescansoMedico });
 
       let response: DescansoMedicoResponse;
 
       if (isEditMode) {
+        console.log("update");
         response = await updateDescanso(id, payloadDescansoMedico); // Llama al servicio de actualización
       } else {
+        console.log("create");
         response = await createDescanso(payloadDescansoMedico); // Llama al servicio de creación
       }
 
@@ -539,14 +566,20 @@ export const DescansoMedicoForm = () => {
                   >
                     Datos médicos
                   </TabsTrigger>
-                  {!userProfile.id_colaborador && (
+                  <TabsTrigger
+                    value="validacion"
+                    className="bg-blue-400 hover:bg-blue-500 hover: cursor-pointer text-white transition-colors duration-300"
+                  >
+                    Validación
+                  </TabsTrigger>
+                  {/* {!id_persona && (
                     <TabsTrigger
                       value="validacion"
                       className="bg-blue-400 hover:bg-blue-500 hover: cursor-pointer text-white transition-colors duration-300"
                     >
                       Validación
                     </TabsTrigger>
-                  )}
+                  )} */}
                   {/* <TabsTrigger value="validacion">Validación</TabsTrigger> */}
                 </TabsList>
 

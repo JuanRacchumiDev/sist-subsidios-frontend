@@ -1,8 +1,5 @@
-import {
-  DocumentoTipoContingencia,
-  DocumentoTipoContingenciaResponse,
-} from "../../../interfaces/IDocumentoTipoContingencia";
-import { TableCell, TableRow } from "../../ui/table";
+import { Persona, PersonaResponse } from "../../interfaces/IPersona";
+import { TableCell, TableRow } from "../ui/table";
 import {
   AlertTriangle,
   CircleCheck,
@@ -19,25 +16,23 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../../ui/dropdown-menu";
+} from "../ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
-import { Button } from "../../ui/button";
-import { useToast } from "../../../context/ToastContext";
-import { ConfirmDialog } from "../../Common/ConfirmDialog";
+import { Button } from "../ui/button";
+import { useToast } from "../../context/ToastContext";
 import { useState } from "react";
-import { updateDocumentoTipoContByEstado } from "@/services/documentoTipoContService";
+import { updateTrabajadorSocialByEstado } from "@/services/trabajadorSocialService";
+import { ConfirmDialog } from "../Common/ConfirmDialog";
 
 interface Props {
-  documento: DocumentoTipoContingencia;
-  onStatusChange?: (documentoId: string) => void;
+  especialistaSH: Persona;
+  onStatusChange?: (especialistaSHId: string) => void;
 }
 
-export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
-  documento,
+export const EspecialistaSHRow: React.FC<Props> = ({
+  especialistaSH,
   onStatusChange,
 }) => {
-  console.log("--- DocumentoTipoContingenciaRow ---");
-  console.log({ documento });
   const { showToast } = useToast();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -46,17 +41,17 @@ export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
 
   const navigate = useNavigate();
 
-  const nuevoEstado = !documento.estado;
+  const nuevoEstado = !especialistaSH.estado;
   const action = nuevoEstado ? "activar" : "desactivar";
   const modalTitle = `${
     action.charAt(0).toUpperCase() + action.slice(1)
-  } Empresa`;
-  const modalMessage = `¿Deseas <strong>${action}</strong> el documento: <strong>${documento.nombre}</strong>?`;
+  } Especialista SH`;
+  const modalMessage = `¿Deseas <strong>${action}</strong> al especialista SH: <strong>${especialistaSH.nombre_completo}</strong>?`;
 
   const handleShowDetail = () => {
-    navigate(
-      `/mantenimiento/documento-tipo-contingencia/editar/${documento.id}`,
-    );
+    const urlEdit = `/especialista-sh/editar/${especialistaSH.id}`;
+    console.log({ urlEdit });
+    navigate(urlEdit);
   };
 
   // Abre el modal
@@ -75,30 +70,40 @@ export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
     setIsProcessing(true);
 
     try {
-      const payload: DocumentoTipoContingencia = {
+      // const payload: TrabajadorSocial = {
+      //   estado: nuevoEstado,
+      // };
+
+      const payload: Persona = {
         estado: nuevoEstado,
       };
 
-      const response = await updateDocumentoTipoContByEstado(
-        documento.id,
+      const response = await updateTrabajadorSocialByEstado(
+        especialistaSH.id,
         payload,
       );
 
-      const { result, data, message, error } =
-        response as DocumentoTipoContingenciaResponse;
+      // const { result, data, message, error } =
+      //   response as TrabajadorSocialResponse;
+
+      const { result, data, message, error } = response as PersonaResponse;
 
       if (result && data) {
         showToast(
           "success",
-          message || "Estado del documento actualizado con éxito.",
+          message ||
+            "Estado del especialista Sophia Human actualizado con éxito.",
         );
 
         // Si hay una función de callback, llamarla para actualizar la tabla padre
         if (onStatusChange) {
-          onStatusChange(documento.id);
+          onStatusChange(especialistaSH.id);
         }
       } else {
-        showToast("error", error || "Error al actualizar el documento.");
+        showToast(
+          "error",
+          error || "Error al actualizar al el especialista de Sophia Human.",
+        );
       }
     } catch (error) {
       console.error("Error en la actualización de estado:", error);
@@ -110,32 +115,36 @@ export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
   };
 
   // Determinar texto y color de acción
-  const actionText = documento.estado ? "Desactivar" : "Activar";
-  const ActionIcon = documento.estado ? ToggleLeft : ToggleRight;
-  const actionColor = documento.estado ? "text-red-600" : "text-green-600";
-  const hoverBgColor = documento.estado
+  const actionText = especialistaSH.estado ? "Desactivar" : "Activar";
+  const ActionIcon = especialistaSH.estado ? ToggleLeft : ToggleRight;
+  const actionColor = especialistaSH.estado ? "text-red-600" : "text-green-600";
+  const hoverBgColor = especialistaSH.estado
     ? "hover:bg-red-100"
     : "hover:bg-green-100";
 
   return (
     <>
       <TableRow
-        key={documento.id}
+        key={especialistaSH.id}
         className="hover:bg-blue-100 hover:cursor-pointer transition-colors duration-200"
       >
+        <TableCell className="py-3">{especialistaSH.abreviatura}</TableCell>
         <TableCell className="py-3">
-          {documento.detalleParametro.nombre}
+          {especialistaSH.numero_documento}
         </TableCell>
-        <TableCell className="py-3">{documento.nombre}</TableCell>
+        <TableCell className="py-3">{especialistaSH.nombre_completo}</TableCell>
         <TableCell className="py-3">
-          {documento.estado ? (
+          {especialistaSH.nombre_o_razon_social}
+        </TableCell>
+        <TableCell className="py-3">{especialistaSH.telefono}</TableCell>
+        <TableCell className="py-3">
+          {especialistaSH.estado ? (
             <CircleCheck className="text-green-500 w-5 h-5" />
           ) : (
             <CircleX className="text-red-500 w-5 h-5" />
           )}
         </TableCell>
         <TableCell className="py-3">
-          {/* w-72 border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300 */}
           <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
             <DropdownMenuTrigger
               asChild
@@ -156,7 +165,6 @@ export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
                 Acciones
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-
               <DropdownMenuItem
                 onClick={handleShowDetail}
                 className="cursor-pointer hover:bg-gray-100 transition-colors flex items-center space-x-2 text-blue-600"
@@ -165,18 +173,16 @@ export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
                 <span>Ver/Editar Detalle</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-
               <DropdownMenuItem
                 onClick={handleOpenStatusModal}
                 className={`cursor-pointer ${hoverBgColor} transition-colors flex items-center space-x-2 ${actionColor}`}
               >
                 <ActionIcon className="h-4 w-4" />
-                <span>{actionText} Documento</span>
+                <span>{actionText} Especialista SH</span>
               </DropdownMenuItem>
-
               {/* <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 transition-colors">
-              Eliminar
-            </DropdownMenuItem> */}
+                Eliminar
+              </DropdownMenuItem> */}
             </DropdownMenuContent>
           </DropdownMenu>
         </TableCell>
@@ -192,7 +198,9 @@ export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
         isProcessing={isProcessing}
         icon={
           <AlertTriangle
-            className={documento.estado ? "text-red-500" : "text-green-500"}
+            className={
+              especialistaSH.estado ? "text-red-500" : "text-green-500"
+            }
           />
         }
       />

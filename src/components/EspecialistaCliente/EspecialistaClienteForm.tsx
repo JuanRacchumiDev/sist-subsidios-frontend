@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "../ui/card";
 import { useToast } from "../../context/ToastContext";
-import { Spinner } from "../../components/Common/Spinner";
+import { Spinner } from "../Common/Spinner";
 import {
   Form,
   FormControl,
@@ -32,7 +32,6 @@ import { getEmpresas } from "../../services/empresaService";
 import { getDetalles } from "../../services/detalleParametroService";
 // import { getTipoDocumentos } from "../../services/tipoDocumentoService";
 // import { getCargos } from "../../services/cargoService";
-// import { getPersonaByIdTipoDocAndNumDoc } from "../../services/personaService";
 import {
   getPersonaByIdTipoDocAndNumDoc,
   getPersonaById,
@@ -44,17 +43,8 @@ import { Persona, PersonaResponse } from "../../interfaces/IPersona";
 import { Detalle } from "../../interfaces/IDetalleParametro";
 import { Empresa } from "../../interfaces/IEmpresa";
 import { createPersona, updatePersona } from "../../services/personaService";
-// import {
-//   Colaborador,
-//   ColaboradorResponse,
-// } from "../../interfaces/IColaborador";
-// import {
-//   createColaborador,
-//   getColaboradorById,
-// } from "../../services/colaboradorService";
 import SearchableCombobox from "../Common/SearchableCombobox";
 import { ArrowLeft } from "lucide-react";
-import { getAuthData } from "../../utils/authMemo";
 
 const formSchema = z.object({
   idTipoDocumento: z
@@ -107,8 +97,8 @@ const formSchema = z.object({
     message: "El número de celular debe tener al menos 9 dígitos.",
   }),
   fechaIngreso: z.date().optional(),
-  esAsociadoSindicato: z.boolean().optional(),
-  esPresentaInconvenientes: z.boolean().optional(),
+  //   esAsociadoSindicato: z.boolean().optional(),
+  //   esPresentaInconvenientes: z.boolean().optional(),
 });
 
 const getTipoDocumentos = async (): Promise<Detalle[]> => {
@@ -185,35 +175,14 @@ type TPersona = {
   emailPersonal?: string;
   telefono?: string;
   fechaIngreso?: null;
-  esAsociadoSindicato?: boolean;
-  esPresentaInconvenientes?: boolean;
 };
 
-// type TColaborador = {
-//   idTipoDocumento?: string;
-//   numeroDocumento?: string;
-//   nombres?: string;
-//   apellidoPaterno?: string;
-//   apellidoMaterno?: string;
-//   fechaNacimiento?: null;
-//   idEmpresa?: string;
-//   idCargo?: string;
-//   nombreArea?: string;
-//   nombreSede?: string;
-//   emailInstitucional?: string;
-//   emailPersonal?: string;
-//   numeroCelular?: string;
-//   fechaIngreso?: null;
-//   esAsociadoSindicato?: boolean;
-//   esPresentaInconvenientes?: boolean;
-// };
-
-export const ColaboradorForm = () => {
+export const EspecialistaClienteForm = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { showToast } = useToast();
 
-  console.log("---- idColaborador ----");
+  console.log("---- id especialista sh ----");
   console.log({ id });
 
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
@@ -226,13 +195,8 @@ export const ColaboradorForm = () => {
 
   const isEditMode = !!id;
 
-  const userProfile = useMemo(() => getAuthData()?.usuario, []);
-  console.log({ userProfile });
-
-  const isEmpresaFixed = !!userProfile?.id_empresa;
-
   const handleGoBack = () => {
-    navigate("/colaborador");
+    navigate("/especialista-cliente");
   };
 
   const resetForm = () => {
@@ -251,8 +215,8 @@ export const ColaboradorForm = () => {
       emailPersonal: "",
       telefono: "",
       fechaIngreso: null,
-      esAsociadoSindicato: false,
-      esPresentaInconvenientes: false,
+      //   esAsociadoSindicato: false,
+      //   esPresentaInconvenientes: false,
     };
 
     form.reset(dataForm);
@@ -267,7 +231,7 @@ export const ColaboradorForm = () => {
       apellidoPaterno: "",
       apellidoMaterno: "",
       fechaNacimiento: null,
-      idEmpresa: userProfile?.id_empresa || "",
+      idEmpresa: "",
       idCargo: "",
       nombreArea: "",
       nombreSede: "",
@@ -275,8 +239,8 @@ export const ColaboradorForm = () => {
       emailPersonal: "",
       telefono: "",
       fechaIngreso: null,
-      esAsociadoSindicato: false,
-      esPresentaInconvenientes: false,
+      //   esAsociadoSindicato: false,
+      //   esPresentaInconvenientes: false,
     },
   });
 
@@ -303,8 +267,8 @@ export const ColaboradorForm = () => {
       emailInstitucional,
       emailPersonal,
       telefono,
-      esAsociadoSindicato,
-      esPresentaInconvenientes,
+      // esAsociadoSindicato,
+      // esPresentaInconvenientes,
     } = values;
 
     const nombreCompleto: string = `${nombres} ${apellidoPaterno} ${apellidoMaterno}`;
@@ -342,21 +306,15 @@ export const ColaboradorForm = () => {
       email_institucional: emailInstitucional,
       email_personal: emailPersonal,
       telefono,
-      nombre_grupo: "GRUPO COLABORADOR",
-      is_asociado_sindicato: esAsociadoSindicato,
-      is_tiene_inconvenientes: esPresentaInconvenientes,
+      nombre_grupo: "GRUPO ESPECIALISTA EMPRESA",
+      // is_asociado_sindicato: esAsociadoSindicato,
+      // is_presenta_inconvenientes: esPresentaInconvenientes,
     };
 
     console.log("---- payload persona ----");
     console.log({ payload });
 
     try {
-      // const response = await createTrabajadorSocial(payload);
-      // const { result, message } = response as TrabajadorSocialResponse;
-
-      // const response = await createPersona(payload);
-      // const { result, message } = response as PersonaResponse;
-
       console.log({ isEditMode });
       console.log({ idPersona });
 
@@ -378,91 +336,15 @@ export const ColaboradorForm = () => {
 
       if (result) {
         showToast("success", message);
-        navigate("/colaborador");
+        navigate("/especialista-cliente");
       } else {
         showToast("error", error || messageError);
         return;
       }
-
-      // if (result) {
-      //   showToast("success", message);
-      //   navigate("/trabajador-social");
-      // } else {
-      //   showToast(
-      //     "error",
-      //     message || "Error al registrar al trabajador social"
-      //   );
-      //   return;
-      // }
     } catch (error) {
-      console.error("Error al registrar trabajador social", error);
+      console.error("Error al registrar especialista cliente", error);
       showToast("error", error);
     }
-
-    // try {
-    //   const {
-    //     idTipoDocumento,
-    //     idCargo,
-    //     idEmpresa,
-    //     numeroDocumento,
-    //     apellidoPaterno,
-    //     apellidoMaterno,
-    //     nombres,
-    //     fechaNacimiento,
-    //     fechaIngreso,
-    //     nombreArea,
-    //     nombreSede,
-    //     emailInstitucional,
-    //     emailPersonal,
-    //     numeroCelular,
-    //     esAsociadoSindicato,
-    //     esPresentaInconvenientes,
-    //   } = values;
-    //   const nombreCompleto: string = `${nombres} ${apellidoPaterno} ${apellidoMaterno}`;
-    //   const fechaNacimientoToString: string | null = fechaNacimiento
-    //     ? fechaNacimiento.toISOString()
-    //     : null;
-    //   const partsFechaNacimientoStr: string[] =
-    //     fechaNacimientoToString.split("T");
-    //   const fechaNacimientoStr: string = partsFechaNacimientoStr[0];
-    //   let fechaIngresoStr: string | null = null;
-    //   if (fechaIngreso) {
-    //     const fechaIngresoToString: string | null = fechaIngreso.toISOString();
-    //     const partsFechaIngreso: string[] = fechaIngresoToString.split("T");
-    //     fechaIngresoStr = partsFechaIngreso[0];
-    //   }
-    //   const payload: Colaborador = {
-    //     id_tipodocumento: idTipoDocumento,
-    //     id_cargo: idCargo,
-    //     id_empresa: idEmpresa,
-    //     numero_documento: numeroDocumento,
-    //     apellido_paterno: apellidoPaterno,
-    //     apellido_materno: apellidoMaterno,
-    //     nombres,
-    //     nombre_completo: nombreCompleto,
-    //     fecha_nacimiento: fechaNacimientoStr,
-    //     fecha_ingreso: fechaIngresoStr,
-    //     nombre_area: nombreArea,
-    //     nombre_sede: nombreSede,
-    //     correo_institucional: emailInstitucional,
-    //     correo_personal: emailPersonal,
-    //     numero_celular: numeroCelular,
-    //     is_asociado_sindicato: esAsociadoSindicato,
-    //     is_presenta_inconvenientes: esPresentaInconvenientes,
-    //   };
-    //   const response = await createColaborador(payload);
-    //   const { result, message } = response as ColaboradorResponse;
-    //   if (result) {
-    //     showToast("success", message);
-    //     navigate("/colaborador");
-    //   } else {
-    //     showToast("error", message || "Error al registrar al colaborador");
-    //     return;
-    //   }
-    // } catch (error) {
-    //   console.error("Error al registrar colaborador", error);
-    //   showToast("error", error);
-    // }
   };
 
   useEffect(() => {
@@ -502,12 +384,12 @@ export const ColaboradorForm = () => {
         console.log({ id });
 
         if (id) {
-          const responseColaborador = await getPersonaById(id);
-          const { result, data, message } = responseColaborador;
+          const responseEspecialistaCliente = await getPersonaById(id);
+          const { result, data, message } = responseEspecialistaCliente;
 
           if (result && data) {
             let dataForm: TPersona = {};
-            const colaborador = data as Persona;
+            const especialistaCliente = data as Persona;
 
             const {
               id_tipodocumento,
@@ -524,9 +406,9 @@ export const ColaboradorForm = () => {
               email_institucional,
               email_personal,
               telefono,
-              is_asociado_sindicato,
-              is_tiene_inconvenientes,
-            } = colaborador;
+              //   is_asociado_sindicato,
+              //   is_presenta_inconvenientes,
+            } = especialistaCliente;
 
             dataForm.idTipoDocumento = id_tipodocumento || "";
             dataForm.numeroDocumento = numero_documento || "";
@@ -546,14 +428,14 @@ export const ColaboradorForm = () => {
             dataForm.emailInstitucional = email_institucional || "";
             dataForm.emailPersonal = email_personal || "";
             dataForm.telefono = telefono || "";
-            dataForm.esAsociadoSindicato = is_asociado_sindicato || false;
-            dataForm.esPresentaInconvenientes =
-              is_tiene_inconvenientes || false;
+            // dataForm.esAsociadoSindicato = is_asociado_sindicato || false;
+            // dataForm.esPresentaInconvenientes =
+            //   is_presenta_inconvenientes || false;
 
             form.reset(dataForm);
           } else {
-            showToast("error", message || "Colaborador no encontrado");
-            navigate("/colaborador/nuevo");
+            showToast("error", message || "Especialista cliente no encontrado");
+            navigate("/especialista-cliente/nuevo");
           }
         }
       } catch (error) {
@@ -573,13 +455,13 @@ export const ColaboradorForm = () => {
           <div className="flex-shrink min-w-0">
             <CardTitle className="text-xl font-bold text-gray-800 truncate">
               {isEditMode
-                ? "Actualización de colaborador"
-                : "Registro de colaborador"}
+                ? "Actualización de especialista cliente"
+                : "Registro de especialista cliente"}
             </CardTitle>
             <CardDescription className="text-sm text-gray-500">
               {isEditMode
-                ? "Formulario de actualización de colaborador"
-                : "Complete el formulario para registrar un colaborador"}
+                ? "Formulario de actualización de especialista cliente"
+                : "Complete el formulario para registrar un especialista cliente"}
             </CardDescription>
           </div>
           <button
@@ -657,7 +539,7 @@ export const ColaboradorForm = () => {
                         <RequiredLabel>Número de Documento</RequiredLabel>
                         <FormControl>
                           <Input
-                            placeholder="12345678"
+                            placeholder="44668800"
                             autoComplete="off"
                             maxLength={8}
                             {...field}
@@ -886,7 +768,6 @@ export const ColaboradorForm = () => {
                             valueKey="id"
                             searchKeys={["nombre_o_razon_social"]}
                             isInvalid={fieldState.invalid}
-                            disabled={isEmpresaFixed}
                           />
                           <FormMessage />
                         </FormItem>
@@ -1088,7 +969,7 @@ export const ColaboradorForm = () => {
                     )}
                   />
 
-                  <FormField
+                  {/* <FormField
                     control={form.control}
                     name="esAsociadoSindicato"
                     render={({ field }) => (
@@ -1133,7 +1014,7 @@ export const ColaboradorForm = () => {
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
+                  /> */}
                 </div>
               </fieldset>
 
@@ -1159,7 +1040,6 @@ export const ColaboradorForm = () => {
                   variant="outline"
                   disabled={isSubmitting}
                   onClick={() => resetForm()}
-                  // onClick={() => navigate("/colaborador")}
                   className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
                   Cancelar

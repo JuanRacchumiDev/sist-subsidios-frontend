@@ -17,61 +17,92 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { TipoDocumento } from "@/interfaces/ITipoDocumento";
-import { TrabajadorSocialFilter } from "../../interfaces/ITrabajadorSocial";
-import { getTipoDocumentos } from "@/services/tipoDocumentoService";
-import { Cargo } from "@/interfaces/ICargo";
-import { getCargos } from "@/services/cargoService";
-import { Empresa } from "@/interfaces/IEmpresa";
+import { Detalle } from "@/interfaces/IDetalleParametro";
+import { PersonaFilter } from "../../interfaces/IPersona";
+import { getDetalles } from "@/services/detalleParametroService";
+import { Empresa, EmpresaResponse } from "@/interfaces/IEmpresa";
 import { getEmpresas } from "@/services/empresaService";
 
 interface TrabajadorSocialFilterModalProps {
   isOpen: boolean;
   onClose: () => void;
-  currentFilters: TrabajadorSocialFilter;
-  onApplyFilters: (filters: TrabajadorSocialFilter) => void;
+  currentFilters: PersonaFilter;
+  onApplyFilters: (filters: PersonaFilter) => void;
 }
 
-const dataTipoDocumentos = async () => {
-  let tipoDocumentos: TipoDocumento[] = [];
-  const response = await getTipoDocumentos();
-  const { result, data } = response;
-  if (result && data) {
-    tipoDocumentos = data as TipoDocumento[];
+const getDataTipoDocumentos = async (): Promise<Detalle[]> => {
+  let tipos: Detalle[] = [];
+
+  try {
+    const clase: number = 1000;
+    const estado: boolean = true;
+
+    const response = await getDetalles(clase, estado);
+    console.log("response getTipoDocumentos");
+    console.log({ response });
+
+    if (response.result && response.data) {
+      tipos = response.data as Detalle[];
+    }
+
+    return tipos;
+  } catch (error) {
+    console.error("Error al obtener tipo de documentos", error);
+    return [];
   }
-  return tipoDocumentos;
 };
 
-const dataCargos = async () => {
-  let cargos: Cargo[] = [];
-  const response = await getCargos();
-  const { result, data } = response;
-  if (result && data) {
-    cargos = data as Cargo[];
+const getDataCargos = async (): Promise<Detalle[]> => {
+  let cargos: Detalle[] = [];
+
+  try {
+    const clase: number = 1008;
+    const estado: boolean = true;
+
+    const response = await getDetalles(clase, estado);
+    console.log("response getCargos");
+    console.log({ response });
+
+    if (response.result && response.data) {
+      cargos = response.data as Detalle[];
+    }
+
+    return cargos;
+  } catch (error) {
+    console.error("Error al obtener cargos", error);
+    return [];
   }
-  return cargos;
 };
 
-const dataEmpresas = async () => {
+const getDataEmpresas = async (): Promise<Empresa[]> => {
   let empresas: Empresa[] = [];
-  const response = await getEmpresas();
-  const { result, data } = response;
-  if (result && data) {
-    empresas = data as Empresa[];
+
+  try {
+    const response = await getEmpresas();
+
+    const { result, data } = response as EmpresaResponse;
+
+    if (result && data) {
+      empresas = data as Empresa[];
+    }
+
+    return empresas;
+  } catch (error) {
+    console.error("Error al obtener empresas", error);
+    return [];
   }
-  return empresas;
 };
 
 export const TrabajadorSocialFilterModal: React.FC<
   TrabajadorSocialFilterModalProps
 > = ({ isOpen, onClose, currentFilters, onApplyFilters }) => {
   const [localFilters, setLocalFilters] =
-    useState<TrabajadorSocialFilter>(currentFilters);
+    useState<PersonaFilter>(currentFilters);
 
   const { showToast } = useToast();
 
-  const [tipoDocumentos, setTipoDocumentos] = useState<TipoDocumento[]>([]);
-  const [cargos, setCargos] = useState<Cargo[]>([]);
+  const [tipos, setTipos] = useState<Detalle[]>([]);
+  const [cargos, setCargos] = useState<Detalle[]>([]);
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
 
   useEffect(() => {
@@ -81,19 +112,20 @@ export const TrabajadorSocialFilterModal: React.FC<
       //   id_empresa: currentFilters.id_empresa || undefined,
       numero_documento: currentFilters.numero_documento || "",
       nombre_completo: currentFilters.nombre_completo || "",
+      nombreGrupo: currentFilters.nombreGrupo || "",
     });
   }, [currentFilters]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [tipoDocumentos, cargos, empresas] = await Promise.all([
-          dataTipoDocumentos(),
-          dataCargos(),
-          dataEmpresas(),
+        const [tipos, cargos, empresas] = await Promise.all([
+          getDataTipoDocumentos(),
+          getDataCargos(),
+          getDataEmpresas(),
         ]);
 
-        setTipoDocumentos(tipoDocumentos);
+        setTipos(tipos);
         setCargos(cargos);
         setEmpresas(empresas);
       } catch (error) {
@@ -116,10 +148,7 @@ export const TrabajadorSocialFilterModal: React.FC<
   };
 
   // Manejador específico para <Select>
-  const handleSelectChange = (
-    name: keyof TrabajadorSocialFilter,
-    value: string
-  ) => {
+  const handleSelectChange = (name: keyof PersonaFilter, value: string) => {
     // Si el valor es "null-filter" (nuestra convención para limpiar), guardamos undefined.
     // Si es un ID válido, lo guardamos.
     setLocalFilters((prev) => ({
@@ -130,7 +159,7 @@ export const TrabajadorSocialFilterModal: React.FC<
 
   const handleApply = () => {
     // 1. Limpiar los valores (cadenas vacías o `null-filter`) a `undefined` para el servicio
-    const filtersToApply: TrabajadorSocialFilter = Object.fromEntries(
+    const filtersToApply: PersonaFilter = Object.fromEntries(
       Object.entries(localFilters).map(([key, value]) => {
         // Los select están en `undefined` si están limpios.
         if (
@@ -143,15 +172,15 @@ export const TrabajadorSocialFilterModal: React.FC<
         }
         // Los inputs de texto/fecha están en `""` si están vacíos.
         return [key, value === "" || value === null ? undefined : value];
-      })
-    ) as TrabajadorSocialFilter;
+      }),
+    ) as PersonaFilter;
 
     onApplyFilters(filtersToApply);
     onClose(); // Cerrar el modal después de aplicar
   };
 
   const handleClear = () => {
-    const emptyFilters: TrabajadorSocialFilter = {
+    const emptyFilters: PersonaFilter = {
       // Usamos `undefined` para filtros de ID (selects)
       id_tipodocumento: undefined,
       //   id_cargo: undefined,
@@ -159,6 +188,7 @@ export const TrabajadorSocialFilterModal: React.FC<
       // Usamos `""` para los inputs (texto/fecha) para limpiar visualmente
       numero_documento: "",
       nombre_completo: "",
+      nombreGrupo: "",
     };
     setLocalFilters(emptyFilters);
     onApplyFilters(emptyFilters);
@@ -166,7 +196,7 @@ export const TrabajadorSocialFilterModal: React.FC<
   };
 
   // Función auxiliar para obtener el valor del select
-  const getSelectValue = (key: keyof TrabajadorSocialFilter) => {
+  const getSelectValue = (key: keyof PersonaFilter) => {
     // El valor en el Select debe ser una cadena. Si es undefined, usamos nuestra convención "null-filter".
     return localFilters[key] || "null-filter";
   };
@@ -237,7 +267,7 @@ export const TrabajadorSocialFilterModal: React.FC<
                 >
                   Todos los tipos de documentos
                 </SelectItem>
-                {tipoDocumentos.map((td) => (
+                {tipos.map((td) => (
                   <SelectItem
                     key={td.id}
                     value={td.id}
@@ -249,74 +279,6 @@ export const TrabajadorSocialFilterModal: React.FC<
               </SelectContent>
             </Select>
           </div>
-
-          {/* <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-2 md:gap-4">
-            <Label
-              htmlFor="id_empresa"
-              className="md:text-right font-medium text-gray-700"
-            >
-              Empresa
-            </Label>
-            <Select
-              onValueChange={(value) => handleSelectChange("id_empresa", value)}
-              value={getSelectValue("id_empresa")}
-            >
-              <SelectTrigger className="md:col-span-3 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                <SelectValue placeholder="Seleccione empresa" />
-              </SelectTrigger>
-              <SelectContent className="bg-white shadow-lg z-[9999]">
-                <SelectItem
-                  value="null-filter"
-                  className="text-gray-500 italic hover:bg-gray-50"
-                >
-                  Todas las empresas
-                </SelectItem>
-                {empresas.map((empresa) => (
-                  <SelectItem
-                    key={empresa.id}
-                    value={empresa.id}
-                    className="cursor-pointer hover:bg-blue-50 transition-colors"
-                  >
-                    {empresa.nombre_o_razon_social}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div> */}
-
-          {/* <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-2 md:gap-4">
-            <Label
-              htmlFor="id_cargo"
-              className="md:text-right font-medium text-gray-700"
-            >
-              Cargo
-            </Label>
-            <Select
-              onValueChange={(value) => handleSelectChange("id_cargo", value)}
-              value={getSelectValue("id_cargo")}
-            >
-              <SelectTrigger className="md:col-span-3 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                <SelectValue placeholder="Seleccione cargo" />
-              </SelectTrigger>
-              <SelectContent className="bg-white shadow-lg z-[9999]">
-                <SelectItem
-                  value="null-filter"
-                  className="text-gray-500 italic hover:bg-gray-50"
-                >
-                  Todos los cargos
-                </SelectItem>
-                {cargos.map((cargo) => (
-                  <SelectItem
-                    key={cargo.id}
-                    value={cargo.id}
-                    className="cursor-pointer hover:bg-blue-50 transition-colors"
-                  >
-                    {cargo.nombre}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div> */}
         </div>
         <DialogFooter className="flex justify-between p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
           <Button

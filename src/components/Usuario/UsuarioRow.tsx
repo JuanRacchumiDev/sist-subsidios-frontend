@@ -76,7 +76,7 @@ export const UsuarioRow: React.FC<Props> = ({ usuario, onStatusChange }) => {
       if (result && data) {
         showToast(
           "success",
-          message || "Estado del usuario actualizado con éxito."
+          message || "Estado del usuario actualizado con éxito.",
         );
 
         // Si hay una función de callback, llamarla para actualizar la tabla padre
@@ -110,11 +110,11 @@ export const UsuarioRow: React.FC<Props> = ({ usuario, onStatusChange }) => {
         className="hover:bg-blue-100 hover:cursor-pointer transition-colors duration-200"
       >
         <TableCell className="py-3">{usuario.username}</TableCell>
-        <TableCell className="py-3">
-          {usuario.persona ? usuario.persona.nombre_completo : <></>}
-        </TableCell>
+        {/* <TableCell className="py-3">
+          {usuario.persona ? usuario.nombre_completo : <></>}
+        </TableCell> */}
         <TableCell className="py-3">{usuario.email}</TableCell>
-        <TableCell className="py-3">{usuario.perfil.nombre}</TableCell>
+        <TableCell className="py-3">{usuario.nombre_perfil}</TableCell>
         <TableCell className="py-3">
           {usuario.estado ? (
             <CircleCheck className="text-green-500 w-5 h-5" />

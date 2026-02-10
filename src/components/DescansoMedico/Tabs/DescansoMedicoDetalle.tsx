@@ -157,7 +157,10 @@ export const DescansoMedicoDetalle = ({
 
   const [totalDias, setTotalDias] = useState<number | null>(null);
   // const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false);
-  const [isDisabled, setIsDisabled] = useState<boolean>(false);
+  // const [isDisabled, setIsDisabled] = useState<boolean>(false);
+  const [isEmpresaDisabled, setIsEmpresaDisabled] = useState<boolean>(false);
+  const [isColaboradorDisabled, setIsColaboradorDisabled] =
+    useState<boolean>(false);
   const [isCitt, setIsCitt] = useState<boolean | null>(false);
 
   // Id de la empresa seleccionada
@@ -196,24 +199,45 @@ export const DescansoMedicoDetalle = ({
           dataAdjuntos(id),
         ]);
 
+        console.log({ isModeLetter });
+
         setEmpresas(empresasRes);
         setColaboradores(colaboradoresRes);
         setTipoDescansos(tipoDescansosRes);
         setTipoContingencias(tipoContingenciasRes);
         setAdjuntos(adjuntosRes);
 
-        if (userProfile.id_empresa && userProfile.id_colaborador) {
-          // console.log("abcdef");
-          // setIsFormDisabled(true);
-          setIsDisabled(true);
+        if (isModeLetter) {
+          setIsEmpresaDisabled(true);
+          setIsColaboradorDisabled(true);
         } else {
-          // console.log("pqrstu");
-          const isDisabledIdEmpresaIdColaborador = isModeLetter
-            ? isModeLetter
-            : false;
-          setIsDisabled(isDisabledIdEmpresaIdColaborador);
-          // setIsFormDisabled(isDisabledIdEmpresaIdColaborador);
+          const { nombre_perfil_url } = userProfile;
+
+          if (nombre_perfil_url === "especialista-empresa") {
+            setIsEmpresaDisabled(true);
+          } else {
+            setIsEmpresaDisabled(false);
+          }
+
+          // if (id_empresa) {
+          //   setIsEmpresaDisabled(true);
+          // } else {
+          //   setIsEmpresaDisabled(false);
+          // }
         }
+
+        // if (userProfile.id_empresa && userProfile.id_persona) {
+        //   // console.log("abcdef");
+        //   // setIsFormDisabled(true);
+        //   setIsDisabled(true);
+        // } else {
+        //   // console.log("pqrstu");
+        //   const isDisabledIdEmpresaIdColaborador = isModeLetter
+        //     ? isModeLetter
+        //     : false;
+        //   setIsDisabled(isDisabledIdEmpresaIdColaborador);
+        //   // setIsFormDisabled(isDisabledIdEmpresaIdColaborador);
+        // }
         // console.log({ isModeLetter });
       } catch (error) {
         console.error("Error al obtener datos", error);
@@ -349,7 +373,7 @@ export const DescansoMedicoDetalle = ({
                 valueKey="id"
                 searchKeys={["nombre_o_razon_social"]}
                 // disabled={isFormDisabled || isModeLetter}
-                disabled={isDisabled}
+                disabled={isEmpresaDisabled}
                 isInvalid={fieldState.invalid}
               />
               <FormMessage />
@@ -373,7 +397,7 @@ export const DescansoMedicoDetalle = ({
                 displayKey="nombre_completo"
                 valueKey="id"
                 searchKeys={["nombre_completo"]}
-                disabled={isDisabled}
+                disabled={isColaboradorDisabled}
                 // disabled={isDependentFieldsDisabled}
                 isInvalid={fieldState.invalid}
               />

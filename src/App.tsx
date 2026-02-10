@@ -17,6 +17,12 @@ import { TrabajadorSocialFormPage } from "./components/TrabajadorSocial/Page/Tra
 import { ColaboradorListPage } from "./components/Colaborador/Page/ColaboradorListPage";
 import { ColaboradorFormPage } from "./components/Colaborador/Page/ColaboradorFormPage";
 
+import { EspecialistaClienteListPage } from "./components/EspecialistaCliente/Page/EspecialistaClienteListPage";
+import { EspecialistaClienteFormPage } from "./components/EspecialistaCliente/Page/EspecialistaClienteFormPage";
+
+import { EspecialistaSHListPage } from "./components/EspecialistaSH/Page/EspecialistaSHListPage";
+import { EspecialistaSHFormPage } from "./components/EspecialistaSH/Page/EspecialistaSHFormPage";
+
 import { DescansoMedicoListPage } from "./components/DescansoMedico/Page/DescansoMedicoListPage";
 import { DescansoMedicoFormPage } from "./components/DescansoMedico/Page/DescansoMedicoFormPage";
 
@@ -122,6 +128,32 @@ function App() {
                     <Route
                       path="/trabajador-social/editar/:id"
                       element={<TrabajadorSocialFormPage />}
+                    ></Route>
+
+                    <Route
+                      path="/especialista-cliente"
+                      element={<EspecialistaClienteListPage />}
+                    ></Route>
+                    <Route
+                      path="/especialista-cliente/nuevo"
+                      element={<EspecialistaClienteFormPage />}
+                    ></Route>
+                    <Route
+                      path="/especialista-cliente/editar/:id"
+                      element={<EspecialistaClienteFormPage />}
+                    ></Route>
+
+                    <Route
+                      path="/especialista-sh"
+                      element={<EspecialistaSHListPage />}
+                    ></Route>
+                    <Route
+                      path="/especialista-sh/nuevo"
+                      element={<EspecialistaSHFormPage />}
+                    ></Route>
+                    <Route
+                      path="/especialista-sh/editar/:id"
+                      element={<EspecialistaSHFormPage />}
                     ></Route>
 
                     <Route

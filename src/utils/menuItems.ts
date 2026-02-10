@@ -53,6 +53,22 @@ export const MENU_ITEMS = [
         path: "/colaborador",
     },
     {
+        id: "especialista-cliente",
+        icon: Users,
+        label: "Especialistas Cliente",
+        active: false,
+        badge: "New",
+        path: "/especialista-cliente",
+    },
+    {
+        id: "especialista-sh",
+        icon: Users,
+        label: "Especialistas SH",
+        active: false,
+        badge: "New",
+        path: "/especialista-sh",
+    },
+    {
         id: "descanso-medico",
         icon: HeartPulse,
         label: "Descansos médicos",

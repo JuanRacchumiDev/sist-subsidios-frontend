@@ -1,7 +1,9 @@
+import { EMPRESA_DEFAULT } from '@/params/constants'
 import { Empresa } from '../interfaces/IEmpresa'
 import {
     getAll,
     getById,
+    getByRazonSocial,
     create,
     getAllWithPaginate,
     updateEstado
@@ -35,6 +37,19 @@ export const getEmpresasWithPaginate = async (
 
 export const getEmpresaById = async (id: string) => {
     const response = await getById(id)
+
+    return {
+        ...response
+    }
+}
+
+export const getEmpresaByRazonSocial = async () => {
+
+    const response = await getByRazonSocial(EMPRESA_DEFAULT)
+
+    console.log('---- getEmpresaByRazonSocial ----')
+
+    console.log({ response })
 
     return {
         ...response

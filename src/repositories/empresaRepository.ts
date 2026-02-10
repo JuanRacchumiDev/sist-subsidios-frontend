@@ -66,6 +66,32 @@ export const getById = async (id: string): Promise<EmpresaResponse> => {
     }
 }
 
+export const getByRazonSocial = async (razonSocial: string): Promise<EmpresaResponse> => {
+    try {
+        const urlApi = `${'/empresas/consulta-razon-social?razonSocial='}${razonSocial}`
+
+        const response = await apiClient.get(urlApi)
+
+        console.log('---- empresaRepository getByRazonSocial ----')
+
+        console.log({ response })
+
+        const { data: { result, data, message, error, status } } = response
+
+        return {
+            result,
+            data,
+            message,
+            error,
+            status
+        }
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+        console.log('errorMessage', errorMessage)
+        return { result: false, data: [], error: errorMessage, status: 500 }
+    }
+}
+
 export const create = async (payload: Empresa): Promise<EmpresaResponse> => {
     try {
         const response = await apiClient.post('/empresas', payload)

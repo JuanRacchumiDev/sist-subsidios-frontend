@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useMemo, useCallback, useEffect, useState } from "react";
 // import { getColaboradoresWithPaginate } from "../../services/colaboradorService";
 import {
   Pagination,
@@ -34,6 +34,7 @@ import { ColaboradorFilterModal } from "./ColaboradorFilterModal";
 import { TableSpinner } from "../../components/Common/TableSpinner";
 import { ColaboradorRow } from "./ColaboradorRow";
 import { getPersonasWithPaginate } from "../../services/personaService";
+import { getAuthData } from "../../utils/authMemo";
 
 // Definimos el estado inicial de los filtros
 // const initialFilters: ColaboradorFilter = {
@@ -71,6 +72,10 @@ export const ColaboradorTable: React.FC = () => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [refreshToggle, setRefreshToggle] = useState(0);
 
+  const userProfile = useMemo(() => getAuthData()?.usuario, []);
+
+  const { id_empresa, nombre_perfil_url } = userProfile;
+
   const handleColaboradorStatusChange = () => {
     // Incrementa el toggle. Esto NO cambia la tabla, pero fuerza el useEffect a ejecutarse.
     setRefreshToggle((prev) => prev + 1);
@@ -82,7 +87,7 @@ export const ColaboradorTable: React.FC = () => {
       Object.entries(newFilters).map(([key, value]) => [
         key,
         value === "" || value === null ? undefined : value,
-      ])
+      ]),
     ) as PersonaFilter;
 
     setFilters(cleanedFilters);
@@ -99,17 +104,22 @@ export const ColaboradorTable: React.FC = () => {
   // useEffect(() => {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
+
     try {
       const { currentPage, limit } = pagination;
 
       // Limpia los filtros (elimina `undefined` para no enviar el query param)
       const cleanFilters = Object.fromEntries(
         Object.entries(filters).filter(
-          ([, value]) => value !== undefined && value !== null && value !== ""
-        )
+          ([, value]) => value !== undefined && value !== null && value !== "",
+        ),
       ) as PersonaFilter;
 
       cleanFilters["nombreGrupo"] = "GRUPO COLABORADOR";
+
+      if (id_empresa && nombre_perfil_url === "especialista-empresa") {
+        cleanFilters["id_empresa"] = id_empresa;
+      }
 
       console.log({ cleanFilters });
 
@@ -122,7 +132,7 @@ export const ColaboradorTable: React.FC = () => {
       const response = await getPersonasWithPaginate(
         currentPage,
         limit,
-        cleanFilters
+        cleanFilters,
       );
 
       console.log({ response });
@@ -164,7 +174,7 @@ export const ColaboradorTable: React.FC = () => {
       items.push(
         <PaginationItem key="ellipsis-start">
           <PaginationEllipsis />
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
 
@@ -185,7 +195,7 @@ export const ColaboradorTable: React.FC = () => {
           >
             {i}
           </PaginationLink>
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
 
@@ -193,7 +203,7 @@ export const ColaboradorTable: React.FC = () => {
       items.push(
         <PaginationItem key="ellipsis-end">
           <PaginationEllipsis />
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
     return items;
@@ -214,7 +224,7 @@ export const ColaboradorTable: React.FC = () => {
             Filtros (
             {
               Object.values(filters).filter(
-                (v) => v !== undefined && v !== null && v !== ""
+                (v) => v !== undefined && v !== null && v !== "",
               ).length
             }
             )

@@ -1,10 +1,11 @@
 import axios, { AxiosError } from 'axios'
+import { useNavigate } from "react-router-dom";
 
 // Crea una instancia de axios con la URL base
 const apiClient = axios.create({
     // baseURL: import.meta.env.VITE_API_URL,
-    // baseUrl: "http://localhost:3000/api/v1",
-    baseURL: "http://18.227.0.225/api-dms/api/v1",
+    baseURL: "http://localhost:3000/api/v1",
+    // baseURL: "http://18.227.0.225/api-dms/api/v1",
     headers: {
         'Content-Type': 'application/json'
     }
@@ -36,7 +37,10 @@ apiClient.interceptors.response.use(
 
             localStorage.removeItem('auth');
 
-            window.location.href = '/login';
+            const navigate = useNavigate();
+
+            navigate('/login/')
+            // window.location.href = '/login';
         }
         return Promise.reject(error);
     }

@@ -23,7 +23,7 @@ import { getDetalles } from "@/services/detalleParametroService";
 import { Empresa, EmpresaResponse } from "@/interfaces/IEmpresa";
 import { getEmpresas } from "@/services/empresaService";
 
-interface ColaboradorFilterModalProps {
+interface EspecialistaClienteFilterModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentFilters: PersonaFilter;
@@ -93,12 +93,9 @@ const getDataEmpresas = async (): Promise<Empresa[]> => {
   }
 };
 
-export const ColaboradorFilterModal: React.FC<ColaboradorFilterModalProps> = ({
-  isOpen,
-  onClose,
-  currentFilters,
-  onApplyFilters,
-}) => {
+export const EspecialistaClienteFilterModal: React.FC<
+  EspecialistaClienteFilterModalProps
+> = ({ isOpen, onClose, currentFilters, onApplyFilters }) => {
   const [localFilters, setLocalFilters] =
     useState<PersonaFilter>(currentFilters);
 
@@ -111,10 +108,8 @@ export const ColaboradorFilterModal: React.FC<ColaboradorFilterModalProps> = ({
   useEffect(() => {
     setLocalFilters({
       id_tipodocumento: currentFilters.id_tipodocumento || undefined,
-      // id_cargo: currentFilters.id_cargo || undefined,
-      // id_empresa: currentFilters.id_empresa || undefined,
       numero_documento: currentFilters.numero_documento || "",
-      nombre_completo: currentFilters.nombre_completo || "",
+      nombre_completo: currentFilters.numero_documento || "",
       nombreGrupo: currentFilters.nombreGrupo || "",
     });
   }, [currentFilters]);
@@ -140,20 +135,15 @@ export const ColaboradorFilterModal: React.FC<ColaboradorFilterModalProps> = ({
     fetchData();
   }, []);
 
-  // Manejador genérico para <input> (texto y fecha)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    // Guardamos la cadena vacía, y al aplicar, la transformamos a undefined
     setLocalFilters((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  // Manejador específico para <Select>
   const handleSelectChange = (name: keyof PersonaFilter, value: string) => {
-    // Si el valor es "null-filter" (nuestra convención para limpiar), guardamos undefined.
-    // Si es un ID válido, lo guardamos.
     setLocalFilters((prev) => ({
       ...prev,
       [name]: value === "null-filter" ? undefined : value,
@@ -161,33 +151,23 @@ export const ColaboradorFilterModal: React.FC<ColaboradorFilterModalProps> = ({
   };
 
   const handleApply = () => {
-    // 1. Limpiar los valores (cadenas vacías o `null-filter`) a `undefined` para el servicio
     const filtersToApply: PersonaFilter = Object.fromEntries(
       Object.entries(localFilters).map(([key, value]) => {
-        // Los select están en `undefined` si están limpios.
-        if (
-          key === "id_tipodocumento" ||
-          key === "id_cargo" ||
-          key === "id_empresa"
-        ) {
+        if (key === "id_tipodocumento") {
           return [key, value];
         }
-        // Los inputs de texto/fecha están en `""` si están vacíos.
+
         return [key, value === "" || value === null ? undefined : value];
       }),
     ) as PersonaFilter;
 
     onApplyFilters(filtersToApply);
-    onClose(); // Cerrar el modal después de aplicar
+    onClose();
   };
 
   const handleClear = () => {
     const emptyFilters: PersonaFilter = {
-      // Usamos `undefined` para filtros de ID (selects)
       id_tipodocumento: undefined,
-      // id_cargo: undefined,
-      // id_empresa: undefined,
-      // Usamos `""` para los inputs (texto/fecha) para limpiar visualmente
       numero_documento: "",
       nombre_completo: "",
       nombreGrupo: "",
@@ -197,9 +177,7 @@ export const ColaboradorFilterModal: React.FC<ColaboradorFilterModalProps> = ({
     onClose();
   };
 
-  // Función auxiliar para obtener el valor del select
   const getSelectValue = (key: keyof PersonaFilter) => {
-    // El valor en el Select debe ser una cadena. Si es undefined, usamos nuestra convención "null-filter".
     return localFilters[key] || "null-filter";
   };
 
@@ -234,7 +212,7 @@ export const ColaboradorFilterModal: React.FC<ColaboradorFilterModalProps> = ({
               htmlFor="nombre_completo"
               className="md:text-right font-medium text-gray-700"
             >
-              Nombre del colaborador
+              Nombre del especialista
             </Label>
             <Input
               id="nombre_completo"
@@ -281,74 +259,6 @@ export const ColaboradorFilterModal: React.FC<ColaboradorFilterModalProps> = ({
               </SelectContent>
             </Select>
           </div>
-
-          {/* <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-2 md:gap-4">
-            <Label
-              htmlFor="id_empresa"
-              className="md:text-right font-medium text-gray-700"
-            >
-              Empresa
-            </Label>
-            <Select
-              onValueChange={(value) => handleSelectChange("id_empresa", value)}
-              value={getSelectValue("id_empresa")}
-            >
-              <SelectTrigger className="md:col-span-3 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                <SelectValue placeholder="Seleccione empresa" />
-              </SelectTrigger>
-              <SelectContent className="bg-white shadow-lg z-[9999]">
-                <SelectItem
-                  value="null-filter"
-                  className="text-gray-500 italic hover:bg-gray-50"
-                >
-                  Todas las empresas
-                </SelectItem>
-                {empresas.map((empresa) => (
-                  <SelectItem
-                    key={empresa.id}
-                    value={empresa.id}
-                    className="cursor-pointer hover:bg-blue-50 transition-colors"
-                  >
-                    {empresa.nombre_o_razon_social}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-2 md:gap-4">
-            <Label
-              htmlFor="id_cargo"
-              className="md:text-right font-medium text-gray-700"
-            >
-              Cargo
-            </Label>
-            <Select
-              onValueChange={(value) => handleSelectChange("id_cargo", value)}
-              value={getSelectValue("id_cargo")}
-            >
-              <SelectTrigger className="md:col-span-3 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                <SelectValue placeholder="Seleccione cargo" />
-              </SelectTrigger>
-              <SelectContent className="bg-white shadow-lg z-[9999]">
-                <SelectItem
-                  value="null-filter"
-                  className="text-gray-500 italic hover:bg-gray-50"
-                >
-                  Todos los cargos
-                </SelectItem>
-                {cargos.map((cargo) => (
-                  <SelectItem
-                    key={cargo.id}
-                    value={cargo.id}
-                    className="cursor-pointer hover:bg-blue-50 transition-colors"
-                  >
-                    {cargo.nombre}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div> */}
         </div>
         <DialogFooter className="flex justify-between p-6 border-t border-gray-100 bg-gray-50 rounded-b-xl">
           <Button

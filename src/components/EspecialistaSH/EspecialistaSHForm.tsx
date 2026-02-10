@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "../ui/card";
 import { useToast } from "../../context/ToastContext";
-import { Spinner } from "../../components/Common/Spinner";
+import { Spinner } from "../Common/Spinner";
 import {
   Form,
   FormControl,
@@ -28,11 +28,10 @@ import {
   SelectValue,
 } from "../ui/select";
 
-import { getEmpresas } from "../../services/empresaService";
+import { getEmpresaByRazonSocial } from "../../services/empresaService";
 import { getDetalles } from "../../services/detalleParametroService";
 // import { getTipoDocumentos } from "../../services/tipoDocumentoService";
 // import { getCargos } from "../../services/cargoService";
-// import { getPersonaByIdTipoDocAndNumDoc } from "../../services/personaService";
 import {
   getPersonaByIdTipoDocAndNumDoc,
   getPersonaById,
@@ -44,17 +43,8 @@ import { Persona, PersonaResponse } from "../../interfaces/IPersona";
 import { Detalle } from "../../interfaces/IDetalleParametro";
 import { Empresa } from "../../interfaces/IEmpresa";
 import { createPersona, updatePersona } from "../../services/personaService";
-// import {
-//   Colaborador,
-//   ColaboradorResponse,
-// } from "../../interfaces/IColaborador";
-// import {
-//   createColaborador,
-//   getColaboradorById,
-// } from "../../services/colaboradorService";
 import SearchableCombobox from "../Common/SearchableCombobox";
 import { ArrowLeft } from "lucide-react";
-import { getAuthData } from "../../utils/authMemo";
 
 const formSchema = z.object({
   idTipoDocumento: z
@@ -81,11 +71,11 @@ const formSchema = z.object({
     .refine((val) => val !== null, {
       message: "La fecha de nacimiento es requerida",
     }),
-  idEmpresa: z
-    .string({
-      message: "Por favor seleccione una empresa.",
-    })
-    .min(1, "Por favor seleccione una empresa"),
+  // idEmpresa: z
+  //   .string({
+  //     message: "Por favor seleccione una empresa.",
+  //   })
+  //   .min(1, "Por favor seleccione una empresa"),
   idCargo: z
     .string({
       message: "Por favor seleccione un cargo.",
@@ -107,8 +97,8 @@ const formSchema = z.object({
     message: "El número de celular debe tener al menos 9 dígitos.",
   }),
   fechaIngreso: z.date().optional(),
-  esAsociadoSindicato: z.boolean().optional(),
-  esPresentaInconvenientes: z.boolean().optional(),
+  //   esAsociadoSindicato: z.boolean().optional(),
+  //   esPresentaInconvenientes: z.boolean().optional(),
 });
 
 const getTipoDocumentos = async (): Promise<Detalle[]> => {
@@ -155,20 +145,24 @@ const getCargos = async (): Promise<Detalle[]> => {
   }
 };
 
-// type TEmpresa = {
-//   id: string;
-//   nombre_o_razon_social: string;
-// };
+const getEmpresas = async (): Promise<Empresa[]> => {
+  let empresas: Empresa[] = [];
 
-// type TTipoDocumento = {
-//   id: string;
-//   abreviatura: string;
-// };
+  try {
+    const response = await getEmpresaByRazonSocial();
+    console.log("response getEmpresas");
+    console.log({ response });
 
-// type TCargo = {
-//   id: string;
-//   nombre: string;
-// };
+    if (response.result && response.data) {
+      empresas = response.data as Empresa[];
+    }
+
+    return empresas;
+  } catch (error) {
+    console.error("Error al obtener empresas", error);
+    return [];
+  }
+};
 
 type TPersona = {
   idTipoDocumento?: string;
@@ -177,7 +171,7 @@ type TPersona = {
   apellidoPaterno?: string;
   apellidoMaterno?: string;
   fechaNacimiento?: null;
-  idEmpresa?: string;
+  // idEmpresa?: string;
   idCargo?: string;
   nombreArea?: string;
   nombreSede?: string;
@@ -185,54 +179,29 @@ type TPersona = {
   emailPersonal?: string;
   telefono?: string;
   fechaIngreso?: null;
-  esAsociadoSindicato?: boolean;
-  esPresentaInconvenientes?: boolean;
 };
 
-// type TColaborador = {
-//   idTipoDocumento?: string;
-//   numeroDocumento?: string;
-//   nombres?: string;
-//   apellidoPaterno?: string;
-//   apellidoMaterno?: string;
-//   fechaNacimiento?: null;
-//   idEmpresa?: string;
-//   idCargo?: string;
-//   nombreArea?: string;
-//   nombreSede?: string;
-//   emailInstitucional?: string;
-//   emailPersonal?: string;
-//   numeroCelular?: string;
-//   fechaIngreso?: null;
-//   esAsociadoSindicato?: boolean;
-//   esPresentaInconvenientes?: boolean;
-// };
-
-export const ColaboradorForm = () => {
+export const EspecialistaSHForm = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { showToast } = useToast();
 
-  console.log("---- idColaborador ----");
+  console.log("---- id especialista sh ----");
   console.log({ id });
 
-  const [empresas, setEmpresas] = useState<Empresa[]>([]);
+  // const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [tipos, setTipos] = useState<Detalle[]>([]);
   const [cargos, setCargos] = useState<Detalle[]>([]);
   const [idPersona, setIdPersona] = useState<string>("");
+  const [idEmpresa, setIdEmpresa] = useState<string>("");
 
   const [camposHabilitadosPersona, setCamposHabilitadosPersona] =
     useState(false);
 
   const isEditMode = !!id;
 
-  const userProfile = useMemo(() => getAuthData()?.usuario, []);
-  console.log({ userProfile });
-
-  const isEmpresaFixed = !!userProfile?.id_empresa;
-
   const handleGoBack = () => {
-    navigate("/colaborador");
+    navigate("/especialista-sh");
   };
 
   const resetForm = () => {
@@ -243,7 +212,7 @@ export const ColaboradorForm = () => {
       apellidoPaterno: "",
       apellidoMaterno: "",
       fechaNacimiento: null,
-      idEmpresa: "",
+      // idEmpresa: "",
       idCargo: "",
       nombreArea: "",
       nombreSede: "",
@@ -251,8 +220,8 @@ export const ColaboradorForm = () => {
       emailPersonal: "",
       telefono: "",
       fechaIngreso: null,
-      esAsociadoSindicato: false,
-      esPresentaInconvenientes: false,
+      //   esAsociadoSindicato: false,
+      //   esPresentaInconvenientes: false,
     };
 
     form.reset(dataForm);
@@ -267,7 +236,7 @@ export const ColaboradorForm = () => {
       apellidoPaterno: "",
       apellidoMaterno: "",
       fechaNacimiento: null,
-      idEmpresa: userProfile?.id_empresa || "",
+      // idEmpresa: "",
       idCargo: "",
       nombreArea: "",
       nombreSede: "",
@@ -275,8 +244,8 @@ export const ColaboradorForm = () => {
       emailPersonal: "",
       telefono: "",
       fechaIngreso: null,
-      esAsociadoSindicato: false,
-      esPresentaInconvenientes: false,
+      //   esAsociadoSindicato: false,
+      //   esPresentaInconvenientes: false,
     },
   });
 
@@ -291,7 +260,7 @@ export const ColaboradorForm = () => {
     const {
       idTipoDocumento,
       idCargo,
-      idEmpresa,
+      // idEmpresa,
       numeroDocumento,
       apellidoPaterno,
       apellidoMaterno,
@@ -303,8 +272,8 @@ export const ColaboradorForm = () => {
       emailInstitucional,
       emailPersonal,
       telefono,
-      esAsociadoSindicato,
-      esPresentaInconvenientes,
+      // esAsociadoSindicato,
+      // esPresentaInconvenientes,
     } = values;
 
     const nombreCompleto: string = `${nombres} ${apellidoPaterno} ${apellidoMaterno}`;
@@ -342,21 +311,15 @@ export const ColaboradorForm = () => {
       email_institucional: emailInstitucional,
       email_personal: emailPersonal,
       telefono,
-      nombre_grupo: "GRUPO COLABORADOR",
-      is_asociado_sindicato: esAsociadoSindicato,
-      is_tiene_inconvenientes: esPresentaInconvenientes,
+      nombre_grupo: "GRUPO ESPECIALISTA SH",
+      // is_asociado_sindicato: esAsociadoSindicato,
+      // is_presenta_inconvenientes: esPresentaInconvenientes,
     };
 
     console.log("---- payload persona ----");
     console.log({ payload });
 
     try {
-      // const response = await createTrabajadorSocial(payload);
-      // const { result, message } = response as TrabajadorSocialResponse;
-
-      // const response = await createPersona(payload);
-      // const { result, message } = response as PersonaResponse;
-
       console.log({ isEditMode });
       console.log({ idPersona });
 
@@ -378,91 +341,15 @@ export const ColaboradorForm = () => {
 
       if (result) {
         showToast("success", message);
-        navigate("/colaborador");
+        navigate("/especialista-sh");
       } else {
         showToast("error", error || messageError);
         return;
       }
-
-      // if (result) {
-      //   showToast("success", message);
-      //   navigate("/trabajador-social");
-      // } else {
-      //   showToast(
-      //     "error",
-      //     message || "Error al registrar al trabajador social"
-      //   );
-      //   return;
-      // }
     } catch (error) {
-      console.error("Error al registrar trabajador social", error);
+      console.error("Error al registrar especialista sh", error);
       showToast("error", error);
     }
-
-    // try {
-    //   const {
-    //     idTipoDocumento,
-    //     idCargo,
-    //     idEmpresa,
-    //     numeroDocumento,
-    //     apellidoPaterno,
-    //     apellidoMaterno,
-    //     nombres,
-    //     fechaNacimiento,
-    //     fechaIngreso,
-    //     nombreArea,
-    //     nombreSede,
-    //     emailInstitucional,
-    //     emailPersonal,
-    //     numeroCelular,
-    //     esAsociadoSindicato,
-    //     esPresentaInconvenientes,
-    //   } = values;
-    //   const nombreCompleto: string = `${nombres} ${apellidoPaterno} ${apellidoMaterno}`;
-    //   const fechaNacimientoToString: string | null = fechaNacimiento
-    //     ? fechaNacimiento.toISOString()
-    //     : null;
-    //   const partsFechaNacimientoStr: string[] =
-    //     fechaNacimientoToString.split("T");
-    //   const fechaNacimientoStr: string = partsFechaNacimientoStr[0];
-    //   let fechaIngresoStr: string | null = null;
-    //   if (fechaIngreso) {
-    //     const fechaIngresoToString: string | null = fechaIngreso.toISOString();
-    //     const partsFechaIngreso: string[] = fechaIngresoToString.split("T");
-    //     fechaIngresoStr = partsFechaIngreso[0];
-    //   }
-    //   const payload: Colaborador = {
-    //     id_tipodocumento: idTipoDocumento,
-    //     id_cargo: idCargo,
-    //     id_empresa: idEmpresa,
-    //     numero_documento: numeroDocumento,
-    //     apellido_paterno: apellidoPaterno,
-    //     apellido_materno: apellidoMaterno,
-    //     nombres,
-    //     nombre_completo: nombreCompleto,
-    //     fecha_nacimiento: fechaNacimientoStr,
-    //     fecha_ingreso: fechaIngresoStr,
-    //     nombre_area: nombreArea,
-    //     nombre_sede: nombreSede,
-    //     correo_institucional: emailInstitucional,
-    //     correo_personal: emailPersonal,
-    //     numero_celular: numeroCelular,
-    //     is_asociado_sindicato: esAsociadoSindicato,
-    //     is_presenta_inconvenientes: esPresentaInconvenientes,
-    //   };
-    //   const response = await createColaborador(payload);
-    //   const { result, message } = response as ColaboradorResponse;
-    //   if (result) {
-    //     showToast("success", message);
-    //     navigate("/colaborador");
-    //   } else {
-    //     showToast("error", message || "Error al registrar al colaborador");
-    //     return;
-    //   }
-    // } catch (error) {
-    //   console.error("Error al registrar colaborador", error);
-    //   showToast("error", error);
-    // }
   };
 
   useEffect(() => {
@@ -472,13 +359,20 @@ export const ColaboradorForm = () => {
         let listTipoDocumentos: Detalle[] = [];
         let listCargos: Detalle[] = [];
 
-        const [responseEmpresas, responseTipoDocumentos, responseCargos] =
+        const [responseEmpresa, responseTipoDocumentos, responseCargos] =
           await Promise.all([getEmpresas(), getTipoDocumentos(), getCargos()]);
 
-        const { result: resultEmpresas, data: dataEmpresas } = responseEmpresas;
-        if (resultEmpresas && dataEmpresas) {
-          listEmpresas = dataEmpresas as Empresa[];
-        }
+        console.log("---- responseEmpresa ----");
+        console.log({ responseEmpresa });
+
+        // const { result: resultEmpresas, data: dataEmpresas } = responseEmpresas;
+        // if (resultEmpresas && dataEmpresas) {
+        //   listEmpresas = dataEmpresas as Empresa[];
+        // }
+
+        // console.log({ listEmpresas });
+
+        // listEmpresas = responseEmpresas as Empresa[];
 
         listTipoDocumentos = responseTipoDocumentos as Detalle[];
 
@@ -494,7 +388,15 @@ export const ColaboradorForm = () => {
         //   listCargos = dataCargos as TCargo[];
         // }
 
-        setEmpresas(listEmpresas);
+        if (responseEmpresa) {
+          console.log("existe empresa");
+          const empresaDefault = responseEmpresa as Empresa;
+          console.log({ empresaDefault });
+          const { id: idEmpresa } = empresaDefault;
+          setIdEmpresa(idEmpresa);
+        }
+
+        // setEmpresas(listEmpresas);
         setTipos(listTipoDocumentos);
         setCargos(listCargos);
 
@@ -502,12 +404,12 @@ export const ColaboradorForm = () => {
         console.log({ id });
 
         if (id) {
-          const responseColaborador = await getPersonaById(id);
-          const { result, data, message } = responseColaborador;
+          const responseEspecialistaSH = await getPersonaById(id);
+          const { result, data, message } = responseEspecialistaSH;
 
           if (result && data) {
             let dataForm: TPersona = {};
-            const colaborador = data as Persona;
+            const especialistaSH = data as Persona;
 
             const {
               id_tipodocumento,
@@ -517,16 +419,16 @@ export const ColaboradorForm = () => {
               apellido_materno,
               fecha_nacimiento,
               fecha_ingreso,
-              id_empresa,
+              // id_empresa,
               id_cargo,
               nombre_area,
               nombre_sede,
               email_institucional,
               email_personal,
               telefono,
-              is_asociado_sindicato,
-              is_tiene_inconvenientes,
-            } = colaborador;
+              //   is_asociado_sindicato,
+              //   is_presenta_inconvenientes,
+            } = especialistaSH;
 
             dataForm.idTipoDocumento = id_tipodocumento || "";
             dataForm.numeroDocumento = numero_documento || "";
@@ -539,21 +441,21 @@ export const ColaboradorForm = () => {
             dataForm.fechaIngreso = fecha_ingreso
               ? parseISO(fecha_ingreso)
               : null;
-            dataForm.idEmpresa = id_empresa || "";
+            // dataForm.idEmpresa = id_empresa || "";
             dataForm.idCargo = id_cargo || "";
             dataForm.nombreArea = nombre_area || "";
             dataForm.nombreSede = nombre_sede || "";
             dataForm.emailInstitucional = email_institucional || "";
             dataForm.emailPersonal = email_personal || "";
             dataForm.telefono = telefono || "";
-            dataForm.esAsociadoSindicato = is_asociado_sindicato || false;
-            dataForm.esPresentaInconvenientes =
-              is_tiene_inconvenientes || false;
+            // dataForm.esAsociadoSindicato = is_asociado_sindicato || false;
+            // dataForm.esPresentaInconvenientes =
+            //   is_presenta_inconvenientes || false;
 
             form.reset(dataForm);
           } else {
-            showToast("error", message || "Colaborador no encontrado");
-            navigate("/colaborador/nuevo");
+            showToast("error", message || "Especialista sh no encontrado");
+            navigate("/especialista-sh/nuevo");
           }
         }
       } catch (error) {
@@ -573,13 +475,13 @@ export const ColaboradorForm = () => {
           <div className="flex-shrink min-w-0">
             <CardTitle className="text-xl font-bold text-gray-800 truncate">
               {isEditMode
-                ? "Actualización de colaborador"
-                : "Registro de colaborador"}
+                ? "Actualización de especialista SH"
+                : "Registro de especialista SH"}
             </CardTitle>
             <CardDescription className="text-sm text-gray-500">
               {isEditMode
-                ? "Formulario de actualización de colaborador"
-                : "Complete el formulario para registrar un colaborador"}
+                ? "Formulario de actualización de especialista SH"
+                : "Complete el formulario para registrar un especialista SH"}
             </CardDescription>
           </div>
           <button
@@ -657,7 +559,7 @@ export const ColaboradorForm = () => {
                         <RequiredLabel>Número de Documento</RequiredLabel>
                         <FormControl>
                           <Input
-                            placeholder="12345678"
+                            placeholder="44668800"
                             autoComplete="off"
                             maxLength={8}
                             {...field}
@@ -870,7 +772,7 @@ export const ColaboradorForm = () => {
                   Información laboral
                 </legend>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
+                  {/* <FormField
                     control={form.control}
                     name="idEmpresa"
                     render={({ field, fieldState }) => {
@@ -886,13 +788,54 @@ export const ColaboradorForm = () => {
                             valueKey="id"
                             searchKeys={["nombre_o_razon_social"]}
                             isInvalid={fieldState.invalid}
-                            disabled={isEmpresaFixed}
                           />
                           <FormMessage />
                         </FormItem>
                       );
                     }}
-                  />
+                  /> */}
+
+                  {/* <FormField
+                    control={form.control}
+                    name="idEmpresa"
+                    render={({ field, fieldState }) => (
+                      <FormItem className="mb-4">
+                        <RequiredLabel>Empresa</RequiredLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value ?? ""}
+                        >
+                          <FormControl>
+                            <SelectTrigger
+                              className={`
+                                ${
+                                  fieldState.invalid
+                                    ? "border-red-500 focus:ring-red-500"
+                                    : "focus:ring-blue-500"
+                                }
+                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
+                              `}
+                            >
+                              <SelectValue placeholder="Seleccionar empresa" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-gray-400">
+                            {empresas.map((empresa) => (
+                              <SelectItem
+                                value={empresa.id}
+                                key={empresa.id}
+                                className="cursor-pointer hover:bg-gray-100 transition-colors"
+                              >
+                                {empresa.nombre_o_razon_social}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  /> */}
+
                   <FormField
                     control={form.control}
                     name="idCargo"
@@ -1088,7 +1031,7 @@ export const ColaboradorForm = () => {
                     )}
                   />
 
-                  <FormField
+                  {/* <FormField
                     control={form.control}
                     name="esAsociadoSindicato"
                     render={({ field }) => (
@@ -1133,7 +1076,7 @@ export const ColaboradorForm = () => {
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
+                  /> */}
                 </div>
               </fieldset>
 
@@ -1159,7 +1102,6 @@ export const ColaboradorForm = () => {
                   variant="outline"
                   disabled={isSubmitting}
                   onClick={() => resetForm()}
-                  // onClick={() => navigate("/colaborador")}
                   className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
                   Cancelar
