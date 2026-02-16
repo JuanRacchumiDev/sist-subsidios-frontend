@@ -18,7 +18,7 @@ const estadoStyles: Record<Estado, string> = {
   // Canje
   [ECanje.CANJE_REGISTRADO]: "bg-purple-100 text-purple-800",
   [ECanje.CANJE_ORSERVADO]: "bg-orange-100 text-orange-800",
-  [ECanje.CANJE_INGRESADO]: "bg-indigo-100 text-indigo-800",
+  // [ECanje.CANJE_INGRESADO]: "bg-indigo-100 text-indigo-800",
   [ECanje.CANJE_CONFORME]: "bg-cyan-100 text-cyan-800",
 
   // Cobro
