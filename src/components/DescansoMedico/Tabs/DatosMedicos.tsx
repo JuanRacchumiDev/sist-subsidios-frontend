@@ -39,6 +39,12 @@ export const DatosMedicos = ({
   form,
   isModeLetter = false,
 }: DatosMedicosProps) => {
+  console.log("---- variable form in component DatosMedicos ----");
+  console.log({ form });
+
+  console.log("---- variable isModeLetter in component DatosMedicos ----");
+  console.log({ isModeLetter });
+
   const { showToast } = useToast();
 
   const [dxs, setDxs] = useState<Diagnostico[]>([]);

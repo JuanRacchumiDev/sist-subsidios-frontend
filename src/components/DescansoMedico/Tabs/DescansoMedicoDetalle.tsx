@@ -211,12 +211,19 @@ export const DescansoMedicoDetalle = ({
           setIsEmpresaDisabled(true);
           setIsColaboradorDisabled(true);
         } else {
-          const { nombre_perfil_url } = userProfile;
+          const { nombre_perfil_url, id_persona } = userProfile;
 
-          if (nombre_perfil_url === "especialista-empresa") {
+          if (
+            nombre_perfil_url === "especialista-empresa" ||
+            nombre_perfil_url === "colaborador"
+          ) {
             setIsEmpresaDisabled(true);
           } else {
             setIsEmpresaDisabled(false);
+          }
+
+          if (nombre_perfil_url === "colaborador" && id_persona) {
+            setIsColaboradorDisabled(true);
           }
 
           // if (id_empresa) {

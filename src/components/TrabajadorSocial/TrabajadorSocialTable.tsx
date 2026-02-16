@@ -56,7 +56,7 @@ export const TrabajadorSocialTable: React.FC = () => {
   //   TrabajadorSocial[]
   // >([]);
   const [trabajadoresSociales, setTrabajadoresSociales] = useState<Persona[]>(
-    []
+    [],
   );
 
   const [pagination, setPagination] = useState<PaginationType>({
@@ -86,7 +86,7 @@ export const TrabajadorSocialTable: React.FC = () => {
       Object.entries(newFilters).map(([key, value]) => [
         key,
         value === "" || value === null ? undefined : value,
-      ])
+      ]),
     ) as PersonaFilter;
 
     setFilters(cleanedFilters);
@@ -108,8 +108,8 @@ export const TrabajadorSocialTable: React.FC = () => {
       // Limpia los filtros (elimina `undefined` para no enviar el query param)
       const cleanFilters: PersonaFilter = Object.fromEntries(
         Object.entries(filters).filter(
-          ([, value]) => value !== undefined && value !== null && value !== ""
-        )
+          ([, value]) => value !== undefined && value !== null && value !== "",
+        ),
       ) as PersonaFilter;
 
       cleanFilters["nombreGrupo"] = "GRUPO TRABAJADOR SOCIAL";
@@ -125,7 +125,7 @@ export const TrabajadorSocialTable: React.FC = () => {
       const response = await getPersonasWithPaginate(
         currentPage,
         limit,
-        cleanFilters
+        cleanFilters,
       );
 
       console.log({ response });
@@ -164,7 +164,7 @@ export const TrabajadorSocialTable: React.FC = () => {
       items.push(
         <PaginationItem key="ellipsis-start">
           <PaginationEllipsis />
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
 
@@ -185,7 +185,7 @@ export const TrabajadorSocialTable: React.FC = () => {
           >
             {i}
           </PaginationLink>
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
 
@@ -193,7 +193,7 @@ export const TrabajadorSocialTable: React.FC = () => {
       items.push(
         <PaginationItem key="ellipsis-end">
           <PaginationEllipsis />
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
     return items;
@@ -214,7 +214,7 @@ export const TrabajadorSocialTable: React.FC = () => {
             Filtros (
             {
               Object.values(filters).filter(
-                (v) => v !== undefined && v !== null && v !== ""
+                (v) => v !== undefined && v !== null && v !== "",
               ).length
             }
             )

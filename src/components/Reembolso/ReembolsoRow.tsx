@@ -46,20 +46,31 @@ export const ReembolsoRow: React.FC<Props> = ({ reembolso }) => {
       key={reembolso.id}
       className="hover:bg-blue-100 hover:cursor-pointer transition-colors duration-200"
     >
-      <TableCell className="py-3">{nombreColaborador}</TableCell>
-      <TableCell className="py-3">
+      <TableCell className="py-3 font-medium">{nombreColaborador}</TableCell>
+      <TableCell className="py-3 text-center">
         {reembolso.fecha_reembolso
           ? HDate.formatDateTimezone(reembolso.fecha_reembolso, "dd/MM/yyyy")
-          : ""}
+          : "--/--/--"}
       </TableCell>
-      <TableCell className="py-3">
-        {HDate.formatDateTimezone(
-          reembolso.fecha_maxima_reembolso,
-          "dd/MM/yyyy"
-        )}
+      <TableCell className="py-3 text-center">
+        {reembolso.fecha_maxima_reembolso
+          ? HDate.formatDateTimezone(
+              reembolso.fecha_maxima_reembolso,
+              "dd/MM/yyyy",
+            )
+          : "--/--/--"}
       </TableCell>
-      <TableCell className="py-3">{reembolso.codigo}</TableCell>
-      <TableCell className="py-3">{reembolso.numero_expediente}</TableCell>
+      <TableCell className="py-3 text-center">
+        {reembolso.codigo && reembolso.codigo.trim() !== ""
+          ? reembolso.codigo
+          : "--"}
+      </TableCell>
+      <TableCell className="py-3 text-center">
+        {reembolso.numero_expediente &&
+        reembolso.numero_expediente.trim() !== ""
+          ? reembolso.numero_expediente
+          : "--"}
+      </TableCell>
       <TableCell className="py-3">
         <BadgeEstado estado={reembolso.estado_registro as EReembolso} />
       </TableCell>

@@ -236,7 +236,7 @@ export const DescansoMedicoForm = () => {
 
   // Deshabilitando campos para el perfil especialista
   const isModeLetter =
-    (nombre_perfil_url === "especialista" ||
+    (nombre_perfil_url === "especialista-empresa" ||
       nombre_perfil_url === "administrador") &&
     isEditMode
       ? true
@@ -342,7 +342,8 @@ export const DescansoMedicoForm = () => {
               observacion: descanso.observacion || "",
             };
 
-            // console.log("dataForm descanso médico", dataForm);
+            console.log("dataForm descanso médico", dataForm);
+
             form.reset(dataForm);
           }
         } catch (error) {

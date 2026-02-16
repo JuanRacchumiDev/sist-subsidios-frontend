@@ -43,6 +43,7 @@ import { Canje } from "../../interfaces/ICanje";
 import { getCanjeById, updateCanje } from "@/services/canjeService";
 import { useToast } from "../../context/ToastContext";
 import HDate from "@/helpers/HDate";
+import { ArrowLeft } from "lucide-react";
 
 export const formSchema = z.object({
   id: z.string().optional(),
@@ -67,6 +68,8 @@ export const CanjeForm = () => {
 
   const [fechaMaximaCanje, setFechaMaximaCanje] = useState<string | "">("");
 
+  const [idUserCrea, setIdUserCrea] = useState<string | "">("");
+
   const { id } = useParams<{ id: string }>();
 
   const isEditMode = !!id;
@@ -78,6 +81,10 @@ export const CanjeForm = () => {
   const estadosPermitidos: ECanje[] = useMemo(() => {
     return Object.values(ECanje);
   }, []);
+
+  const handleGoBack = () => {
+    navigate("/canje");
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -104,12 +111,15 @@ export const CanjeForm = () => {
       if (isEditMode && id) {
         try {
           const responseCanje = await getCanjeById(id);
+
+          console.log({ responseCanje });
+
           const { result, data } = responseCanje;
 
           if (result && data) {
             const canje = data as Canje;
 
-            // console.log({ canje });
+            console.log({ canje });
 
             const dataForm = {
               fechaCanje: canje.fecha_canje
@@ -123,8 +133,11 @@ export const CanjeForm = () => {
             // console.log("dataForm canje", dataForm);
             form.reset(dataForm);
 
-            const { fecha_maxima_canje } = canje;
+            const { fecha_maxima_canje, user_crea } = canje;
+
             setFechaMaximaCanje(fecha_maxima_canje);
+
+            setIdUserCrea(user_crea);
 
             const descansoMedico = canje.descansoMedico;
             setDescanso(descansoMedico);
@@ -154,9 +167,10 @@ export const CanjeForm = () => {
         codigo_citt: codigoCitt,
         estado_registro: estadoRegistro as ECanje,
         observacion,
+        user_crea: idUserCrea,
       };
 
-      // console.log({ payloadCanje });
+      console.log({ payloadCanje });
 
       const response = await updateCanje(id, payloadCanje);
 
@@ -177,15 +191,34 @@ export const CanjeForm = () => {
   return (
     <>
       <Card className="shadow-lg border-gray-200">
-        <CardHeader className="border-b border-gray-200">
-          <CardTitle className="text-xl font-bold text-gray-800">
-            {isEditMode ? "Actualización de canje" : "Registro de canje"}
-          </CardTitle>
-          <CardDescription className="text-sm text-gray-500">
-            {isEditMode
-              ? "Formulario de actualización de canje"
-              : "Complete el formulario para registrar un canje"}
-          </CardDescription>
+        <CardHeader className="border-b border-gray-200 flex flex-row items-center justify-between">
+          <div className="flex-shrink min-w-0">
+            <CardTitle className="text-xl font-bold text-gray-800">
+              {isEditMode ? "Actualización de canje" : "Registro de canje"}
+            </CardTitle>
+            <CardDescription className="text-sm text-gray-500">
+              {isEditMode
+                ? "Formulario de actualización de canje"
+                : "Complete el formulario para registrar un canje"}
+            </CardDescription>
+          </div>
+          <button
+            onClick={handleGoBack}
+            className="
+                        flex items-center text-sm font-semibold 
+                        text-blue-600 
+                        hover:text-blue-800 
+                        hover:bg-blue-50 
+                        transition-colors 
+                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 
+                        rounded-md p-2 ml-4 
+                        cursor-pointer
+                      "
+            aria-label="Volver al listado"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Volver
+          </button>
         </CardHeader>
         <CardContent className="pt-6">
           <Form {...form}>
@@ -254,7 +287,7 @@ export const CanjeForm = () => {
                             descanso?.fecha_inicio
                               ? HDate.formatDateTimezone(
                                   descanso.fecha_inicio,
-                                  "dd/MM/yyyy"
+                                  "dd/MM/yyyy",
                                 )
                               : ""
                           }
@@ -270,7 +303,7 @@ export const CanjeForm = () => {
                             descanso?.fecha_final
                               ? HDate.formatDateTimezone(
                                   descanso.fecha_final,
-                                  "dd/MM/yyyy"
+                                  "dd/MM/yyyy",
                                 )
                               : ""
                           }
@@ -292,7 +325,7 @@ export const CanjeForm = () => {
                             fechaMaximaCanje
                               ? HDate.formatDateTimezone(
                                   fechaMaximaCanje,
-                                  "dd/MM/yyyy"
+                                  "dd/MM/yyyy",
                                 )
                               : ""
                           }
@@ -319,7 +352,7 @@ export const CanjeForm = () => {
                           }
                           onChange={(e) =>
                             field.onChange(
-                              e.target.value ? parseISO(e.target.value) : null
+                              e.target.value ? parseISO(e.target.value) : null,
                             )
                           }
                           className={`

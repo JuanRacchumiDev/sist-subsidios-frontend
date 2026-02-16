@@ -27,6 +27,12 @@ interface ValidacionProps {
 }
 
 export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
+  console.log("---- variable form in component Validacion ----");
+  console.log({ form });
+
+  console.log("---- variable isModeLetter in component Validacion ----");
+  console.log({ isModeLetter });
+
   const { id } = useParams<{ id: string }>();
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
   const isEditMode = !!id;
@@ -41,13 +47,19 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
 
     const { nombre_perfil_url } = userProfile;
 
+    console.log("---- nombre_perfil_url in component Validacion ----");
+    console.log({ nombre_perfil_url });
+
     // Lógica para el perfil "especialista-sophia-human"
     if (nombre_perfil_url === "especialista-empresa") {
-      Object.values(EDescansoMedico).forEach((estado) => {
-        if (estado !== EDescansoMedico.REGISTRO_EXITOSO) {
-          estadosPermitidos.push(estado);
-        }
-      });
+      estadosPermitidos.push(EDescansoMedico.REGISTRO_INGRESADO);
+      estadosPermitidos.push(EDescansoMedico.DOCUMENTACION_INCORRECTA);
+      // Object.values(EDescansoMedico).forEach((estado) => {
+      //   if (estado !== EDescansoMedico.REGISTRO_EXITOSO) {
+      //     estadosPermitidos.push(estado);
+      //   }
+      //   // estadosPermitidos.push(estado);
+      // });
 
       // if (isEditMode) {
       //   // console.log("modo edición");
@@ -71,11 +83,14 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
       //   isDisabled = false;
       // }
     } else if (nombre_perfil_url === "especialista-sophia-human") {
-      Object.values(EDescansoMedico).forEach((estado) => {
-        if (estado !== EDescansoMedico.REGISTRO_INGRESADO) {
-          estadosPermitidos.push(estado);
-        }
-      });
+      estadosPermitidos.push(EDescansoMedico.REGISTRO_INGRESADO);
+      estadosPermitidos.push(EDescansoMedico.REGISTRO_EXITOSO);
+      estadosPermitidos.push(EDescansoMedico.DOCUMENTACION_INCORRECTA);
+      // Object.values(EDescansoMedico).forEach((estado) => {
+      //   if (estado !== EDescansoMedico.REGISTRO_INGRESADO) {
+      //     estadosPermitidos.push(estado);
+      //   }
+      // });
     } else if (nombre_perfil_url === "colaborador") {
       // Lógica para el perfil "colaborador"
       if (isEditMode) {
@@ -99,7 +114,7 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
       isDisabled = false; // El administrador tiene permiso para editar
     }
 
-    form.setValue("estadoRegistro", "");
+    // form.setValue("estadoRegistro", "");
 
     return { estadosPermitidos, isDisabled };
   }, [userProfile, isEditMode, form]);
@@ -124,7 +139,7 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
         render={({ field, fieldState }) => (
           <FormItem>
             <RequiredLabel>Estado del registro</RequiredLabel>
-            <Select onValueChange={field.onChange} value={field.value ?? ""}>
+            <Select onValueChange={field.onChange} value={field.value}>
               <FormControl>
                 <SelectTrigger
                   className={`

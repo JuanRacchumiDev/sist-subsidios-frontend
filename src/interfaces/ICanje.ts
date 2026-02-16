@@ -33,6 +33,7 @@ export interface Canje {
     mes_devengado?: string
     nombre_tipodescansomedico?: string
     nombre_tipocontingencia?: string
+    user_crea?: string
     estado_registro?: ECanje
     descansoMedico?: DescansoMedico
     colaborador?: Colaborador

@@ -196,6 +196,10 @@ function App() {
                       path="/reembolso/nuevo"
                       element={<ReembolsoFormPage />}
                     ></Route>
+                    <Route
+                      path="/reembolso/editar/:id"
+                      element={<ReembolsoFormPage />}
+                    ></Route>
 
                     <Route path="/cobro" element={<CobroListPage />}></Route>
                     <Route

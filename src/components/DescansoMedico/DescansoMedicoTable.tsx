@@ -116,6 +116,8 @@ export const DescansoMedicoTable = () => {
         // if (id_usuario) {
         //   cleanFilters["user_crea"] = id_usuario;
         // }
+      } else if (nombre_perfil_url === "colaborador") {
+        cleanFilters["user_crea"] = id_usuario;
       }
 
       console.log({ cleanFilters });
