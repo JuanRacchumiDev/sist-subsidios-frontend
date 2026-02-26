@@ -108,8 +108,7 @@ export const TrabajadorSocialFilterModal: React.FC<
   useEffect(() => {
     setLocalFilters({
       id_tipodocumento: currentFilters.id_tipodocumento || undefined,
-      //   id_cargo: currentFilters.id_cargo || undefined,
-      //   id_empresa: currentFilters.id_empresa || undefined,
+      id_empresa: currentFilters.id_empresa || undefined,
       numero_documento: currentFilters.numero_documento || "",
       nombre_completo: currentFilters.nombre_completo || "",
       nombreGrupo: currentFilters.nombreGrupo || "",
@@ -137,20 +136,15 @@ export const TrabajadorSocialFilterModal: React.FC<
     fetchData();
   }, []);
 
-  // Manejador genérico para <input> (texto y fecha)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    // Guardamos la cadena vacía, y al aplicar, la transformamos a undefined
     setLocalFilters((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  // Manejador específico para <Select>
   const handleSelectChange = (name: keyof PersonaFilter, value: string) => {
-    // Si el valor es "null-filter" (nuestra convención para limpiar), guardamos undefined.
-    // Si es un ID válido, lo guardamos.
     setLocalFilters((prev) => ({
       ...prev,
       [name]: value === "null-filter" ? undefined : value,
@@ -158,34 +152,28 @@ export const TrabajadorSocialFilterModal: React.FC<
   };
 
   const handleApply = () => {
-    // 1. Limpiar los valores (cadenas vacías o `null-filter`) a `undefined` para el servicio
     const filtersToApply: PersonaFilter = Object.fromEntries(
       Object.entries(localFilters).map(([key, value]) => {
-        // Los select están en `undefined` si están limpios.
         if (
-          key === "id_tipodocumento"
-          //   key === "id_tipodocumento" ||
-          //   key === "id_cargo" ||
-          //   key === "id_empresa"
+          key === "id_tipodocumento" ||
+          key === "id_tipodocumento" ||
+          key === "id_empresa" ||
+          key === "nombreGrupo"
         ) {
           return [key, value];
         }
-        // Los inputs de texto/fecha están en `""` si están vacíos.
         return [key, value === "" || value === null ? undefined : value];
       }),
     ) as PersonaFilter;
 
     onApplyFilters(filtersToApply);
-    onClose(); // Cerrar el modal después de aplicar
+    onClose();
   };
 
   const handleClear = () => {
     const emptyFilters: PersonaFilter = {
-      // Usamos `undefined` para filtros de ID (selects)
       id_tipodocumento: undefined,
-      //   id_cargo: undefined,
-      //   id_empresa: undefined,
-      // Usamos `""` para los inputs (texto/fecha) para limpiar visualmente
+      id_empresa: undefined,
       numero_documento: "",
       nombre_completo: "",
       nombreGrupo: "",
@@ -195,9 +183,7 @@ export const TrabajadorSocialFilterModal: React.FC<
     onClose();
   };
 
-  // Función auxiliar para obtener el valor del select
   const getSelectValue = (key: keyof PersonaFilter) => {
-    // El valor en el Select debe ser una cadena. Si es undefined, usamos nuestra convención "null-filter".
     return localFilters[key] || "null-filter";
   };
 

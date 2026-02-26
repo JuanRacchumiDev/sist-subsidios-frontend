@@ -44,7 +44,6 @@ export const EmpresaTable = () => {
   const [refreshToggle, setRefreshToggle] = useState(0);
 
   const handleEmpresaStatusChange = () => {
-    // Incrementa el toggle. Esto NO cambia la tabla, pero fuerza el useEffect a ejecutarse.
     setRefreshToggle((prev) => prev + 1);
   };
 
@@ -74,8 +73,12 @@ export const EmpresaTable = () => {
         const response = await getEmpresasWithPaginate(
           currentPage,
           limit,
-          filterQuery
+          filterQuery,
         );
+
+        console.log({ filterQuery });
+
+        console.log({ response });
 
         const { result, data, pagination: detailPagination } = response;
 
@@ -112,7 +115,7 @@ export const EmpresaTable = () => {
       items.push(
         <PaginationItem key="ellipsis-start">
           <PaginationEllipsis />
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
 
@@ -132,7 +135,7 @@ export const EmpresaTable = () => {
           >
             {i}
           </PaginationLink>
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
 
@@ -140,7 +143,7 @@ export const EmpresaTable = () => {
       items.push(
         <PaginationItem key="ellipsis-end">
           <PaginationEllipsis />
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
     return items;

@@ -20,8 +20,6 @@ import { getEmpresaById } from "../../services/empresaService";
 import { Empresa } from "../../interfaces/IEmpresa";
 import { getPersonaById } from "../../services/personaService";
 import { Persona } from "../../interfaces/IPersona";
-// import { getColaboradorById } from "@/services/colaboradorService";
-// import { Colaborador } from "@/interfaces/IColaborador";
 
 interface DocumentosRequeridosProps {
   documentos: DocumentoTipoContingencia[];
@@ -40,7 +38,6 @@ export const Documentos = ({
 
   useEffect(() => {
     adjuntosExistentes.forEach((adjunto) => {
-      // Usamos `id_documento` para mapear el adjunto con el documento requerido
       if (adjunto.id_documento) {
         form.setValue(`documentos.${adjunto.id_documento}`, adjunto.id);
       }
@@ -72,7 +69,7 @@ export const Documentos = ({
 
   const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    idDocumento: string
+    idDocumento: string,
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -83,7 +80,6 @@ export const Documentos = ({
     const idColaborador = form.getValues("idColaborador");
     console.log({ idColaborador });
 
-    // Create FormData object
     const formData = new FormData();
     formData.append("file", file);
     formData.append("id_documento", idDocumento);
@@ -91,7 +87,6 @@ export const Documentos = ({
     console.log("---- formData v1 ----");
     console.log({ formData });
 
-    // Obteniendo datos de la empresa seleccionada
     if (idEmpresa) {
       const responseEmpresa = await getEmpresaById(idEmpresa);
       console.log("response empresa", responseEmpresa);
@@ -105,9 +100,7 @@ export const Documentos = ({
     console.log("---- formData v2 ----");
     console.log({ formData });
 
-    // Obteniendo datos del colaborador seleccionado
     if (idColaborador) {
-      // const responseColaborador = await getColaboradorById(idColaborador);
       const responseColaborador = await getPersonaById(idColaborador);
       console.log({ responseColaborador });
       const { result, data } = responseColaborador;
@@ -122,7 +115,6 @@ export const Documentos = ({
 
     try {
       const response = await uploadAdjunto(formData);
-      // console.log("response upload file", response);
 
       console.log("---- response uploadAdjunto ----");
       console.log({ response });
@@ -150,9 +142,8 @@ export const Documentos = ({
       </h3>
       {documentos.map((doc) => {
         const uploadedFileId = form.watch(`documentos.${doc.id}`);
-        // Determina si existe un adjunto en los datos pasados por props
         const existingAdjunto = adjuntosExistentes.find(
-          (adj) => adj.id_documento === doc.id
+          (adj) => adj.id_documento === doc.id,
         );
         const fileIdToUse = uploadedFileId || existingAdjunto?.id || null;
 
@@ -162,7 +153,6 @@ export const Documentos = ({
             control={form.control}
             name={`documentos.${doc.id}`}
             render={() => {
-              // const uploadedFileId = form.watch(`documentos.${doc.id}`);
               return (
                 <FormItem>
                   <RequiredLabel>{doc.nombre}</RequiredLabel>

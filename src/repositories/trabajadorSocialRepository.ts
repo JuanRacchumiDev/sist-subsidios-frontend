@@ -25,7 +25,6 @@ export const getAll = async (): Promise<TrabajadorSocialResponse> => {
 export const getAllWithPaginate = async (queryParams: string) => {
     try {
         const urlApi = `${'/trab-sociales/paginate?'}${queryParams}`
-        // console.log({ urlApi })
 
         const response = await apiClient.get(urlApi)
 

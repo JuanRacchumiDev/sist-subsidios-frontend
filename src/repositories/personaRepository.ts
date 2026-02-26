@@ -24,7 +24,6 @@ export const getAll = async (): Promise<PersonaResponse> => {
 
 export const getAllWithPaginate = async (queryParams: string) => {
     try {
-        // const urlApi = `${'/trab-sociales/paginate?'}${queryParams}`
         const urlApi = `${'/personas/buscar-por-grupo/paginate?'}${queryParams}`
         console.log({ urlApi })
 
@@ -70,9 +69,32 @@ export const getAllByEmpresa = async (idEmpresa: string): Promise<PersonaRespons
     }
 }
 
+export const getByEmpresaWithGrupo = async (queryParams: string) => {
+    try {
+        const urlApi = `${'/personas/buscar-unico?'}${queryParams}`
+        console.log({ urlApi })
+
+        const response = await apiClient.get(urlApi)
+
+        const { data: { result, data, status, message, error } } = response
+
+        return {
+            result,
+            data,
+            status,
+            message,
+            error
+        }
+
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+        console.log('errorMessage', errorMessage)
+        return { result: false, error: errorMessage, status: 500 }
+    }
+}
+
 export const getAllByEmpresaWithGrupo = async (queryParams: string) => {
     try {
-        // const urlApi = `${'/trab-sociales/paginate?'}${queryParams}`
         const urlApi = `${'/personas/buscar-por-empresa-por-grupo?'}${queryParams}`
         console.log({ urlApi })
 

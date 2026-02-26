@@ -30,8 +30,6 @@ import {
 
 import { getEmpresas } from "../../services/empresaService";
 import { getDetalles } from "../../services/detalleParametroService";
-// import { getTipoDocumentos } from "../../services/tipoDocumentoService";
-// import { getCargos } from "../../services/cargoService";
 import {
   getPersonaByIdTipoDocAndNumDoc,
   getPersonaById,
@@ -97,8 +95,6 @@ const formSchema = z.object({
     message: "El número de celular debe tener al menos 9 dígitos.",
   }),
   fechaIngreso: z.date().optional(),
-  //   esAsociadoSindicato: z.boolean().optional(),
-  //   esPresentaInconvenientes: z.boolean().optional(),
 });
 
 const getTipoDocumentos = async (): Promise<Detalle[]> => {
@@ -144,21 +140,6 @@ const getCargos = async (): Promise<Detalle[]> => {
     return [];
   }
 };
-
-// type TEmpresa = {
-//   id: string;
-//   nombre_o_razon_social: string;
-// };
-
-// type TTipoDocumento = {
-//   id: string;
-//   abreviatura: string;
-// };
-
-// type TCargo = {
-//   id: string;
-//   nombre: string;
-// };
 
 type TPersona = {
   idTipoDocumento?: string;
@@ -215,8 +196,6 @@ export const EspecialistaClienteForm = () => {
       emailPersonal: "",
       telefono: "",
       fechaIngreso: null,
-      //   esAsociadoSindicato: false,
-      //   esPresentaInconvenientes: false,
     };
 
     form.reset(dataForm);
@@ -239,8 +218,6 @@ export const EspecialistaClienteForm = () => {
       emailPersonal: "",
       telefono: "",
       fechaIngreso: null,
-      //   esAsociadoSindicato: false,
-      //   esPresentaInconvenientes: false,
     },
   });
 
@@ -249,7 +226,6 @@ export const EspecialistaClienteForm = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log({ values });
     let messageError: string = "";
-    // let response: RepresentanteLegalResponse;
     let response: PersonaResponse;
 
     const {
@@ -267,8 +243,6 @@ export const EspecialistaClienteForm = () => {
       emailInstitucional,
       emailPersonal,
       telefono,
-      // esAsociadoSindicato,
-      // esPresentaInconvenientes,
     } = values;
 
     const nombreCompleto: string = `${nombres} ${apellidoPaterno} ${apellidoMaterno}`;
@@ -307,8 +281,6 @@ export const EspecialistaClienteForm = () => {
       email_personal: emailPersonal,
       telefono,
       nombre_grupo: "GRUPO ESPECIALISTA EMPRESA",
-      // is_asociado_sindicato: esAsociadoSindicato,
-      // is_presenta_inconvenientes: esPresentaInconvenientes,
     };
 
     console.log("---- payload persona ----");
@@ -366,16 +338,6 @@ export const EspecialistaClienteForm = () => {
 
         listCargos = responseCargos as Detalle[];
 
-        // const { result: resultTipos, data: dataTipos } = responseTipoDocumentos;
-        // if (resultTipos && dataTipos) {
-        //   listTipoDocumentos = dataTipos as TTipoDocumento[];
-        // }
-
-        // const { result: resultCargos, data: dataCargos } = responseCargos;
-        // if (resultCargos && dataCargos) {
-        //   listCargos = dataCargos as TCargo[];
-        // }
-
         setEmpresas(listEmpresas);
         setTipos(listTipoDocumentos);
         setCargos(listCargos);
@@ -406,8 +368,6 @@ export const EspecialistaClienteForm = () => {
               email_institucional,
               email_personal,
               telefono,
-              //   is_asociado_sindicato,
-              //   is_presenta_inconvenientes,
             } = especialistaCliente;
 
             dataForm.idTipoDocumento = id_tipodocumento || "";
@@ -428,10 +388,6 @@ export const EspecialistaClienteForm = () => {
             dataForm.emailInstitucional = email_institucional || "";
             dataForm.emailPersonal = email_personal || "";
             dataForm.telefono = telefono || "";
-            // dataForm.esAsociadoSindicato = is_asociado_sindicato || false;
-            // dataForm.esPresentaInconvenientes =
-            //   is_presenta_inconvenientes || false;
-
             form.reset(dataForm);
           } else {
             showToast("error", message || "Especialista cliente no encontrado");
@@ -446,7 +402,6 @@ export const EspecialistaClienteForm = () => {
 
     fetchData();
   }, [id, form]);
-  // [id, form, navigate, showToast]
 
   return (
     <>
@@ -604,7 +559,6 @@ export const EspecialistaClienteForm = () => {
                                   }
                                 } catch (error) {
                                   setCamposHabilitadosPersona(true);
-                                  // showErrorToast("Error al crear persona");
                                   showToast("error", "Error al crear persona");
                                 }
                               }
@@ -959,62 +913,10 @@ export const EspecialistaClienteForm = () => {
                             `}
                           />
                         </FormControl>
-                        {/* <FormDescription>
-                          {field.value
-                            ? format(field.value, "PPP")
-                            : "Seleccione una fecha"}
-                        </FormDescription> */}
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
-                  {/* <FormField
-                    control={form.control}
-                    name="esAsociadoSindicato"
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="flex items-center space-x-2">
-                          <Input
-                            type="checkbox"
-                            id="acceptSindicato"
-                            checked={field.value}
-                            onChange={field.onChange}
-                            className="w-4 h-4"
-                          />
-                          <label htmlFor="acceptSindicato" className="text-sm">
-                            Asociado a un sindicato
-                          </label>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="esPresentaInconvenientes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="flex items-center space-x-2">
-                          <Input
-                            type="checkbox"
-                            id="acceptInconvenientes"
-                            checked={field.value}
-                            onChange={field.onChange}
-                            className="w-4 h-4"
-                          />
-                          <label
-                            htmlFor="acceptInconvenientes"
-                            className="text-sm"
-                          >
-                            Presenta inconvenientes
-                          </label>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  /> */}
                 </div>
               </fieldset>
 
@@ -1043,7 +945,6 @@ export const EspecialistaClienteForm = () => {
                   className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
                   Cancelar
-                  {/* {isSubmitting ? "Cancelando..." : "Cancelar"} */}
                 </Button>
               </div>
             </form>

@@ -19,17 +19,12 @@ import * as z from "zod";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { Spinner } from "../../Common/Spinner";
-// import {
-//   createCargo,
-//   getCargoById,
-//   updateCargo,
-// } from "../../../services/cargoService";
+
 import {
   createDetalle,
   updateDetalle,
   getDetalleById,
 } from "../../../services/detalleParametroService";
-// import { Cargo, CargoResponse } from "../../../interfaces/ICargo";
 import {
   Detalle,
   DetalleResponse,
@@ -75,13 +70,7 @@ export const CargoForm = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       let messageError: string = "";
-      // let response: CargoResponse;
       let response: DetalleResponse;
-
-      // const payloadData: Cargo = {
-      //   ...values,
-      //   estado: true,
-      // };
 
       console.log({ values });
 
@@ -94,10 +83,8 @@ export const CargoForm = () => {
       if (isEditMode && id) {
         messageError = "Error al actualizar el cargo";
         response = await updateDetalle(id, payloadData);
-        // response = await updateCargo(id, payloadData);
       } else {
         messageError = "Error al registrar el cargo";
-        // response = await createCargo(payloadData);
         response = await createDetalle(payloadData);
       }
 
@@ -120,12 +107,10 @@ export const CargoForm = () => {
     const fetchData = async () => {
       try {
         if (isEditMode) {
-          // const responseCargo = await getCargoById(id);
           const responseCargo = await getDetalleById(id);
           const { result, data, message } = responseCargo;
 
           if (result && data) {
-            // const cargo = data as Cargo;
             const cargo = data as Detalle;
             form.reset({
               nombre: cargo.nombre,
@@ -176,7 +161,6 @@ export const CargoForm = () => {
         <CardContent className="pt-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> */}
               <FormField
                 control={form.control}
                 name="nombre"
@@ -203,7 +187,6 @@ export const CargoForm = () => {
                   </FormItem>
                 )}
               />
-              {/* </div> */}
               <div className="flex justify-end space-x-4 pt-4">
                 <Button
                   type="submit"
@@ -226,11 +209,9 @@ export const CargoForm = () => {
                   variant="outline"
                   disabled={isSubmitting}
                   onClick={() => resetForm()}
-                  // onClick={() => navigate("/mantenimiento/cargo")}
                   className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
                   Cancelar
-                  {/* {isSubmitting ? "Cancelando..." : "Cancelar"} */}
                 </Button>
               </div>
             </form>

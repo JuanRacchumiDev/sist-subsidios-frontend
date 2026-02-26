@@ -38,11 +38,11 @@ import {
 } from "../ui/collapsible";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-import { DescansoMedico } from "@/interfaces/IDescansoMedico";
+import { DescansoMedico } from "../../interfaces/IDescansoMedico";
 import { Canje } from "../../interfaces/ICanje";
-import { getCanjeById, updateCanje } from "@/services/canjeService";
+import { getCanjeById, updateCanje } from "../../services/canjeService";
 import { useToast } from "../../context/ToastContext";
-import HDate from "@/helpers/HDate";
+import HDate from "../../helpers/HDate";
 import { ArrowLeft } from "lucide-react";
 
 export const formSchema = z.object({
@@ -130,7 +130,6 @@ export const CanjeForm = () => {
               estadoRegistro: canje.estado_registro,
               observacion: canje.observacion || "",
             };
-            // console.log("dataForm canje", dataForm);
             form.reset(dataForm);
 
             const { fecha_maxima_canje, user_crea } = canje;
@@ -223,7 +222,6 @@ export const CanjeForm = () => {
         <CardContent className="pt-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Sección de campos de solo lectura */}
               <Collapsible
                 className="w-full space-y-2"
                 open={isOpen}
@@ -335,7 +333,6 @@ export const CanjeForm = () => {
                   </div>
                 </CollapsibleContent>
               </Collapsible>
-              {/* Fin de la sección de campos de solo lectura */}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField

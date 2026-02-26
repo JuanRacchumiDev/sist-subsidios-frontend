@@ -26,7 +26,6 @@ export const getAll = async (): Promise<DocumentoTipoContingenciaResponse> => {
 
 export const getAllWithPaginate = async (queryParams: string) => {
     try {
-        // const urlApi = `${'/documentos-tipo-contingencia/paginate?page='}${page}${'&limit='}${limit}`
         const urlApi = `${'/documentos-tipo-contingencia/paginate?'}${queryParams}`
         console.log({ urlApi })
 

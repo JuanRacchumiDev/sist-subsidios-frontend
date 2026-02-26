@@ -63,15 +63,10 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
               variant="outline"
               role="combobox"
               className={cn(
-                // Ajustado el ancho para evitar que sea fijo y mejor manejo de texto
                 "w-full justify-between overflow-hidden text-ellipsis whitespace-nowrap",
                 !value && "text-muted-foreground",
                 isInvalid ? "border-red-500" : "focus:ring-blue-500",
                 disabled && "opacity-70 cursor-not-allowed bg-gray-50 italic",
-                // isInvalid
-                //   ? "border-red-500 focus:ring-red-500"
-                //   : "focus:ring-blue-500",
-                // "focus:ring-2 focus:ring-offset-2 transition-all duration-300 h-10 px-3 py-2" // Altura y padding estándar
               )}
               disabled={disabled}
             >
@@ -93,7 +88,6 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
               <CommandGroup className="p-1">
                 {Array.isArray(options) &&
                   options.map((option) => {
-                    // Generar un valor de búsqueda que combine los campos especificados en `searchKeys`
                     const searchValue = searchKeys
                       .map((key) => option[key])
                       .join(" ")
@@ -109,17 +103,17 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
                         }}
                         className={cn(
                           "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors duration-150 ease-in-out",
-                          "", // Estilo para el seleccionado
+                          "",
                           "hover:bg-blue-50 hover:text-blue-700",
                           value === option[valueKey] &&
-                            "bg-blue-50 font-medium text-blue-700", // Estilo para el elemento actualmente seleccionado
+                            "bg-blue-50 font-medium text-blue-700",
                         )}
                       >
                         <Check
                           className={cn(
                             "mr-2 h-4 w-4",
                             value === option[valueKey]
-                              ? "opacity-100" // Color azul para el check
+                              ? "opacity-100"
                               : "opacity-0",
                           )}
                         />

@@ -16,13 +16,9 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import {
-  getDescansosWithPaginate,
-  // getDescansosByColaboradorWithPaginate,
-} from "../../services/descansoMedicoService";
+import { getDescansosWithPaginate } from "../../services/descansoMedicoService";
 import {
   DescansoMedico,
-  DescansoMedicoPaginateResponse,
   Pagination as PaginationType,
   DescansoMedicoFilter,
 } from "../../interfaces/IDescansoMedico";
@@ -33,7 +29,6 @@ import { DescansoMedicoFilterModal } from "./DescansoMedicoFilterModal";
 import { Button } from "../ui/button";
 import { TableSpinner } from "../Common/TableSpinner";
 
-// Definimos el estado inicial de los filtros
 const initialFilters: DescansoMedicoFilter = {
   id_tipodescansomedico: undefined,
   id_tipocontingencia: undefined,
@@ -61,7 +56,6 @@ export const DescansoMedicoTable = () => {
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
 
   const handleApplyFilters = (newFilters: DescansoMedicoFilter) => {
-    // Asegurar que las cadenas vacías de los Inputs se conviertan a `undefined` al aplicar
     const cleanedFilters: DescansoMedicoFilter = Object.fromEntries(
       Object.entries(newFilters).map(([key, value]) => [
         key,
@@ -80,119 +74,37 @@ export const DescansoMedicoTable = () => {
     }
   };
 
-  // useEffect(() => {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
 
     try {
-      let response: DescansoMedicoPaginateResponse = null;
-
-      console.log({ userProfile });
-
       const { nombre_perfil_url, id_empresa, id_usuario } = userProfile;
-
-      console.log({ nombre_perfil_url });
-
-      console.log({ id_usuario });
-
       const { currentPage, limit } = pagination;
 
-      // Limpia los filtros (elimina `undefined` para no enviar el query param)
-      const cleanFilters = Object.fromEntries(
-        Object.entries(filters).filter(
-          ([, value]) => value !== undefined && value !== null && value !== "",
-        ),
-      ) as DescansoMedicoFilter;
+      const cleanFilters: DescansoMedicoFilter = { ...filters };
 
       if (nombre_perfil_url === "especialista-empresa") {
-        if (id_empresa) {
-          cleanFilters["id_empresa"] = id_empresa;
-        }
-
-        // if (id_usuario) {
-        //   cleanFilters["user_crea"] = id_usuario;
-        // }
-      } else if (nombre_perfil_url === "especialista-sophia-human") {
-        // if (id_usuario) {
-        //   cleanFilters["user_crea"] = id_usuario;
-        // }
+        if (id_empresa) cleanFilters["id_empresa"] = id_empresa;
       } else if (nombre_perfil_url === "colaborador") {
         cleanFilters["user_crea"] = id_usuario;
       }
 
-      console.log({ cleanFilters });
-
-      response = await getDescansosWithPaginate(
+      const response = await getDescansosWithPaginate(
         currentPage,
         limit,
         cleanFilters,
       );
 
-      // if (nombre_perfil_url === "especialista-empresa") {
-      //   if (id_empresa) {
-      //     cleanFilters["id_empresa"] = id_empresa;
-      //   }
-
-      //   response = await getDescansosByEmpresaWithPaginate(
-      //     currentPage,
-      //     limit,
-      //     cleanFilters,
-      //   );
-      // } else if (
-      //   nombre_perfil_url === "especialista-sophia-human" ||
-      //   nombre_perfil_url === "administrador"
-      // ) {
-      //   response = await getDescansosWithPaginate(
-      //     currentPage,
-      //     limit,
-      //     cleanFilters,
-      //   );
-      // } else if (nombre_perfil_url === "colaborador") {
-      //   if () {
-
-      //   }
-
-      //   response = await getDescansosByColaboradorWithPaginate(
-      //     currentPage,
-      //     limit,
-      //     cleanFilters,
-      //   );
-      // }
-
-      // if (nombre_perfil_url && id_persona) {
-      //   console.log("existe nombre_perfil_url y id_persona");
-      //   response = await getDescansosByColaboradorWithPaginate(
-      //     id_persona,
-      //     currentPage,
-      //     limit,
-      //     cleanFilters,
-      //   );
-      // } else {
-      //   console.log("no existe nombre_perfil_url y id_persona");
-      //   response = await getDescansosWithPaginate(
-      //     currentPage,
-      //     limit,
-      //     cleanFilters,
-      //   );
-      // }
-
-      console.log({ response });
-
       const { result, data, pagination: detailPagination } = response;
+
+      console.log("---- data descansos ----");
+      console.log({ data });
 
       if (result && data && detailPagination) {
         setDescansos(data);
         setPagination(detailPagination);
       } else {
         setDescansos([]);
-        setPagination({
-          currentPage: 1,
-          limit: 10,
-          totalPages: 1,
-          totalItems: 0,
-          nextPage: null,
-          previousPage: null,
-        });
       }
     } catch (error) {
       console.error("Error al obtener colaboradores", error);
@@ -200,9 +112,6 @@ export const DescansoMedicoTable = () => {
       setIsLoading(false);
     }
   }, [pagination.currentPage, pagination.limit, userProfile, filters]);
-
-  //   fetchData();
-  // }, [pagination.currentPage, pagination.limit]);
 
   useEffect(() => {
     fetchData();
@@ -221,7 +130,6 @@ export const DescansoMedicoTable = () => {
       );
     }
 
-    // for (let i = 1; i < pagination.totalPages; i++) {
     for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
@@ -261,7 +169,6 @@ export const DescansoMedicoTable = () => {
           className="flex items-center space-x-2 border-blue-500 text-blue-500 hover:bg-blue-50 hover:text-blue-600 hover:cursor-pointer transition"
         >
           <FilterIcon className="w-4 h-4" />
-          {/* Contar los filtros aplicados (valores que no son undefined/null/vacío) */}
           <span>
             Filtros (
             {
@@ -277,9 +184,6 @@ export const DescansoMedicoTable = () => {
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-100">
-              {/* <TableHead className="text-gray-600 font-medium">
-                Código
-              </TableHead> */}
               <TableHead className="text-gray-600 font-medium">
                 Colaborador
               </TableHead>
@@ -308,9 +212,6 @@ export const DescansoMedicoTable = () => {
               <TableHead className="text-gray-600 font-medium">
                 Estado
               </TableHead>
-              {/* <TableHead className="text-gray-600 font-medium">
-                Subsidiado
-              </TableHead> */}
               <TableHead className="text-gray-600 font-medium">
                 Acciones
               </TableHead>

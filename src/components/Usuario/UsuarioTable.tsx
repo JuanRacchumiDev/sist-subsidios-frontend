@@ -31,6 +31,8 @@ import { TableSpinner } from "../Common/TableSpinner";
 const initialFilters: UsuarioFilter = {
   id_perfil: undefined,
   nombre_persona: undefined,
+  username: undefined,
+  email: undefined,
 };
 
 export const UsuarioTable = () => {
@@ -50,12 +52,10 @@ export const UsuarioTable = () => {
   const [refreshToggle, setRefreshToggle] = useState(0);
 
   const handleUsuarioStatusChange = () => {
-    // Incrementa el toggle. Esto NO cambia la tabla, pero fuerza el useEffect a ejecutarse.
     setRefreshToggle((prev) => prev + 1);
   };
 
   const handleApplyFilters = (newFilters: UsuarioFilter) => {
-    // Asegurar que las cadenas vacías de los Inputs se conviertan a `undefined` al aplicar
     const cleanedFilters: UsuarioFilter = Object.fromEntries(
       Object.entries(newFilters).map(([key, value]) => [
         key,
@@ -74,18 +74,19 @@ export const UsuarioTable = () => {
     }
   };
 
-  // useEffect(() => {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
+
     try {
       const { currentPage, limit } = pagination;
 
-      // Limpia los filtros (elimina `undefined` para no enviar el query param)
       const cleanFilters = Object.fromEntries(
         Object.entries(filters).filter(
           ([, value]) => value !== undefined && value !== null && value !== "",
         ),
-      );
+      ) as UsuarioFilter;
+
+      console.log({ cleanFilters });
 
       const response = await getUsuariosWithPaginate(
         currentPage,
@@ -93,7 +94,7 @@ export const UsuarioTable = () => {
         cleanFilters,
       );
 
-      // console.log({ response });
+      console.log({ response });
 
       const { result, data, pagination: detailPagination } = response;
 
@@ -102,14 +103,6 @@ export const UsuarioTable = () => {
         setPagination(detailPagination);
       } else {
         setUsuarios([]);
-        setPagination({
-          currentPage: 1,
-          limit: 10,
-          totalPages: 1,
-          totalItems: 0,
-          nextPage: null,
-          previousPage: null,
-        });
       }
     } catch (error) {
       console.error("Error al obtener usuarios", error);
@@ -117,9 +110,6 @@ export const UsuarioTable = () => {
       setIsLoading(false);
     }
   }, [pagination.currentPage, pagination.limit, filters, refreshToggle]);
-
-  // fetchData();
-  // }, [pagination.currentPage, pagination.limit]);
 
   useEffect(() => {
     fetchData();
@@ -138,7 +128,6 @@ export const UsuarioTable = () => {
       );
     }
 
-    // for (let i = 1; i < pagination.totalPages; i++) {
     for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
@@ -171,9 +160,7 @@ export const UsuarioTable = () => {
 
   return (
     <div className="w-full space-y-4 pt-4">
-      {/* <div className="pb-4 pt-4 flex justify-between items-center"> */}
       <div className="flex justify-end items-center space-x-2 pb-4">
-        {/* <h2 className="text-xl font-semibold">Listado de usuarios</h2> */}
         <Button
           variant="outline"
           onClick={() => setIsFilterModalOpen(true)}
@@ -190,11 +177,6 @@ export const UsuarioTable = () => {
             )
           </span>
         </Button>
-        {/* <Input
-          type="text"
-          placeholder="Buscar por razón social o RUC"
-          className="w-72 border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
-        /> */}
       </div>
       <div className="rounded-md border border-gray-200 shadow-sm">
         <Table>
@@ -203,9 +185,6 @@ export const UsuarioTable = () => {
               <TableHead className="text-gray-600 font-medium">
                 Nombre de Usuario
               </TableHead>
-              {/* <TableHead className="text-gray-600 font-medium">
-                Persona
-              </TableHead> */}
               <TableHead className="text-gray-600 font-medium">Email</TableHead>
               <TableHead className="text-gray-600 font-medium">
                 Perfil

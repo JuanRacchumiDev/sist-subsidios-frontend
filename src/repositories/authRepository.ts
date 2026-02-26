@@ -9,15 +9,9 @@ export const login = async (email: string, password: string): Promise<TAuthRespo
             password
         }
 
-        // console.log({ credenciales })
-
         const response = await apiClient.post('/auth/login', credenciales)
 
-        // console.log({ response })
-
         const { data: dataAuth, status: statusAuth } = response
-
-        // console.log({ dataAuth })
 
         const { message, result, usuario, status, token, error } = dataAuth
 

@@ -1,7 +1,5 @@
-import { Colaborador } from "./IColaborador"
 import { Perfil } from "./IPerfil"
 import { Persona } from "./IPersona"
-import { TrabajadorSocial } from "./ITrabajadorSocial"
 
 export interface Usuario {
     id?: string
@@ -22,8 +20,6 @@ export interface Usuario {
     estado?: boolean
     perfil?: Perfil
     persona?: Persona
-    // colaborador?: Colaborador
-    // trabajadorSocial?: TrabajadorSocial
 }
 
 export interface UsuarioResponse {
@@ -52,6 +48,8 @@ export interface UsuarioPaginateResponse {
 }
 
 export interface UsuarioFilter {
-    nombre_persona?: string
     id_perfil?: string
+    nombre_persona?: string
+    username?: string
+    email?: string
 }

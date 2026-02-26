@@ -36,8 +36,8 @@ export const EspecialistaSHRow: React.FC<Props> = ({
   const { showToast } = useToast();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // ⬅️ Estado para el modal
-  const [isProcessing, setIsProcessing] = useState(false); // ⬅️ Estado para el loading
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const navigate = useNavigate();
 
@@ -70,10 +70,6 @@ export const EspecialistaSHRow: React.FC<Props> = ({
     setIsProcessing(true);
 
     try {
-      // const payload: TrabajadorSocial = {
-      //   estado: nuevoEstado,
-      // };
-
       const payload: Persona = {
         estado: nuevoEstado,
       };
@@ -82,9 +78,6 @@ export const EspecialistaSHRow: React.FC<Props> = ({
         especialistaSH.id,
         payload,
       );
-
-      // const { result, data, message, error } =
-      //   response as TrabajadorSocialResponse;
 
       const { result, data, message, error } = response as PersonaResponse;
 
@@ -95,7 +88,6 @@ export const EspecialistaSHRow: React.FC<Props> = ({
             "Estado del especialista Sophia Human actualizado con éxito.",
         );
 
-        // Si hay una función de callback, llamarla para actualizar la tabla padre
         if (onStatusChange) {
           onStatusChange(especialistaSH.id);
         }
@@ -109,12 +101,11 @@ export const EspecialistaSHRow: React.FC<Props> = ({
       console.error("Error en la actualización de estado:", error);
       showToast("error", "Error de conexión al intentar actualizar.");
     } finally {
-      setIsProcessing(false); // Desactiva el loading
-      handleCloseModal(); // Cierra el modal
+      setIsProcessing(false);
+      handleCloseModal();
     }
   };
 
-  // Determinar texto y color de acción
   const actionText = especialistaSH.estado ? "Desactivar" : "Activar";
   const ActionIcon = especialistaSH.estado ? ToggleLeft : ToggleRight;
   const actionColor = especialistaSH.estado ? "text-red-600" : "text-green-600";
@@ -149,7 +140,6 @@ export const EspecialistaSHRow: React.FC<Props> = ({
             <DropdownMenuTrigger
               asChild
               className="focus:outline-none focus:ring-2 z-40 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer"
-              // className="bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer"
             >
               <Button variant="ghost" className="h-8 w-8 p-0">
                 <span className="sr-only">Abrir menú de acciones</span>
@@ -180,9 +170,6 @@ export const EspecialistaSHRow: React.FC<Props> = ({
                 <ActionIcon className="h-4 w-4" />
                 <span>{actionText} Especialista SH</span>
               </DropdownMenuItem>
-              {/* <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 transition-colors">
-                Eliminar
-              </DropdownMenuItem> */}
             </DropdownMenuContent>
           </DropdownMenu>
         </TableCell>

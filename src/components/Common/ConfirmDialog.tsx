@@ -10,7 +10,7 @@ interface ConfirmDialogProps {
   message: React.ReactNode;
   confirmText?: string;
   cancelText?: string;
-  isProcessing?: boolean; // Para deshabilitar botones durante la carga
+  isProcessing?: boolean;
   icon?: React.ReactNode;
 }
 
@@ -28,17 +28,14 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   if (!isOpen) return null;
 
   const modalContent = (
-    // Overlay (Fondo oscuro)
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black opacity-90 backdrop-blur-sm"
       onClick={onClose}
     >
-      {/* Contenedor del Modal */}
       <div
         className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 m-4 transform transition-all duration-300 scale-100"
-        onClick={(e) => e.stopPropagation()} // Previene cerrar al hacer clic dentro
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Encabezado */}
         <div className="flex justify-between items-start mb-4">
           <h2 className="text-xl font-bold text-gray-800 flex items-center">
             {icon && <span className="mr-3 text-current">{icon}</span>}
@@ -53,12 +50,10 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           </button>
         </div>
 
-        {/* Cuerpo del Mensaje */}
         <div className="mb-6 text-gray-600">
           <p>{message}</p>
         </div>
 
-        {/* Acciones (Botones) */}
         <div className="flex justify-end space-x-3">
           <button
             onClick={onClose}

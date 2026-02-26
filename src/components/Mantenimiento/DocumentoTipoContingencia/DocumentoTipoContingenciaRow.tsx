@@ -41,8 +41,8 @@ export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
   const { showToast } = useToast();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // ⬅️ Estado para el modal
-  const [isProcessing, setIsProcessing] = useState(false); // ⬅️ Estado para el loading
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const navigate = useNavigate();
 
@@ -93,7 +93,6 @@ export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
           message || "Estado del documento actualizado con éxito.",
         );
 
-        // Si hay una función de callback, llamarla para actualizar la tabla padre
         if (onStatusChange) {
           onStatusChange(documento.id);
         }
@@ -104,8 +103,8 @@ export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
       console.error("Error en la actualización de estado:", error);
       showToast("error", "Error de conexión al intentar actualizar.");
     } finally {
-      setIsProcessing(false); // Desactiva el loading
-      handleCloseModal(); // Cierra el modal
+      setIsProcessing(false);
+      handleCloseModal();
     }
   };
 
@@ -135,12 +134,10 @@ export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
           )}
         </TableCell>
         <TableCell className="py-3">
-          {/* w-72 border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300 */}
           <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
             <DropdownMenuTrigger
               asChild
               className="focus:outline-none focus:ring-2 z-40 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer"
-              // className="bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer"
             >
               <Button variant="ghost" className="h-8 w-8 p-0">
                 <span className="sr-only">Abrir menú de acciones</span>
@@ -173,10 +170,6 @@ export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
                 <ActionIcon className="h-4 w-4" />
                 <span>{actionText} Documento</span>
               </DropdownMenuItem>
-
-              {/* <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 transition-colors">
-              Eliminar
-            </DropdownMenuItem> */}
             </DropdownMenuContent>
           </DropdownMenu>
         </TableCell>

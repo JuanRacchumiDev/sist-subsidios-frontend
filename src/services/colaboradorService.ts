@@ -22,7 +22,6 @@ export const getColaboradoresWithPaginate = async (
     limit: number,
     filters: ColaboradorFilter = {}
 ) => {
-    // Construir la cadena de query parameters
     const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
@@ -31,7 +30,6 @@ export const getColaboradoresWithPaginate = async (
         )
     }).toString()
 
-    // const response = await getAllWithPaginate(page, limit)
     const response = await getAllWithPaginate(queryParams)
 
     return {

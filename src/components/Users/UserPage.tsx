@@ -17,7 +17,6 @@ export const UserPage = () => {
   );
 };
 
-// Create a component for the All Users submenu
 export const AllUsers = () => {
   return (
     <div className="mt-6 p-6 bg-white/80 rounded-2xl">
@@ -29,7 +28,6 @@ export const AllUsers = () => {
   );
 };
 
-// Create a component for the Roles & Permissions submenu
 export const RolesPermissions = () => {
   return (
     <div className="mt-6 p-6 bg-white/80 rounded-2xl">
@@ -43,7 +41,6 @@ export const RolesPermissions = () => {
   );
 };
 
-// Create a component for the User Activity submenu
 export const UserActivity = () => {
   return (
     <div className="mt-6 p-6 bg-white/80 rounded-2xl">

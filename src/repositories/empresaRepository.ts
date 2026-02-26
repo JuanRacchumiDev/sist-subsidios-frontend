@@ -24,10 +24,12 @@ export const getAll = async (): Promise<EmpresaResponse> => {
 
 export const getAllWithPaginate = async (queryParams: string) => {
     try {
-        // const urlApi = `${'/empresas/paginate?page='}${page}${'&limit='}${limit}`
+        console.log({ queryParams })
+
         const urlApi = `${'/empresas/paginate?'}${queryParams}`
-        // console.log({ urlApi })
+
         const response = await apiClient.get(urlApi)
+
         const { data: dataEmpresas } = response
 
         const { result, data, pagination, status } = dataEmpresas
@@ -106,10 +108,6 @@ export const create = async (payload: Empresa): Promise<EmpresaResponse> => {
             error
         }
     } catch (error) {
-        // if (error.response) {
-        //     throw new Error(error.response.data.message || 'Error al crear empresa')
-        // }
-        // throw new Error('Error de conexión con el servidor')
         const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
         console.log('errorMessage', errorMessage)
         return { result: false, error: errorMessage, status: 500 }

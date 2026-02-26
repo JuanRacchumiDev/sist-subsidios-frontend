@@ -6,7 +6,7 @@ import { Spinner } from "../Common/Spinner";
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { getDescansosForReport } from "../../services/descansoMedicoService";
-import HDate from "@/helpers/HDate";
+import HDate from "../../helpers/HDate";
 
 export const DescansoMedicoList = () => {
   const [loading, setLoading] = useState(false);
@@ -17,7 +17,6 @@ export const DescansoMedicoList = () => {
     try {
       const response = await getDescansosForReport(type);
 
-      // Si la respuesta no es exitosa, lanza un error o maneja la lógica
       if (!response.result) {
         throw new Error(response.error || "Error al generar el reporte");
       }
@@ -28,7 +27,6 @@ export const DescansoMedicoList = () => {
             ? "application/pdf"
             : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      // const blob = new Blob([response.data]);
 
       const dateSuffix = HDate.getCurrentDateToString("ddMMyyyy");
 
@@ -47,7 +45,6 @@ export const DescansoMedicoList = () => {
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error("Error al descargar el reporte:", error);
-      // Puedes usar un toast o un modal para mostrar el error al usuario
     } finally {
       setLoading(false);
     }
@@ -67,15 +64,6 @@ export const DescansoMedicoList = () => {
             </div>
           ) : (
             <>
-              {/* Botón para reporte PDF */}
-              {/* <Button
-                onClick={() => handleDownloadReport("pdf")}
-                className="bg-transparent border border-gray-400 text-red-600 hover:bg-red-50 hover:border-red-600 hover:text-red-700 transition-colors shadow-none px-2 py-2 cursor-pointer"
-                title="Generar reporte PDF"
-              >
-                <FileDown className="h-6 w-6" />
-              </Button> */}
-              {/* Botón para reporte Excel */}
               <Button
                 onClick={() => handleDownloadReport("excel")}
                 className="bg-transparent border border-gray-400 text-green-600 hover:bg-green-50 hover:border-green-600 hover:text-green-700 transition-colors shadow-none px-2 py-2 cursor-pointer"

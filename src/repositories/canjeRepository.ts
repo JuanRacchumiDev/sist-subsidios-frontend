@@ -26,9 +26,7 @@ export const getAll = async (): Promise<CanjeResponse> => {
 
 export const getAllWithPaginate = async (queryParams: string) => {
     try {
-        // const urlApi = `${'/canjes/paginate?page='}${page}${'&limit='}${limit}`
         const urlApi = `${'/canjes/paginate?'}${queryParams}`
-        console.log({ urlApi })
 
         const response = await apiClient.get(urlApi)
 
@@ -60,7 +58,6 @@ export const getAllForReports = async (outputType: string, reportType: string, l
             responseType: 'blob'
         })
 
-        // return response
         return {
             result: true,
             data: response.data,
@@ -98,8 +95,6 @@ export const getById = async (id: string): Promise<CanjeResponse> => {
 
 export const create = async (payload: Canje): Promise<CanjeResponse> => {
     try {
-        // console.log('payload new canje', payload)
-
         const response = await apiClient.post('/canjes', payload)
 
         const { data: { result, message, status } } = response

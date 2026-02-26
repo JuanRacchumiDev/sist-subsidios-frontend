@@ -3,13 +3,9 @@ import { token } from "../helpers/HToken"
 import { PersonaResponse } from "../interfaces/IPersona"
 import { getById as tipoDocumentoById } from './detalleParametroRepository'
 import { Detalle } from '../interfaces/IDetalleParametro'
-// import { getById as tipoDocumentoById } from './tipoDocumentoRepository'
-// import { TipoDocumento } from "../interfaces/ITipoDocumento";
-// import { DetalleParametro } from '../../../dms-backend-node/src/app/models/DetalleParametro';
 
 export const searchForTipoDocAndNumDoc = async (idTipoDocumento: string, numeroDocumento: string): Promise<PersonaResponse> => {
     try {
-        // Obteniendo tipo de documento
         const responseTipoDocumento = await tipoDocumentoById(idTipoDocumento)
 
         const { data, result, status, message } = responseTipoDocumento
@@ -22,7 +18,6 @@ export const searchForTipoDocAndNumDoc = async (idTipoDocumento: string, numeroD
             }
         }
 
-        // const { abreviatura } = data as TipoDocumento
         const { abreviatura } = data as Detalle
 
         const urlApi = `${'/personas/consulta-api?abreviatura='}${abreviatura}${'&numeroDocumento='}${numeroDocumento}`

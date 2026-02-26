@@ -22,7 +22,6 @@ export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
 
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
 
-  // Filtrar el menú de acuerdo al perfil del usuario
   const filteredMenuItems = useMemo(() => {
     if (!userProfile) {
       return [];
@@ -40,12 +39,10 @@ export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
           (item) =>
             item.id === "colaborador" ||
             item.id === "trabajador-social" ||
-            // item.id === "empresa" ||
             item.id === "descanso-medico" ||
             item.id === "canje" ||
             item.id === "reembolso" ||
             item.id === "cobro" ||
-            // item.id === "usuario" ||
             item.id === "mantenimiento",
         );
       case "especialista-empresa":
@@ -70,14 +67,12 @@ export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
         collapsed ? "w-20" : "w-72"
       } transition-all duration-300 border-r border-slate-400/50 flex flex-col relative z-10`}
     >
-      {/* Logo */}
       <div className="p-4 border-b border-slate-400/50">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
             <Zap className="w-6 h-6 text-white" />
           </div>
 
-          {/* Conditional Rendering */}
           {!collapsed && (
             <div>
               <h1 className="text-xl font-bold text-slate-800">DMS</h1>
@@ -87,7 +82,6 @@ export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
         </div>
       </div>
 
-      {/* Navigation I will display Dynamic Menus */}
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {filteredMenuItems.map((item) => {
           const isItemActive =
@@ -138,7 +132,6 @@ export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
                 </button>
               )}
 
-              {/* Submenu */}
               {!collapsed && item.submenu && expandedItems.has(item.id) && (
                 <div className="ml-8 mt-2 space-y-1">
                   {item.submenu?.map((subitem) => (
@@ -147,9 +140,6 @@ export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
                       to={subitem.path}
                       className={({ isActive }) =>
                         `w-full block text-left p-2 text-sm rounded-lg transition-all ${
-                          // isActive
-                          //   ? "text-blue-600 font-semibold bg-blue-50"
-                          //   : "text-slate-600 hover:text-slate-800 hover:bg-slate-100"
                           isActive
                             ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25"
                             : "text-slate-600 hover:bg-slate-100"
@@ -166,15 +156,9 @@ export const Sidebar = ({ collapsed, onToggle, currentPage }) => {
         })}
       </nav>
 
-      {/* User profile */}
       {!collapsed && (
         <div className="p-4 border-l border-slate-200/50">
           <div className="flex items-center space-x-3 p-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600">
-            {/* <img
-              src=""
-              alt="user"
-              className="w-10 h-10 rounded-full ring-2 ring-blue-500"
-            /> */}
             <div className="flex-1 min-w-0">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white truncate">

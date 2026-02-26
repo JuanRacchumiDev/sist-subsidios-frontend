@@ -30,9 +30,6 @@ import {
 
 import { getEmpresas } from "../../services/empresaService";
 import { getDetalles } from "../../services/detalleParametroService";
-// import { getTipoDocumentos } from "../../services/tipoDocumentoService";
-// import { getCargos } from "../../services/cargoService";
-// import { getPersonaByIdTipoDocAndNumDoc } from "../../services/personaService";
 import {
   getPersonaByIdTipoDocAndNumDoc,
   getPersonaById,
@@ -44,14 +41,6 @@ import { Persona, PersonaResponse } from "../../interfaces/IPersona";
 import { Detalle } from "../../interfaces/IDetalleParametro";
 import { Empresa } from "../../interfaces/IEmpresa";
 import { createPersona, updatePersona } from "../../services/personaService";
-// import {
-//   Colaborador,
-//   ColaboradorResponse,
-// } from "../../interfaces/IColaborador";
-// import {
-//   createColaborador,
-//   getColaboradorById,
-// } from "../../services/colaboradorService";
 import SearchableCombobox from "../Common/SearchableCombobox";
 import { ArrowLeft } from "lucide-react";
 import { getAuthData } from "../../utils/authMemo";
@@ -155,21 +144,6 @@ const getCargos = async (): Promise<Detalle[]> => {
   }
 };
 
-// type TEmpresa = {
-//   id: string;
-//   nombre_o_razon_social: string;
-// };
-
-// type TTipoDocumento = {
-//   id: string;
-//   abreviatura: string;
-// };
-
-// type TCargo = {
-//   id: string;
-//   nombre: string;
-// };
-
 type TPersona = {
   idTipoDocumento?: string;
   numeroDocumento?: string;
@@ -188,25 +162,6 @@ type TPersona = {
   esAsociadoSindicato?: boolean;
   esPresentaInconvenientes?: boolean;
 };
-
-// type TColaborador = {
-//   idTipoDocumento?: string;
-//   numeroDocumento?: string;
-//   nombres?: string;
-//   apellidoPaterno?: string;
-//   apellidoMaterno?: string;
-//   fechaNacimiento?: null;
-//   idEmpresa?: string;
-//   idCargo?: string;
-//   nombreArea?: string;
-//   nombreSede?: string;
-//   emailInstitucional?: string;
-//   emailPersonal?: string;
-//   numeroCelular?: string;
-//   fechaIngreso?: null;
-//   esAsociadoSindicato?: boolean;
-//   esPresentaInconvenientes?: boolean;
-// };
 
 export const ColaboradorForm = () => {
   const navigate = useNavigate();
@@ -285,7 +240,6 @@ export const ColaboradorForm = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log({ values });
     let messageError: string = "";
-    // let response: RepresentanteLegalResponse;
     let response: PersonaResponse;
 
     const {
@@ -351,12 +305,6 @@ export const ColaboradorForm = () => {
     console.log({ payload });
 
     try {
-      // const response = await createTrabajadorSocial(payload);
-      // const { result, message } = response as TrabajadorSocialResponse;
-
-      // const response = await createPersona(payload);
-      // const { result, message } = response as PersonaResponse;
-
       console.log({ isEditMode });
       console.log({ idPersona });
 
@@ -383,86 +331,10 @@ export const ColaboradorForm = () => {
         showToast("error", error || messageError);
         return;
       }
-
-      // if (result) {
-      //   showToast("success", message);
-      //   navigate("/trabajador-social");
-      // } else {
-      //   showToast(
-      //     "error",
-      //     message || "Error al registrar al trabajador social"
-      //   );
-      //   return;
-      // }
     } catch (error) {
       console.error("Error al registrar trabajador social", error);
       showToast("error", error);
     }
-
-    // try {
-    //   const {
-    //     idTipoDocumento,
-    //     idCargo,
-    //     idEmpresa,
-    //     numeroDocumento,
-    //     apellidoPaterno,
-    //     apellidoMaterno,
-    //     nombres,
-    //     fechaNacimiento,
-    //     fechaIngreso,
-    //     nombreArea,
-    //     nombreSede,
-    //     emailInstitucional,
-    //     emailPersonal,
-    //     numeroCelular,
-    //     esAsociadoSindicato,
-    //     esPresentaInconvenientes,
-    //   } = values;
-    //   const nombreCompleto: string = `${nombres} ${apellidoPaterno} ${apellidoMaterno}`;
-    //   const fechaNacimientoToString: string | null = fechaNacimiento
-    //     ? fechaNacimiento.toISOString()
-    //     : null;
-    //   const partsFechaNacimientoStr: string[] =
-    //     fechaNacimientoToString.split("T");
-    //   const fechaNacimientoStr: string = partsFechaNacimientoStr[0];
-    //   let fechaIngresoStr: string | null = null;
-    //   if (fechaIngreso) {
-    //     const fechaIngresoToString: string | null = fechaIngreso.toISOString();
-    //     const partsFechaIngreso: string[] = fechaIngresoToString.split("T");
-    //     fechaIngresoStr = partsFechaIngreso[0];
-    //   }
-    //   const payload: Colaborador = {
-    //     id_tipodocumento: idTipoDocumento,
-    //     id_cargo: idCargo,
-    //     id_empresa: idEmpresa,
-    //     numero_documento: numeroDocumento,
-    //     apellido_paterno: apellidoPaterno,
-    //     apellido_materno: apellidoMaterno,
-    //     nombres,
-    //     nombre_completo: nombreCompleto,
-    //     fecha_nacimiento: fechaNacimientoStr,
-    //     fecha_ingreso: fechaIngresoStr,
-    //     nombre_area: nombreArea,
-    //     nombre_sede: nombreSede,
-    //     correo_institucional: emailInstitucional,
-    //     correo_personal: emailPersonal,
-    //     numero_celular: numeroCelular,
-    //     is_asociado_sindicato: esAsociadoSindicato,
-    //     is_presenta_inconvenientes: esPresentaInconvenientes,
-    //   };
-    //   const response = await createColaborador(payload);
-    //   const { result, message } = response as ColaboradorResponse;
-    //   if (result) {
-    //     showToast("success", message);
-    //     navigate("/colaborador");
-    //   } else {
-    //     showToast("error", message || "Error al registrar al colaborador");
-    //     return;
-    //   }
-    // } catch (error) {
-    //   console.error("Error al registrar colaborador", error);
-    //   showToast("error", error);
-    // }
   };
 
   useEffect(() => {
@@ -483,16 +355,6 @@ export const ColaboradorForm = () => {
         listTipoDocumentos = responseTipoDocumentos as Detalle[];
 
         listCargos = responseCargos as Detalle[];
-
-        // const { result: resultTipos, data: dataTipos } = responseTipoDocumentos;
-        // if (resultTipos && dataTipos) {
-        //   listTipoDocumentos = dataTipos as TTipoDocumento[];
-        // }
-
-        // const { result: resultCargos, data: dataCargos } = responseCargos;
-        // if (resultCargos && dataCargos) {
-        //   listCargos = dataCargos as TCargo[];
-        // }
 
         setEmpresas(listEmpresas);
         setTipos(listTipoDocumentos);
@@ -564,7 +426,6 @@ export const ColaboradorForm = () => {
 
     fetchData();
   }, [id, form]);
-  // [id, form, navigate, showToast]
 
   return (
     <>
@@ -722,7 +583,6 @@ export const ColaboradorForm = () => {
                                   }
                                 } catch (error) {
                                   setCamposHabilitadosPersona(true);
-                                  // showErrorToast("Error al crear persona");
                                   showToast("error", "Error al crear persona");
                                 }
                               }
@@ -1078,11 +938,6 @@ export const ColaboradorForm = () => {
                             `}
                           />
                         </FormControl>
-                        {/* <FormDescription>
-                          {field.value
-                            ? format(field.value, "PPP")
-                            : "Seleccione una fecha"}
-                        </FormDescription> */}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -1159,11 +1014,9 @@ export const ColaboradorForm = () => {
                   variant="outline"
                   disabled={isSubmitting}
                   onClick={() => resetForm()}
-                  // onClick={() => navigate("/colaborador")}
                   className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
                   Cancelar
-                  {/* {isSubmitting ? "Cancelando..." : "Cancelar"} */}
                 </Button>
               </div>
             </form>

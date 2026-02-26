@@ -21,7 +21,6 @@ export const getDocumentosTipoContWithPaginate = async (
     limit: number,
     filters: DocumentoTipoContingenciaFilter = {}
 ) => {
-    // Construir la cadena de query parameters
     const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
@@ -32,7 +31,6 @@ export const getDocumentosTipoContWithPaginate = async (
 
     console.log({ queryParams })
 
-    // const response = await getAllWithPaginate(page, limit)
     const response = await getAllWithPaginate(queryParams)
 
     return {

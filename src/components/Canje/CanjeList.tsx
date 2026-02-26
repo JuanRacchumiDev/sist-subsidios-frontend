@@ -4,10 +4,9 @@ import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { CanjeTable } from "./CanjeTable";
 import { useState } from "react";
-import { getCanjesForReport } from "@/services/canjeService";
-import HDate from "@/helpers/HDate";
+import { getCanjesForReport } from "../../services/canjeService";
+import HDate from "../../helpers/HDate";
 
-// Definición de los tipos de reporte
 type ReportType = "no_consecutivos" | "consecutivos" | "global";
 
 export const CanjeList = () => {
@@ -16,7 +15,7 @@ export const CanjeList = () => {
   const handleDownloadReport = async (
     outputType: "pdf" | "excel",
     reportType: ReportType,
-    limit: number
+    limit: number,
   ) => {
     setLoading(true);
 
@@ -25,7 +24,6 @@ export const CanjeList = () => {
 
       console.log({ response });
 
-      // Si la respuesta no es exitosa, lanza un error o maneja la lógica
       if (!response.result) {
         throw new Error(response.error || "Error al generar el reporte");
       }
@@ -36,13 +34,11 @@ export const CanjeList = () => {
             ? "application/pdf"
             : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      // const blob = new Blob([response.data]);
 
       const dateSuffix = HDate.getCurrentDateToString("ddMMyyyy");
 
       const fileExtension = outputType === "pdf" ? "pdf" : "xlsx";
 
-      // const filename = `reporte_canjes_${dateSuffix}.${fileExtension}`;
       const filename = `reporte_subsidios_${limit}_dias_${reportType}_${dateSuffix}.${fileExtension}`;
 
       const downloadUrl = window.URL.createObjectURL(blob);
@@ -56,7 +52,6 @@ export const CanjeList = () => {
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error("Error al descargar el reporte:", error);
-      // Puedes usar un toast o un modal para mostrar el error al usuario
     } finally {
       setLoading(false);
     }
@@ -104,17 +99,6 @@ export const CanjeList = () => {
               >
                 <Calendar className="h-6 w-6" />
               </Button>
-
-              {/* Ícono General de Excel (Mantenido o reemplazado) */}
-              {/* Si este botón era para un reporte general de la tabla, mantenlo.
-                                Si es redundante, elimínalo o úsalo para un reporte general sin límites. */}
-              {/* <Button
-                onClick={() => handleDownloadReport("excel", "global", 0)} // Ejemplo de reporte general
-                className="bg-transparent border border-gray-400 text-green-600 hover:bg-green-50 hover:border-green-600 hover:text-green-700 transition-colors shadow-none p-2 cursor-pointer"
-                title="Generar listado completo (Excel)"
-              >
-                <FileSpreadsheet className="h-6 w-6" />
-              </Button> */}
             </div>
           )}
         </div>

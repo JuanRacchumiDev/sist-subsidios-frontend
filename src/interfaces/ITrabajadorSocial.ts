@@ -69,8 +69,6 @@ export interface TrabajadorSocialPaginateResponse {
 
 export interface TrabajadorSocialFilter {
     id_tipodocumento?: string
-    // id_cargo?: string
-    // id_empresa?: string
     numero_documento?: string
     nombre_completo?: string
 }

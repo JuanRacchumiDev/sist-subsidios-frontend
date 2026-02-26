@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { getDocumentosTipoContWithPaginate } from "../../../services/documentoTipoContService";
-// import { getDetallesWithPaginate } from "../../../services/detalleParametroService";
 import {
   Pagination,
   PaginationContent,
@@ -30,9 +29,7 @@ import { FilterIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DocumentoTipoContingenciaFilterModal } from "./DocumentoTipoContingenciaFilterModal";
 import { TableSpinner } from "../../../components/Common/TableSpinner";
-// import { ParametroClase } from "../../../constants/parametroClase";
 
-// Definimos el estado inicial de los filtros
 const initialFilters: DocumentoTipoContingenciaFilter = {
   id_tipocontingencia: undefined,
   nombre: undefined,
@@ -56,17 +53,15 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
   const [refreshToggle, setRefreshToggle] = useState(0);
 
   const handleDocumentoStatusChange = () => {
-    // Incrementa el toggle. Esto NO cambia la tabla, pero fuerza el useEffect a ejecutarse.
     setRefreshToggle((prev) => prev + 1);
   };
 
   const handleApplyFilters = (newFilters: DocumentoTipoContingenciaFilter) => {
-    // Asegurar que las cadenas vacías de los Inputs se conviertan a `undefined` al aplicar
     const cleanedFilters: DocumentoTipoContingenciaFilter = Object.fromEntries(
       Object.entries(newFilters).map(([key, value]) => [
         key,
         value === "" || value === null ? undefined : value,
-      ])
+      ]),
     ) as DocumentoTipoContingenciaFilter;
 
     setFilters(cleanedFilters);
@@ -80,17 +75,15 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
     }
   };
 
-  // useEffect(() => {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
       const { currentPage, limit } = pagination;
 
-      // Limpia los filtros (elimina `undefined` para no enviar el query param)
       const cleanFilters = Object.fromEntries(
         Object.entries(filters).filter(
-          ([, value]) => value !== undefined && value !== null && value !== ""
-        )
+          ([, value]) => value !== undefined && value !== null && value !== "",
+        ),
       );
 
       console.log({ cleanFilters });
@@ -104,15 +97,8 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
       const response = await getDocumentosTipoContWithPaginate(
         currentPage,
         limit,
-        cleanFilters
+        cleanFilters,
       );
-
-      // const response = await getDetallesWithPaginate(
-      //   ParametroClase.TIPO_CONTINGENCIA,
-      //   currentPage,
-      //   limit,
-      //   filterString
-      // );
 
       console.log("response documentos", response);
 
@@ -133,15 +119,12 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
     } catch (error) {
       console.error(
         "Error al obtener documentos por tipo de contingencia",
-        error
+        error,
       );
     } finally {
       setIsLoading(false);
     }
   }, [pagination.currentPage, pagination.limit, filters, refreshToggle]);
-
-  // fetchData();
-  // }, [pagination.currentPage, pagination.limit]);
 
   useEffect(() => {
     fetchData();
@@ -156,11 +139,10 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
       items.push(
         <PaginationItem key="ellipsis-start">
           <PaginationEllipsis />
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
 
-    // for (let i = 1; i < pagination.totalPages; i++) {
     for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
@@ -177,7 +159,7 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
           >
             {i}
           </PaginationLink>
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
 
@@ -185,7 +167,7 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
       items.push(
         <PaginationItem key="ellipsis-end">
           <PaginationEllipsis />
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
     return items;
@@ -193,16 +175,7 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
 
   return (
     <div className="w-full space-y-4 pt-4">
-      {/* <div className="pb-4 pt-4 flex justify-between items-center"> */}
       <div className="flex justify-end items-center space-x-2 pb-4">
-        {/* <h2 className="text-xl font-semibold text-gray-800">
-          Listado de documentos
-        </h2> */}
-        {/* <Input
-          type="text"
-          placeholder="Buscar por nombre o documento..."
-          className="w-72 border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
-        /> */}
         <Button
           variant="outline"
           onClick={() => setIsFilterModalOpen(true)}
@@ -213,7 +186,7 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
             Filtros (
             {
               Object.values(filters).filter(
-                (v) => v !== undefined && v !== null && v !== ""
+                (v) => v !== undefined && v !== null && v !== "",
               ).length
             }
             )

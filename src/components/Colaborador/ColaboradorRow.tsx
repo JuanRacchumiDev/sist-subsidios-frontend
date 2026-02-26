@@ -1,7 +1,3 @@
-// import {
-//   Colaborador,
-//   ColaboradorResponse,
-// } from "../../interfaces/IColaborador";
 import { Persona, PersonaResponse } from "../../interfaces/IPersona";
 import { TableCell, TableRow } from "../ui/table";
 import {
@@ -25,7 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { useToast } from "../../context/ToastContext";
 import { useState } from "react";
-import { updateColaboradorByEstado } from "@/services/colaboradorService";
+import { updateColaboradorByEstado } from "../../services/colaboradorService";
 import { ConfirmDialog } from "../Common/ConfirmDialog";
 
 interface Props {
@@ -37,8 +33,8 @@ export const ColaboradorRow: React.FC<Props> = ({ col, onStatusChange }) => {
   const { showToast } = useToast();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // ⬅️ Estado para el modal
-  const [isProcessing, setIsProcessing] = useState(false); // ⬅️ Estado para el loading
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const navigate = useNavigate();
 
@@ -50,7 +46,6 @@ export const ColaboradorRow: React.FC<Props> = ({ col, onStatusChange }) => {
   const modalMessage = `¿Deseas <strong>${action}</strong> al colaborador: <strong>${col.nombre_completo}</strong>?`;
 
   const handleShowDetail = () => {
-    // navigate(`/colaborador/editar/${col.id}`);
     const urlEdit = `/colaborador/editar/${col.id}`;
     console.log({ urlEdit });
     navigate(urlEdit);
@@ -83,10 +78,9 @@ export const ColaboradorRow: React.FC<Props> = ({ col, onStatusChange }) => {
       if (result && data) {
         showToast(
           "success",
-          message || "Estado del colaborador actualizado con éxito."
+          message || "Estado del colaborador actualizado con éxito.",
         );
 
-        // Si hay una función de callback, llamarla para actualizar la tabla padre
         if (onStatusChange) {
           onStatusChange(col.id);
         }
@@ -97,12 +91,11 @@ export const ColaboradorRow: React.FC<Props> = ({ col, onStatusChange }) => {
       console.error("Error en la actualización de estado:", error);
       showToast("error", "Error de conexión al intentar actualizar.");
     } finally {
-      setIsProcessing(false); // Desactiva el loading
-      handleCloseModal(); // Cierra el modal
+      setIsProcessing(false);
+      handleCloseModal();
     }
   };
 
-  // Determinar texto y color de acción
   const actionText = col.estado ? "Desactivar" : "Activar";
   const ActionIcon = col.estado ? ToggleLeft : ToggleRight;
   const actionColor = col.estado ? "text-red-600" : "text-green-600";
@@ -131,7 +124,6 @@ export const ColaboradorRow: React.FC<Props> = ({ col, onStatusChange }) => {
             <DropdownMenuTrigger
               asChild
               className="focus:outline-none focus:ring-2 z-40 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer"
-              // className="bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer"
             >
               <Button variant="ghost" className="h-8 w-8 p-0">
                 <span className="sr-only">Abrir menú de acciones</span>
@@ -162,9 +154,6 @@ export const ColaboradorRow: React.FC<Props> = ({ col, onStatusChange }) => {
                 <ActionIcon className="h-4 w-4" />
                 <span>{actionText} Colaborador</span>
               </DropdownMenuItem>
-              {/* <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 transition-colors">
-                Eliminar
-              </DropdownMenuItem> */}
             </DropdownMenuContent>
           </DropdownMenu>
         </TableCell>

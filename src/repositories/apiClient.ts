@@ -40,7 +40,6 @@ apiClient.interceptors.response.use(
             const navigate = useNavigate();
 
             navigate('/login/')
-            // window.location.href = '/login';
         }
         return Promise.reject(error);
     }

@@ -1,4 +1,4 @@
-import { Reembolso } from '@/interfaces/IReembolso'
+import { Reembolso } from '../interfaces/IReembolso'
 import {
     getAll,
     getById,
@@ -37,11 +37,3 @@ export const createReembolso = async (payload: Reembolso) => {
         ...response
     }
 }
-
-// export const updateCanje = async (id: string, payload: Canje) => {
-//     const response = await update(id, payload)
-
-//     return {
-//         ...response
-//     }
-// }

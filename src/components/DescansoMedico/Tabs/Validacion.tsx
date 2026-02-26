@@ -43,78 +43,37 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
     const estadosPermitidos: EDescansoMedico[] = [];
     let isDisabled = false;
 
-    // console.log({ userProfile });
-
     const { nombre_perfil_url } = userProfile;
 
     console.log("---- nombre_perfil_url in component Validacion ----");
     console.log({ nombre_perfil_url });
 
-    // Lógica para el perfil "especialista-sophia-human"
     if (nombre_perfil_url === "especialista-empresa") {
       estadosPermitidos.push(EDescansoMedico.REGISTRO_INGRESADO);
+      estadosPermitidos.push(EDescansoMedico.REGISTRO_EXITOSO);
       estadosPermitidos.push(EDescansoMedico.DOCUMENTACION_INCORRECTA);
-      // Object.values(EDescansoMedico).forEach((estado) => {
-      //   if (estado !== EDescansoMedico.REGISTRO_EXITOSO) {
-      //     estadosPermitidos.push(estado);
-      //   }
-      //   // estadosPermitidos.push(estado);
-      // });
-
-      // if (isEditMode) {
-      //   // console.log("modo edición");
-      //   // En modo edición, el especialista puede cambiar el estado, pero ciertos campos pueden estar deshabilitados.
-      //   // Aquí no hay campos deshabilitados explícitamente, pero podrías agregar esa lógica.
-      //   // Muestra todos los estados excepto "Registro exitoso"
-      //   Object.values(EDescansoMedico).forEach((estado) => {
-      //     if (estado !== EDescansoMedico.REGISTRO_INGRESADO) {
-      //       estadosPermitidos.push(estado);
-      //     }
-      //   });
-      //   isDisabled = false; // El especialista tiene permiso para editar
-      // } else {
-      //   // console.log("modo creación");
-      //   // En nuevo registro, el especialista también podría tener permisos para editar
-      //   Object.values(EDescansoMedico).forEach((estado) => {
-      //     if (estado !== EDescansoMedico.REGISTRO_INGRESADO) {
-      //       estadosPermitidos.push(estado);
-      //     }
-      //   });
-      //   isDisabled = false;
-      // }
     } else if (nombre_perfil_url === "especialista-sophia-human") {
       estadosPermitidos.push(EDescansoMedico.REGISTRO_INGRESADO);
       estadosPermitidos.push(EDescansoMedico.REGISTRO_EXITOSO);
       estadosPermitidos.push(EDescansoMedico.DOCUMENTACION_INCORRECTA);
-      // Object.values(EDescansoMedico).forEach((estado) => {
-      //   if (estado !== EDescansoMedico.REGISTRO_INGRESADO) {
-      //     estadosPermitidos.push(estado);
-      //   }
-      // });
     } else if (nombre_perfil_url === "colaborador") {
-      // Lógica para el perfil "colaborador"
       if (isEditMode) {
-        // En modo edición, el colaborador solo puede ver, no cambiar el estado.
         estadosPermitidos.push(
           form.getValues("estadoRegistro") as EDescansoMedico,
         );
         isDisabled = true;
       } else {
-        // En nuevo registro, el estado por defecto es "Registro ingresado"
         estadosPermitidos.push(EDescansoMedico.REGISTRO_INGRESADO);
         isDisabled = true;
       }
     } else if (nombre_perfil_url === "administrador") {
-      // Lógica para el perfil "administrador"
       Object.values(EDescansoMedico).forEach((estado) => {
         if (estado !== EDescansoMedico.REGISTRO_EXITOSO) {
           estadosPermitidos.push(estado);
         }
       });
-      isDisabled = false; // El administrador tiene permiso para editar
+      isDisabled = false;
     }
-
-    // form.setValue("estadoRegistro", "");
 
     return { estadosPermitidos, isDisabled };
   }, [userProfile, isEditMode, form]);

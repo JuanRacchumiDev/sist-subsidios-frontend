@@ -1,5 +1,4 @@
 import { Empresa } from "./IEmpresa"
-// import { TipoDocumento } from "./ITipoDocumento"
 import { Detalle } from "./IDetalleParametro"
 
 export interface Persona {
@@ -81,8 +80,7 @@ export interface PersonaPaginateResponse {
 
 export interface PersonaFilter {
     id_tipodocumento?: string
-    // id_cargo?: string
-    // id_empresa?: string
+    id_empresa?: string
     numero_documento?: string
     nombre_completo?: string
     nombreGrupo?: string

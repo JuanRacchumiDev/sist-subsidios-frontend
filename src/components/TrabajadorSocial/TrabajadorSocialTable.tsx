@@ -16,12 +16,6 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-// import { TrabajadorSocialRow } from "./TrabajadorSocialRow";
-// import {
-//   TrabajadorSocial,
-//   TrabajadorSocialFilter,
-//   Pagination as PaginationType,
-// } from "../../interfaces/ITrabajadorSocial";
 import {
   Persona,
   PersonaFilter,
@@ -31,30 +25,18 @@ import { Button } from "../ui/button";
 import { FilterIcon } from "lucide-react";
 import { TrabajadorSocialFilterModal } from "./TrabajadorSocialFilterModal";
 import { TableSpinner } from "../../components/Common/TableSpinner";
-// import { getTrabjadoresSocialesWithPaginate } from "../../services/trabajadorSocialService";
 import { TrabajadorSocialRow } from "./TrabajadorSocialRow";
 import { getPersonasWithPaginate } from "../../services/personaService";
 
-// const initialFilters: TrabajadorSocialFilter = {
-//   id_tipodocumento: undefined,
-//   //   id_cargo: undefined,
-//   //   id_empresa: undefined,
-//   numero_documento: undefined,
-//   nombre_completo: undefined,
-// };
-
 const initialFilters: PersonaFilter = {
   id_tipodocumento: undefined,
-  //   id_cargo: undefined,
-  //   id_empresa: undefined,
+  id_empresa: undefined,
   numero_documento: undefined,
   nombre_completo: undefined,
+  nombreGrupo: undefined,
 };
 
 export const TrabajadorSocialTable: React.FC = () => {
-  // const [trabajadoresSociales, setTrabajadoresSociales] = useState<
-  //   TrabajadorSocial[]
-  // >([]);
   const [trabajadoresSociales, setTrabajadoresSociales] = useState<Persona[]>(
     [],
   );
@@ -69,19 +51,15 @@ export const TrabajadorSocialTable: React.FC = () => {
   });
 
   const [isLoading, setIsLoading] = useState(true);
-  // const [filters, setFilters] =
-  // useState<TrabajadorSocialFilter>(initialFilters);
   const [filters, setFilters] = useState<PersonaFilter>(initialFilters);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [refreshToggle, setRefreshToggle] = useState(0);
 
   const handleTrabajadorSocialStatusChange = () => {
-    // Incrementa el toggle. Esto NO cambia la tabla, pero fuerza el useEffect a ejecutarse.
     setRefreshToggle((prev) => prev + 1);
   };
 
   const handleApplyFilters = (newFilters: PersonaFilter) => {
-    // Asegurar que las cadenas vacías de los Inputs se conviertan a `undefined` al aplicar
     const cleanedFilters: PersonaFilter = Object.fromEntries(
       Object.entries(newFilters).map(([key, value]) => [
         key,
@@ -105,7 +83,6 @@ export const TrabajadorSocialTable: React.FC = () => {
     try {
       const { currentPage, limit } = pagination;
 
-      // Limpia los filtros (elimina `undefined` para no enviar el query param)
       const cleanFilters: PersonaFilter = Object.fromEntries(
         Object.entries(filters).filter(
           ([, value]) => value !== undefined && value !== null && value !== "",
@@ -115,12 +92,6 @@ export const TrabajadorSocialTable: React.FC = () => {
       cleanFilters["nombreGrupo"] = "GRUPO TRABAJADOR SOCIAL";
 
       console.log({ cleanFilters });
-
-      // const response = await getTrabjadoresSocialesWithPaginate(
-      //   currentPage,
-      //   limit,
-      //   cleanFilters
-      // );
 
       const response = await getPersonasWithPaginate(
         currentPage,
@@ -135,14 +106,6 @@ export const TrabajadorSocialTable: React.FC = () => {
         setPagination(response.pagination);
       } else {
         setTrabajadoresSociales([]);
-        setPagination({
-          currentPage: 1,
-          limit: 10,
-          totalPages: 1,
-          totalItems: 0,
-          nextPage: null,
-          previousPage: null,
-        });
       }
     } catch (error) {
       console.error("Error al obtener trabajadores sociales", error);
@@ -168,7 +131,6 @@ export const TrabajadorSocialTable: React.FC = () => {
       );
     }
 
-    // for (let i = 1; i < pagination.totalPages; i++) {
     for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
@@ -201,9 +163,7 @@ export const TrabajadorSocialTable: React.FC = () => {
 
   return (
     <div className="w-full space-y-4 pt-4">
-      {/* <div className="pb-4 pt-4 flex justify-between items-center"> */}
       <div className="flex justify-end items-center space-x-2 pb-4">
-        {/* <h2 className="text-xl font-semibold">Listado de trabajadores sociales</h2> */}
         <Button
           variant="outline"
           onClick={() => setIsFilterModalOpen(true)}
@@ -220,11 +180,6 @@ export const TrabajadorSocialTable: React.FC = () => {
             )
           </span>
         </Button>
-        {/* <Input
-            type="text"
-            placeholder="Buscar por nombre o documento..."
-            className="w-72 border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
-          /> */}
       </div>
       <div className="rounded-md border border-gray-200 shadow-sm">
         <Table>

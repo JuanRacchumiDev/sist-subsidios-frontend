@@ -16,12 +16,6 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-// import { TrabajadorSocialRow } from "./TrabajadorSocialRow";
-// import {
-//   TrabajadorSocial,
-//   TrabajadorSocialFilter,
-//   Pagination as PaginationType,
-// } from "../../interfaces/ITrabajadorSocial";
 import {
   Persona,
   PersonaFilter,
@@ -31,7 +25,6 @@ import { Button } from "../ui/button";
 import { FilterIcon } from "lucide-react";
 import { EspecialistaClienteFilterModal } from "./EspecialistaClienteFilterModal";
 import { TableSpinner } from "../../components/Common/TableSpinner";
-// import { getTrabjadoresSocialesWithPaginate } from "../../services/trabajadorSocialService";
 import { EspecialistaClienteRow } from "./EspecialistaClienteRow";
 import { getPersonasWithPaginate } from "../../services/personaService";
 
@@ -55,19 +48,15 @@ export const EspecialistaClienteTable: React.FC = () => {
   });
 
   const [isLoading, setIsLoading] = useState(true);
-  // const [filters, setFilters] =
-  // useState<TrabajadorSocialFilter>(initialFilters);
   const [filters, setFilters] = useState<PersonaFilter>(initialFilters);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [refreshToggle, setRefreshToggle] = useState(0);
 
   const handleEspecialistaClienteStatusChange = () => {
-    // Incrementa el toggle. Esto NO cambia la tabla, pero fuerza el useEffect a ejecutarse.
     setRefreshToggle((prev) => prev + 1);
   };
 
   const handleApplyFilters = (newFilters: PersonaFilter) => {
-    // Asegurar que las cadenas vacías de los Inputs se conviertan a `undefined` al aplicar
     const cleanedFilters: PersonaFilter = Object.fromEntries(
       Object.entries(newFilters).map(([key, value]) => [
         key,
@@ -91,7 +80,6 @@ export const EspecialistaClienteTable: React.FC = () => {
     try {
       const { currentPage, limit } = pagination;
 
-      // Limpia los filtros (elimina `undefined` para no enviar el query param)
       const cleanFilters: PersonaFilter = Object.fromEntries(
         Object.entries(filters).filter(
           ([, value]) => value !== undefined && value !== null && value !== "",
@@ -101,12 +89,6 @@ export const EspecialistaClienteTable: React.FC = () => {
       cleanFilters["nombreGrupo"] = "GRUPO ESPECIALISTA EMPRESA";
 
       console.log({ cleanFilters });
-
-      // const response = await getTrabjadoresSocialesWithPaginate(
-      //   currentPage,
-      //   limit,
-      //   cleanFilters
-      // );
 
       const response = await getPersonasWithPaginate(
         currentPage,
@@ -121,14 +103,6 @@ export const EspecialistaClienteTable: React.FC = () => {
         setPagination(response.pagination);
       } else {
         setEspecialistas([]);
-        setPagination({
-          currentPage: 1,
-          limit: 10,
-          totalPages: 1,
-          totalItems: 0,
-          nextPage: null,
-          previousPage: null,
-        });
       }
     } catch (error) {
       console.error("Error al obtener especialistas cliente", error);
@@ -154,7 +128,6 @@ export const EspecialistaClienteTable: React.FC = () => {
       );
     }
 
-    // for (let i = 1; i < pagination.totalPages; i++) {
     for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>

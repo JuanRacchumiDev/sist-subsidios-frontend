@@ -24,7 +24,6 @@ export enum EstadoCobro {
     COBRO_PENDIENTE = 'cobro_pendiente'
 }
 
-// Map enum values to human-readable labels
 export const LIST_ESTADOS_DESCANSOS_MEDICOS = {
     [EstadoDescansoMedico.REGISTRO_EXITOSO]: 'Registro exitoso',
     [EstadoDescansoMedico.DOCUMENTACION_INCORRECTA]: 'Documentación incorrecta',
@@ -37,7 +36,6 @@ export const LIST_ESTADOS_CANJE = {
     [EstadoCanje.CANJE_ORSERVADO]: 'Canje observado',
 };
 
-// Map observation types to default messages
 export const MENSAJES_OBSERVACION: Record<string, string> = {
     [EstadoDescansoMedico.DOCUMENTACION_INCORRECTA]: "LA DOCUMENTACIÓN AGREGADA NO CUMPLE LOS REQUISITOS SOLICITADOS",
     [EstadoCanje.CANJE_ORSERVADO]: "LA DOCUMENTACIÓN AGREGADA NO CUMPLE LOS REQUISITOS SOLICITADOS",

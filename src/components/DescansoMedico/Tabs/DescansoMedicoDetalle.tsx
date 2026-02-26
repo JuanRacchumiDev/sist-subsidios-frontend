@@ -18,33 +18,17 @@ import { useToast } from "../../../context/ToastContext";
 import { Empresa } from "../../../interfaces/IEmpresa";
 import { getEmpresas } from "../../../services/empresaService";
 import SearchableCombobox from "../../../components/Common/SearchableCombobox";
-// import {
-//   Colaborador,
-//   ColaboradorResponse,
-// } from "../../../interfaces/IColaborador";
 import { Persona, PersonaResponse } from "../../../interfaces/IPersona";
-// import {
-//   getColaboradores,
-//   getColaboradoresByIdEmpresa,
-// } from "../../../services/colaboradorService";
 import {
   getPersonas,
   getPersonasByEmpresaWithGrupo,
-  // getPersonasByEmpresa,
 } from "../../../services/personaService";
 import { Detalle } from "../../../interfaces/IDetalleParametro";
 import {
   getDetalleById,
   getDetalles,
 } from "../../../services/detalleParametroService";
-// import { TipoDescansoMedico } from "../../../interfaces/ITipoDescansoMedico";
-// import { getTipoDescansosMedicos } from "../../../services/tipoDescansoMedicoService";
-// import { TipoContingencia } from "../../../interfaces/ITipoContingencia";
 import { DocumentoTipoContingencia } from "../../../interfaces/IDocumentoTipoContingencia";
-// import {
-//   getTipoContingencias,
-//   getTipoContingenciaById,
-// } from "../../../services/tipoContingenciaService";
 import { Input } from "../../../components/ui/input";
 import * as z from "zod";
 import { UseFormReturn } from "react-hook-form";
@@ -77,7 +61,6 @@ const dataColaboradores = async (idEmpresa: string | null = null) => {
   const nombreGrupo: string = "GRUPO COLABORADOR";
 
   if (idEmpresa) {
-    // response = await getPersonasByEmpresa(idEmpresa);
     response = await getPersonasByEmpresaWithGrupo(idEmpresa, nombreGrupo);
   } else {
     response = await getPersonas();
@@ -156,27 +139,17 @@ export const DescansoMedicoDetalle = ({
   const [adjuntos, setAdjuntos] = useState<Adjunto[]>([]);
 
   const [totalDias, setTotalDias] = useState<number | null>(null);
-  // const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false);
-  // const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const [isEmpresaDisabled, setIsEmpresaDisabled] = useState<boolean>(false);
   const [isColaboradorDisabled, setIsColaboradorDisabled] =
     useState<boolean>(false);
   const [isCitt, setIsCitt] = useState<boolean | null>(false);
 
-  // Id de la empresa seleccionada
   const selectedEmpresaId = form.watch("idEmpresa");
 
-  // Lógica para determinar si los campos dependientes deben estar deshabilitados.
-  // Serán deshabilitados si NO hay un idEmpresa seleccionado O si estamos en modo "carta" (isModeLetter)
-  // const isDependentFieldsDisabled = isModeLetter || !selectedEmpresaId;
-
-  // Id del tipo de descanso
   const selectedTipoDescansoId = form.watch("idTipoDescansoMedico");
 
-  // Id del tipo de contingencia seleccionado
   const selectedTipoContingenciaId = form.watch("idTipoContingencia");
 
-  // Calcular el total de días cuando la fecha de inicio y final cambian
   const fechaInicio = form.watch("fechaInicio");
   const fechaFinal = form.watch("fechaFinal");
 
@@ -225,27 +198,7 @@ export const DescansoMedicoDetalle = ({
           if (nombre_perfil_url === "colaborador" && id_persona) {
             setIsColaboradorDisabled(true);
           }
-
-          // if (id_empresa) {
-          //   setIsEmpresaDisabled(true);
-          // } else {
-          //   setIsEmpresaDisabled(false);
-          // }
         }
-
-        // if (userProfile.id_empresa && userProfile.id_persona) {
-        //   // console.log("abcdef");
-        //   // setIsFormDisabled(true);
-        //   setIsDisabled(true);
-        // } else {
-        //   // console.log("pqrstu");
-        //   const isDisabledIdEmpresaIdColaborador = isModeLetter
-        //     ? isModeLetter
-        //     : false;
-        //   setIsDisabled(isDisabledIdEmpresaIdColaborador);
-        //   // setIsFormDisabled(isDisabledIdEmpresaIdColaborador);
-        // }
-        // console.log({ isModeLetter });
       } catch (error) {
         console.error("Error al obtener datos", error);
         showToast("error", "Error al cargar los datos del formulario.");
@@ -254,19 +207,14 @@ export const DescansoMedicoDetalle = ({
 
     fetchData();
   }, [form, id, userProfile]);
-  // [form, showToast, userProfile]
 
   useEffect(() => {
-    // console.log({ selectedTipoDescansoId });
-
     if (selectedTipoDescansoId) {
       let isTipoDescansoCitt = false;
 
       const tipoSeleccionado = tipoDescansos.find(
         (tipodescanso) => tipodescanso.id === selectedTipoDescansoId,
       );
-
-      // console.log({ tipoSeleccionado });
 
       if (tipoSeleccionado) {
         const { nombre } = tipoSeleccionado;
@@ -291,7 +239,6 @@ export const DescansoMedicoDetalle = ({
       fetchColaboradores();
     }
   }, [selectedEmpresaId]);
-  // [selectedEmpresaId, form, showToast, userProfile]
 
   useEffect(() => {
     const fetchDocumentos = async () => {
@@ -300,10 +247,6 @@ export const DescansoMedicoDetalle = ({
       if (selectedTipoContingenciaId) {
         console.log({ selectedTipoContingenciaId });
         try {
-          // const response = await getTipoContingenciaById(
-          //   selectedTipoContingenciaId
-          // );
-
           const response = await getDetalleById(selectedTipoContingenciaId);
           console.log("---- response fetchDocumentos ----");
           console.log({ response });
@@ -311,7 +254,6 @@ export const DescansoMedicoDetalle = ({
           const { result, data } = response;
 
           if (result && data) {
-            // const tipoContingencia = data as TipoContingencia;
             const tipoContingencia = data as Detalle;
             console.log({ tipoContingencia });
 
@@ -319,18 +261,10 @@ export const DescansoMedicoDetalle = ({
 
             listDocumentos = documentoTipoCont as DocumentoTipoContingencia[];
 
-            // console.log(listDocumentos);
-
-            // console.log({ isCitt });
-
-            // Filtrar los documentos para el caso tipoDescansoMedico igual a CITT
             if (isCitt) {
-              // console.log("isCitt true");
               listDocumentos = listDocumentos.filter(
                 (doc) => doc.nombre_url! === "descanso-medico",
               );
-              // console.log("listDocumentos filtered");
-              // console.log({ listDocumentos });
             }
           }
 
@@ -346,7 +280,6 @@ export const DescansoMedicoDetalle = ({
     };
     fetchDocumentos();
   }, [selectedTipoContingenciaId]);
-  // [selectedTipoContingenciaId, showToast]
 
   useEffect(() => {
     if (fechaInicio && fechaFinal) {
@@ -362,7 +295,6 @@ export const DescansoMedicoDetalle = ({
   }, [fechaInicio, fechaFinal, form]);
 
   return (
-    // <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <FormField
         control={form.control}
@@ -379,7 +311,6 @@ export const DescansoMedicoDetalle = ({
                 displayKey="nombre_o_razon_social"
                 valueKey="id"
                 searchKeys={["nombre_o_razon_social"]}
-                // disabled={isFormDisabled || isModeLetter}
                 disabled={isEmpresaDisabled}
                 isInvalid={fieldState.invalid}
               />
@@ -405,7 +336,6 @@ export const DescansoMedicoDetalle = ({
                 valueKey="id"
                 searchKeys={["nombre_completo"]}
                 disabled={isColaboradorDisabled}
-                // disabled={isDependentFieldsDisabled}
                 isInvalid={fieldState.invalid}
               />
               <FormMessage />
@@ -423,7 +353,6 @@ export const DescansoMedicoDetalle = ({
             <Select
               onValueChange={field.onChange}
               value={field.value ?? ""}
-              // disabled={isDependentFieldsDisabled}
               disabled={isModeLetter}
             >
               <FormControl>
@@ -495,7 +424,6 @@ export const DescansoMedicoDetalle = ({
             <Select
               onValueChange={field.onChange}
               value={field.value ?? ""}
-              // disabled={isDependentFieldsDisabled}
               disabled={isModeLetter}
             >
               <FormControl>

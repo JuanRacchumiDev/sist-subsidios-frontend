@@ -29,7 +29,6 @@ import {
 import { Button } from "../../ui/button";
 import { RequiredLabel } from "../../Common/RequiredLabel";
 
-// import { getTipoContingencias } from "../../../services/tipoContingenciaService";
 import { getDetalles } from "../../../services/detalleParametroService";
 
 import {
@@ -40,7 +39,6 @@ import {
   DocumentoTipoContingencia,
   DocumentoTipoContingenciaResponse,
 } from "../../../interfaces/IDocumentoTipoContingencia";
-// import { TipoContingencia } from "../../../interfaces/ITipoContingencia";
 import { Input } from "../../../components/ui/input";
 import { getDocumentoTipoContById } from "../../../services/documentoTipoContService";
 import { ArrowLeft } from "lucide-react";
@@ -62,10 +60,6 @@ export const DocumentoTipoContigenciaForm = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { showToast } = useToast();
-
-  // const [tipoContingencias, setTipoContingencias] = useState<
-  //   DocumentoTipoContingencia[]
-  // >([]);
 
   const [tipoContingencias, setTipoContingencias] = useState<Detalle[]>([]);
 
@@ -123,7 +117,7 @@ export const DocumentoTipoContigenciaForm = () => {
     } catch (error) {
       console.error(
         "Error al registrar documento de tipo de contingencia",
-        error
+        error,
       );
       showToast("error", error);
     }
@@ -132,13 +126,11 @@ export const DocumentoTipoContigenciaForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // let listTipoContingencias: TipoContingencia[] = [];
         let listTipoContingencias: Detalle[] = [];
 
-        // const response = await getTipoContingencias();
         const response = await getDetalles(
           ParametroClase.TIPO_CONTINGENCIA,
-          true
+          true,
         );
 
         console.log({ response });
@@ -146,7 +138,6 @@ export const DocumentoTipoContigenciaForm = () => {
         const { result, data } = response;
 
         if (result && data) {
-          // listTipoContingencias = data as TipoContingencia[];
           listTipoContingencias = data as Detalle[];
         }
 
@@ -163,7 +154,6 @@ export const DocumentoTipoContigenciaForm = () => {
               idTipoContingencia: documento.id_tipocontingencia,
               nombre: documento.nombre || "",
             };
-            // console.log("dataForm documento tipo contingencia", dataForm);
             form.reset(dataForm);
           }
         }
@@ -175,7 +165,6 @@ export const DocumentoTipoContigenciaForm = () => {
 
     fetchData();
   }, [id, isEditMode]);
-  // [form, navigate, showToast]
 
   return (
     <>
@@ -306,11 +295,9 @@ export const DocumentoTipoContigenciaForm = () => {
                   variant="outline"
                   disabled={isSubmitting}
                   onClick={() => resetForm()}
-                  // onClick={() => navigate("/mantenimiento/documento-tipo-contingencia")}
                   className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
                   Cancelar
-                  {/* {isSubmitting ? "Cancelando..." : "Cancelar"} */}
                 </Button>
               </div>
             </form>

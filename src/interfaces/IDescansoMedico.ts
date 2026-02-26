@@ -1,12 +1,9 @@
 import { EDescansoMedico } from "../enums/EDescansoMedico"
 import { Adjunto } from "./IAdjunto"
-// import { Colaborador } from "./IColaborador"
 import { Diagnostico } from "./IDiagnostico"
 import { Detalle } from "./IDetalleParametro"
 import { Persona } from "./IPersona"
 import { Empresa } from "./IEmpresa"
-// import { TipoContingencia } from "./ITipoContingencia"
-// import { TipoDescansoMedico } from "./ITipoDescansoMedico"
 
 export interface DescansoMedico {
     id?: string
@@ -41,6 +38,9 @@ export interface DescansoMedico {
     nombre_tipocontingencia?: string
     nombre_diagnostico?: string
     nombre_establecimiento?: string
+    apellido_paterno_colaborador?: string
+    apellido_materno_colaborador?: string
+    nombres_colaborador?: string
     observacion?: string
     total_dias?: number
     is_subsidio?: boolean

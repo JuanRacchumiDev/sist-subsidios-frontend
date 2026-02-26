@@ -111,11 +111,6 @@ export const update = async (id: string, payload: Adjunto): Promise<AdjuntoRespo
 
 export const upload = async (formData: FormData): Promise<AdjuntoResponse> => {
     try {
-        // Añadiendo tipo adjunto a formData
-        // const idTipoAdjunto = "c9d53225-6644-4e53-90be-97678693146f";
-
-        // formData.append("id_tipoadjunto", idTipoAdjunto)
-
         // Obteniendo el código temporal del usuario autenticado
         const codigo_temp = localStorage.getItem("codigo_temp") || null
 
@@ -165,16 +160,6 @@ export const viewFile = async (id: string): Promise<responseViewFile> => {
             message: 'Archivo obtenido con éxito',
             status: 200
         }
-
-        // const { data: { result, data, message, error, status } } = response
-
-        // return {
-        //     result,
-        //     data,
-        //     message,
-        //     error,
-        //     status
-        // }
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
         console.log('errorMessage', errorMessage)

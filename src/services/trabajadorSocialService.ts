@@ -21,7 +21,6 @@ export const getTrabjadoresSocialesWithPaginate = async (
     limit: number,
     filters: TrabajadorSocialFilter = {}
 ) => {
-    // Construir la cadena de query parameters
     const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
@@ -30,7 +29,6 @@ export const getTrabjadoresSocialesWithPaginate = async (
         )
     }).toString()
 
-    // const response = await getAllWithPaginate(page, limit)
     const response = await getAllWithPaginate(queryParams)
 
     return {

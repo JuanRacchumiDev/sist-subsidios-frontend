@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { CobroRow } from "./CobroRow";
 import { Cobro, Pagination as PaginationType } from "../../interfaces/ICobro";
-import { getCobrosWithPaginate } from "@/services/cobroService";
+import { getCobrosWithPaginate } from "../../services/cobroService";
 import {
   Pagination,
   PaginationContent,
@@ -35,8 +35,6 @@ export const CobroTable = () => {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  // const userProfile = useMemo(() => getAuthData()?.usuario, []);
-
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= pagination.totalPages) {
       setPagination((prev) => ({ ...prev, currentPage: page }));
@@ -49,7 +47,6 @@ export const CobroTable = () => {
       try {
         const { currentPage, limit } = pagination;
         const response = await getCobrosWithPaginate(currentPage, limit);
-        // console.log("response cobros", response);
 
         const { result, data, pagination: detailtPagination } = response;
 
@@ -58,14 +55,6 @@ export const CobroTable = () => {
           setPagination(detailtPagination);
         } else {
           setCobros([]);
-          setPagination({
-            currentPage: 1,
-            limit: 10,
-            totalPages: 1,
-            totalItems: 0,
-            nextPage: null,
-            previousPage: null,
-          });
         }
       } catch (error) {
         console.error("Error al obtener cobros", error);
@@ -86,11 +75,10 @@ export const CobroTable = () => {
       items.push(
         <PaginationItem key="ellipsis-start">
           <PaginationEllipsis />
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
 
-    // for (let i = 1; i < pagination.totalPages; i++) {
     for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
@@ -107,7 +95,7 @@ export const CobroTable = () => {
           >
             {i}
           </PaginationLink>
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
 
@@ -115,7 +103,7 @@ export const CobroTable = () => {
       items.push(
         <PaginationItem key="ellipsis-end">
           <PaginationEllipsis />
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
     return items;

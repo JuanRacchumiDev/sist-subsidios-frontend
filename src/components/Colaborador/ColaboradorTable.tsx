@@ -1,5 +1,4 @@
 import React, { useMemo, useCallback, useEffect, useState } from "react";
-// import { getColaboradoresWithPaginate } from "../../services/colaboradorService";
 import {
   Pagination,
   PaginationContent,
@@ -17,12 +16,6 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-// import { ColaboradorRow } from "./ColaboradorRow";
-// import {
-//   Colaborador,
-//   ColaboradorFilter,
-//   Pagination as PaginationType,
-// } from "../../interfaces/IColaborador";
 import {
   Persona,
   PersonaFilter,
@@ -36,25 +29,13 @@ import { ColaboradorRow } from "./ColaboradorRow";
 import { getPersonasWithPaginate } from "../../services/personaService";
 import { getAuthData } from "../../utils/authMemo";
 
-// Definimos el estado inicial de los filtros
-// const initialFilters: ColaboradorFilter = {
-//   id_tipodocumento: undefined,
-//   id_cargo: undefined,
-//   id_empresa: undefined,
-//   numero_documento: undefined,
-//   nombre_completo: undefined,
-// };
-
 const initialFilters: PersonaFilter = {
   id_tipodocumento: undefined,
-  // id_cargo: undefined,
-  // id_empresa: undefined,
   numero_documento: undefined,
   nombre_completo: undefined,
 };
 
 export const ColaboradorTable: React.FC = () => {
-  // const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
   const [colaboradores, setColaboradores] = useState<Persona[]>([]);
 
   const [pagination, setPagination] = useState<PaginationType>({
@@ -67,7 +48,6 @@ export const ColaboradorTable: React.FC = () => {
   });
 
   const [isLoading, setIsLoading] = useState(true);
-  // const [filters, setFilters] = useState<ColaboradorFilter>(initialFilters);
   const [filters, setFilters] = useState<PersonaFilter>(initialFilters);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [refreshToggle, setRefreshToggle] = useState(0);
@@ -77,12 +57,10 @@ export const ColaboradorTable: React.FC = () => {
   const { id_empresa, nombre_perfil_url } = userProfile;
 
   const handleColaboradorStatusChange = () => {
-    // Incrementa el toggle. Esto NO cambia la tabla, pero fuerza el useEffect a ejecutarse.
     setRefreshToggle((prev) => prev + 1);
   };
 
   const handleApplyFilters = (newFilters: PersonaFilter) => {
-    // Asegurar que las cadenas vacías de los Inputs se conviertan a `undefined` al aplicar
     const cleanedFilters: PersonaFilter = Object.fromEntries(
       Object.entries(newFilters).map(([key, value]) => [
         key,
@@ -101,14 +79,12 @@ export const ColaboradorTable: React.FC = () => {
     }
   };
 
-  // useEffect(() => {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
 
     try {
       const { currentPage, limit } = pagination;
 
-      // Limpia los filtros (elimina `undefined` para no enviar el query param)
       const cleanFilters = Object.fromEntries(
         Object.entries(filters).filter(
           ([, value]) => value !== undefined && value !== null && value !== "",
@@ -123,12 +99,6 @@ export const ColaboradorTable: React.FC = () => {
 
       console.log({ cleanFilters });
 
-      // const response = await getColaboradoresWithPaginate(
-      //   currentPage,
-      //   limit,
-      //   cleanFilters
-      // );
-
       const response = await getPersonasWithPaginate(
         currentPage,
         limit,
@@ -137,19 +107,13 @@ export const ColaboradorTable: React.FC = () => {
 
       console.log({ response });
 
-      if (response.result && response.data && response.pagination) {
-        setColaboradores(response.data);
-        setPagination(response.pagination);
+      const { result, data, pagination: detailPagination } = response;
+
+      if (result && data && detailPagination) {
+        setColaboradores(data);
+        setPagination(detailPagination);
       } else {
         setColaboradores([]);
-        setPagination({
-          currentPage: 1,
-          limit: 10,
-          totalPages: 1,
-          totalItems: 0,
-          nextPage: null,
-          previousPage: null,
-        });
       }
     } catch (error) {
       console.error("Error al obtener colaboradores", error);
@@ -157,9 +121,6 @@ export const ColaboradorTable: React.FC = () => {
       setIsLoading(false);
     }
   }, [pagination.currentPage, pagination.limit, filters, refreshToggle]);
-
-  // fetchData();
-  // }, [pagination.currentPage, pagination.limit]);
 
   useEffect(() => {
     fetchData();
@@ -178,7 +139,6 @@ export const ColaboradorTable: React.FC = () => {
       );
     }
 
-    // for (let i = 1; i < pagination.totalPages; i++) {
     for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
@@ -211,9 +171,7 @@ export const ColaboradorTable: React.FC = () => {
 
   return (
     <div className="w-full space-y-4 pt-4">
-      {/* <div className="pb-4 pt-4 flex justify-between items-center"> */}
       <div className="flex justify-end items-center space-x-2 pb-4">
-        {/* <h2 className="text-xl font-semibold">Listado de colaboradores</h2> */}
         <Button
           variant="outline"
           onClick={() => setIsFilterModalOpen(true)}
@@ -230,11 +188,6 @@ export const ColaboradorTable: React.FC = () => {
             )
           </span>
         </Button>
-        {/* <Input
-          type="text"
-          placeholder="Buscar por nombre o documento..."
-          className="w-72 border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
-        /> */}
       </div>
       <div className="rounded-md border border-gray-200 shadow-sm">
         <Table>

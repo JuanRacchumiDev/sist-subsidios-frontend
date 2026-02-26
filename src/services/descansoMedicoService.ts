@@ -3,7 +3,6 @@ import {
     getAll,
     getById,
     getAllWithPaginate,
-    // getAllByColaboradorPaginate,
     getAllForReports,
     create,
     update
@@ -23,46 +22,27 @@ export const getDescansosWithPaginate = async (
     limit: number,
     filters: DescansoMedicoFilter = {}
 ) => {
-    // Construir la cadena de query parameters
-    const queryParams = new URLSearchParams({
+    const params: any = {
         page: page.toString(),
-        limit: limit.toString(),
-        ...Object.fromEntries(
-            Object.entries(filters).filter(([, value]) => value)
-        )
-    }).toString()
+        limit: limit.toString()
+    };
+
+    Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== undefined && value !== "") {
+            params[key] = value
+        }
+    })
+
+    const queryParams = new URLSearchParams(params).toString()
 
     console.log({ queryParams })
 
-    // const response = await getAllWithPaginate(page, limit)
     const response = await getAllWithPaginate(queryParams)
 
     return {
         ...response
     }
 }
-
-// export const getDescansosByColaboradorWithPaginate = async (
-//     idColaborador: string,
-//     page: number,
-//     limit: number,
-//     filters: DescansoMedicoFilter = {}
-// ) => {
-//     const queryParams = new URLSearchParams({
-//         page: page.toString(),
-//         limit: limit.toString(),
-//         ...Object.fromEntries(
-//             Object.entries(filters).filter(([, value]) => value)
-//         )
-//     }).toString()
-
-//     // const response = await getAllByColaboradorPaginate(idColaborador, page, limit)
-//     const response = await getAllByColaboradorPaginate(idColaborador, queryParams)
-
-//     return {
-//         ...response
-//     }
-// }
 
 export const getDescansosForReport = async (tipo: string) => {
     const response = await getAllForReports(tipo)

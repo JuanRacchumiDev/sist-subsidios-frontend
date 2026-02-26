@@ -1,7 +1,7 @@
 import apiClient from './apiClient';
-import { TipoContingenciaResponse } from '../interfaces/ITipoContingencia';
+import { DetalleResponse } from "../interfaces/IDetalleParametro"
 
-export const getAll = async (): Promise<TipoContingenciaResponse> => {
+export const getAll = async (): Promise<DetalleResponse> => {
     try {
         const response = await apiClient.get('/tipo-contingencias')
 
@@ -22,11 +22,9 @@ export const getAll = async (): Promise<TipoContingenciaResponse> => {
     }
 }
 
-export const getById = async (id: string): Promise<TipoContingenciaResponse> => {
+export const getById = async (id: string): Promise<DetalleResponse> => {
     try {
         const urlApi = `${'/tipo-contingencias/'}${id}`
-
-        // console.log('urlApi documento por tipocontingencia', urlApi)
 
         const response = await apiClient.get(urlApi)
 

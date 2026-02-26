@@ -24,9 +24,7 @@ export const getAll = async (): Promise<ColaboradorResponse> => {
 
 export const getAllWithPaginate = async (queryParams: string) => {
     try {
-        // const urlApi = `${'/colaboradores/paginate?page='}${page}${'&limit='}${limit}`
         const urlApi = `${'/colaboradores/paginate?'}${queryParams}`
-        // console.log({ urlApi })
 
         const response = await apiClient.get(urlApi)
 

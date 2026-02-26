@@ -1,4 +1,4 @@
-import { Canje, CanjeFilter } from '@/interfaces/ICanje'
+import { Canje, CanjeFilter } from '../interfaces/ICanje'
 import {
     getAll,
     getById,
@@ -21,16 +21,21 @@ export const getCanjesWithPaginate = async (
     limit: number,
     filters: CanjeFilter = {}
 ) => {
-    // Construir la cadena de query parameters
-    const queryParams = new URLSearchParams({
+    const params: any = {
         page: page.toString(),
-        limit: limit.toString(),
-        ...Object.fromEntries(
-            Object.entries(filters).filter(([, value]) => value)
-        )
-    }).toString()
+        limit: limit.toString()
+    };
 
-    // const response = await getAllWithPaginate(page, limit)
+    Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== undefined && value !== "") {
+            params[key] = value
+        }
+    })
+
+    const queryParams = new URLSearchParams(params).toString()
+
+    console.log({ queryParams })
+
     const response = await getAllWithPaginate(queryParams)
 
     return {

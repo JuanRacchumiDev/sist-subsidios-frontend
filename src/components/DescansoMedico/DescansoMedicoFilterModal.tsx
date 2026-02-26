@@ -18,10 +18,8 @@ import {
   SelectValue,
 } from "../ui/select";
 import { useToast } from "../../context/ToastContext";
-import { getTipoDescansosMedicos } from "../../services/tipoDescansoMedicoService";
-import { getTipoContingencias } from "../../services/tipoContingenciaService";
-import { TipoDescansoMedico } from "../../interfaces/ITipoDescansoMedico";
-import { TipoContingencia } from "../../interfaces/ITipoContingencia";
+import { getDetalles } from "../../services/detalleParametroService";
+import { Detalle } from "../../interfaces/IDetalleParametro";
 
 interface DescansoMedicoFilterModalProps {
   isOpen: boolean;
@@ -30,24 +28,52 @@ interface DescansoMedicoFilterModalProps {
   onApplyFilters: (filters: DescansoMedicoFilter) => void;
 }
 
-const dataTipoDescansosMedicos = async () => {
-  let tipoDescansos: TipoDescansoMedico[] = [];
-  const response = await getTipoDescansosMedicos();
-  const { result, data } = response;
-  if (result && data) {
-    tipoDescansos = data as TipoDescansoMedico[];
+const getTipoDescansosMedicos = async (): Promise<Detalle[]> => {
+  let tipoDescansos: Detalle[] = [];
+
+  try {
+    const clase: number = 1003;
+    const estado: boolean = true;
+
+    const response = await getDetalles(clase, estado);
+    console.log("response getTipoDescansosMedicos");
+    console.log({ response });
+
+    const { result, data } = response;
+
+    if (result && data) {
+      tipoDescansos = data as Detalle[];
+    }
+
+    return tipoDescansos;
+  } catch (error) {
+    console.error("Error al obtener tipo de descansos médicos", error);
+    return [];
   }
-  return tipoDescansos;
 };
 
-const dataTipoContingencias = async () => {
-  let tipoContingencias: TipoContingencia[] = [];
-  const response = await getTipoContingencias();
-  const { result, data } = response;
-  if (result && data) {
-    tipoContingencias = data as TipoContingencia[];
+const getTipoContingencias = async (): Promise<Detalle[]> => {
+  let tipoContingencias: Detalle[] = [];
+
+  try {
+    const clase: number = 1004;
+    const estado: boolean = true;
+
+    const response = await getDetalles(clase, estado);
+    console.log("response getTipoContingencias");
+    console.log({ response });
+
+    const { result, data } = response;
+
+    if (result && data) {
+      tipoContingencias = data as Detalle[];
+    }
+
+    return tipoContingencias;
+  } catch (error) {
+    console.error("Error al obtener tipo de contingencias", error);
+    return [];
   }
-  return tipoContingencias;
 };
 
 export const DescansoMedicoFilterModal: React.FC<
@@ -58,14 +84,10 @@ export const DescansoMedicoFilterModal: React.FC<
 
   const { showToast } = useToast();
 
-  const [tipoDescansos, setTipoDescansos] = useState<TipoDescansoMedico[]>([]);
-  const [tipoContingencias, setTipoContingencias] = useState<
-    TipoContingencia[]
-  >([]);
+  const [tipoDescansos, setTipoDescansos] = useState<Detalle[]>([]);
+  const [tipoContingencias, setTipoContingencias] = useState<Detalle[]>([]);
 
-  // Sincronizar filtros al abrir el modal
   useEffect(() => {
-    // setLocalFilters(currentFilters);
     setLocalFilters({
       id_tipodescansomedico: currentFilters.id_tipodescansomedico || undefined,
       id_tipocontingencia: currentFilters.id_tipocontingencia || undefined,
@@ -79,8 +101,8 @@ export const DescansoMedicoFilterModal: React.FC<
     const fetchData = async () => {
       try {
         const [tipoDescansosRes, tipoContingenciasRes] = await Promise.all([
-          dataTipoDescansosMedicos(),
-          dataTipoContingencias(),
+          getTipoDescansosMedicos(),
+          getTipoContingencias(),
         ]);
 
         setTipoDescansos(tipoDescansosRes);
@@ -94,23 +116,18 @@ export const DescansoMedicoFilterModal: React.FC<
     fetchData();
   }, []);
 
-  // Manejador genérico para <input> (texto y fecha)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    // Guardamos la cadena vacía, y al aplicar, la transformamos a undefined
     setLocalFilters((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  // Manejador específico para <Select>
   const handleSelectChange = (
     name: keyof DescansoMedicoFilter,
-    value: string
+    value: string,
   ) => {
-    // Si el valor es "null-filter" (nuestra convención para limpiar), guardamos undefined.
-    // Si es un ID válido, lo guardamos.
     setLocalFilters((prev) => ({
       ...prev,
       [name]: value === "null-filter" ? undefined : value,
@@ -118,28 +135,23 @@ export const DescansoMedicoFilterModal: React.FC<
   };
 
   const handleApply = () => {
-    // 1. Limpiar los valores (cadenas vacías o `null-filter`) a `undefined` para el servicio
     const filtersToApply: DescansoMedicoFilter = Object.fromEntries(
       Object.entries(localFilters).map(([key, value]) => {
-        // Los select están en `undefined` si están limpios.
         if (key === "id_tipodescansomedico" || key === "id_tipocontingencia") {
           return [key, value];
         }
-        // Los inputs de texto/fecha están en `""` si están vacíos.
         return [key, value === "" || value === null ? undefined : value];
-      })
+      }),
     ) as DescansoMedicoFilter;
 
     onApplyFilters(filtersToApply);
-    onClose(); // Cerrar el modal después de aplicar
+    onClose();
   };
 
   const handleClear = () => {
     const emptyFilters: DescansoMedicoFilter = {
-      // Usamos `undefined` para filtros de ID (selects)
       id_tipodescansomedico: undefined,
       id_tipocontingencia: undefined,
-      // Usamos `""` para los inputs (texto/fecha) para limpiar visualmente
       nombre_colaborador: "",
       fecha_inicio: "",
       fecha_final: "",
@@ -149,9 +161,7 @@ export const DescansoMedicoFilterModal: React.FC<
     onClose();
   };
 
-  // Función auxiliar para obtener el valor del select
   const getSelectValue = (key: keyof DescansoMedicoFilter) => {
-    // El valor en el Select debe ser una cadena. Si es undefined, usamos nuestra convención "null-filter".
     return localFilters[key] || "null-filter";
   };
 
@@ -167,7 +177,7 @@ export const DescansoMedicoFilterModal: React.FC<
           <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-2 md:gap-4">
             <Label
               htmlFor="nombre_colaborador"
-              className="md:text-right font-medium text-gray-700"
+              className="md:text-right w-full font-medium text-gray-700 pr-2"
             >
               Colaborador
             </Label>
@@ -184,7 +194,7 @@ export const DescansoMedicoFilterModal: React.FC<
           <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-2 md:gap-4">
             <Label
               htmlFor="id_tipodescansomedico"
-              className="md:text-right font-medium text-gray-700"
+              className="md:text-right w-full font-medium text-gray-700 pr-2"
             >
               Tipo descanso
             </Label>
@@ -220,9 +230,9 @@ export const DescansoMedicoFilterModal: React.FC<
           <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-2 md:gap-4">
             <Label
               htmlFor="id_tipocontingencia"
-              className="md:text-right font-medium text-gray-700"
+              className="md:text-right w-full font-medium text-gray-700 pr-2"
             >
-              Contingencia
+              Tipo de Contingencia
             </Label>
             <Select
               onValueChange={(value) =>
@@ -256,7 +266,7 @@ export const DescansoMedicoFilterModal: React.FC<
           <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-2 md:gap-4">
             <Label
               htmlFor="fecha_inicio"
-              className="md:text-right font-medium text-gray-700"
+              className="md:text-right w-full font-medium text-gray-700 pr-2"
             >
               Fecha Inicio (Desde)
             </Label>
@@ -273,7 +283,7 @@ export const DescansoMedicoFilterModal: React.FC<
           <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-2 md:gap-4">
             <Label
               htmlFor="fecha_final"
-              className="md:text-right font-medium text-gray-700"
+              className="md:text-right w-full font-medium text-gray-700 pr-2"
             >
               Fecha Final (Hasta)
             </Label>

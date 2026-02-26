@@ -28,10 +28,7 @@ import {
   SelectValue,
 } from "../ui/select";
 
-import { getEmpresaByRazonSocial } from "../../services/empresaService";
 import { getDetalles } from "../../services/detalleParametroService";
-// import { getTipoDocumentos } from "../../services/tipoDocumentoService";
-// import { getCargos } from "../../services/cargoService";
 import {
   getPersonaByIdTipoDocAndNumDoc,
   getPersonaById,
@@ -41,7 +38,6 @@ import { Button } from "../ui/button";
 import { RequiredLabel } from "../Common/RequiredLabel";
 import { Persona, PersonaResponse } from "../../interfaces/IPersona";
 import { Detalle } from "../../interfaces/IDetalleParametro";
-import { Empresa } from "../../interfaces/IEmpresa";
 import { createPersona, updatePersona } from "../../services/personaService";
 import SearchableCombobox from "../Common/SearchableCombobox";
 import { ArrowLeft } from "lucide-react";
@@ -71,11 +67,6 @@ const formSchema = z.object({
     .refine((val) => val !== null, {
       message: "La fecha de nacimiento es requerida",
     }),
-  // idEmpresa: z
-  //   .string({
-  //     message: "Por favor seleccione una empresa.",
-  //   })
-  //   .min(1, "Por favor seleccione una empresa"),
   idCargo: z
     .string({
       message: "Por favor seleccione un cargo.",
@@ -97,8 +88,6 @@ const formSchema = z.object({
     message: "El número de celular debe tener al menos 9 dígitos.",
   }),
   fechaIngreso: z.date().optional(),
-  //   esAsociadoSindicato: z.boolean().optional(),
-  //   esPresentaInconvenientes: z.boolean().optional(),
 });
 
 const getTipoDocumentos = async (): Promise<Detalle[]> => {
@@ -145,25 +134,6 @@ const getCargos = async (): Promise<Detalle[]> => {
   }
 };
 
-const getEmpresas = async (): Promise<Empresa[]> => {
-  let empresas: Empresa[] = [];
-
-  try {
-    const response = await getEmpresaByRazonSocial();
-    console.log("response getEmpresas");
-    console.log({ response });
-
-    if (response.result && response.data) {
-      empresas = response.data as Empresa[];
-    }
-
-    return empresas;
-  } catch (error) {
-    console.error("Error al obtener empresas", error);
-    return [];
-  }
-};
-
 type TPersona = {
   idTipoDocumento?: string;
   numeroDocumento?: string;
@@ -171,7 +141,6 @@ type TPersona = {
   apellidoPaterno?: string;
   apellidoMaterno?: string;
   fechaNacimiento?: null;
-  // idEmpresa?: string;
   idCargo?: string;
   nombreArea?: string;
   nombreSede?: string;
@@ -189,7 +158,6 @@ export const EspecialistaSHForm = () => {
   console.log("---- id especialista sh ----");
   console.log({ id });
 
-  // const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [tipos, setTipos] = useState<Detalle[]>([]);
   const [cargos, setCargos] = useState<Detalle[]>([]);
   const [idPersona, setIdPersona] = useState<string>("");
@@ -212,7 +180,6 @@ export const EspecialistaSHForm = () => {
       apellidoPaterno: "",
       apellidoMaterno: "",
       fechaNacimiento: null,
-      // idEmpresa: "",
       idCargo: "",
       nombreArea: "",
       nombreSede: "",
@@ -220,8 +187,6 @@ export const EspecialistaSHForm = () => {
       emailPersonal: "",
       telefono: "",
       fechaIngreso: null,
-      //   esAsociadoSindicato: false,
-      //   esPresentaInconvenientes: false,
     };
 
     form.reset(dataForm);
@@ -236,7 +201,6 @@ export const EspecialistaSHForm = () => {
       apellidoPaterno: "",
       apellidoMaterno: "",
       fechaNacimiento: null,
-      // idEmpresa: "",
       idCargo: "",
       nombreArea: "",
       nombreSede: "",
@@ -244,8 +208,6 @@ export const EspecialistaSHForm = () => {
       emailPersonal: "",
       telefono: "",
       fechaIngreso: null,
-      //   esAsociadoSindicato: false,
-      //   esPresentaInconvenientes: false,
     },
   });
 
@@ -254,13 +216,11 @@ export const EspecialistaSHForm = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log({ values });
     let messageError: string = "";
-    // let response: RepresentanteLegalResponse;
     let response: PersonaResponse;
 
     const {
       idTipoDocumento,
       idCargo,
-      // idEmpresa,
       numeroDocumento,
       apellidoPaterno,
       apellidoMaterno,
@@ -272,8 +232,6 @@ export const EspecialistaSHForm = () => {
       emailInstitucional,
       emailPersonal,
       telefono,
-      // esAsociadoSindicato,
-      // esPresentaInconvenientes,
     } = values;
 
     const nombreCompleto: string = `${nombres} ${apellidoPaterno} ${apellidoMaterno}`;
@@ -312,8 +270,6 @@ export const EspecialistaSHForm = () => {
       email_personal: emailPersonal,
       telefono,
       nombre_grupo: "GRUPO ESPECIALISTA SH",
-      // is_asociado_sindicato: esAsociadoSindicato,
-      // is_presenta_inconvenientes: esPresentaInconvenientes,
     };
 
     console.log("---- payload persona ----");
@@ -355,48 +311,18 @@ export const EspecialistaSHForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let listEmpresas: Empresa[] = [];
         let listTipoDocumentos: Detalle[] = [];
         let listCargos: Detalle[] = [];
 
-        const [responseEmpresa, responseTipoDocumentos, responseCargos] =
-          await Promise.all([getEmpresas(), getTipoDocumentos(), getCargos()]);
-
-        console.log("---- responseEmpresa ----");
-        console.log({ responseEmpresa });
-
-        // const { result: resultEmpresas, data: dataEmpresas } = responseEmpresas;
-        // if (resultEmpresas && dataEmpresas) {
-        //   listEmpresas = dataEmpresas as Empresa[];
-        // }
-
-        // console.log({ listEmpresas });
-
-        // listEmpresas = responseEmpresas as Empresa[];
+        const [responseTipoDocumentos, responseCargos] = await Promise.all([
+          getTipoDocumentos(),
+          getCargos(),
+        ]);
 
         listTipoDocumentos = responseTipoDocumentos as Detalle[];
 
         listCargos = responseCargos as Detalle[];
 
-        // const { result: resultTipos, data: dataTipos } = responseTipoDocumentos;
-        // if (resultTipos && dataTipos) {
-        //   listTipoDocumentos = dataTipos as TTipoDocumento[];
-        // }
-
-        // const { result: resultCargos, data: dataCargos } = responseCargos;
-        // if (resultCargos && dataCargos) {
-        //   listCargos = dataCargos as TCargo[];
-        // }
-
-        if (responseEmpresa) {
-          console.log("existe empresa");
-          const empresaDefault = responseEmpresa as Empresa;
-          console.log({ empresaDefault });
-          const { id: idEmpresa } = empresaDefault;
-          setIdEmpresa(idEmpresa);
-        }
-
-        // setEmpresas(listEmpresas);
         setTipos(listTipoDocumentos);
         setCargos(listCargos);
 
@@ -419,15 +345,12 @@ export const EspecialistaSHForm = () => {
               apellido_materno,
               fecha_nacimiento,
               fecha_ingreso,
-              // id_empresa,
               id_cargo,
               nombre_area,
               nombre_sede,
               email_institucional,
               email_personal,
               telefono,
-              //   is_asociado_sindicato,
-              //   is_presenta_inconvenientes,
             } = especialistaSH;
 
             dataForm.idTipoDocumento = id_tipodocumento || "";
@@ -441,17 +364,12 @@ export const EspecialistaSHForm = () => {
             dataForm.fechaIngreso = fecha_ingreso
               ? parseISO(fecha_ingreso)
               : null;
-            // dataForm.idEmpresa = id_empresa || "";
             dataForm.idCargo = id_cargo || "";
             dataForm.nombreArea = nombre_area || "";
             dataForm.nombreSede = nombre_sede || "";
             dataForm.emailInstitucional = email_institucional || "";
             dataForm.emailPersonal = email_personal || "";
             dataForm.telefono = telefono || "";
-            // dataForm.esAsociadoSindicato = is_asociado_sindicato || false;
-            // dataForm.esPresentaInconvenientes =
-            //   is_presenta_inconvenientes || false;
-
             form.reset(dataForm);
           } else {
             showToast("error", message || "Especialista sh no encontrado");
@@ -466,7 +384,6 @@ export const EspecialistaSHForm = () => {
 
     fetchData();
   }, [id, form]);
-  // [id, form, navigate, showToast]
 
   return (
     <>
@@ -624,7 +541,6 @@ export const EspecialistaSHForm = () => {
                                   }
                                 } catch (error) {
                                   setCamposHabilitadosPersona(true);
-                                  // showErrorToast("Error al crear persona");
                                   showToast("error", "Error al crear persona");
                                 }
                               }
@@ -772,70 +688,6 @@ export const EspecialistaSHForm = () => {
                   Información laboral
                 </legend>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* <FormField
-                    control={form.control}
-                    name="idEmpresa"
-                    render={({ field, fieldState }) => {
-                      return (
-                        <FormItem className="flex flex-col">
-                          <RequiredLabel>Empresa</RequiredLabel>
-                          <SearchableCombobox<Empresa>
-                            placeholder="Buscar una empresa"
-                            options={empresas}
-                            value={field.value}
-                            onChange={field.onChange}
-                            displayKey="nombre_o_razon_social"
-                            valueKey="id"
-                            searchKeys={["nombre_o_razon_social"]}
-                            isInvalid={fieldState.invalid}
-                          />
-                          <FormMessage />
-                        </FormItem>
-                      );
-                    }}
-                  /> */}
-
-                  {/* <FormField
-                    control={form.control}
-                    name="idEmpresa"
-                    render={({ field, fieldState }) => (
-                      <FormItem className="mb-4">
-                        <RequiredLabel>Empresa</RequiredLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value ?? ""}
-                        >
-                          <FormControl>
-                            <SelectTrigger
-                              className={`
-                                ${
-                                  fieldState.invalid
-                                    ? "border-red-500 focus:ring-red-500"
-                                    : "focus:ring-blue-500"
-                                }
-                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
-                              `}
-                            >
-                              <SelectValue placeholder="Seleccionar empresa" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-gray-400">
-                            {empresas.map((empresa) => (
-                              <SelectItem
-                                value={empresa.id}
-                                key={empresa.id}
-                                className="cursor-pointer hover:bg-gray-100 transition-colors"
-                              >
-                                {empresa.nombre_o_razon_social}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  /> */}
-
                   <FormField
                     control={form.control}
                     name="idCargo"
@@ -1021,62 +873,10 @@ export const EspecialistaSHForm = () => {
                             `}
                           />
                         </FormControl>
-                        {/* <FormDescription>
-                          {field.value
-                            ? format(field.value, "PPP")
-                            : "Seleccione una fecha"}
-                        </FormDescription> */}
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
-                  {/* <FormField
-                    control={form.control}
-                    name="esAsociadoSindicato"
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="flex items-center space-x-2">
-                          <Input
-                            type="checkbox"
-                            id="acceptSindicato"
-                            checked={field.value}
-                            onChange={field.onChange}
-                            className="w-4 h-4"
-                          />
-                          <label htmlFor="acceptSindicato" className="text-sm">
-                            Asociado a un sindicato
-                          </label>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="esPresentaInconvenientes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="flex items-center space-x-2">
-                          <Input
-                            type="checkbox"
-                            id="acceptInconvenientes"
-                            checked={field.value}
-                            onChange={field.onChange}
-                            className="w-4 h-4"
-                          />
-                          <label
-                            htmlFor="acceptInconvenientes"
-                            className="text-sm"
-                          >
-                            Presenta inconvenientes
-                          </label>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  /> */}
                 </div>
               </fieldset>
 
@@ -1105,7 +905,6 @@ export const EspecialistaSHForm = () => {
                   className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
                   Cancelar
-                  {/* {isSubmitting ? "Cancelando..." : "Cancelar"} */}
                 </Button>
               </div>
             </form>

@@ -16,7 +16,6 @@ import { getPersonas } from "../../services/personaService";
 import { getDetalles } from "../../services/detalleParametroService";
 import { Detalle } from "../../interfaces/IDetalleParametro";
 import { Persona } from "../../interfaces/IPersona";
-// import { getPerfiles } from "../../services/perfilService";
 import {
   getUsuarioById,
   createUsuario,
@@ -102,20 +101,6 @@ const getDataPerfiles = async (): Promise<Detalle[]> => {
   }
 };
 
-// type Persona = {
-//   id: string;
-//   apellido_paterno: string;
-//   apellido_materno: string;
-//   nombres: string;
-//   email: string;
-//   nombre_completo: string;
-// };
-
-// type Perfil = {
-//   id: string;
-//   nombre: string;
-// };
-
 export const UsuarioForm = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -160,8 +145,6 @@ export const UsuarioForm = () => {
       const { idPerfil, idPersona, username, email } = values;
 
       const payloadData: Usuario = {
-        // ...values,
-        // estado: true,
         id_perfil: idPerfil,
         id_persona: idPersona,
         username,
@@ -175,8 +158,6 @@ export const UsuarioForm = () => {
         messageError = "Error al registrar el usuario";
         response = await createUsuario(payloadData);
       }
-
-      // console.log("response new usuario", response);
 
       const { result, message, error } = response;
 
@@ -306,58 +287,10 @@ export const UsuarioForm = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* <FormField
-                  control={form.control}
-                  name="idPersona"
-                  render={({ field, fieldState }) => {
-                    const selectedPersona = personas.find(
-                      (c) => c.id === field.value,
-                    );
-
-                    console.log({ selectedPersona });
-
-                    if (selectedPersona) {
-                      let listCorreos: string[] = [];
-
-                      const { email_institucional, email_personal } =
-                        selectedPersona;
-
-                      if (email_personal) {
-                        listCorreos.push(email_personal);
-                      }
-
-                      if (email_institucional) {
-                        listCorreos.push(email_institucional);
-                      }
-
-                      setCorreos(listCorreos);
-                    }
-
-                    return (
-                      <FormItem className="flex flex-col">
-                        <RequiredLabel>Persona</RequiredLabel>
-                        <SearchableCombobox<Persona>
-                          placeholder="Buscar una persona"
-                          options={personas}
-                          value={field.value}
-                          onChange={field.onChange}
-                          displayKey="nombre_completo"
-                          valueKey="id"
-                          searchKeys={["nombre_completo"]}
-                          isInvalid={fieldState.invalid}
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
-                /> */}
-
                 <FormField
                   control={form.control}
                   name="idPersona"
-                  render={(
-                    { field, fieldState }, // Quitamos toda la lógica pesada de aquí
-                  ) => (
+                  render={({ field, fieldState }) => (
                     <FormItem className="flex flex-col">
                       <RequiredLabel>Persona</RequiredLabel>
                       <SearchableCombobox<Persona>
@@ -476,27 +409,6 @@ export const UsuarioForm = () => {
                     </FormItem>
                   )}
                 />
-
-                {/* <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <RequiredLabel>Correo Electrónico</RequiredLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="luz.perez@email.com"
-                          type="email"
-                          autoComplete="off"
-                          maxLength={60}
-                          {...field}
-                          className={fieldState.invalid ? "border-red-500" : ""}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
               </div>
 
               <div className="flex justify-end space-x-4 pt-4">
@@ -521,11 +433,9 @@ export const UsuarioForm = () => {
                   variant="outline"
                   disabled={isSubmitting}
                   onClick={() => resetForm()}
-                  // onClick={() => navigate("/usuario")}
                   className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
                   Cancelar
-                  {/* {isSubmitting ? "Cancelando..." : "Cancelar"} */}
                 </Button>
               </div>
             </form>

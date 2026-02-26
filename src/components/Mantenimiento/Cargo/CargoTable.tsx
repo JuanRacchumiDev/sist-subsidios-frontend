@@ -2,7 +2,6 @@ import {
   Cargo,
   Pagination as PaginationType,
 } from "../../../interfaces/ICargo";
-// import { getCargosWithPaginate } from "../../../services/cargoService";
 import { getDetallesWithPaginate } from "../../../services/detalleParametroService";
 import React, { useEffect, useState } from "react";
 import { Input } from "../../ui/input";
@@ -46,7 +45,6 @@ export const CargoTable: React.FC = () => {
   const [refreshToggle, setRefreshToggle] = useState(0);
 
   const handleCargoStatusChange = () => {
-    // Incrementa el toggle. Esto NO cambia la tabla, pero fuerza el useEffect a ejecutarse.
     setRefreshToggle((prev) => prev + 1);
   };
 
@@ -77,17 +75,11 @@ export const CargoTable: React.FC = () => {
         console.log(ParametroClase.CARGO);
         console.log({ filterQuery });
 
-        // const response = await getCargosWithPaginate(
-        //   currentPage,
-        //   limit,
-        //   filterQuery
-        // );
-
         const response = await getDetallesWithPaginate(
           ParametroClase.CARGO,
           currentPage,
           limit,
-          filterQuery
+          filterQuery,
         );
 
         console.log("---- response listCargos ----");
@@ -126,7 +118,7 @@ export const CargoTable: React.FC = () => {
       items.push(
         <PaginationItem key="ellipsis-start">
           <PaginationEllipsis />
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
 
@@ -146,7 +138,7 @@ export const CargoTable: React.FC = () => {
           >
             {i}
           </PaginationLink>
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
 
@@ -154,7 +146,7 @@ export const CargoTable: React.FC = () => {
       items.push(
         <PaginationItem key="ellipsis-end">
           <PaginationEllipsis />
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
     return items;

@@ -1,5 +1,5 @@
 import { ECanje } from "../enums/ECanje"
-import { Colaborador } from "./IColaborador"
+import { Persona } from "./IPersona"
 import { DescansoMedico } from "./IDescansoMedico"
 
 export interface Canje {
@@ -33,10 +33,14 @@ export interface Canje {
     mes_devengado?: string
     nombre_tipodescansomedico?: string
     nombre_tipocontingencia?: string
+    nombre_colaborador?: string
+    apellido_paterno_colaborador?: string
+    apellido_materno_colaborador?: string
+    nombres_colaborador?: string
     user_crea?: string
     estado_registro?: ECanje
     descansoMedico?: DescansoMedico
-    colaborador?: Colaborador
+    colaborador?: Persona
 }
 
 export interface CanjeResponse {
@@ -65,6 +69,8 @@ export interface CanjePaginateResponse {
 }
 
 export interface CanjeFilter {
+    id_tipodescansomedico?: string
+    id_tipocontingencia?: string
     nombre_colaborador?: string
     codigo_canje?: string
     codigo_citt?: string

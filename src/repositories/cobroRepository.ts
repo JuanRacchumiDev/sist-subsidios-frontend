@@ -72,8 +72,6 @@ export const getById = async (id: string): Promise<CobroResponse> => {
 
 export const create = async (payload: Cobro): Promise<CobroResponse> => {
     try {
-        // console.log('payload new canje', payload)
-
         const response = await apiClient.post('/cobros', payload)
 
         const { data: { result, message, status } } = response

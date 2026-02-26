@@ -17,9 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { UsuarioFilter } from "@/interfaces/IUsuario";
-import { getPerfiles } from "@/services/perfilService";
-import { Perfil } from "@/interfaces/IPerfil";
+import { UsuarioFilter } from "../../interfaces/IUsuario";
+import { getDetalles } from "../../services/detalleParametroService";
+import { Detalle } from "../../interfaces/IDetalleParametro";
 
 interface UsuarioFilterModalProps {
   isOpen: boolean;
@@ -28,14 +28,28 @@ interface UsuarioFilterModalProps {
   onApplyFilters: (filters: UsuarioFilter) => void;
 }
 
-const dataPerfiles = async () => {
-  let perfiles: Perfil[] = [];
-  const response = await getPerfiles();
-  const { result, data } = response;
-  if (result && data) {
-    perfiles = data as Perfil[];
+const getPerfiles = async (): Promise<Detalle[]> => {
+  let perfiles: Detalle[] = [];
+
+  try {
+    const clase: number = 1001;
+    const estado: boolean = true;
+
+    const response = await getDetalles(clase, estado);
+    console.log("response getPerfiles");
+    console.log({ response });
+
+    const { result, data } = response;
+
+    if (result && data) {
+      perfiles = data as Detalle[];
+    }
+
+    return perfiles;
+  } catch (error) {
+    console.error("Error al obtener tipo de descansos médicos", error);
+    return [];
   }
-  return perfiles;
 };
 
 export const UsuarioFilterModal: React.FC<UsuarioFilterModalProps> = ({
@@ -49,19 +63,21 @@ export const UsuarioFilterModal: React.FC<UsuarioFilterModalProps> = ({
 
   const { showToast } = useToast();
 
-  const [perfiles, setPerfiles] = useState<Perfil[]>([]);
+  const [perfiles, setPerfiles] = useState<Detalle[]>([]);
 
   useEffect(() => {
     setLocalFilters({
-      nombre_persona: currentFilters.nombre_persona || undefined,
       id_perfil: currentFilters.id_perfil || undefined,
+      nombre_persona: currentFilters.nombre_persona || undefined,
+      username: currentFilters.username || "",
+      email: currentFilters.email || "",
     });
   }, [currentFilters]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [perfiles] = await Promise.all([dataPerfiles()]);
+        const [perfiles] = await Promise.all([getPerfiles()]);
 
         setPerfiles(perfiles);
       } catch (error) {
@@ -73,20 +89,15 @@ export const UsuarioFilterModal: React.FC<UsuarioFilterModalProps> = ({
     fetchData();
   }, []);
 
-  // Manejador genérico para <input> (texto y fecha)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    // Guardamos la cadena vacía, y al aplicar, la transformamos a undefined
     setLocalFilters((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  // Manejador específico para <Select>
   const handleSelectChange = (name: keyof UsuarioFilter, value: string) => {
-    // Si el valor es "null-filter" (nuestra convención para limpiar), guardamos undefined.
-    // Si es un ID válido, lo guardamos.
     setLocalFilters((prev) => ({
       ...prev,
       [name]: value === "null-filter" ? undefined : value,
@@ -94,36 +105,32 @@ export const UsuarioFilterModal: React.FC<UsuarioFilterModalProps> = ({
   };
 
   const handleApply = () => {
-    // 1. Limpiar los valores (cadenas vacías o `null-filter`) a `undefined` para el servicio
     const filtersToApply: UsuarioFilter = Object.fromEntries(
       Object.entries(localFilters).map(([key, value]) => {
-        // Los select están en `undefined` si están limpios.
         if (key === "id_perfil") {
           return [key, value];
         }
-        // Los inputs de texto/fecha están en `""` si están vacíos.
         return [key, value === "" || value === null ? undefined : value];
-      })
+      }),
     ) as UsuarioFilter;
 
     onApplyFilters(filtersToApply);
-    onClose(); // Cerrar el modal después de aplicar
+    onClose();
   };
 
   const handleClear = () => {
     const emptyFilters: UsuarioFilter = {
-      // Usamos `undefined` para filtros de ID (selects)
       id_perfil: undefined,
       nombre_persona: "",
+      username: "",
+      email: "",
     };
     setLocalFilters(emptyFilters);
     onApplyFilters(emptyFilters);
     onClose();
   };
 
-  // Función auxiliar para obtener el valor del select
   const getSelectValue = (key: keyof UsuarioFilter) => {
-    // El valor en el Select debe ser una cadena. Si es undefined, usamos nuestra convención "null-filter".
     return localFilters[key] || "null-filter";
   };
 
@@ -141,7 +148,7 @@ export const UsuarioFilterModal: React.FC<UsuarioFilterModalProps> = ({
               htmlFor="nombre_persona"
               className="md:text-right font-medium text-gray-700"
             >
-              Nombre
+              Nombre de persona
             </Label>
             <Input
               id="nombre_persona"
@@ -152,6 +159,41 @@ export const UsuarioFilterModal: React.FC<UsuarioFilterModalProps> = ({
               className="md:col-span-3 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-2 md:gap-4">
+            <Label
+              htmlFor="username"
+              className="md:text-right font-medium text-gray-700"
+            >
+              Nombre de usuario
+            </Label>
+            <Input
+              id="username"
+              name="username"
+              value={localFilters.username || ""}
+              onChange={handleInputChange}
+              placeholder="Escribe el nombre de usuario"
+              className="md:col-span-3 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-2 md:gap-4">
+            <Label
+              htmlFor="email"
+              className="md:text-right font-medium text-gray-700"
+            >
+              Email
+            </Label>
+            <Input
+              id="email"
+              name="email"
+              value={localFilters.email || ""}
+              onChange={handleInputChange}
+              placeholder="Escribe el email del usuario"
+              className="md:col-span-3 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-2 md:gap-4">
             <Label
               htmlFor="id_perfil"

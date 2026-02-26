@@ -74,23 +74,18 @@ export const DocumentoTipoContingenciaFilterModal: React.FC<
     fetchData();
   }, []);
 
-  // Manejador genérico para <input> (texto y fecha)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    // Guardamos la cadena vacía, y al aplicar, la transformamos a undefined
     setLocalFilters((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  // Manejador específico para <Select>
   const handleSelectChange = (
     name: keyof DocumentoTipoContingenciaFilter,
-    value: string
+    value: string,
   ) => {
-    // Si el valor es "null-filter" (nuestra convención para limpiar), guardamos undefined.
-    // Si es un ID válido, lo guardamos.
     setLocalFilters((prev) => ({
       ...prev,
       [name]: value === "null-filter" ? undefined : value,
@@ -98,27 +93,22 @@ export const DocumentoTipoContingenciaFilterModal: React.FC<
   };
 
   const handleApply = () => {
-    // 1. Limpiar los valores (cadenas vacías o `null-filter`) a `undefined` para el servicio
     const filtersToApply: DocumentoTipoContingenciaFilter = Object.fromEntries(
       Object.entries(localFilters).map(([key, value]) => {
-        // Los select están en `undefined` si están limpios.
         if (key === "id_tipocontingencia") {
           return [key, value];
         }
-        // Los inputs de texto/fecha están en `""` si están vacíos.
         return [key, value === "" || value === null ? undefined : value];
-      })
+      }),
     ) as DocumentoTipoContingenciaFilter;
 
     onApplyFilters(filtersToApply);
-    onClose(); // Cerrar el modal después de aplicar
+    onClose();
   };
 
   const handleClear = () => {
     const emptyFilters: DocumentoTipoContingenciaFilter = {
-      // Usamos `undefined` para filtros de ID (selects)
       id_tipocontingencia: undefined,
-      // Usamos `""` para los inputs (texto/fecha) para limpiar visualmente
       nombre: "",
     };
     setLocalFilters(emptyFilters);
@@ -126,9 +116,7 @@ export const DocumentoTipoContingenciaFilterModal: React.FC<
     onClose();
   };
 
-  // Función auxiliar para obtener el valor del select
   const getSelectValue = (key: keyof DocumentoTipoContingenciaFilter) => {
-    // El valor en el Select debe ser una cadena. Si es undefined, usamos nuestra convención "null-filter".
     return localFilters[key] || "null-filter";
   };
 

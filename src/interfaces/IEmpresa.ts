@@ -1,4 +1,3 @@
-// import { RepresentanteLegal } from "./IRepresentanteLegal"
 import { Persona } from "./IPersona"
 
 export interface Empresa {

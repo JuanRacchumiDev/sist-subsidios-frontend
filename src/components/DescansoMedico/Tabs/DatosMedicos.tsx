@@ -20,7 +20,6 @@ interface DatosMedicosProps {
   isModeLetter?: boolean;
 }
 
-// Interfaz para el diagnóstico formateado
 interface DiagnosticoConFormato extends Diagnostico {
   display: string;
 }

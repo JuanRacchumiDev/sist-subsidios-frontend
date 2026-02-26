@@ -30,8 +30,6 @@ import {
 
 import { getEmpresas } from "../../services/empresaService";
 import { getDetalles } from "../../services/detalleParametroService";
-// import { getTipoDocumentos } from "../../services/tipoDocumentoService";
-// import { getCargos } from "../../services/cargoService";
 import {
   getPersonaByIdTipoDocAndNumDoc,
   getPersonaById,
@@ -43,14 +41,6 @@ import { Persona, PersonaResponse } from "../../interfaces/IPersona";
 import { Detalle } from "../../interfaces/IDetalleParametro";
 import { Empresa } from "../../interfaces/IEmpresa";
 import { createPersona, updatePersona } from "../../services/personaService";
-// import {
-//   TrabajadorSocial,
-//   TrabajadorSocialResponse,
-// } from "../../interfaces/ITrabajadorSocial";
-// import {
-//   createTrabajadorSocial,
-//   getTrabajadorSocialById,
-// } from "../../services/trabajadorSocialService";
 import SearchableCombobox from "../Common/SearchableCombobox";
 import { ArrowLeft } from "lucide-react";
 
@@ -105,8 +95,6 @@ const formSchema = z.object({
     message: "El número de celular debe tener al menos 9 dígitos.",
   }),
   fechaIngreso: z.date().optional(),
-  //   esAsociadoSindicato: z.boolean().optional(),
-  //   esPresentaInconvenientes: z.boolean().optional(),
 });
 
 const getTipoDocumentos = async (): Promise<Detalle[]> => {
@@ -153,21 +141,6 @@ const getCargos = async (): Promise<Detalle[]> => {
   }
 };
 
-// type TEmpresa = {
-//   id: string;
-//   nombre_o_razon_social: string;
-// };
-
-// type TTipoDocumento = {
-//   id: string;
-//   abreviatura: string;
-// };
-
-// type TCargo = {
-//   id: string;
-//   nombre: string;
-// };
-
 type TPersona = {
   idTipoDocumento?: string;
   numeroDocumento?: string;
@@ -184,25 +157,6 @@ type TPersona = {
   telefono?: string;
   fechaIngreso?: null;
 };
-
-// type TTrabajadorSocial = {
-//   idTipoDocumento?: string;
-//   numeroDocumento?: string;
-//   nombres?: string;
-//   apellidoPaterno?: string;
-//   apellidoMaterno?: string;
-//   fechaNacimiento?: null;
-//   idEmpresa?: string;
-//   idCargo?: string;
-//   nombreArea?: string;
-//   nombreSede?: string;
-//   emailInstitucional?: string;
-//   emailPersonal?: string;
-//   numeroCelular?: string;
-//   fechaIngreso?: null;
-//   //   esAsociadoSindicato?: boolean;
-//   //   esPresentaInconvenientes?: boolean;
-// };
 
 export const TrabajadorSocialForm = () => {
   const navigate = useNavigate();
@@ -242,8 +196,6 @@ export const TrabajadorSocialForm = () => {
       emailPersonal: "",
       telefono: "",
       fechaIngreso: null,
-      //   esAsociadoSindicato: false,
-      //   esPresentaInconvenientes: false,
     };
 
     form.reset(dataForm);
@@ -266,8 +218,6 @@ export const TrabajadorSocialForm = () => {
       emailPersonal: "",
       telefono: "",
       fechaIngreso: null,
-      //   esAsociadoSindicato: false,
-      //   esPresentaInconvenientes: false,
     },
   });
 
@@ -276,7 +226,6 @@ export const TrabajadorSocialForm = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log({ values });
     let messageError: string = "";
-    // let response: RepresentanteLegalResponse;
     let response: PersonaResponse;
 
     const {
@@ -294,8 +243,6 @@ export const TrabajadorSocialForm = () => {
       emailInstitucional,
       emailPersonal,
       telefono,
-      // esAsociadoSindicato,
-      // esPresentaInconvenientes,
     } = values;
 
     const nombreCompleto: string = `${nombres} ${apellidoPaterno} ${apellidoMaterno}`;
@@ -334,20 +281,12 @@ export const TrabajadorSocialForm = () => {
       email_personal: emailPersonal,
       telefono,
       nombre_grupo: "GRUPO TRABAJADOR SOCIAL",
-      // is_asociado_sindicato: esAsociadoSindicato,
-      // is_presenta_inconvenientes: esPresentaInconvenientes,
     };
 
     console.log("---- payload persona ----");
     console.log({ payload });
 
     try {
-      // const response = await createTrabajadorSocial(payload);
-      // const { result, message } = response as TrabajadorSocialResponse;
-
-      // const response = await createPersona(payload);
-      // const { result, message } = response as PersonaResponse;
-
       console.log({ isEditMode });
       console.log({ idPersona });
 
@@ -374,17 +313,6 @@ export const TrabajadorSocialForm = () => {
         showToast("error", error || messageError);
         return;
       }
-
-      // if (result) {
-      //   showToast("success", message);
-      //   navigate("/trabajador-social");
-      // } else {
-      //   showToast(
-      //     "error",
-      //     message || "Error al registrar al trabajador social"
-      //   );
-      //   return;
-      // }
     } catch (error) {
       console.error("Error al registrar trabajador social", error);
       showToast("error", error);
@@ -410,16 +338,6 @@ export const TrabajadorSocialForm = () => {
 
         listCargos = responseCargos as Detalle[];
 
-        // const { result: resultTipos, data: dataTipos } = responseTipoDocumentos;
-        // if (resultTipos && dataTipos) {
-        //   listTipoDocumentos = dataTipos as TTipoDocumento[];
-        // }
-
-        // const { result: resultCargos, data: dataCargos } = responseCargos;
-        // if (resultCargos && dataCargos) {
-        //   listCargos = dataCargos as TCargo[];
-        // }
-
         setEmpresas(listEmpresas);
         setTipos(listTipoDocumentos);
         setCargos(listCargos);
@@ -428,13 +346,11 @@ export const TrabajadorSocialForm = () => {
         console.log({ id });
 
         if (id) {
-          // const responseTrabajadorSocial = await getTrabajadorSocialById(id);
           const responseTrabajadorSocial = await getPersonaById(id);
           const { result, data, message } = responseTrabajadorSocial;
 
           if (result && data) {
             let dataForm: TPersona = {};
-            // const trabajadorSocial = data as TrabajadorSocial;
             const trabajadorSocial = data as Persona;
 
             const {
@@ -452,14 +368,12 @@ export const TrabajadorSocialForm = () => {
               email_institucional,
               email_personal,
               telefono,
-              //   is_asociado_sindicato,
-              //   is_presenta_inconvenientes,
             } = trabajadorSocial;
 
             dataForm.idTipoDocumento = id_tipodocumento || "";
             dataForm.numeroDocumento = numero_documento || "";
-            (dataForm.nombres = nombres || ""),
-              (dataForm.apellidoPaterno = apellido_paterno || "");
+            ((dataForm.nombres = nombres || ""),
+              (dataForm.apellidoPaterno = apellido_paterno || ""));
             dataForm.apellidoMaterno = apellido_materno || "";
             dataForm.fechaNacimiento = fecha_nacimiento
               ? parseISO(fecha_nacimiento)
@@ -474,10 +388,6 @@ export const TrabajadorSocialForm = () => {
             dataForm.emailInstitucional = email_institucional || "";
             dataForm.emailPersonal = email_personal || "";
             dataForm.telefono = telefono || "";
-            // dataForm.esAsociadoSindicato = is_asociado_sindicato || false;
-            // dataForm.esPresentaInconvenientes =
-            //   is_presenta_inconvenientes || false;
-
             form.reset(dataForm);
           } else {
             showToast("error", message || "Trabajador social no encontrado");
@@ -492,7 +402,6 @@ export const TrabajadorSocialForm = () => {
 
     fetchData();
   }, [id, form]);
-  // [id, form, navigate, showToast]
 
   return (
     <>
@@ -601,7 +510,7 @@ export const TrabajadorSocialForm = () => {
                                   const responsePersona =
                                     await getPersonaByIdTipoDocAndNumDoc(
                                       idTipoDocumento,
-                                      field.value
+                                      field.value,
                                     );
 
                                   const { result, data, message } =
@@ -622,12 +531,12 @@ export const TrabajadorSocialForm = () => {
 
                                     form.setValue(
                                       "apellidoPaterno",
-                                      apellido_paterno
+                                      apellido_paterno,
                                     );
 
                                     form.setValue(
                                       "apellidoMaterno",
-                                      apellido_materno
+                                      apellido_materno,
                                     );
 
                                     if (fecha_nacimiento) {
@@ -635,7 +544,7 @@ export const TrabajadorSocialForm = () => {
                                         parseISO(fecha_nacimiento);
                                       form.setValue(
                                         "fechaNacimiento",
-                                        fechaParsed
+                                        fechaParsed,
                                       );
                                     }
                                     setIdPersona(id);
@@ -645,12 +554,11 @@ export const TrabajadorSocialForm = () => {
                                     setCamposHabilitadosPersona(true);
                                     showToast(
                                       "warning",
-                                      "No se encontraron datos de persona"
+                                      "No se encontraron datos de persona",
                                     );
                                   }
                                 } catch (error) {
                                   setCamposHabilitadosPersona(true);
-                                  // showErrorToast("Error al crear persona");
                                   showToast("error", "Error al crear persona");
                                 }
                               }
@@ -770,7 +678,9 @@ export const TrabajadorSocialForm = () => {
                             }
                             onChange={(e) =>
                               field.onChange(
-                                e.target.value ? parseISO(e.target.value) : null
+                                e.target.value
+                                  ? parseISO(e.target.value)
+                                  : null,
                               )
                             }
                             className={`
@@ -988,7 +898,9 @@ export const TrabajadorSocialForm = () => {
                             }
                             onChange={(e) =>
                               field.onChange(
-                                e.target.value ? parseISO(e.target.value) : null
+                                e.target.value
+                                  ? parseISO(e.target.value)
+                                  : null,
                               )
                             }
                             className={`
@@ -1082,11 +994,9 @@ export const TrabajadorSocialForm = () => {
                   variant="outline"
                   disabled={isSubmitting}
                   onClick={() => resetForm()}
-                  // onClick={() => navigate("/trabajador-social")}
                   className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
                   Cancelar
-                  {/* {isSubmitting ? "Cancelando..." : "Cancelar"} */}
                 </Button>
               </div>
             </form>

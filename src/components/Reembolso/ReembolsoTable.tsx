@@ -37,8 +37,6 @@ export const ReembolsoTable = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  // const userProfile = useMemo(() => getAuthData()?.usuario, []);
-
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= pagination.totalPages) {
       setPagination((prev) => ({ ...prev, currentPage: page }));
@@ -87,11 +85,10 @@ export const ReembolsoTable = () => {
       items.push(
         <PaginationItem key="ellipsis-start">
           <PaginationEllipsis />
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
 
-    // for (let i = 1; i < pagination.totalPages; i++) {
     for (let i = startPage; i <= endPage; i++) {
       items.push(
         <PaginationItem key={i}>
@@ -108,7 +105,7 @@ export const ReembolsoTable = () => {
           >
             {i}
           </PaginationLink>
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
 
@@ -116,7 +113,7 @@ export const ReembolsoTable = () => {
       items.push(
         <PaginationItem key="ellipsis-end">
           <PaginationEllipsis />
-        </PaginationItem>
+        </PaginationItem>,
       );
     }
     return items;

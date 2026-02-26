@@ -26,34 +26,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-
-// import { getTipoDocumentos } from "../../services/tipoDocumentoService";
-// import { getCargos } from "../../services/cargoService";
 import { RequiredLabel } from "../Common/RequiredLabel";
 import { Input } from "../ui/input";
 import { getEmpresaByApi } from "../../services/apiEmpresaService";
 import { Empresa } from "../../interfaces/IEmpresa";
 import { getPersonaByApi } from "../../services/apiPersonaService";
 import { getEmpresaById } from "../../services/empresaService";
-import { createPersona, updatePersona } from "../../services/personaService";
+import {
+  createPersona,
+  updatePersona,
+  getPersonaByEmpresaWithGrupo,
+} from "../../services/personaService";
 import { getDetalles } from "../../services/detalleParametroService";
 import { Persona, PersonaResponse } from "../../interfaces/IPersona";
 import { Button } from "../ui/button";
-// import {
-//   RepresentanteLegal,
-//   RepresentanteLegalResponse,
-// } from "../../interfaces/IRepresentanteLegal";
-// import {
-//   createRepresentante,
-//   updateRepresentante,
-// } from "../../services/representanteService";
 import SearchableCombobox from "../Common/SearchableCombobox";
-// import { Cargo } from "@/interfaces/ICargo";
 import { ArrowLeft } from "lucide-react";
 import { Detalle } from "../../interfaces/IDetalleParametro";
-// import { Parametro } from "@/interfaces/IParametro";
-// import { RepresentanteLegalResponse } from "@/interfaces/IRepresentanteLegal";
-// import { DetalleParametro } from "../../../../dms-backend-node/src/app/models/DetalleParametro";
 
 const getTipoDocumentos = async (): Promise<Detalle[]> => {
   let tipos: Detalle[] = [];
@@ -140,16 +129,6 @@ const formSchema = z.object({
   ospe: z.string().min(1, { message: "El OSPE es requerido." }),
 });
 
-// type TTipoDocumento = {
-//   id: string;
-//   abreviatura: string;
-// };
-
-// type TCargo = {
-//   id: string;
-//   nombre: string;
-// };
-
 type TEmpresa = {
   ruc?: string;
   razonSocial?: string;
@@ -175,8 +154,6 @@ export const EmpresaForm = () => {
   console.log("---- idEmpresa ----");
   console.log({ id });
 
-  // const [tipos, setTipos] = useState<TTipoDocumento[]>([]);
-  // const [cargos, setCargos] = useState<TCargo[]>([]);
   const [tipos, setTipos] = useState<Detalle[]>([]);
   const [cargos, setCargos] = useState<Detalle[]>([]);
   const [idEmpresa, setIdEmpresa] = useState<string>("");
@@ -204,7 +181,6 @@ export const EmpresaForm = () => {
       idCargo: "",
       telefono: "",
       emailPersonal: "",
-      // emailInstitucional: "",
       ospe: "",
     },
   });
@@ -231,7 +207,6 @@ export const EmpresaForm = () => {
       idCargo: "",
       telefono: "",
       emailPersonal: "",
-      // emailInstitucional: "",
       ospe: "",
     };
 
@@ -241,10 +216,8 @@ export const EmpresaForm = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log({ values });
     let messageError: string = "";
-    // let response: RepresentanteLegalResponse;
     let response: PersonaResponse;
 
-    // Obteniendo valores del formulario
     const {
       idTipoDocumento,
       idCargo,
@@ -256,24 +229,8 @@ export const EmpresaForm = () => {
       partidaRegistral,
       telefono,
       emailPersonal,
-      // emailInstitucional,
       ospe,
     } = values;
-
-    // const payload: RepresentanteLegal = {
-    //   id_tipodocumento: idTipoDocumento,
-    //   id_empresa: idEmpresa,
-    //   id_cargo: idCargo,
-    //   numero_documento: numeroDocumento,
-    //   nombres,
-    //   apellido_paterno: apellidoPaterno,
-    //   apellido_materno: apellidoMaterno,
-    //   direccion_fiscal: direccionFiscal,
-    //   partida_registral: partidaRegistral,
-    //   telefono,
-    //   correo,
-    //   ospe,
-    // };
 
     const payload: Persona = {
       id_tipodocumento: idTipoDocumento,
@@ -287,7 +244,6 @@ export const EmpresaForm = () => {
       partida_registral: partidaRegistral,
       telefono,
       email_personal: emailPersonal,
-      // email_institucional: emailInstitucional,
       ospe,
       nombre_grupo: "GRUPO REPRESENTANTE LEGAL",
     };
@@ -296,7 +252,6 @@ export const EmpresaForm = () => {
     console.log({ payload });
 
     try {
-      // Completar registro de representante legal
       if (!isEditMode && idPersona) {
         console.log("create persona");
         response = await updatePersona(idPersona, payload);
@@ -307,14 +262,6 @@ export const EmpresaForm = () => {
         console.log("ccc");
         response = await createPersona(payload);
       }
-
-      // if (isEditMode && idPersona) {
-      //   messageError = "Error al actualizar el representante legal";
-      //   response = await updatePersona(idPersona, payload);
-      // } else {
-      //   messageError = "Error al registrar el representante legal";
-      //   response = await createPersona(payload);
-      // }
 
       console.log("---- response createPersona or updatePersona ----");
       console.log(response);
@@ -337,9 +284,7 @@ export const EmpresaForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // let listTipoDocumentos: TTipoDocumento[] = [];
         let listTipoDocumentos: Detalle[] = [];
-        // let listCargos: TCargo[] = [];
         let listCargos: Detalle[] = [];
 
         const [responseTipoDocumentos, responseCargos] = await Promise.all([
@@ -350,17 +295,6 @@ export const EmpresaForm = () => {
         listTipoDocumentos = responseTipoDocumentos as Detalle[];
 
         listCargos = responseCargos as Detalle[];
-
-        // const { result: resultTipoDocs, data: dataTipoDocs } =
-        //   responseTipoDocumentos;
-        // if (resultTipoDocs && dataTipoDocs) {
-        //   listTipoDocumentos = dataTipoDocs as TTipoDocumento[];
-        // }
-
-        // const { result: resultCargos, data: dataCargos } = responseCargos;
-        // if (resultCargos && dataCargos) {
-        //   listCargos = dataCargos as TCargo[];
-        // }
 
         setTipos(listTipoDocumentos);
         setCargos(listCargos);
@@ -383,7 +317,6 @@ export const EmpresaForm = () => {
               numero,
               nombre_o_razon_social,
               direccion,
-              representantes,
             } = empresa;
 
             dataForm.ruc = numero || "";
@@ -392,59 +325,68 @@ export const EmpresaForm = () => {
 
             setIdEmpresa(idEmpresa);
 
-            console.log({ representantes });
+            const nombreGrupo = `GRUPO REPRESENTANTE LEGAL`;
 
-            // const listRepresentantes = representantes as RepresentanteLegal[];
-            const listRepresentantes = representantes as Persona[];
+            const responsePersona = await getPersonaByEmpresaWithGrupo(
+              idEmpresa,
+              nombreGrupo,
+            );
 
-            const totalRepresentantes = listRepresentantes.length;
+            console.log({ responsePersona });
 
-            if (isEditMode && totalRepresentantes === 0) {
-              setCamposHabilitadosPersona(false);
+            const { result: resultPersona, data: dataPersona } =
+              responsePersona;
+
+            if (resultPersona && dataPersona) {
+              const representante = dataPersona as Persona;
+              console.log({ representante });
+
+              if (!isEditMode) {
+                setCamposHabilitadosPersona(false);
+              } else {
+                setCamposHabilitadosPersona(true);
+              }
+
+              if (representante) {
+                const uniqueRepresentante = representante[0];
+
+                console.log({ uniqueRepresentante });
+
+                const {
+                  id: idRepresentante,
+                  id_tipodocumento,
+                  id_cargo,
+                  numero_documento,
+                  nombres,
+                  apellido_paterno,
+                  apellido_materno,
+                  direccion_fiscal,
+                  partida_registral,
+                  telefono,
+                  email_personal,
+                  ospe,
+                } = uniqueRepresentante;
+
+                dataForm.idTipoDocumento = id_tipodocumento;
+                dataForm.numeroDocumento = numero_documento || "";
+                dataForm.apellidoPaterno = apellido_paterno || "";
+                dataForm.apellidoMaterno = apellido_materno || "";
+                dataForm.nombres = nombres || "";
+                dataForm.direccionFiscal = direccion_fiscal || "";
+                dataForm.partidaRegistral = partida_registral || "";
+                dataForm.idCargo = id_cargo;
+                dataForm.telefono = telefono;
+                dataForm.emailPersonal = email_personal || "";
+                dataForm.ospe = ospe || "";
+
+                setIdPersona(idRepresentante);
+              }
             } else {
-              setCamposHabilitadosPersona(true);
-            }
-
-            if (totalRepresentantes === 1) {
-              // const representante = listRepresentantes[0] as RepresentanteLegal;
-              const representante = listRepresentantes[0] as Persona;
-
-              const {
-                id_tipodocumento,
-                id_cargo,
-                numero_documento,
-                nombres,
-                apellido_paterno,
-                apellido_materno,
-                direccion_fiscal,
-                partida_registral,
-                telefono,
-                email_personal,
-                // email_institucional,
-                ospe,
-              } = representante;
-
-              dataForm.idTipoDocumento = id_tipodocumento;
-              dataForm.numeroDocumento = numero_documento || "";
-              dataForm.apellidoPaterno = apellido_paterno || "";
-              dataForm.apellidoMaterno = apellido_materno || "";
-              dataForm.nombres = nombres || "";
-              dataForm.direccionFiscal = direccion_fiscal || "";
-              dataForm.partidaRegistral = partida_registral || "";
-              dataForm.idCargo = id_cargo;
-              dataForm.telefono = telefono;
-              // dataForm.correo = correo;
-              dataForm.emailPersonal = email_personal || "";
-              // dataForm.emailInstitucional = email_institucional || "";
-              dataForm.ospe = ospe;
-
-              // setIdRepresentante(representante.id);
-              setIdPersona(representante.id);
+              setCamposHabilitadosPersona(false);
             }
 
             form.reset(dataForm);
 
-            // Deshabilita los siguientes campos
             form.setValue("idTipoDocumento", dataForm.idTipoDocumento);
             form.setValue("ruc", dataForm.ruc);
             form.setValue("numeroDocumento", dataForm.numeroDocumento);
@@ -518,7 +460,7 @@ export const EmpresaForm = () => {
                                   showToast("success", "Buscando empresa...");
 
                                   const response = await getEmpresaByApi(
-                                    field.value
+                                    field.value,
                                   );
 
                                   const { result, data, message } = response;
@@ -536,7 +478,7 @@ export const EmpresaForm = () => {
 
                                     form.setValue(
                                       "razonSocial",
-                                      nombre_o_razon_social
+                                      nombre_o_razon_social,
                                     );
 
                                     form.setValue("direccion", direccion);
@@ -545,14 +487,14 @@ export const EmpresaForm = () => {
                                     setCamposHabilitadosEmpresa(true);
                                     showToast(
                                       "warning",
-                                      "No se encontraron datos de empresa"
+                                      "No se encontraron datos de empresa",
                                     );
                                   }
                                 } catch (error) {
                                   setCamposHabilitadosEmpresa(true);
                                   showToast(
                                     "error",
-                                    `Error de información de empresa: ${error}`
+                                    `Error de información de empresa: ${error}`,
                                   );
                                 }
                               }
@@ -690,7 +632,6 @@ export const EmpresaForm = () => {
                             maxLength={8}
                             {...field}
                             disabled={camposHabilitadosPersona}
-                            // disabled={isEditMode}
                             onKeyDown={async (e) => {
                               if (e.key === "Enter") {
                                 e.preventDefault();
@@ -702,7 +643,7 @@ export const EmpresaForm = () => {
 
                                   const responsePersona = await getPersonaByApi(
                                     idTipoDocumento,
-                                    field.value
+                                    field.value,
                                   );
 
                                   console.log({ responsePersona });
@@ -724,12 +665,12 @@ export const EmpresaForm = () => {
 
                                     form.setValue(
                                       "apellidoPaterno",
-                                      apellido_paterno
+                                      apellido_paterno,
                                     );
 
                                     form.setValue(
                                       "apellidoMaterno",
-                                      apellido_materno
+                                      apellido_materno,
                                     );
 
                                     setIdPersona(id);
@@ -739,14 +680,14 @@ export const EmpresaForm = () => {
                                     setCamposHabilitadosPersona(false);
                                     showToast(
                                       "warning",
-                                      "No se encontraron datos de persona"
+                                      "No se encontraron datos de persona",
                                     );
                                   }
                                 } catch (error) {
                                   setCamposHabilitadosPersona(false);
                                   showToast(
                                     "error",
-                                    "Error al buscar una persona"
+                                    "Error al buscar una persona",
                                   );
                                 }
                               }
@@ -779,7 +720,6 @@ export const EmpresaForm = () => {
                             maxLength={30}
                             {...field}
                             disabled={camposHabilitadosPersona}
-                            // disabled={!camposHabilitadosPersona}
                             className={`
                               ${
                                 fieldState.invalid
@@ -808,7 +748,6 @@ export const EmpresaForm = () => {
                             maxLength={30}
                             {...field}
                             disabled={camposHabilitadosPersona}
-                            // disabled={!camposHabilitadosPersona}
                             className={`
                               ${
                                 fieldState.invalid
@@ -837,7 +776,6 @@ export const EmpresaForm = () => {
                             maxLength={40}
                             {...field}
                             disabled={camposHabilitadosPersona}
-                            // disabled={!camposHabilitadosPersona}
                             className={`
                               ${
                                 fieldState.invalid
@@ -1036,11 +974,9 @@ export const EmpresaForm = () => {
                   variant="outline"
                   disabled={isSubmitting}
                   onClick={() => resetForm()}
-                  // onClick={() => navigate("/empresa")}
                   className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
                   Cancelar
-                  {/* {isSubmitting ? "Cancelando..." : "Cancelar"} */}
                 </Button>
               </div>
             </form>

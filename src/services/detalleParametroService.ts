@@ -34,14 +34,12 @@ export const getDetallesWithPaginate = async (
         ? JSON.stringify(filter)
         : filter
 
-    // Construir la cadena de query parameters
     const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
         filter: filterValue
     }).toString()
 
-    // const response = await getAllWithPaginate(page, limit)
     const response = await getAllWithPaginate(clase, queryParams)
     console.log('---- detalleParametroService getDetallesWithPaginate ----')
     console.log({ response })

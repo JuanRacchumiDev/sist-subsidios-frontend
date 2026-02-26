@@ -33,8 +33,8 @@ export const UsuarioRow: React.FC<Props> = ({ usuario, onStatusChange }) => {
   const { showToast } = useToast();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // ⬅️ Estado para el modal
-  const [isProcessing, setIsProcessing] = useState(false); // ⬅️ Estado para el loading
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const navigate = useNavigate();
 
@@ -79,7 +79,6 @@ export const UsuarioRow: React.FC<Props> = ({ usuario, onStatusChange }) => {
           message || "Estado del usuario actualizado con éxito.",
         );
 
-        // Si hay una función de callback, llamarla para actualizar la tabla padre
         if (onStatusChange) {
           onStatusChange(usuario.id);
         }
@@ -90,8 +89,8 @@ export const UsuarioRow: React.FC<Props> = ({ usuario, onStatusChange }) => {
       console.error("Error en la actualización de estado:", error);
       showToast("error", "Error de conexión al intentar actualizar.");
     } finally {
-      setIsProcessing(false); // Desactiva el loading
-      handleCloseModal(); // Cierra el modal
+      setIsProcessing(false);
+      handleCloseModal();
     }
   };
 
@@ -110,12 +109,9 @@ export const UsuarioRow: React.FC<Props> = ({ usuario, onStatusChange }) => {
         className="hover:bg-blue-100 hover:cursor-pointer transition-colors duration-200"
       >
         <TableCell className="py-3">{usuario.username}</TableCell>
-        {/* <TableCell className="py-3">
-          {usuario.persona ? usuario.nombre_completo : <></>}
-        </TableCell> */}
         <TableCell className="py-3">{usuario.email}</TableCell>
         <TableCell className="py-3">{usuario.nombre_perfil}</TableCell>
-        <TableCell className="py-3">
+        <TableCell className="py-3 flex items-center justify-center h-full">
           {usuario.estado ? (
             <CircleCheck className="text-green-500 w-5 h-5" />
           ) : (
@@ -127,7 +123,6 @@ export const UsuarioRow: React.FC<Props> = ({ usuario, onStatusChange }) => {
             <DropdownMenuTrigger
               asChild
               className="focus:outline-none focus:ring-2 z-40 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer"
-              // className="bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer"
             >
               <Button variant="ghost" className="h-8 w-8 p-0">
                 <span className="sr-only">Abrir menú</span>

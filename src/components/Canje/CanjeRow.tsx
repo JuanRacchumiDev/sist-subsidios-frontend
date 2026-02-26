@@ -12,9 +12,9 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import HDate from "../../helpers/HDate";
-import { Canje } from "@/interfaces/ICanje";
+import { Canje } from "../../interfaces/ICanje";
 import BadgeEstado from "../Common/BadgeEstado";
-import { ECanje } from "@/enums/ECanje";
+import { ECanje } from "../../enums/ECanje";
 
 interface Props {
   canje: Canje;
@@ -22,13 +22,12 @@ interface Props {
 
 export const CanjeRow: React.FC<Props> = ({ canje }) => {
   const navigate = useNavigate();
-  const colaborador = `${canje.descansoMedico.colaborador_dm.apellido_paterno} ${canje.descansoMedico.colaborador_dm.apellido_materno} ${canje.descansoMedico.colaborador_dm.nombres}`;
+  const colaborador = `${canje.apellido_paterno_colaborador} ${canje.apellido_materno_colaborador} ${canje.nombres_colaborador}`;
 
   const handleShowDetail = () => {
     navigate(`/canje/editar/${canje.id}`);
   };
 
-  // Clases condicionales para el estado "deshabilitado"
   const rowDisabledClasses = canje.is_reembolsable
     ? "hover:bg-blue-100 hover:cursor-pointer transition-colors duration-200"
     : "bg-gray-100 text-gray-500 cursor-not-allowed";
@@ -40,7 +39,8 @@ export const CanjeRow: React.FC<Props> = ({ canje }) => {
   return (
     <TableRow key={canje.id} className={rowDisabledClasses}>
       <TableCell className={`py-3 ${textDisabledClasses}`}>
-        {colaborador}
+        {canje.nombres_colaborador} {canje.apellido_paterno_colaborador}{" "}
+        {canje.apellido_materno_colaborador}
       </TableCell>
 
       <TableCell
@@ -101,15 +101,10 @@ export const CanjeRow: React.FC<Props> = ({ canje }) => {
         <DropdownMenu>
           <DropdownMenuTrigger
             asChild
-            // Deshabilitar el botón si no es reembolsable
             disabled={!canje.is_reembolsable}
             className={`focus:outline-none focus:ring-2 z-40 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer ${
               !canje.is_reembolsable && "opacity-50 cursor-not-allowed"
             }`}
-            // className={`bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-300 ${
-            //   !canje.is_reembolsable && "opacity-50 cursor-not-allowed"
-            // }`}
-            // className="bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer"
           >
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Abrir menú de acciones</span>
@@ -133,10 +128,6 @@ export const CanjeRow: React.FC<Props> = ({ canje }) => {
               <Edit className="h-4 w-4" />
               <span>Ver/Editar Detalle</span>
             </DropdownMenuItem>
-            {/* <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 transition-colors">
-              Eliminar
-            </DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>

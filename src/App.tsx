@@ -3,8 +3,6 @@ import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { Sidebar } from "./components/Layout/Sidebar";
 import { Header } from "./components/Layout/Header";
 import { Dashboard } from "./components/Dashboard/Dashboard";
-// import { AnalyticsPage } from "./components/Analytics/AnalyticsPage";
-// import { UserPage } from "./components/Users/UserPage";
 import { LoginPage } from "./components/Auth/Page/LoginPage";
 import { NotFoundPage } from "./components/Layout/NotFoundPage";
 
@@ -65,7 +63,6 @@ function App() {
   }, [isLoginPage, navigate]);
 
   return (
-    // <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-all duration-500">
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 transition-all duration-500">
       <div className="flex h-screen overflow-hidden">
         {!isLoginPage && isLoggedIn && (
@@ -220,16 +217,6 @@ function App() {
                       path="/mantenimiento/*"
                       element={<MantenimientoPage />}
                     ></Route>
-                    {/* <Route
-                      path="/analytics/*"
-                      element={<AnalyticsPage />}
-                    ></Route> */}
-                    {/* <Route
-                      path="/colaborador/*"
-                      element={<ColaboradorPage />}
-                    ></Route>
-                    <Route path="/cargo/*" element={<CargoPage />}></Route> */}
-                    {/* <Route path="/users/*" element={<UserPage />}></Route> */}
                   </>
                 ) : (
                   <Route

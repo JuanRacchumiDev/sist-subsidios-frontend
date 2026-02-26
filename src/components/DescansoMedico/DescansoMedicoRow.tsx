@@ -14,8 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import HDate from "../../helpers/HDate";
 import BadgeEstado from "../Common/BadgeEstado";
-import { EDescansoMedico } from "@/enums/EDescansoMedico";
-// import { formatDate } from "date-fns";
+import { EDescansoMedico } from "../../enums/EDescansoMedico";
 
 interface Props {
   desc: DescansoMedico;
@@ -23,7 +22,7 @@ interface Props {
 
 export const DescansoMedicoRow: React.FC<Props> = ({ desc }) => {
   const navigate = useNavigate();
-  const colaborador = `${desc.colaborador_dm.apellido_paterno} ${desc.colaborador_dm.apellido_materno} ${desc.colaborador_dm.nombres}`;
+  const colaborador = `${desc.apellido_paterno_colaborador} ${desc.apellido_materno_colaborador} ${desc.nombres_colaborador}`;
 
   const handleShowDetail = () => {
     navigate(`/descanso-medico/editar/${desc.id}`);
@@ -34,8 +33,10 @@ export const DescansoMedicoRow: React.FC<Props> = ({ desc }) => {
       key={desc.id}
       className="hover:bg-blue-100 hover:cursor-pointer transition-colors duration-200"
     >
-      {/* <TableCell className="py-3">{desc.codigo}</TableCell> */}
-      <TableCell className="py-3">{colaborador}</TableCell>
+      <TableCell className="py-3">
+        {desc.nombres_colaborador} {desc.apellido_paterno_colaborador}{" "}
+        {desc.apellido_materno_colaborador}
+      </TableCell>
       <TableCell className="py-3">
         {HDate.formatDateTimezone(desc.fecha_otorgamiento, "dd/MM/yyyy")}
       </TableCell>
@@ -55,13 +56,11 @@ export const DescansoMedicoRow: React.FC<Props> = ({ desc }) => {
       <TableCell className="py-3">
         <BadgeEstado estado={desc.estado_registro as EDescansoMedico} />
       </TableCell>
-      {/* <TableCell>SI/NO</TableCell> */}
       <TableCell className="py-3">
         <DropdownMenu>
           <DropdownMenuTrigger
             asChild
             className="focus:outline-none focus:ring-2 z-40 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer"
-            // className="bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer"
           >
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Abrir menú de acciones</span>
@@ -80,7 +79,6 @@ export const DescansoMedicoRow: React.FC<Props> = ({ desc }) => {
             <DropdownMenuItem
               onClick={handleShowDetail}
               className="cursor-pointer hover:bg-gray-100 transition-colors flex items-center space-x-2 text-blue-600"
-              // className="cursor-pointer hover:bg-gray-100 transition-colors"
             >
               <Edit className="h-4 w-4" />
               <span>Ver/Editar Detalle</span>

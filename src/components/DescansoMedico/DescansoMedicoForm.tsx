@@ -22,14 +22,8 @@ import {
   DescansoMedico,
   DescansoMedicoResponse,
 } from "../../interfaces/IDescansoMedico";
-// import { getColaboradorById } from "../../services/colaboradorService";
-// import { Colaborador } from "../../interfaces/IColaborador";
 import { getPersonaById } from "../../services/personaService";
 import { Persona } from "../../interfaces/IPersona";
-// import { getTipoDescansoById } from "../../services/tipoDescansoMedicoService";
-// import { TipoDescansoMedico } from "../../interfaces/ITipoDescansoMedico";
-// import { getTipoContingenciaById } from "../../services/tipoContingenciaService";
-// import { TipoContingencia } from "../../interfaces/ITipoContingencia";
 import { getDetalleById } from "../../services/detalleParametroService";
 import { Detalle } from "../../interfaces/IDetalleParametro";
 import { getDiagnosticoByCodigo } from "../../services/diagnosticoService";
@@ -234,7 +228,6 @@ export const DescansoMedicoForm = () => {
 
   console.log({ id_usuario });
 
-  // Deshabilitando campos para el perfil especialista
   const isModeLetter =
     (nombre_perfil_url === "especialista-empresa" ||
       nombre_perfil_url === "administrador") &&
@@ -291,10 +284,6 @@ export const DescansoMedicoForm = () => {
 
             console.log({ descanso });
 
-            // const responseColaborador = await getColaboradorById(
-            //   descanso.id_colaborador
-            // );
-
             const responseColaborador = await getPersonaById(
               descanso.id_colaborador,
             );
@@ -305,23 +294,16 @@ export const DescansoMedicoForm = () => {
               responseColaborador;
 
             if (resultColaborador && dataColaborador) {
-              // const { id_empresa } = dataColaborador as Colaborador;
               const { id_empresa } = dataColaborador as Persona;
               idEmpresa = id_empresa;
             }
 
             const dataForm = {
-              // id: descanso.id || "",
               idEmpresa,
               idColaborador: descanso.id_colaborador,
               idTipoDescansoMedico: descanso.id_tipodescansomedico,
               idTipoContingencia: descanso.id_tipocontingencia,
               codigoCitt: descanso.codigo_citt || "",
-              // fechaOtorgamiento: descanso.fecha_otorgamiento
-              //   ? descanso.fecha_otorgamiento
-              //   : "",
-              // fechaInicio: descanso.fecha_inicio ? descanso.fecha_inicio : "",
-              // fechaFinal: descanso.fecha_final ? descanso.fecha_final : "",
               fechaOtorgamiento: descanso.fecha_otorgamiento
                 ? parseISO(descanso.fecha_otorgamiento)
                 : null,
@@ -351,27 +333,17 @@ export const DescansoMedicoForm = () => {
           console.error("Error fetching descanso medico:", error);
         }
       } else {
-        // Crea un código temporal único por cada nuevo descanso médico
         if (userProfile) {
-          // const { id_empresa, id_colaborador } = userProfile;
-          // console.log({ id_empresa });
-          // console.log({ id_colaborador });
           form.setValue("idEmpresa", id_empresa);
           form.setValue("idColaborador", id_persona);
         }
 
         await createCodigoTempAuth();
-        // const response = await createCodigoTempAuth();
-        // console.log(
-        //   "response create codigo_temp in new descanso médico",
-        //   response
-        // );
       }
     };
 
     fecthDescansoMedico();
   }, [id, isEditMode]);
-  // [id, isEditMode, navigate, showToast, form]
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -397,67 +369,43 @@ export const DescansoMedicoForm = () => {
         observacion,
       } = values;
 
-      // Obteniendo la fecha actual en formato yyyy-mm-dd
       const fechaRegistro = HDate.formatDateTimezone(new Date());
 
-      // Obtener el nombre del colaborador
       let nombreColaborador: string = "";
-      // const responseColaborador = await getColaboradorById(idColaborador);
       const responseColaborador = await getPersonaById(idColaborador);
-      // console.log({ responseColaborador });
       const { result: resultCol, data: dataCol } = responseColaborador;
 
       if (resultCol && dataCol) {
-        // const { nombres, apellido_paterno, apellido_materno } =
-        //   dataCol as Colaborador;
-
         const { nombres, apellido_paterno, apellido_materno } =
           dataCol as Persona;
 
         nombreColaborador = `${nombres} ${apellido_paterno} ${apellido_materno}`;
       }
 
-      // Obtener tipo de descanso médico
       let nombreTipoDescanso: string = "";
 
-      // const responseTipoDescanso = await getTipoDescansoById(
-      //   idTipoDescansoMedico
-      // );
-
       const responseTipoDescanso = await getDetalleById(idTipoDescansoMedico);
-      // console.log({ responseTipoDescanso });
 
       const { result: resultTipoDescanso, data: dataTipoDescanso } =
         responseTipoDescanso;
       if (resultTipoDescanso && dataTipoDescanso) {
-        // const { nombre } = dataTipoDescanso as TipoDescansoMedico;
         const { nombre } = dataTipoDescanso as Detalle;
         nombreTipoDescanso = nombre;
       }
 
-      // Obtener tipo de contingencia
       let nombreTipoContingencia: string = "";
 
-      // const responseTipoContingencia = await getTipoContingenciaById(
-      //   idTipoContingencia
-      // );
-
       const responseTipoContingencia = await getDetalleById(idTipoContingencia);
-
-      // console.log({ responseTipoContingencia });
 
       const { result: resultTipoContingencia, data: dataTipoContingencia } =
         responseTipoContingencia;
       if (resultTipoContingencia && dataTipoContingencia) {
-        // const { nombre } = dataTipoContingencia as TipoContingencia;
         const { nombre } = dataTipoContingencia as Detalle;
         nombreTipoContingencia = nombre;
       }
 
-      // Obtener diagnóstico
       let nombreDiagnostico: string = "";
       const responseDiagnostico = await getDiagnosticoByCodigo(idDiagnostico);
-      // console.log({ responseDiagnostico });
       const { result: resultDx, data: dataDx } = responseDiagnostico;
 
       if (resultDx && dataDx) {
@@ -466,7 +414,6 @@ export const DescansoMedicoForm = () => {
       }
 
       const payloadDescansoMedico: DescansoMedico = {
-        // id: isEditMode && id ? id : undefined,
         id_empresa: idEmpresa,
         id_colaborador: idColaborador,
         id_tipodescansomedico: idTipoDescansoMedico,
@@ -497,10 +444,10 @@ export const DescansoMedicoForm = () => {
 
       if (isEditMode) {
         console.log("update");
-        response = await updateDescanso(id, payloadDescansoMedico); // Llama al servicio de actualización
+        response = await updateDescanso(id, payloadDescansoMedico);
       } else {
         console.log("create");
-        response = await createDescanso(payloadDescansoMedico); // Llama al servicio de creación
+        response = await createDescanso(payloadDescansoMedico);
       }
 
       const { result, message } = response;
@@ -573,15 +520,6 @@ export const DescansoMedicoForm = () => {
                   >
                     Validación
                   </TabsTrigger>
-                  {/* {!id_persona && (
-                    <TabsTrigger
-                      value="validacion"
-                      className="bg-blue-400 hover:bg-blue-500 hover: cursor-pointer text-white transition-colors duration-300"
-                    >
-                      Validación
-                    </TabsTrigger>
-                  )} */}
-                  {/* <TabsTrigger value="validacion">Validación</TabsTrigger> */}
                 </TabsList>
 
                 <TabsContent value="datos-descanso-medico" className="mt-6">
@@ -612,20 +550,12 @@ export const DescansoMedicoForm = () => {
                           checked={field.value}
                           onChange={field.onChange}
                           id="responsabilidad"
-                          className={
-                            // Apply ring-red-500 for invalid state
-                            `ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300
+                          className={`ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300
                             ${
                               fieldState.invalid
                                 ? "text-red-500 focus-visible:ring-red-500 border-red-500"
                                 : "text-blue-600 focus-visible:ring-blue-600 border-gray-300"
-                            }`
-                          }
-                          // className={
-                          //   fieldState.invalid
-                          //     ? "border-red-500 text-red-500 focus:ring-red-500"
-                          //     : ""
-                          // }
+                            }`}
                         />
                         <div className="grid gap-1.5 leading-none">
                           <div className="flex items-center">
@@ -634,7 +564,6 @@ export const DescansoMedicoForm = () => {
                               className={`text-sm text-gray-700 font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
                                 fieldState.invalid ? "text-red-600" : ""
                               }`}
-                              // className="text-sm text-gray-700"
                             >
                               <span className="text-red-500 mr-1">*</span>
                               Declaro que la información proporcionada es
@@ -672,11 +601,6 @@ export const DescansoMedicoForm = () => {
                                 ? "text-red-500 focus-visible:ring-red-500 border-red-500"
                                 : "text-blue-600 focus-visible:ring-blue-600 border-gray-300"
                             }`}
-                          // className={
-                          //   fieldState.invalid
-                          //     ? "border-red-500 text-red-500 focus:ring-red-500"
-                          //     : ""
-                          // }
                         />
                         <div className="grid gap-1.5 leading-none">
                           <div className="flex items-center">
@@ -685,7 +609,6 @@ export const DescansoMedicoForm = () => {
                               className={`text-sm text-gray-700 font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
                                 fieldState.invalid ? "text-red-600" : ""
                               }`}
-                              // className="text-sm text-gray-700"
                             >
                               <span className="text-red-500 mr-1">*</span>
                               Acepto la política de la empresa en caso de
@@ -728,17 +651,14 @@ export const DescansoMedicoForm = () => {
                   type="button"
                   variant="outline"
                   disabled={isSubmitting}
-                  // onClick={() => navigate("/descanso-medico")}
                   onClick={() => resetForm()}
                   className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
                 >
                   Cancelar
-                  {/* {isSubmitting ? "Cancelando..." : "Cancelar"} */}
                 </Button>
               </div>
             </form>
 
-            {/* Modales informativos */}
             <InfoModal
               open={showResponsabilidad}
               onClose={() => setShowResponsabilidad(false)}

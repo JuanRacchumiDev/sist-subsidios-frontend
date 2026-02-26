@@ -33,8 +33,8 @@ export const EmpresaRow: React.FC<Props> = ({ emp, onStatusChange }) => {
   const { showToast } = useToast();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // ⬅️ Estado para el modal
-  const [isProcessing, setIsProcessing] = useState(false); // ⬅️ Estado para el loading
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const navigate = useNavigate();
 
@@ -44,7 +44,6 @@ export const EmpresaRow: React.FC<Props> = ({ emp, onStatusChange }) => {
     action.charAt(0).toUpperCase() + action.slice(1)
   } Empresa`;
   const modalMessage = `¿Deseas <strong>${action}</strong> la empresa: <strong>${emp.nombre_o_razon_social}</strong>?`;
-  // const modalMessage = `Estás a punto de **${action}** la empresa: **${emp.nombre_o_razon_social}**. ¿Deseas continuar?`;
 
   const handleShowDetail = () => {
     navigate(`/empresa/editar/${emp.id}`);
@@ -77,10 +76,9 @@ export const EmpresaRow: React.FC<Props> = ({ emp, onStatusChange }) => {
       if (result && data) {
         showToast(
           "success",
-          message || "Estado de la empresa actualizado con éxito."
+          message || "Estado de la empresa actualizado con éxito.",
         );
 
-        // Si hay una función de callback, llamarla para actualizar la tabla padre
         if (onStatusChange) {
           onStatusChange(emp.id);
         }
@@ -91,8 +89,8 @@ export const EmpresaRow: React.FC<Props> = ({ emp, onStatusChange }) => {
       console.error("Error en la actualización de estado:", error);
       showToast("error", "Error de conexión al intentar actualizar.");
     } finally {
-      setIsProcessing(false); // Desactiva el loading
-      handleCloseModal(); // Cierra el modal
+      setIsProcessing(false);
+      handleCloseModal();
     }
   };
 
@@ -123,7 +121,6 @@ export const EmpresaRow: React.FC<Props> = ({ emp, onStatusChange }) => {
             <DropdownMenuTrigger
               asChild
               className="focus:outline-none focus:ring-2 z-40 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer"
-              // className="bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer"
             >
               <Button variant="ghost" className="h-8 w-8 p-0">
                 <span className="sr-only">Abrir menú de acciones</span>
@@ -156,9 +153,6 @@ export const EmpresaRow: React.FC<Props> = ({ emp, onStatusChange }) => {
                 <ActionIcon className="h-4 w-4" />
                 <span>{actionText} Empresa</span>
               </DropdownMenuItem>
-              {/* <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 transition-colors">
-              Eliminar
-            </DropdownMenuItem> */}
             </DropdownMenuContent>
           </DropdownMenu>
         </TableCell>

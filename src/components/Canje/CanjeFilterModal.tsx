@@ -11,6 +11,15 @@ import {
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { getDetalles } from "../../services/detalleParametroService";
+import { Detalle } from "../../interfaces/IDetalleParametro";
 
 interface CanjeFilterModalProps {
   isOpen: boolean;
@@ -18,6 +27,54 @@ interface CanjeFilterModalProps {
   currentFilters: CanjeFilter;
   onApplyFilters: (filters: CanjeFilter) => void;
 }
+
+const getTipoDescansosMedicos = async (): Promise<Detalle[]> => {
+  let tipoDescansos: Detalle[] = [];
+
+  try {
+    const clase: number = 1003;
+    const estado: boolean = true;
+
+    const response = await getDetalles(clase, estado);
+    console.log("response getTipoDescansosMedicos");
+    console.log({ response });
+
+    const { result, data } = response;
+
+    if (result && data) {
+      tipoDescansos = data as Detalle[];
+    }
+
+    return tipoDescansos;
+  } catch (error) {
+    console.error("Error al obtener tipo de descansos médicos", error);
+    return [];
+  }
+};
+
+const getTipoContingencias = async (): Promise<Detalle[]> => {
+  let tipoContingencias: Detalle[] = [];
+
+  try {
+    const clase: number = 1004;
+    const estado: boolean = true;
+
+    const response = await getDetalles(clase, estado);
+    console.log("response getTipoContingencias");
+    console.log({ response });
+
+    const { result, data } = response;
+
+    if (result && data) {
+      tipoContingencias = data as Detalle[];
+    }
+
+    return tipoContingencias;
+  } catch (error) {
+    console.error("Error al obtener tipo de contingencias", error);
+    return [];
+  }
+};
 
 export const CanjeFilterModal: React.FC<CanjeFilterModalProps> = ({
   isOpen,
@@ -29,15 +86,40 @@ export const CanjeFilterModal: React.FC<CanjeFilterModalProps> = ({
 
   const { showToast } = useToast();
 
+  const [tipoDescansos, setTipoDescansos] = useState<Detalle[]>([]);
+  const [tipoContingencias, setTipoContingencias] = useState<Detalle[]>([]);
+
   // Sincronizar filtros al abrir el modal
   useEffect(() => {
     setLocalFilters({
+      id_tipodescansomedico: currentFilters.id_tipodescansomedico || undefined,
+      id_tipocontingencia: currentFilters.id_tipocontingencia || undefined,
+      nombre_colaborador: currentFilters.nombre_colaborador || "",
       codigo_canje: currentFilters.codigo_canje || "",
       codigo_citt: currentFilters.codigo_citt || "",
       fecha_inicio_subsidio: currentFilters.fecha_inicio_subsidio || "",
       fecha_final_subsidio: currentFilters.fecha_final_subsidio || "",
     });
   }, [currentFilters]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [tipoDescansosRes, tipoContingenciasRes] = await Promise.all([
+          getTipoDescansosMedicos(),
+          getTipoContingencias(),
+        ]);
+
+        setTipoDescansos(tipoDescansosRes);
+        setTipoContingencias(tipoContingenciasRes);
+      } catch (error) {
+        console.error("Error al obtener datos", error);
+        showToast("error", "Error al cargar los datos del formulario.");
+      }
+    };
+
+    fetchData();
+  }, []);
 
   // Manejador genérico para <input> (texto y fecha)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,31 +131,33 @@ export const CanjeFilterModal: React.FC<CanjeFilterModalProps> = ({
   };
 
   // Manejador específico pata <Select>
-  //   const handleSelectChange = (name: keyof CanjeFilter, value: string) => {
-  //     // Si el valor es "null-filter" (nuestra convención para limpiar), guardamos undefined.
-  //     // Si es un ID válido, lo guardamos.
-  //     setLocalFilters((prev) => ({
-  //       ...prev,
-  //       [name]: value === "null-filter" ? undefined : value,
-  //     }));
-  //   };
+  const handleSelectChange = (name: keyof CanjeFilter, value: string) => {
+    setLocalFilters((prev) => ({
+      ...prev,
+      [name]: value === "null-filter" ? undefined : value,
+    }));
+  };
 
   const handleApply = () => {
-    // 1. Limpiar los valores (cadenas vacías o `null-filter`) a `undefined` para el servicio
     const filtersToApply: CanjeFilter = Object.fromEntries(
       Object.entries(localFilters).map(([key, value]) => {
-        // Los inputs de texto/fecha están en `""` si están vacíos.
+        if (key === "id_tipodescansomedico" || key === "id_tipocontingencia") {
+          return [key, value];
+        }
+
         return [key, value === "" || value === null ? undefined : value];
-      })
+      }),
     ) as CanjeFilter;
 
     onApplyFilters(filtersToApply);
-    onClose(); // Cerrar el modal después de aplicar
+    onClose();
   };
 
   const handleClear = () => {
     const emptyFilters: CanjeFilter = {
-      // Usamos `""` para los inputs (texto/fecha) para limpiar visualmente
+      id_tipodescansomedico: undefined,
+      id_tipocontingencia: undefined,
+      nombre_colaborador: "",
       codigo_canje: "",
       codigo_citt: "",
       fecha_inicio_subsidio: "",
@@ -82,6 +166,10 @@ export const CanjeFilterModal: React.FC<CanjeFilterModalProps> = ({
     setLocalFilters(emptyFilters);
     onApplyFilters(emptyFilters);
     onClose();
+  };
+
+  const getSelectValue = (key: keyof CanjeFilter) => {
+    return localFilters[key] || "null-filter";
   };
 
   return (
@@ -108,6 +196,78 @@ export const CanjeFilterModal: React.FC<CanjeFilterModalProps> = ({
               placeholder="Escribe el nombre completo"
               className="md:col-span-3 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
             />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-2 md:gap-4">
+            <Label
+              htmlFor="id_tipodescansomedico"
+              className="md:text-right font-medium text-gray-700"
+            >
+              Tipo descanso
+            </Label>
+            <Select
+              onValueChange={(value) =>
+                handleSelectChange("id_tipodescansomedico", value)
+              }
+              value={getSelectValue("id_tipodescansomedico")}
+            >
+              <SelectTrigger className="md:col-span-3 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                <SelectValue placeholder="Seleccione tipo de descanso médico" />
+              </SelectTrigger>
+              <SelectContent className="bg-white shadow-lg z-[9999]">
+                <SelectItem
+                  value="null-filter"
+                  className="text-gray-500 italic hover:bg-gray-50"
+                >
+                  Todos los tipos de descanso
+                </SelectItem>
+                {tipoDescansos.map((td) => (
+                  <SelectItem
+                    key={td.id}
+                    value={td.id}
+                    className="cursor-pointer hover:bg-blue-50 transition-colors"
+                  >
+                    {td.nombre}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-2 md:gap-4">
+            <Label
+              htmlFor="id_tipocontingencia"
+              className="md:text-right font-medium text-gray-700"
+            >
+              Tipo de Contingencia
+            </Label>
+            <Select
+              onValueChange={(value) =>
+                handleSelectChange("id_tipocontingencia", value)
+              }
+              value={getSelectValue("id_tipocontingencia")}
+            >
+              <SelectTrigger className="md:col-span-3 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                <SelectValue placeholder="Seleccione tipo de contingencia" />
+              </SelectTrigger>
+              <SelectContent className="bg-white shadow-lg z-[9999]">
+                <SelectItem
+                  value="null-filter"
+                  className="text-gray-500 italic hover:bg-gray-50"
+                >
+                  Todos los tipos de contingencia
+                </SelectItem>
+                {tipoContingencias.map((tc) => (
+                  <SelectItem
+                    key={tc.id}
+                    value={tc.id}
+                    className="cursor-pointer hover:bg-blue-50 transition-colors"
+                  >
+                    {tc.nombre}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-2 md:gap-4">

@@ -78,7 +78,6 @@ export const ReembolsoRow: React.FC<Props> = ({ reembolso }) => {
         <DropdownMenu>
           <DropdownMenuTrigger
             asChild
-            // className="bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer"
             className={`focus:outline-none focus:ring-2 z-40 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer`}
           >
             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -99,15 +98,10 @@ export const ReembolsoRow: React.FC<Props> = ({ reembolso }) => {
             <DropdownMenuItem
               onClick={handleShowDetail}
               className="cursor-pointer hover:bg-gray-100 transition-colors flex items-center space-x-2 text-blue-600"
-              // className="cursor-pointer hover:bg-gray-100 transition-colors"
             >
               <Edit className="h-4 w-4" />
               <span>Ver/Editar Detalle</span>
             </DropdownMenuItem>
-            {/* <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer hover:bg-gray-100 transition-colors">
-              Eliminar
-            </DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>
