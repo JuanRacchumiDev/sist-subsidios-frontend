@@ -5,9 +5,12 @@ export interface DocumentoTipoContingencia {
     id_tipocontingencia?: string
     nombre?: string
     nombre_url?: string
+    user_crea?: string
+    user_actualiza?: string
+    user_elimina?: string
     sistema?: boolean
     estado?: boolean
-    detalleParametro?: Parametro
+    tipoContingencia?: Parametro
 }
 
 export interface DocumentoTipoContingenciaResponse {

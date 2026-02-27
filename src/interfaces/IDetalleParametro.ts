@@ -10,6 +10,9 @@ export interface Detalle {
     valor?: string
     abreviatura?: string
     longitud?: number
+    user_crea?: string
+    user_actualiza?: string
+    user_elimina?: string
     en_persona?: boolean
     en_empresa?: boolean
     compra?: boolean

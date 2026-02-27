@@ -20,6 +20,7 @@ import {
 import { UsuarioFilter } from "../../interfaces/IUsuario";
 import { getDetalles } from "../../services/detalleParametroService";
 import { Detalle } from "../../interfaces/IDetalleParametro";
+import { ParametroClase } from "../../constants/parametroClase";
 
 interface UsuarioFilterModalProps {
   isOpen: boolean;
@@ -32,10 +33,9 @@ const getPerfiles = async (): Promise<Detalle[]> => {
   let perfiles: Detalle[] = [];
 
   try {
-    const clase: number = 1001;
     const estado: boolean = true;
 
-    const response = await getDetalles(clase, estado);
+    const response = await getDetalles(ParametroClase.PERFIL, estado);
     console.log("response getPerfiles");
     console.log({ response });
 

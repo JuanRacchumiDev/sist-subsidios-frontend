@@ -20,6 +20,7 @@ import {
 import { useToast } from "../../context/ToastContext";
 import { getDetalles } from "../../services/detalleParametroService";
 import { Detalle } from "../../interfaces/IDetalleParametro";
+import { ParametroClase } from "../../constants/parametroClase";
 
 interface DescansoMedicoFilterModalProps {
   isOpen: boolean;
@@ -32,10 +33,12 @@ const getTipoDescansosMedicos = async (): Promise<Detalle[]> => {
   let tipoDescansos: Detalle[] = [];
 
   try {
-    const clase: number = 1003;
     const estado: boolean = true;
 
-    const response = await getDetalles(clase, estado);
+    const response = await getDetalles(
+      ParametroClase.TIPO_DESCANSO_MEDICO,
+      estado,
+    );
     console.log("response getTipoDescansosMedicos");
     console.log({ response });
 
@@ -56,10 +59,12 @@ const getTipoContingencias = async (): Promise<Detalle[]> => {
   let tipoContingencias: Detalle[] = [];
 
   try {
-    const clase: number = 1004;
     const estado: boolean = true;
 
-    const response = await getDetalles(clase, estado);
+    const response = await getDetalles(
+      ParametroClase.TIPO_CONTINGENCIA,
+      estado,
+    );
     console.log("response getTipoContingencias");
     console.log({ response });
 

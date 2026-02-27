@@ -24,7 +24,6 @@ import {
   DocumentoTipoContingenciaFilter,
   Pagination as PaginationType,
 } from "../../../interfaces/IDocumentoTipoContingencia";
-import {} from "../../../interfaces/IDetalleParametro";
 import { FilterIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DocumentoTipoContingenciaFilterModal } from "./DocumentoTipoContingenciaFilterModal";

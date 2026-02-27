@@ -44,6 +44,7 @@ import { getCanjeById, updateCanje } from "../../services/canjeService";
 import { useToast } from "../../context/ToastContext";
 import HDate from "../../helpers/HDate";
 import { ArrowLeft } from "lucide-react";
+import { getAuthData } from "../../utils/authMemo";
 
 export const formSchema = z.object({
   id: z.string().optional(),
@@ -73,6 +74,12 @@ export const CanjeForm = () => {
   const { id } = useParams<{ id: string }>();
 
   const isEditMode = !!id;
+
+  const userProfile = useMemo(() => getAuthData()?.usuario, []);
+  console.log({ userProfile });
+
+  const { id_usuario } = userProfile;
+  console.log({ id_usuario });
 
   const { showToast } = useToast();
 
@@ -160,13 +167,15 @@ export const CanjeForm = () => {
         observacion,
       } = values;
 
+      console.log({ idUserCrea });
+
       const payloadCanje: Canje = {
         fecha_canje: HDate.formatDateTimezone(fechaCanje),
         codigo_canje: codigoCanje,
         codigo_citt: codigoCitt,
         estado_registro: estadoRegistro as ECanje,
         observacion,
-        user_crea: idUserCrea,
+        user_crea: id_usuario,
       };
 
       console.log({ payloadCanje });

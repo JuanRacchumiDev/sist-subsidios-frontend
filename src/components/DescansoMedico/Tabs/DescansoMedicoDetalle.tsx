@@ -38,7 +38,8 @@ import Documentos from "../../../components/TipoContingencia/Documentos";
 import { getAuthData } from "../../../utils/authMemo";
 import { Adjunto } from "../../../interfaces/IAdjunto";
 import { DescansoMedico } from "../../../interfaces/IDescansoMedico";
-import { getDescansoById } from "@/services/descansoMedicoService";
+import { getDescansoById } from "../../../services/descansoMedicoService";
+import { ParametroClase } from "../../../constants/parametroClase";
 
 interface DescansoMedicoDetalleProps {
   form: UseFormReturn<z.infer<typeof formSchema>>;
@@ -78,10 +79,12 @@ const dataColaboradores = async (idEmpresa: string | null = null) => {
 
 const dataTipoDescansosMedicos = async () => {
   let tipoDescansos: Detalle[] = [];
-  const claseTDM: number = 1003;
   const estadoTDM: boolean = true;
 
-  const response = await getDetalles(claseTDM, estadoTDM);
+  const response = await getDetalles(
+    ParametroClase.TIPO_DESCANSO_MEDICO,
+    estadoTDM,
+  );
 
   const { result, data } = response;
 
@@ -109,10 +112,12 @@ const dataAdjuntos = async (idDescansoMedico: string) => {
 const dataTipoContingencias = async () => {
   let tipoContingencias: Detalle[] = [];
 
-  const claseTC: number = 1004;
   const estadoTC: boolean = true;
 
-  const response = await getDetalles(claseTC, estadoTC);
+  const response = await getDetalles(
+    ParametroClase.TIPO_CONTINGENCIA,
+    estadoTC,
+  );
 
   const { result, data } = response;
 

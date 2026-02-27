@@ -80,6 +80,7 @@ export const TrabajadorSocialTable: React.FC = () => {
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
+
     try {
       const { currentPage, limit } = pagination;
 
@@ -101,9 +102,11 @@ export const TrabajadorSocialTable: React.FC = () => {
 
       console.log({ response });
 
-      if (response.result && response.data && response.pagination) {
-        setTrabajadoresSociales(response.data);
-        setPagination(response.pagination);
+      const { result, data, pagination: detailPagination } = response;
+
+      if (result && data && detailPagination) {
+        setTrabajadoresSociales(data);
+        setPagination(detailPagination);
       } else {
         setTrabajadoresSociales([]);
       }

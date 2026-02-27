@@ -123,7 +123,7 @@ export const DocumentoTipoContingenciaRow: React.FC<Props> = ({
         className="hover:bg-blue-100 hover:cursor-pointer transition-colors duration-200"
       >
         <TableCell className="py-3">
-          {documento.detalleParametro.nombre}
+          {documento.tipoContingencia.nombre}
         </TableCell>
         <TableCell className="py-3">{documento.nombre}</TableCell>
         <TableCell className="py-3">

@@ -1,4 +1,3 @@
-import { EMPRESA_DEFAULT } from '@/params/constants'
 import { Empresa } from '../interfaces/IEmpresa'
 import {
     getAll,
@@ -43,9 +42,9 @@ export const getEmpresaById = async (id: string) => {
     }
 }
 
-export const getEmpresaByRazonSocial = async () => {
+export const getEmpresaByRazonSocial = async (razonSocial: string) => {
 
-    const response = await getByRazonSocial(EMPRESA_DEFAULT)
+    const response = await getByRazonSocial(razonSocial)
 
     console.log('---- getEmpresaByRazonSocial ----')
 

@@ -46,6 +46,9 @@ export interface Persona {
     abreviatura?: string
     nombre_cargo?: string
     nombre_o_razon_social?: string
+    user_crea?: string
+    user_actualiza?: string
+    user_elimina?: string
     tipoDocumento?: Detalle
     empresa?: Empresa
     cargo?: Detalle

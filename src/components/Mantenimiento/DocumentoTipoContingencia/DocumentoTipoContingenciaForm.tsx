@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -43,7 +43,8 @@ import { Input } from "../../../components/ui/input";
 import { getDocumentoTipoContById } from "../../../services/documentoTipoContService";
 import { ArrowLeft } from "lucide-react";
 import { Detalle } from "../../../interfaces/IDetalleParametro";
-import { ParametroClase } from "@/constants/parametroClase";
+import { ParametroClase } from "../../../constants/parametroClase";
+import { getAuthData } from "../../../utils/authMemo";
 
 const formSchema = z.object({
   idTipoContingencia: z
@@ -74,6 +75,12 @@ export const DocumentoTipoContigenciaForm = () => {
   const { isSubmitting } = form.formState;
   const isEditMode = !!id;
 
+  const userProfile = useMemo(() => getAuthData()?.usuario, []);
+  console.log({ userProfile });
+
+  const { id_usuario } = userProfile;
+  console.log({ id_usuario });
+
   const handleGoBack = () => {
     navigate("/mantenimiento/documento-tipo-contingencia");
   };
@@ -99,9 +106,11 @@ export const DocumentoTipoContigenciaForm = () => {
 
       if (isEditMode && id) {
         messageError = "Error al actualizar el documento";
+        payloadDocumentoTC.user_actualiza = id_usuario;
         response = await updateDocumentoTipoCont(id, payloadDocumentoTC);
       } else {
         messageError = "Error al registrar el documento";
+        payloadDocumentoTC.user_crea = id_usuario;
         response = await createDocumentoTipoCont(payloadDocumentoTC);
       }
 

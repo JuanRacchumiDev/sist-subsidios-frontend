@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useToast } from "../../../context/ToastContext";
-import { DocumentoTipoContingenciaFilter } from "@/interfaces/IDocumentoTipoContingencia";
-import { TipoContingencia } from "@/interfaces/ITipoContingencia";
-import { getTipoContingencias } from "@/services/tipoContingenciaService";
+import { DocumentoTipoContingenciaFilter } from "../../../interfaces/IDocumentoTipoContingencia";
+import { Detalle } from "../../../interfaces/IDetalleParametro";
+import { getDetalles } from "../../../services/detalleParametroService";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ParametroClase } from "../../../constants/parametroClase";
 
 interface DocumentoTipoContingenciaFilterModalProps {
   isOpen: boolean;
@@ -28,14 +29,28 @@ interface DocumentoTipoContingenciaFilterModalProps {
   onApplyFilters: (filters: DocumentoTipoContingenciaFilter) => void;
 }
 
-const dataTipoContingencias = async () => {
-  let tipoContingencias: TipoContingencia[] = [];
-  const response = await getTipoContingencias();
-  const { result, data } = response;
-  if (result && data) {
-    tipoContingencias = data as TipoContingencia[];
+const getTipoContingencias = async (): Promise<Detalle[]> => {
+  let tipoContingencias: Detalle[] = [];
+
+  try {
+    const estado: boolean = true;
+
+    const response = await getDetalles(
+      ParametroClase.TIPO_CONTINGENCIA,
+      estado,
+    );
+    console.log("response getTipoContingencias");
+    console.log({ response });
+
+    if (response.result && response.data) {
+      tipoContingencias = response.data as Detalle[];
+    }
+
+    return tipoContingencias;
+  } catch (error) {
+    console.error("Error al obtener tipo de documentos", error);
+    return [];
   }
-  return tipoContingencias;
 };
 
 export const DocumentoTipoContingenciaFilterModal: React.FC<
@@ -46,9 +61,7 @@ export const DocumentoTipoContingenciaFilterModal: React.FC<
 
   const { showToast } = useToast();
 
-  const [tipoContingencias, setTipoContingencias] = useState<
-    TipoContingencia[]
-  >([]);
+  const [tipoContingencias, setTipoContingencias] = useState<Detalle[]>([]);
 
   useEffect(() => {
     setLocalFilters({
@@ -60,9 +73,7 @@ export const DocumentoTipoContingenciaFilterModal: React.FC<
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [tipoContingencias] = await Promise.all([
-          dataTipoContingencias(),
-        ]);
+        const [tipoContingencias] = await Promise.all([getTipoContingencias()]);
 
         setTipoContingencias(tipoContingencias);
       } catch (error) {

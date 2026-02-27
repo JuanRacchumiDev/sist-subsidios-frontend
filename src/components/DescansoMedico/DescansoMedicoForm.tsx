@@ -188,9 +188,19 @@ export const DescansoMedicoForm = () => {
 
   const { showToast } = useToast();
 
+  const isEditMode = !!id;
+
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
 
-  const isEditMode = !!id;
+  console.log({ userProfile });
+
+  const { nombre_perfil_url, id_persona, id_empresa, id_usuario } = userProfile;
+
+  console.log({ nombre_perfil_url });
+
+  console.log({ id_persona });
+
+  console.log({ id_usuario });
 
   const handleGoBack = () => {
     navigate("/descanso-medico");
@@ -217,16 +227,6 @@ export const DescansoMedicoForm = () => {
 
     form.reset(dataForm);
   };
-
-  console.log({ userProfile });
-
-  const { nombre_perfil_url, id_persona, id_empresa, id_usuario } = userProfile;
-
-  console.log({ nombre_perfil_url });
-
-  console.log({ id_persona });
-
-  console.log({ id_usuario });
 
   const isModeLetter =
     (nombre_perfil_url === "especialista-empresa" ||
@@ -444,9 +444,11 @@ export const DescansoMedicoForm = () => {
 
       if (isEditMode) {
         console.log("update");
+        payloadDescansoMedico.user_actualiza = id_usuario;
         response = await updateDescanso(id, payloadDescansoMedico);
       } else {
         console.log("create");
+        payloadDescansoMedico.user_crea = id_usuario;
         response = await createDescanso(payloadDescansoMedico);
       }
 

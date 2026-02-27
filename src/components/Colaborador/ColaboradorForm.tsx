@@ -44,6 +44,7 @@ import { createPersona, updatePersona } from "../../services/personaService";
 import SearchableCombobox from "../Common/SearchableCombobox";
 import { ArrowLeft } from "lucide-react";
 import { getAuthData } from "../../utils/authMemo";
+import { ParametroClase } from "../../constants/parametroClase";
 
 const formSchema = z.object({
   idTipoDocumento: z
@@ -104,10 +105,9 @@ const getTipoDocumentos = async (): Promise<Detalle[]> => {
   let tipos: Detalle[] = [];
 
   try {
-    const clase: number = 1000;
     const estado: boolean = true;
 
-    const response = await getDetalles(clase, estado);
+    const response = await getDetalles(ParametroClase.TIPO_DOCUMENTO, estado);
     console.log("response getTipoDocumentos");
     console.log({ response });
 
@@ -126,10 +126,9 @@ const getCargos = async (): Promise<Detalle[]> => {
   let cargos: Detalle[] = [];
 
   try {
-    const clase: number = 1008;
     const estado: boolean = true;
 
-    const response = await getDetalles(clase, estado);
+    const response = await getDetalles(ParametroClase.CARGO, estado);
     console.log("response getCargos");
     console.log({ response });
 
@@ -183,6 +182,9 @@ export const ColaboradorForm = () => {
 
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
   console.log({ userProfile });
+
+  const { id_usuario } = userProfile;
+  console.log({ id_usuario });
 
   const isEmpresaFixed = !!userProfile?.id_empresa;
 
@@ -310,12 +312,15 @@ export const ColaboradorForm = () => {
 
       if (!isEditMode && idPersona) {
         console.log("create persona");
+        payload.user_crea = id_usuario;
         response = await updatePersona(idPersona, payload);
       } else if (isEditMode && idPersona) {
         console.log("update persona");
+        payload.user_actualiza = id_usuario;
         response = await updatePersona(idPersona, payload);
       } else {
         console.log("ccc");
+        payload.user_crea = id_usuario;
         response = await createPersona(payload);
       }
 
@@ -413,6 +418,7 @@ export const ColaboradorForm = () => {
               is_tiene_inconvenientes || false;
 
             form.reset(dataForm);
+            setIdPersona(id);
           } else {
             showToast("error", message || "Colaborador no encontrado");
             navigate("/colaborador/nuevo");

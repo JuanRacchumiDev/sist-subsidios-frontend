@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -37,10 +37,15 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { RequiredLabel } from "../Common/RequiredLabel";
 import { Persona, PersonaResponse } from "../../interfaces/IPersona";
+import { Empresa } from "../../interfaces/IEmpresa";
 import { Detalle } from "../../interfaces/IDetalleParametro";
 import { createPersona, updatePersona } from "../../services/personaService";
 import SearchableCombobox from "../Common/SearchableCombobox";
 import { ArrowLeft } from "lucide-react";
+import { ParametroClase } from "../../constants/parametroClase";
+import { EMPRESA_DEFAULT } from "../../params/constants";
+import { getAuthData } from "../../utils/authMemo";
+import { getEmpresaByRazonSocial } from "../../services/empresaService";
 
 const formSchema = z.object({
   idTipoDocumento: z
@@ -90,19 +95,41 @@ const formSchema = z.object({
   fechaIngreso: z.date().optional(),
 });
 
+const getEmpresa = async (): Promise<Empresa> => {
+  let empresa: Empresa = null;
+
+  try {
+    const response = await getEmpresaByRazonSocial(EMPRESA_DEFAULT);
+    console.log("response getEmpresa");
+    console.log({ response });
+
+    const { result, data } = response;
+
+    if (result && data) {
+      empresa = data as Empresa;
+    }
+
+    return empresa;
+  } catch (error) {
+    console.error("Error al obtener tipo de documentos", error);
+    return null;
+  }
+};
+
 const getTipoDocumentos = async (): Promise<Detalle[]> => {
   let tipos: Detalle[] = [];
 
   try {
-    const clase: number = 1000;
     const estado: boolean = true;
 
-    const response = await getDetalles(clase, estado);
+    const response = await getDetalles(ParametroClase.TIPO_DOCUMENTO, estado);
     console.log("response getTipoDocumentos");
     console.log({ response });
 
-    if (response.result && response.data) {
-      tipos = response.data as Detalle[];
+    const { result, data } = response;
+
+    if (result && data) {
+      tipos = data as Detalle[];
     }
 
     return tipos;
@@ -116,10 +143,9 @@ const getCargos = async (): Promise<Detalle[]> => {
   let cargos: Detalle[] = [];
 
   try {
-    const clase: number = 1008;
     const estado: boolean = true;
 
-    const response = await getDetalles(clase, estado);
+    const response = await getDetalles(ParametroClase.CARGO, estado);
     console.log("response getCargos");
     console.log({ response });
 
@@ -167,6 +193,12 @@ export const EspecialistaSHForm = () => {
     useState(false);
 
   const isEditMode = !!id;
+
+  const userProfile = useMemo(() => getAuthData()?.usuario, []);
+  console.log({ userProfile });
+
+  const { id_usuario } = userProfile;
+  console.log({ id_usuario });
 
   const handleGoBack = () => {
     navigate("/especialista-sh");
@@ -253,6 +285,8 @@ export const EspecialistaSHForm = () => {
       fechaIngresoStr = partsFechaIngreso[0];
     }
 
+    console.log({ idEmpresa });
+
     const payload: Persona = {
       id_tipodocumento: idTipoDocumento,
       id_cargo: idCargo,
@@ -281,12 +315,15 @@ export const EspecialistaSHForm = () => {
 
       if (!isEditMode && idPersona) {
         console.log("create persona");
+        payload.user_crea = id_usuario;
         response = await updatePersona(idPersona, payload);
       } else if (isEditMode && idPersona) {
         console.log("update persona");
+        payload.user_actualiza = id_usuario;
         response = await updatePersona(idPersona, payload);
       } else {
         console.log("ccc");
+        payload.user_crea = id_usuario;
         response = await createPersona(payload);
       }
 
@@ -313,11 +350,10 @@ export const EspecialistaSHForm = () => {
       try {
         let listTipoDocumentos: Detalle[] = [];
         let listCargos: Detalle[] = [];
+        let dataEmpresa: Empresa = null;
 
-        const [responseTipoDocumentos, responseCargos] = await Promise.all([
-          getTipoDocumentos(),
-          getCargos(),
-        ]);
+        const [responseTipoDocumentos, responseCargos, responseEmpresa] =
+          await Promise.all([getTipoDocumentos(), getCargos(), getEmpresa()]);
 
         listTipoDocumentos = responseTipoDocumentos as Detalle[];
 
@@ -325,6 +361,13 @@ export const EspecialistaSHForm = () => {
 
         setTipos(listTipoDocumentos);
         setCargos(listCargos);
+
+        if (responseEmpresa) {
+          dataEmpresa = responseEmpresa as Empresa;
+          console.log({ dataEmpresa });
+          const { id } = dataEmpresa;
+          setIdEmpresa(id);
+        }
 
         console.log("---- fetchData id ----");
         console.log({ id });
@@ -371,6 +414,7 @@ export const EspecialistaSHForm = () => {
             dataForm.emailPersonal = email_personal || "";
             dataForm.telefono = telefono || "";
             form.reset(dataForm);
+            setIdPersona(id);
           } else {
             showToast("error", message || "Especialista sh no encontrado");
             navigate("/especialista-sh/nuevo");

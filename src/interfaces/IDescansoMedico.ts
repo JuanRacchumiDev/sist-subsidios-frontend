@@ -51,6 +51,9 @@ export interface DescansoMedico {
     sistema?: boolean
     estado?: boolean
     codigo_temp?: string
+    user_crea?: string
+    user_actualiza?: string
+    user_elimina?: string
     empresa?: Empresa
     colaborador_dm?: Persona
     tipoDescansoMedico?: Detalle

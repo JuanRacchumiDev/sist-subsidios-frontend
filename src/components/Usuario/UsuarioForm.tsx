@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import * as z from "zod";
@@ -41,6 +41,8 @@ import {
 } from "../ui/select";
 import { Button } from "../ui/button";
 import { ArrowLeft } from "lucide-react";
+import { ParametroClase } from "../../constants/parametroClase";
+import { getAuthData } from "../../utils/authMemo";
 
 export const formSchema = z.object({
   idPerfil: z
@@ -83,10 +85,9 @@ const getDataPerfiles = async (): Promise<Detalle[]> => {
   let perfiles: Detalle[] = [];
 
   try {
-    const clase: number = 1001;
     const estado: boolean = true;
 
-    const response = await getDetalles(clase, estado);
+    const response = await getDetalles(ParametroClase.PERFIL, estado);
     console.log("---- response getPerfiles ----");
     console.log({ response });
 
@@ -111,6 +112,12 @@ export const UsuarioForm = () => {
   const [correos, setCorreos] = useState<string[]>([]);
 
   const isEditMode = !!id;
+
+  const userProfile = useMemo(() => getAuthData()?.usuario, []);
+  console.log({ userProfile });
+
+  const { id_usuario } = userProfile;
+  console.log({ id_usuario });
 
   const handleGoBack = () => {
     navigate("/usuario");
@@ -153,9 +160,11 @@ export const UsuarioForm = () => {
 
       if (isEditMode && id) {
         messageError = "Error al actualizar el usuario";
+        payloadData.user_actualiza = id_usuario;
         response = await updateUsuario(id, payloadData);
       } else {
         messageError = "Error al registrar el usuario";
+        payloadData.user_crea = id_usuario;
         response = await createUsuario(payloadData);
       }
 

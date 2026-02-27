@@ -22,6 +22,7 @@ import { PersonaFilter } from "../../interfaces/IPersona";
 import { getDetalles } from "../../services/detalleParametroService";
 import { Empresa, EmpresaResponse } from "../../interfaces/IEmpresa";
 import { getEmpresas } from "../../services/empresaService";
+import { ParametroClase } from "../../constants/parametroClase";
 
 interface ColaboradorFilterModalProps {
   isOpen: boolean;
@@ -34,10 +35,9 @@ const getDataTipoDocumentos = async (): Promise<Detalle[]> => {
   let tipos: Detalle[] = [];
 
   try {
-    const clase: number = 1000;
     const estado: boolean = true;
 
-    const response = await getDetalles(clase, estado);
+    const response = await getDetalles(ParametroClase.TIPO_DOCUMENTO, estado);
     console.log("response getTipoDocumentos");
     console.log({ response });
 
@@ -56,10 +56,9 @@ const getDataCargos = async (): Promise<Detalle[]> => {
   let cargos: Detalle[] = [];
 
   try {
-    const clase: number = 1008;
     const estado: boolean = true;
 
-    const response = await getDetalles(clase, estado);
+    const response = await getDetalles(ParametroClase.CARGO, estado);
     console.log("response getCargos");
     console.log({ response });
 
@@ -104,8 +103,8 @@ export const ColaboradorFilterModal: React.FC<ColaboradorFilterModalProps> = ({
 
   const { showToast } = useToast();
 
-  const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [tipos, setTipos] = useState<Detalle[]>([]);
+  const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [cargos, setCargos] = useState<Detalle[]>([]);
 
   useEffect(() => {
@@ -158,8 +157,9 @@ export const ColaboradorFilterModal: React.FC<ColaboradorFilterModalProps> = ({
       Object.entries(localFilters).map(([key, value]) => {
         if (
           key === "id_tipodocumento" ||
+          key === "id_empresa" ||
           key === "id_cargo" ||
-          key === "id_empresa"
+          key === "nombreGrupo"
         ) {
           return [key, value];
         }
@@ -174,6 +174,7 @@ export const ColaboradorFilterModal: React.FC<ColaboradorFilterModalProps> = ({
   const handleClear = () => {
     const emptyFilters: PersonaFilter = {
       id_tipodocumento: undefined,
+      id_empresa: undefined,
       numero_documento: "",
       nombre_completo: "",
       nombreGrupo: "",

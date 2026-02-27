@@ -17,11 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Detalle } from "@/interfaces/IDetalleParametro";
+import { Detalle } from "../../interfaces/IDetalleParametro";
 import { PersonaFilter } from "../../interfaces/IPersona";
-import { getDetalles } from "@/services/detalleParametroService";
-import { Empresa, EmpresaResponse } from "@/interfaces/IEmpresa";
-import { getEmpresas } from "@/services/empresaService";
+import { getDetalles } from "../../services/detalleParametroService";
+import { Empresa, EmpresaResponse } from "../../interfaces/IEmpresa";
+import { getEmpresas } from "../../services/empresaService";
+import { ParametroClase } from "../../constants/parametroClase";
 
 interface EspecialistaClienteFilterModalProps {
   isOpen: boolean;
@@ -34,10 +35,9 @@ const getDataTipoDocumentos = async (): Promise<Detalle[]> => {
   let tipos: Detalle[] = [];
 
   try {
-    const clase: number = 1000;
     const estado: boolean = true;
 
-    const response = await getDetalles(clase, estado);
+    const response = await getDetalles(ParametroClase.TIPO_DOCUMENTO, estado);
     console.log("response getTipoDocumentos");
     console.log({ response });
 
@@ -56,10 +56,9 @@ const getDataCargos = async (): Promise<Detalle[]> => {
   let cargos: Detalle[] = [];
 
   try {
-    const clase: number = 1008;
     const estado: boolean = true;
 
-    const response = await getDetalles(clase, estado);
+    const response = await getDetalles(ParametroClase.CARGO, estado);
     console.log("response getCargos");
     console.log({ response });
 

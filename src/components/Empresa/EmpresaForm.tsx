@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -43,15 +43,16 @@ import { Button } from "../ui/button";
 import SearchableCombobox from "../Common/SearchableCombobox";
 import { ArrowLeft } from "lucide-react";
 import { Detalle } from "../../interfaces/IDetalleParametro";
+import { ParametroClase } from "../../constants/parametroClase";
+import { getAuthData } from "../../utils/authMemo";
 
 const getTipoDocumentos = async (): Promise<Detalle[]> => {
   let tipos: Detalle[] = [];
 
   try {
-    const clase: number = 1000;
     const estado: boolean = true;
 
-    const response = await getDetalles(clase, estado);
+    const response = await getDetalles(ParametroClase.TIPO_DOCUMENTO, estado);
     console.log("response getTipoDocumentos");
     console.log({ response });
 
@@ -70,10 +71,9 @@ const getCargos = async (): Promise<Detalle[]> => {
   let cargos: Detalle[] = [];
 
   try {
-    const clase: number = 1008;
     const estado: boolean = true;
 
-    const response = await getDetalles(clase, estado);
+    const response = await getDetalles(ParametroClase.CARGO, estado);
     console.log("response getCargos");
     console.log({ response });
 
@@ -188,6 +188,12 @@ export const EmpresaForm = () => {
   const { isSubmitting } = form.formState;
   const isEditMode = !!id;
 
+  const userProfile = useMemo(() => getAuthData()?.usuario, []);
+  console.log({ userProfile });
+
+  const { id_usuario } = userProfile;
+  console.log({ id_usuario });
+
   const handleGoBack = () => {
     navigate("/empresa");
   };
@@ -254,12 +260,15 @@ export const EmpresaForm = () => {
     try {
       if (!isEditMode && idPersona) {
         console.log("create persona");
+        payload.user_actualiza = id_usuario;
         response = await updatePersona(idPersona, payload);
       } else if (isEditMode && idPersona) {
         console.log("update persona");
+        payload.user_actualiza = id_usuario;
         response = await updatePersona(idPersona, payload);
       } else {
         console.log("ccc");
+        payload.user_crea = id_usuario;
         response = await createPersona(payload);
       }
 
@@ -312,6 +321,8 @@ export const EmpresaForm = () => {
 
             const empresa = data as Empresa;
 
+            console.log({ empresa });
+
             const {
               id: idEmpresa,
               numero,
@@ -337,21 +348,19 @@ export const EmpresaForm = () => {
             const { result: resultPersona, data: dataPersona } =
               responsePersona;
 
-            if (resultPersona && dataPersona) {
-              const representante = dataPersona as Persona;
-              console.log({ representante });
+            if (
+              resultPersona &&
+              Array.isArray(dataPersona) &&
+              dataPersona.length > 0
+            ) {
+              const listRepresentantes = dataPersona as Persona[];
+              console.log({ listRepresentantes });
 
-              if (!isEditMode) {
-                setCamposHabilitadosPersona(false);
-              } else {
-                setCamposHabilitadosPersona(true);
-              }
+              const uniqueRepresentante = listRepresentantes[0];
 
-              if (representante) {
-                const uniqueRepresentante = representante[0];
+              setCamposHabilitadosPersona(isEditMode);
 
-                console.log({ uniqueRepresentante });
-
+              if (uniqueRepresentante) {
                 const {
                   id: idRepresentante,
                   id_tipodocumento,
@@ -384,6 +393,8 @@ export const EmpresaForm = () => {
             } else {
               setCamposHabilitadosPersona(false);
             }
+
+            console.log({ dataForm });
 
             form.reset(dataForm);
 

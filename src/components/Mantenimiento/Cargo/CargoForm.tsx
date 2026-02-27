@@ -32,8 +32,9 @@ import {
 import { useToast } from "../../../context/ToastContext";
 import { RequiredLabel } from "../../../components/Common/RequiredLabel";
 import { ParametroClase } from "../../../constants/parametroClase";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { ArrowLeft } from "lucide-react";
+import { getAuthData } from "../../../utils/authMemo";
 
 const formSchema = z.object({
   nombre: z.string().min(2, {
@@ -56,6 +57,12 @@ export const CargoForm = () => {
   const { isSubmitting } = form.formState;
 
   const isEditMode = !!id;
+
+  const userProfile = useMemo(() => getAuthData()?.usuario, []);
+  console.log({ userProfile });
+
+  const { id_usuario } = userProfile;
+  console.log({ id_usuario });
 
   const handleGoBack = () => {
     navigate("/mantenimiento/cargo");
@@ -81,10 +88,16 @@ export const CargoForm = () => {
       };
 
       if (isEditMode && id) {
+        console.log("actualizar detalle");
         messageError = "Error al actualizar el cargo";
+        payloadData.user_actualiza = id_usuario;
+        console.log({ payloadData });
         response = await updateDetalle(id, payloadData);
       } else {
+        console.log("crear detalle");
         messageError = "Error al registrar el cargo";
+        payloadData.user_crea = id_usuario;
+        console.log({ payloadData });
         response = await createDetalle(payloadData);
       }
 
