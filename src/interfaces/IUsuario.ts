@@ -15,6 +15,7 @@ export interface Usuario {
     nombres?: string
     apellido_paterno?: string
     apellido_materno?: string
+    nombre_perfil?: string
     user_crea?: string
     user_actualiza?: string
     user_elimina?: string
