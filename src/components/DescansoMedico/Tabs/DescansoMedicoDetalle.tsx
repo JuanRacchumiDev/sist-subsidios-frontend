@@ -46,86 +46,122 @@ interface DescansoMedicoDetalleProps {
   isModeLetter?: boolean;
 }
 
-const dataEmpresas = async () => {
+const getDataEmpresas = async (): Promise<Empresa[]> => {
   let empresas: Empresa[] = [];
-  const response = await getEmpresas();
-  const { result, data } = response;
-  if (result && data) {
-    empresas = data as Empresa[];
+
+  try {
+    const response = await getEmpresas();
+    console.log("response getEmpresas");
+    console.log({ response });
+
+    const { result, data } = response;
+
+    if (result && data) {
+      empresas = data as Empresa[];
+    }
+    return empresas;
+  } catch (error) {
+    console.error("Error al obtener empresas", error);
+    return [];
   }
-  return empresas;
 };
 
-const dataColaboradores = async (idEmpresa: string | null = null) => {
+const getDataColaboradores = async (
+  idEmpresa: string | null = null,
+): Promise<Persona[]> => {
   let colaboradores: Persona[] = [];
   let response: PersonaResponse;
   const nombreGrupo: string = "GRUPO COLABORADOR";
 
-  if (idEmpresa) {
-    response = await getPersonasByEmpresaWithGrupo(idEmpresa, nombreGrupo);
-  } else {
-    response = await getPersonas();
-  }
+  try {
+    if (idEmpresa) {
+      response = await getPersonasByEmpresaWithGrupo(idEmpresa, nombreGrupo);
+    } else {
+      response = await getPersonas();
+    }
 
-  console.log("---- response dataColaboradores ----");
-  console.log({ response });
+    console.log("---- response dataColaboradores ----");
+    console.log({ response });
 
-  const { result, data } = response;
-  if (result && data) {
-    colaboradores = data as Persona[];
+    const { result, data } = response;
+
+    if (result && data) {
+      colaboradores = data as Persona[];
+    }
+
+    return colaboradores;
+  } catch (error) {
+    console.error("Error al obtener colaboradores", error);
+    return [];
   }
-  return colaboradores;
 };
 
-const dataTipoDescansosMedicos = async () => {
+const getDataTipoDescansosMedicos = async (): Promise<Detalle[]> => {
   let tipoDescansos: Detalle[] = [];
   const estadoTDM: boolean = true;
 
-  const response = await getDetalles(
-    ParametroClase.TIPO_DESCANSO_MEDICO,
-    estadoTDM,
-  );
+  try {
+    const response = await getDetalles(
+      ParametroClase.TIPO_DESCANSO_MEDICO,
+      estadoTDM,
+    );
 
-  const { result, data } = response;
-
-  if (result && data) {
-    tipoDescansos = data as Detalle[];
-  }
-
-  return tipoDescansos;
-};
-
-const dataAdjuntos = async (idDescansoMedico: string) => {
-  let adjuntos: Adjunto[] = [];
-  if (idDescansoMedico) {
-    const responseDescanso = await getDescansoById(idDescansoMedico);
-    const { result, data } = responseDescanso;
+    const { result, data } = response;
 
     if (result && data) {
-      const descanso = data as DescansoMedico;
-      adjuntos = descanso.adjuntos as Adjunto[];
+      tipoDescansos = data as Detalle[];
     }
+
+    return tipoDescansos;
+  } catch (error) {
+    console.error("Error al obtener data tipo descansos médicos", error);
+    return [];
   }
-  return adjuntos;
 };
 
-const dataTipoContingencias = async () => {
-  let tipoContingencias: Detalle[] = [];
+const getDataAdjuntos = async (
+  idDescansoMedico: string,
+): Promise<Adjunto[]> => {
+  let adjuntos: Adjunto[] = [];
 
+  try {
+    if (idDescansoMedico) {
+      const responseDescanso = await getDescansoById(idDescansoMedico);
+      const { result, data } = responseDescanso;
+
+      if (result && data) {
+        const descanso = data as DescansoMedico;
+        adjuntos = descanso.adjuntos as Adjunto[];
+      }
+    }
+    return adjuntos;
+  } catch (error) {
+    console.error("Error al obtener data adjuntos", error);
+    return [];
+  }
+};
+
+const getDataTipoContingencias = async (): Promise<Detalle[]> => {
+  let tipoContingencias: Detalle[] = [];
   const estadoTC: boolean = true;
 
-  const response = await getDetalles(
-    ParametroClase.TIPO_CONTINGENCIA,
-    estadoTC,
-  );
+  try {
+    const response = await getDetalles(
+      ParametroClase.TIPO_CONTINGENCIA,
+      estadoTC,
+    );
 
-  const { result, data } = response;
+    const { result, data } = response;
 
-  if (result && data) {
-    tipoContingencias = data as Detalle[];
+    if (result && data) {
+      tipoContingencias = data as Detalle[];
+    }
+
+    return tipoContingencias;
+  } catch (error) {
+    console.error("Error al obtener data tipo contingencias", error);
+    return [];
   }
-
-  return tipoContingencias;
 };
 
 export const DescansoMedicoDetalle = ({
@@ -170,14 +206,16 @@ export const DescansoMedicoDetalle = ({
           tipoContingenciasRes,
           adjuntosRes,
         ] = await Promise.all([
-          dataEmpresas(),
-          dataColaboradores(),
-          dataTipoDescansosMedicos(),
-          dataTipoContingencias(),
-          dataAdjuntos(id),
+          getDataEmpresas(),
+          getDataColaboradores(),
+          getDataTipoDescansosMedicos(),
+          getDataTipoContingencias(),
+          getDataAdjuntos(id),
         ]);
 
+        console.log("---- DescansoMedicoDetalle ----");
         console.log({ isModeLetter });
+        console.log({ id });
 
         setEmpresas(empresasRes);
         setColaboradores(colaboradoresRes);
@@ -233,7 +271,8 @@ export const DescansoMedicoDetalle = ({
     if (selectedEmpresaId) {
       const fetchColaboradores = async () => {
         try {
-          const colaboradoresRes = await dataColaboradores(selectedEmpresaId);
+          const colaboradoresRes =
+            await getDataColaboradores(selectedEmpresaId);
           setColaboradores(colaboradoresRes);
         } catch (error) {
           console.error("Error al obtener colaboradores", error);
@@ -468,6 +507,7 @@ export const DescansoMedicoDetalle = ({
           form={form}
           adjuntosExistentes={adjuntos}
           isModeLetter={isModeLetter}
+          idDescanso={id}
         />
       )}
 

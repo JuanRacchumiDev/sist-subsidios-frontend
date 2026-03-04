@@ -26,6 +26,7 @@ interface DocumentosRequeridosProps {
   form: UseFormReturn<z.infer<typeof formSchema>>;
   adjuntosExistentes?: Adjunto[];
   isModeLetter?: boolean;
+  idDescanso?: string;
 }
 
 export const Documentos = ({
@@ -33,6 +34,7 @@ export const Documentos = ({
   form,
   adjuntosExistentes = [],
   isModeLetter = false,
+  idDescanso = "",
 }: DocumentosRequeridosProps) => {
   const { showToast } = useToast();
 
@@ -71,6 +73,8 @@ export const Documentos = ({
     e: React.ChangeEvent<HTMLInputElement>,
     idDocumento: string,
   ) => {
+    let paramsAdjunto: Adjunto | null = null;
+
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -83,6 +87,18 @@ export const Documentos = ({
     const formData = new FormData();
     formData.append("file", file);
     formData.append("id_documento", idDocumento);
+
+    // Validando si existe el id de descanso médico
+    if (idDescanso && idDescanso.length > 0) {
+      formData.append("id_descansomedico", idDescanso);
+
+      paramsAdjunto = {
+        id_descansomedico: idDescanso,
+        id_documento: idDocumento,
+      };
+    }
+
+    console.log({ paramsAdjunto });
 
     console.log("---- formData v1 ----");
     console.log({ formData });
@@ -105,7 +121,10 @@ export const Documentos = ({
       console.log({ responseColaborador });
       const { result, data } = responseColaborador;
       if (result && data) {
-        const { numero_documento } = data as Persona;
+        const { id: idPersona, numero_documento } = data as Persona;
+        console.log({ idPersona });
+        console.log({ numero_documento });
+        formData.append("id_persona", idPersona);
         formData.append("numero_documento", numero_documento);
       }
     }
@@ -114,7 +133,7 @@ export const Documentos = ({
     console.log({ formData });
 
     try {
-      const response = await uploadAdjunto(formData);
+      const response = await uploadAdjunto(paramsAdjunto, formData);
 
       console.log("---- response uploadAdjunto ----");
       console.log({ response });

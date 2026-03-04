@@ -52,7 +52,11 @@ export const updateAdjunto = async (id: string, payload: Adjunto) => {
     }
 }
 
-export const uploadAdjunto = async (formData: FormData) => {
+export const uploadAdjunto = async (params: Adjunto = {}, formData: FormData) => {
+    const hasParams = params && Object.keys(params).length > 0
+
+    console.log(hasParams ? "Modo: Actualización (PATCH)" : "Modo: Creación (POST)")
+
     const responseTipoAdjunto = await getByNombre("GENERAL");
 
     console.log({ responseTipoAdjunto })
@@ -67,7 +71,13 @@ export const uploadAdjunto = async (formData: FormData) => {
         formData.append("id_tipoadjunto", id)
     }
 
-    const response = await upload(formData)
+    console.log('---- params in adjuntoService ----')
+    console.log({ params })
+
+    console.log('---- uploadAdjunto in adjuntoService ----')
+    console.log({ formData })
+
+    const response = await upload(params, formData)
 
     return {
         ...response

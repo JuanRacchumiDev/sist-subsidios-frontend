@@ -109,8 +109,15 @@ export const update = async (id: string, payload: Adjunto): Promise<AdjuntoRespo
     }
 }
 
-export const upload = async (formData: FormData): Promise<AdjuntoResponse> => {
+export const upload = async (params: Adjunto = {}, formData: FormData): Promise<AdjuntoResponse> => {
     try {
+        console.log('---- update adjuntoRepository ----')
+        console.log({ params })
+        console.log({ formData })
+
+        let response: any = null
+        let uri: string = `/adjuntos`
+
         // Obteniendo el código temporal del usuario autenticado
         const codigo_temp = localStorage.getItem("codigo_temp") || null
 
@@ -122,11 +129,35 @@ export const upload = async (formData: FormData): Promise<AdjuntoResponse> => {
 
         console.log({ formData })
 
-        const response = await apiClient.post('/adjuntos', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        })
+        // if (params) {
+        //     console.log('actualizar adjunto')
+        //     const { id_descansomedico, id_documento } = params
+        //     uri = `/adjuntos?id_descansomedico=${id_descansomedico}&id_documento=${id_documento}`
+        // } else {
+        //     console.log('nuevo adjunto')
+        //     uri = `/adjuntos`
+        // }
+
+        if (params) {
+            const { id_descansomedico, id_documento } = params
+            uri += `?id_descansomedico=${id_descansomedico}&id_documento=${id_documento}`
+
+            response = await apiClient.patch(uri, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
+        } else {
+            response = await apiClient.post(uri, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
+        }
+
+        console.log({ uri })
+
+        console.log({ response })
 
         const { data: { result, data, message, error, status } } = response
 

@@ -1,11 +1,10 @@
 import { Canje } from "./ICanje"
 import { Cobro } from "./ICobro"
-import { Colaborador } from "./IColaborador"
 import { DescansoMedico } from "./IDescansoMedico"
 import { Reembolso } from "./IReembolso"
 import { TipoAdjunto } from "./ITipoAdjunto"
-import { TrabajadorSocial } from "./ITrabajadorSocial"
 import { DocumentoTipoContingencia } from "./IDocumentoTipoContingencia"
+import { Persona } from "./IPersona"
 
 export interface Adjunto {
     id?: string
@@ -14,8 +13,7 @@ export interface Adjunto {
     id_canje?: string
     id_cobro?: string
     id_reembolso?: string
-    id_colaborador?: string
-    id_trabajadorsocial?: string
+    id_persona?: string
     id_documento?: string
     file_name?: string
     file_type?: string
@@ -29,8 +27,7 @@ export interface Adjunto {
     canje?: Canje
     cobro?: Cobro
     reembolso?: Reembolso
-    colaborador?: Colaborador
-    trabajadorSocial?: TrabajadorSocial
+    persona?: Persona
     documentoTipoContingencia?: DocumentoTipoContingencia
 }
 

@@ -109,8 +109,10 @@ const getTipoDocumentos = async (): Promise<Detalle[]> => {
     console.log("response getTipoDocumentos");
     console.log({ response });
 
-    if (response.result && response.data) {
-      tipos = response.data as Detalle[];
+    const { result, data } = response;
+
+    if (result && data) {
+      tipos = data as Detalle[];
     }
 
     return tipos;

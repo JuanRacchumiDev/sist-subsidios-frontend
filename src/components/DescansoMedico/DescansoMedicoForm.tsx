@@ -181,6 +181,7 @@ export const DescansoMedicoForm = () => {
   const [showResponsabilidad, setShowResponsabilidad] = useState(false);
   const [showPoliticaSubsidio, setShowPoliticaSubsidio] = useState(false);
   const [activeTab, setActiveTab] = useState("datos-descanso-medico");
+  const [estadoOriginal, setEstadoOriginal] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
@@ -262,6 +263,16 @@ export const DescansoMedicoForm = () => {
 
   const { isSubmitting } = form.formState;
 
+  // const currentEstado = form.watch("estadoRegistro");
+
+  // const isButtonDisabled =
+  //   isSubmitting || (isEditMode && currentEstado === "Registro exitoso");
+
+  const isRegistroBloqueado =
+    isEditMode && estadoOriginal === "Registro exitoso";
+
+  const isButtonDisabled = isSubmitting || isRegistroBloqueado;
+
   useEffect(() => {
     const fecthDescansoMedico = async () => {
       if (isEditMode && id) {
@@ -284,9 +295,28 @@ export const DescansoMedicoForm = () => {
 
             console.log({ descanso });
 
-            const responseColaborador = await getPersonaById(
-              descanso.id_colaborador,
-            );
+            const {
+              id_colaborador,
+              id_tipodescansomedico,
+              id_tipocontingencia,
+              codigo_citt,
+              fecha_otorgamiento,
+              fecha_inicio,
+              fecha_final,
+              total_dias,
+              numero_colegiatura,
+              medico_tratante,
+              codcie10_diagnostico,
+              nombre_establecimiento,
+              is_acepta_responsabilidad,
+              is_acepta_politica,
+              estado_registro,
+              observacion,
+            } = descanso;
+
+            setEstadoOriginal(estado_registro);
+
+            const responseColaborador = await getPersonaById(id_colaborador);
 
             console.log({ responseColaborador });
 
@@ -300,28 +330,24 @@ export const DescansoMedicoForm = () => {
 
             const dataForm = {
               idEmpresa,
-              idColaborador: descanso.id_colaborador,
-              idTipoDescansoMedico: descanso.id_tipodescansomedico,
-              idTipoContingencia: descanso.id_tipocontingencia,
-              codigoCitt: descanso.codigo_citt || "",
-              fechaOtorgamiento: descanso.fecha_otorgamiento
-                ? parseISO(descanso.fecha_otorgamiento)
+              idColaborador: id_colaborador,
+              idTipoDescansoMedico: id_tipodescansomedico,
+              idTipoContingencia: id_tipocontingencia,
+              codigoCitt: codigo_citt || "",
+              fechaOtorgamiento: fecha_otorgamiento
+                ? parseISO(fecha_otorgamiento)
                 : null,
-              fechaInicio: descanso.fecha_inicio
-                ? parseISO(descanso.fecha_inicio)
-                : null,
-              fechaFinal: descanso.fecha_final
-                ? parseISO(descanso.fecha_final)
-                : null,
-              totalDias: descanso.total_dias?.toString() || "",
-              colegiadoMedico: descanso.numero_colegiatura,
-              medicoTratante: descanso.medico_tratante,
-              idDiagnostico: descanso.codcie10_diagnostico,
-              nombreEstablecimiento: descanso.nombre_establecimiento,
-              aceptaResponsabilidad: descanso.is_acepta_responsabilidad,
-              aceptaPoliticaSubsidio: descanso.is_acepta_politica,
-              estadoRegistro: descanso.estado_registro,
-              observacion: descanso.observacion || "",
+              fechaInicio: fecha_inicio ? parseISO(fecha_inicio) : null,
+              fechaFinal: fecha_final ? parseISO(fecha_final) : null,
+              totalDias: total_dias?.toString() || "",
+              colegiadoMedico: numero_colegiatura,
+              medicoTratante: medico_tratante,
+              idDiagnostico: codcie10_diagnostico,
+              nombreEstablecimiento: nombre_establecimiento,
+              aceptaResponsabilidad: is_acepta_responsabilidad,
+              aceptaPoliticaSubsidio: is_acepta_politica,
+              estadoRegistro: estado_registro,
+              observacion: observacion || "",
             };
 
             console.log("dataForm descanso médico", dataForm);
@@ -453,6 +479,7 @@ export const DescansoMedicoForm = () => {
       }
 
       const { result, message } = response;
+
       if (result) {
         showToast("success", message);
         navigate("/descanso-medico");
@@ -635,8 +662,9 @@ export const DescansoMedicoForm = () => {
               <div className="flex justify-end space-x-4 pt-4">
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="bg-blue-600 hover:bg-blue-700 hover: cursor-pointer text-white transition-colors duration-300"
+                  disabled={isButtonDisabled}
+                  // className="bg-blue-600 hover:bg-blue-700 hover: cursor-pointer text-white transition-colors duration-300"
+                  className={`${isRegistroBloqueado ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 cursor-pointer"} text-white transition-colors duration-300`}
                 >
                   {isSubmitting ? (
                     <>
