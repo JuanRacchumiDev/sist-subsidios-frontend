@@ -67,11 +67,9 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
         isDisabled = true;
       }
     } else if (nombre_perfil_url === "administrador") {
-      Object.values(EDescansoMedico).forEach((estado) => {
-        if (estado !== EDescansoMedico.REGISTRO_EXITOSO) {
-          estadosPermitidos.push(estado);
-        }
-      });
+      estadosPermitidos.push(EDescansoMedico.REGISTRO_INGRESADO);
+      estadosPermitidos.push(EDescansoMedico.REGISTRO_EXITOSO);
+      estadosPermitidos.push(EDescansoMedico.DOCUMENTACION_INCORRECTA);
       isDisabled = false;
     }
 

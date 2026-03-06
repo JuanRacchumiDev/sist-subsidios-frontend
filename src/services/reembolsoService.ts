@@ -3,7 +3,8 @@ import {
     getAll,
     getById,
     getAllWithPaginate,
-    create
+    create,
+    update
 } from '../repositories/reembolsoRepository'
 
 export const getReembolsos = async () => {
@@ -32,6 +33,14 @@ export const getReembolsoById = async (id: string) => {
 
 export const createReembolso = async (payload: Reembolso) => {
     const response = await create(payload)
+
+    return {
+        ...response
+    }
+}
+
+export const updateReembolso = async (id: string, payload: Reembolso) => {
+    const response = await update(id, payload)
 
     return {
         ...response

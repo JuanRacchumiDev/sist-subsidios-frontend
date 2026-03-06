@@ -12,8 +12,11 @@ export interface Reembolso {
     fecha_reembolso?: string
     fecha_maxima_reembolso?: string
     fecha_maxima_subsanar?: string
+    fecha_pago?: string
     is_cobrable?: boolean
     observacion?: string
+    user_crea?: string
+    user_actualiza?: string
     estado_registro?: EReembolso
     canje?: Canje
 }

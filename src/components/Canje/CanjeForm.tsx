@@ -22,7 +22,7 @@ import {
 } from "../ui/form";
 import { RequiredLabel } from "../Common/RequiredLabel";
 import { Input } from "../ui/input";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, addDays } from "date-fns";
 import {
   Select,
   SelectContent,
@@ -36,14 +36,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "../ui/collapsible";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, ArrowLeft } from "lucide-react";
 
 import { DescansoMedico } from "../../interfaces/IDescansoMedico";
 import { Canje } from "../../interfaces/ICanje";
 import { getCanjeById, updateCanje } from "../../services/canjeService";
 import { useToast } from "../../context/ToastContext";
 import HDate from "../../helpers/HDate";
-import { ArrowLeft } from "lucide-react";
 import { getAuthData } from "../../utils/authMemo";
 
 export const formSchema = z.object({
@@ -64,26 +63,20 @@ export const formSchema = z.object({
 
 export const CanjeForm = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const isEditMode = !!id;
+  const { showToast } = useToast();
 
   const [descanso, setDescanso] = useState<DescansoMedico | null>(null);
-
   const [fechaMaximaCanje, setFechaMaximaCanje] = useState<string | "">("");
-
   const [idUserCrea, setIdUserCrea] = useState<string | "">("");
-
-  const { id } = useParams<{ id: string }>();
-
-  const isEditMode = !!id;
+  const [isOpen, setIsOpen] = useState(false); // Estado para controlar el Collapsible
 
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
   console.log({ userProfile });
 
   const { id_usuario } = userProfile;
   console.log({ id_usuario });
-
-  const { showToast } = useToast();
-
-  const [isOpen, setIsOpen] = useState(false); // Estado para controlar el Collapsible
 
   const estadosPermitidos: ECanje[] = useMemo(() => {
     return Object.values(ECanje);
@@ -106,12 +99,16 @@ export const CanjeForm = () => {
   });
 
   const estadoRegistro = form.watch("estadoRegistro");
-
   const showObservacion = estadoRegistro === ECanje.CANJE_ORSERVADO;
-
   const showCodigoCitt = estadoRegistro === ECanje.CANJE_CONFORME;
-
   const { isSubmitting } = form.formState;
+
+  // Lógica para calcular la fecha máxima de canje permitida
+  const maxInputDate = useMemo(() => {
+    if (!fechaMaximaCanje) return undefined;
+    const date = parseISO(fechaMaximaCanje);
+    return format(addDays(date, 7), "yyyy-MM-dd");
+  }, [fechaMaximaCanje]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -128,24 +125,37 @@ export const CanjeForm = () => {
 
             console.log({ canje });
 
+            const {
+              fecha_canje,
+              fecha_maxima_canje,
+              codigo_canje,
+              codigo_citt,
+              estado_registro,
+              observacion,
+              user_crea,
+              descansoMedico,
+            } = canje;
+
+            let fechaDefault: Date | null = null;
+
+            if (fecha_canje) {
+              fechaDefault = parseISO(fecha_canje);
+            } else if (fecha_maxima_canje) {
+              fechaDefault = addDays(parseISO(fecha_maxima_canje), 7);
+            }
+
             const dataForm = {
-              fechaCanje: canje.fecha_canje
-                ? parseISO(canje.fecha_canje)
-                : null,
-              codigoCanje: canje.codigo_canje || "",
-              codigoCitt: canje.codigo_citt || "",
-              estadoRegistro: canje.estado_registro,
-              observacion: canje.observacion || "",
+              fechaCanje: fechaDefault,
+              codigoCanje: codigo_canje || "",
+              codigoCitt: codigo_citt || "",
+              estadoRegistro: estado_registro,
+              observacion: observacion || "",
             };
+
             form.reset(dataForm);
 
-            const { fecha_maxima_canje, user_crea } = canje;
-
             setFechaMaximaCanje(fecha_maxima_canje);
-
             setIdUserCrea(user_crea);
-
-            const descansoMedico = canje.descansoMedico;
             setDescanso(descansoMedico);
           }
         } catch (error) {
@@ -155,7 +165,7 @@ export const CanjeForm = () => {
       }
     };
     fetchData();
-  }, [id, isEditMode]);
+  }, [id, isEditMode, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -175,8 +185,13 @@ export const CanjeForm = () => {
         codigo_citt: codigoCitt,
         estado_registro: estadoRegistro as ECanje,
         observacion,
-        user_crea: id_usuario,
       };
+
+      if (isEditMode && id) {
+        payloadCanje.user_actualiza = id_usuario;
+      } else {
+        payloadCanje.user_crea = id_usuario;
+      }
 
       console.log({ payloadCanje });
 
@@ -212,16 +227,7 @@ export const CanjeForm = () => {
           </div>
           <button
             onClick={handleGoBack}
-            className="
-                        flex items-center text-sm font-semibold 
-                        text-blue-600 
-                        hover:text-blue-800 
-                        hover:bg-blue-50 
-                        transition-colors 
-                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 
-                        rounded-md p-2 ml-4 
-                        cursor-pointer
-                      "
+            className="flex items-center text-sm font-semibold text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-colors rounded-md p-2 ml-4 cursor-pointer"
             aria-label="Volver al listado"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
@@ -236,12 +242,16 @@ export const CanjeForm = () => {
                 open={isOpen}
                 onOpenChange={setIsOpen}
               >
-                <div className="flex items-center justify-between rounded-md border border-gray-200 bg-white px-4 py-2 font-medium transition-all hover:bg-gray-100 focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 cursor-pointer">
-                  <span className="text-gray-700">
+                <div className="flex items-center justify-between rounded-md border border-blue-200 bg-blue-50 px-4 py-2 font-medium transition-all hover:bg-blue-100 cursor-pointer">
+                  <span className="text-blue-700 font-semibold">
                     Ver datos del descanso médico
                   </span>
                   <CollapsibleTrigger asChild>
-                    <Button variant="ghost" size="sm" className="w-9 p-0">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-9 p-0 text-blue-700 hover:bg-blue-200"
+                    >
                       {isOpen ? (
                         <ChevronUp className="h-4 w-4" />
                       ) : (
@@ -251,9 +261,8 @@ export const CanjeForm = () => {
                     </Button>
                   </CollapsibleTrigger>
                 </div>
-
-                <CollapsibleContent className="space-y-2 overflow-hidden transition-all duration-300 ease-in-out data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-                  <div className="rounded-md border border-gray-200 bg-gray-50 p-4 transition-all duration-300">
+                <CollapsibleContent className="space-y-2 overflow-hidden transition-all duration-300">
+                  <div className="rounded-md border border-gray-200 bg-gray-50 p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -343,7 +352,7 @@ export const CanjeForm = () => {
                 </CollapsibleContent>
               </Collapsible>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <FormField
                   control={form.control}
                   name="fechaCanje"
@@ -353,6 +362,7 @@ export const CanjeForm = () => {
                       <FormControl>
                         <Input
                           type="date"
+                          max={maxInputDate}
                           value={
                             field.value ? format(field.value, "yyyy-MM-dd") : ""
                           }
@@ -361,14 +371,11 @@ export const CanjeForm = () => {
                               e.target.value ? parseISO(e.target.value) : null,
                             )
                           }
-                          className={`
-                            ${
-                              fieldState.invalid
-                                ? "border-red-500 focus:ring-red-500"
-                                : "focus:ring-blue-500"
-                            }
-                              transition-all duration-300
-                          `}
+                          className={
+                            fieldState.invalid
+                              ? "border-red-500"
+                              : "focus:ring-blue-500"
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -388,14 +395,11 @@ export const CanjeForm = () => {
                           autoComplete="off"
                           maxLength={20}
                           {...field}
-                          className={`
-                            ${
-                              fieldState.invalid
-                                ? "border-red-500 focus:ring-red-500"
-                                : "focus:ring-blue-500"
-                            }
-                              transition-all duration-300
-                          `}
+                          className={
+                            fieldState.invalid
+                              ? "border-red-500"
+                              : "focus:ring-blue-500"
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -415,14 +419,11 @@ export const CanjeForm = () => {
                       >
                         <FormControl>
                           <SelectTrigger
-                            className={`
-                              ${
-                                fieldState.invalid
-                                  ? "border-red-500 focus:ring-red-500"
-                                  : "focus:ring-blue-500"
-                              }
-                                focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
-                            `}
+                            className={
+                              fieldState.invalid
+                                ? "border-red-500"
+                                : "focus:ring-blue-500"
+                            }
                           >
                             <SelectValue placeholder="Seleccionar estado" />
                           </SelectTrigger>
@@ -432,7 +433,7 @@ export const CanjeForm = () => {
                             <SelectItem
                               key={estado}
                               value={estado}
-                              className="cursor-pointer hover:bg-gray-100 transition-colors"
+                              className="cursor-pointer"
                             >
                               {estado}
                             </SelectItem>
@@ -442,33 +443,6 @@ export const CanjeForm = () => {
                     </FormItem>
                   )}
                 />
-
-                {showObservacion && (
-                  <FormField
-                    control={form.control}
-                    name="observacion"
-                    render={({ field, fieldState }) => (
-                      <FormItem>
-                        <RequiredLabel>Observación</RequiredLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Detalle la documentación pendiente..."
-                            {...field}
-                            className={`
-                    ${
-                      fieldState.invalid
-                        ? "border-red-500 focus:ring-red-500"
-                        : "focus:ring-blue-500"
-                    }
-                    transition-all duration-300
-                  `}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
 
                 {showCodigoCitt && (
                   <FormField
@@ -483,14 +457,11 @@ export const CanjeForm = () => {
                             autoComplete="off"
                             maxLength={20}
                             {...field}
-                            className={`
-                            ${
+                            className={
                               fieldState.invalid
-                                ? "border-red-500 focus:ring-red-500"
+                                ? "border-red-500"
                                 : "focus:ring-blue-500"
                             }
-                              transition-all duration-300
-                          `}
                           />
                         </FormControl>
                         <FormMessage />
@@ -500,11 +471,39 @@ export const CanjeForm = () => {
                 )}
               </div>
 
-              <div className="flex justify-end space-x-4 pt-4">
+              {/* <div className="grid grid-cols-1 gap-6"> */}
+              {showObservacion && (
+                <div className="mt-6">
+                  <FormField
+                    control={form.control}
+                    name="observacion"
+                    render={({ field, fieldState }) => (
+                      <FormItem>
+                        <RequiredLabel>Observación</RequiredLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Detalle la documentación pendiente..."
+                            {...field}
+                            className={
+                              fieldState.invalid
+                                ? "border-red-500"
+                                : "focus:ring-blue-500"
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+              {/* </div> */}
+
+              <div className="flex justify-end space-x-4 pt-4 border-t border-gray-100">
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-blue-600 hover:bg-blue-700 hover: cursor-pointer text-white transition-colors duration-300"
+                  className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer transition-colors"
                 >
                   {isSubmitting ? (
                     <>
@@ -522,9 +521,9 @@ export const CanjeForm = () => {
                   variant="outline"
                   disabled={isSubmitting}
                   onClick={() => navigate("/canje")}
-                  className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
+                  className="hover:bg-gray-200 cursor-pointer"
                 >
-                  {isSubmitting ? "Cancelando..." : "Cancelar"}
+                  Cancelar
                 </Button>
               </div>
             </form>

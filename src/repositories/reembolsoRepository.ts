@@ -88,3 +88,25 @@ export const create = async (payload: Reembolso): Promise<ReembolsoResponse> => 
         return { result: false, data: [], error: errorMessage, status: 500 }
     }
 }
+
+export const update = async (id: string, payload: Reembolso): Promise<ReembolsoResponse> => {
+    try {
+        const urlApi = `${'/reembolsos/'}${id}`
+
+        const response = await apiClient.patch(urlApi, payload)
+
+        const { data: { result, data, message, error, status } } = response
+
+        return {
+            result,
+            data,
+            message,
+            error,
+            status
+        }
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+        console.log('errorMessage', errorMessage)
+        return { result: false, data: [], error: errorMessage, status: 500 }
+    }
+}

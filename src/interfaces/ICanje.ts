@@ -38,6 +38,7 @@ export interface Canje {
     apellido_materno_colaborador?: string
     nombres_colaborador?: string
     user_crea?: string
+    user_actualiza?: string
     estado_registro?: ECanje
     descansoMedico?: DescansoMedico
     colaborador?: Persona
