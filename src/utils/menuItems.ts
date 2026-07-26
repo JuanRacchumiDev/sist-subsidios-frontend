@@ -119,6 +119,12 @@ export const MENU_ITEMS = [
                 label: "Documentos Tipo Contingencia",
                 icon: FileText,
                 path: "/mantenimiento/documento-tipo-contingencia"
+            },
+            {
+                id: "diagnostico",
+                label: "Diagnóstico",
+                icon: Briefcase,
+                path: "/mantenimiento/diagnostico"
             }
         ],
     },

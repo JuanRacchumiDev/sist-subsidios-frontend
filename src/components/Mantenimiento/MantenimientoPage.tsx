@@ -3,6 +3,8 @@ import { CargoList } from "./Cargo/CargoList";
 import { CargoForm } from "./Cargo/CargoForm";
 import { DocumentoTipoContingenciaList } from "./DocumentoTipoContingencia/DocumentoTipoContingenciaList";
 import { DocumentoTipoContigenciaForm } from "./DocumentoTipoContingencia/DocumentoTipoContingenciaForm";
+import { DiagnosticoList } from "./Diagnostico/DiagnosticoList";
+import { DiagnosticoForm } from "./Diagnostico/DiagnosticoForm";
 
 export const MantenimientoPage = () => {
   return (
@@ -24,6 +26,9 @@ export const MantenimientoPage = () => {
           path="/documento-tipo-contingencia/editar/:id"
           element={<DocumentoTipoContigenciaForm />}
         />
+
+        <Route path="/diagnostico" element={<DiagnosticoList />} />
+        <Route path="/diagnostico/nuevo" element={<DiagnosticoForm />} />
       </Routes>
     </div>
   );

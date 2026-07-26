@@ -34,8 +34,14 @@ const getPerfiles = async (): Promise<Detalle[]> => {
 
   try {
     const estado: boolean = true;
+    // const enPersona: boolean = false;
 
-    const response = await getDetalles(ParametroClase.PERFIL, estado);
+    const response = await getDetalles(
+      ParametroClase.PERFIL,
+      estado,
+      // enPersona,
+    );
+
     console.log("response getPerfiles");
     console.log({ response });
 

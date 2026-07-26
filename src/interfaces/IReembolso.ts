@@ -45,3 +45,14 @@ export interface ReembolsoPaginateResponse {
     errors?: string
     status?: number
 }
+
+export interface ReembolsoFilter {
+    id_canje?: string
+    codigo?: string
+    codigo_reembolso?: string
+    numero_expediente?: string
+    fecha_reembolso?: string
+    fecha_maxima_reembolso?: string
+    fecha_maxima_subsanar?: string
+    fecha_pago?: string
+}

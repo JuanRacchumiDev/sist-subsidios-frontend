@@ -51,11 +51,11 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
     if (nombre_perfil_url === "especialista-empresa") {
       estadosPermitidos.push(EDescansoMedico.REGISTRO_INGRESADO);
       estadosPermitidos.push(EDescansoMedico.REGISTRO_EXITOSO);
-      estadosPermitidos.push(EDescansoMedico.DOCUMENTACION_INCORRECTA);
+      estadosPermitidos.push(EDescansoMedico.DOCUMENTACION_NO_CONFORME);
     } else if (nombre_perfil_url === "especialista-sophia-human") {
       estadosPermitidos.push(EDescansoMedico.REGISTRO_INGRESADO);
       estadosPermitidos.push(EDescansoMedico.REGISTRO_EXITOSO);
-      estadosPermitidos.push(EDescansoMedico.DOCUMENTACION_INCORRECTA);
+      estadosPermitidos.push(EDescansoMedico.DOCUMENTACION_NO_CONFORME);
     } else if (nombre_perfil_url === "colaborador") {
       if (isEditMode) {
         estadosPermitidos.push(
@@ -69,7 +69,7 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
     } else if (nombre_perfil_url === "administrador") {
       estadosPermitidos.push(EDescansoMedico.REGISTRO_INGRESADO);
       estadosPermitidos.push(EDescansoMedico.REGISTRO_EXITOSO);
-      estadosPermitidos.push(EDescansoMedico.DOCUMENTACION_INCORRECTA);
+      estadosPermitidos.push(EDescansoMedico.DOCUMENTACION_NO_CONFORME);
       isDisabled = false;
     }
 
@@ -78,7 +78,7 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
 
   useEffect(() => {
     if (
-      estadoRegistro === EDescansoMedico.DOCUMENTACION_INCORRECTA &&
+      estadoRegistro === EDescansoMedico.DOCUMENTACION_NO_CONFORME &&
       !form.getValues("observacion")
     ) {
       form.setValue("observacion", "Pendiente adjuntar documentación.");
@@ -86,7 +86,7 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
   }, [estadoRegistro, form]);
 
   const showObservacion =
-    estadoRegistro === EDescansoMedico.DOCUMENTACION_INCORRECTA;
+    estadoRegistro === EDescansoMedico.DOCUMENTACION_NO_CONFORME;
 
   return (
     <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -94,24 +94,21 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
         control={form.control}
         name="estadoRegistro"
         render={({ field, fieldState }) => (
-          <FormItem>
+          <FormItem className="w-full">
             <RequiredLabel>Estado del registro</RequiredLabel>
             <Select onValueChange={field.onChange} value={field.value}>
               <FormControl>
                 <SelectTrigger
-                  className={`
-                    ${
-                      fieldState.invalid
-                        ? "border-red-500 focus:ring-red-500"
-                        : "focus:ring-blue-500"
-                    }
-                      focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
-                  `}
+                  className={`w-full ${
+                    fieldState.invalid
+                      ? "border-red-500 focus:ring-red-500"
+                      : "focus:ring-blue-500"
+                  } focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer `}
                 >
                   <SelectValue placeholder="Seleccionar estado" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent className="bg-gray-400">
+              <SelectContent className="bg-white">
                 {estadosPermitidos.map((estado) => (
                   <SelectItem
                     key={estado}

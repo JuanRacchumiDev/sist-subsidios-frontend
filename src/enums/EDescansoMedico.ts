@@ -5,6 +5,6 @@
 export enum EDescansoMedico {
     REGISTRO_INGRESADO = 'Registro ingresado',
     REGISTRO_EXITOSO = 'Registro exitoso',
-    DOCUMENTACION_INCORRECTA = 'Documentación incorrecta',
+    DOCUMENTACION_NO_CONFORME = 'Documentación no conforme',
     POR_CANJEAR = 'Por Canjear'
 }

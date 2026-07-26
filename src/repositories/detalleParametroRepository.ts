@@ -4,7 +4,6 @@ import { Detalle, DetalleResponse } from "../interfaces/IDetalleParametro"
 export const getAll = async (queryParams: string): Promise<DetalleResponse> => {
     try {
         const urlApi = `${'/detalles?'}${queryParams}`
-        console.log({ urlApi })
 
         const response = await apiClient.get(urlApi)
 
@@ -28,11 +27,8 @@ export const getAll = async (queryParams: string): Promise<DetalleResponse> => {
 export const getAllWithPaginate = async (clase: number, queryParams: string) => {
     try {
         const urlApi = `${'/detalles/paginate/'}${clase}${'?'}${queryParams}`
-        console.log({ urlApi })
 
         const response = await apiClient.get(urlApi)
-        console.log('---- getAllWithPaginate detalleParametroRepository ----')
-        console.log({ response })
 
         const { data: dataDetalles } = response
 
@@ -78,13 +74,14 @@ export const create = async (payload: Detalle): Promise<DetalleResponse> => {
     try {
         const response = await apiClient.post('/detalles', payload)
 
-        const { data: { result, data, status, message } } = response
+        const { data: { result, data, status, message, error } } = response
 
         return {
             result,
             data,
             status,
-            message
+            message,
+            error
         }
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Error desconocido'

@@ -10,11 +10,13 @@ import {
 
 export const getDetalles = async (
     clase: number,
-    estado: boolean
+    estado: boolean,
+    // enPersona: boolean
 ) => {
     const queryParams = new URLSearchParams({
         clase: clase.toString(),
-        estado: (estado) ? "true" : "false"
+        estado: (estado) ? "true" : "false",
+        // enPersona: (enPersona) ? "true" : "false"
     }).toString()
 
     const response = await getAll(queryParams)

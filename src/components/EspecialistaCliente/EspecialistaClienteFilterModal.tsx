@@ -36,8 +36,13 @@ const getDataTipoDocumentos = async (): Promise<Detalle[]> => {
 
   try {
     const estado: boolean = true;
+    // const enPersona: boolean = true;
 
-    const response = await getDetalles(ParametroClase.TIPO_DOCUMENTO, estado);
+    const response = await getDetalles(
+      ParametroClase.TIPO_DOCUMENTO,
+      estado,
+      // enPersona,
+    );
     console.log("response getTipoDocumentos");
     console.log({ response });
 
@@ -57,8 +62,14 @@ const getDataCargos = async (): Promise<Detalle[]> => {
 
   try {
     const estado: boolean = true;
+    // const enPersona: boolean = false;
 
-    const response = await getDetalles(ParametroClase.CARGO, estado);
+    const response = await getDetalles(
+      ParametroClase.CARGO,
+      estado,
+      // enPersona
+    );
+
     console.log("response getCargos");
     console.log({ response });
 
@@ -185,7 +196,7 @@ export const EspecialistaClienteFilterModal: React.FC<
       <DialogContent className="sm:max-w-lg p-0 bg-white rounded-xl shadow-2xl transition-all">
         <DialogHeader className="p-6 border-b border-gray-100">
           <DialogTitle className="text-2xl font-bold text-gray-800">
-            Filtros
+            Filtros de búsqueda
           </DialogTitle>
         </DialogHeader>
         <div className="grid gap-6 p-6">

@@ -12,24 +12,14 @@ export const searchForRuc = async (ruc: string): Promise<EmpresaResponse> => {
             }
         })
 
-        const { data: dataApi, status } = response
-
-        const { result, data, message } = dataApi
-
-        if (result && data) {
-            return {
-                result,
-                data,
-                message,
-                status
-            }
-        }
+        const { data: { data, status, result, message, error } } = response
 
         return {
-            result: false,
-            data: [],
-            message: "Error al obtener datos de la empresa",
-            status: 500
+            result,
+            error,
+            message,
+            data,
+            status
         }
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Error desconocido'

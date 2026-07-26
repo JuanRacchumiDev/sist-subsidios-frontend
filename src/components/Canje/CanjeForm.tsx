@@ -36,7 +36,14 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "../ui/collapsible";
-import { ChevronDown, ChevronUp, ArrowLeft } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  ArrowLeft,
+  Calendar,
+  Info,
+  ClipboardCheck,
+} from "lucide-react";
 
 import { DescansoMedico } from "../../interfaces/IDescansoMedico";
 import { Canje } from "../../interfaces/ICanje";
@@ -55,7 +62,6 @@ export const formSchema = z.object({
     .refine((val) => val !== null, {
       message: "La fecha de canje es requerida",
     }),
-  codigoCanje: z.string().min(1, "El código de canje es requerido"),
   codigoCitt: z.string().optional(),
   estadoRegistro: z.string({ message: "Debe seleccionar un estado" }),
   observacion: z.string().optional(),
@@ -91,7 +97,6 @@ export const CanjeForm = () => {
     defaultValues: {
       id: "",
       fechaCanje: null,
-      codigoCanje: "",
       codigoCitt: "",
       estadoRegistro: ECanje.CANJE_REGISTRADO,
       observacion: "",
@@ -128,7 +133,6 @@ export const CanjeForm = () => {
             const {
               fecha_canje,
               fecha_maxima_canje,
-              codigo_canje,
               codigo_citt,
               estado_registro,
               observacion,
@@ -146,7 +150,6 @@ export const CanjeForm = () => {
 
             const dataForm = {
               fechaCanje: fechaDefault,
-              codigoCanje: codigo_canje || "",
               codigoCitt: codigo_citt || "",
               estadoRegistro: estado_registro,
               observacion: observacion || "",
@@ -169,19 +172,12 @@ export const CanjeForm = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const {
-        fechaCanje,
-        codigoCanje,
-        codigoCitt,
-        estadoRegistro,
-        observacion,
-      } = values;
+      const { fechaCanje, codigoCitt, estadoRegistro, observacion } = values;
 
       console.log({ idUserCrea });
 
       const payloadCanje: Canje = {
         fecha_canje: HDate.formatDateTimezone(fechaCanje),
-        codigo_canje: codigoCanje,
         codigo_citt: codigoCitt,
         estado_registro: estadoRegistro as ECanje,
         observacion,
@@ -213,194 +209,161 @@ export const CanjeForm = () => {
 
   return (
     <>
-      <Card className="shadow-lg border-gray-200">
-        <CardHeader className="border-b border-gray-200 flex flex-row items-center justify-between">
-          <div className="flex-shrink min-w-0">
-            <CardTitle className="text-xl font-bold text-gray-800">
-              {isEditMode ? "Actualización de canje" : "Registro de canje"}
+      <Card className="max-w-5xl mx-auto shadow-xl border-slate-200 overflow-hidden">
+        <CardHeader className="bg-slate-50/50 border-b border-slate-200 flex flex-row items-center justify-between py-6">
+          <div className="space-y-1">
+            <CardTitle className="text-2xl font-extrabold text-slate-900">
+              {isEditMode ? "Actualización de Canje" : "Registro de Canje"}
             </CardTitle>
-            <CardDescription className="text-sm text-gray-500">
+            <CardDescription className="text-slate-500 font-medium">
               {isEditMode
-                ? "Formulario de actualización de canje"
-                : "Complete el formulario para registrar un canje"}
+                ? "Modifique los detalles del canje de subsidio"
+                : "Ingrese la información necesaria para el proceso de canje"}
             </CardDescription>
           </div>
-          <button
+          <Button
+            variant="ghost"
             onClick={handleGoBack}
-            className="flex items-center text-sm font-semibold text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-colors rounded-md p-2 ml-4 cursor-pointer"
-            aria-label="Volver al listado"
+            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-bold transition-all"
           >
-            <ArrowLeft className="h-4 w-4 mr-1" />
+            <ArrowLeft className="h-5 w-5 mr-2" />
             Volver
-          </button>
+          </Button>
         </CardHeader>
-        <CardContent className="pt-6">
+
+        <CardContent className="p-8">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <Collapsible
-                className="w-full space-y-2"
                 open={isOpen}
                 onOpenChange={setIsOpen}
+                className="group border border-blue-100 rounded-xl bg-blue-50/30 overflow-hidden transition-all shadow-sm"
               >
-                <div className="flex items-center justify-between rounded-md border border-blue-200 bg-blue-50 px-4 py-2 font-medium transition-all hover:bg-blue-100 cursor-pointer">
-                  <span className="text-blue-700 font-semibold">
-                    Ver datos del descanso médico
-                  </span>
-                  <CollapsibleTrigger asChild>
+                <CollapsibleTrigger asChild>
+                  <div className="flex items-center justify-between px-5 py-3 cursor-pointer hover:bg-blue-50 transition-colors">
+                    <div className="flex items-center gap-2 text-blue-800 font-bold">
+                      <Info className="h-5 w-5" />
+                      <span>Información del Descanso Médico Relacionado</span>
+                    </div>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-9 p-0 text-blue-700 hover:bg-blue-200"
+                      className="h-8 w-8 p-0 rounded-full"
                     >
                       {isOpen ? (
-                        <ChevronUp className="h-4 w-4" />
+                        <ChevronUp className="h-5 w-5" />
                       ) : (
-                        <ChevronDown className="h-4 w-4" />
+                        <ChevronDown className="h-5 w-5" />
                       )}
-                      <span className="sr-only">Toggle</span>
                     </Button>
-                  </CollapsibleTrigger>
-                </div>
-                <CollapsibleContent className="space-y-2 overflow-hidden transition-all duration-300">
-                  <div className="rounded-md border border-gray-200 bg-gray-50 p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Colaborador
-                        </label>
-                        <Input
-                          disabled
-                          value={descanso?.colaborador_dm.nombre_completo || ""}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Tipo de descanso médico
-                        </label>
-                        <Input
-                          disabled
-                          value={descanso?.nombre_tipodescansomedico || ""}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Tipo de contingencia
-                        </label>
-                        <Input
-                          disabled
-                          value={descanso?.nombre_tipocontingencia || ""}
-                        />
-                      </div>
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="px-5 pb-5">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                    <div className="space-y-1">
+                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+                        Colaborador
+                      </label>
+                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                        {descanso?.colaborador_dm.nombre_completo || "---"}
+                      </p>
                     </div>
-                    <div className="flex flex-wrap gap-4 mt-3">
-                      <div className="flex-1 min-w-[150px]">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Inicio Descanso
-                        </label>
-                        <Input
-                          disabled
-                          value={
-                            descanso?.fecha_inicio
-                              ? HDate.formatDateTimezone(
-                                  descanso.fecha_inicio,
-                                  "dd/MM/yyyy",
-                                )
-                              : ""
-                          }
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Fin Descanso
-                        </label>
-                        <Input
-                          disabled
-                          value={
-                            descanso?.fecha_final
-                              ? HDate.formatDateTimezone(
-                                  descanso.fecha_final,
-                                  "dd/MM/yyyy",
-                                )
-                              : ""
-                          }
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Días
-                        </label>
-                        <Input disabled value={descanso?.total_dias || ""} />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Fecha Máxima Canje
-                        </label>
-                        <Input
-                          disabled
-                          value={
-                            fechaMaximaCanje
-                              ? HDate.formatDateTimezone(
-                                  fechaMaximaCanje,
-                                  "dd/MM/yyyy",
-                                )
-                              : ""
-                          }
-                        />
-                      </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+                        Tipo Descanso médico
+                      </label>
+                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                        {descanso?.nombre_tipodescansomedico || "---"}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+                        Tipo Contingencia
+                      </label>
+                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                        {descanso?.nombre_tipocontingencia || "---"}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+                        Inicio descanso médico
+                      </label>
+                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                        {descanso?.fecha_inicio
+                          ? HDate.formatDateTimezone(
+                              descanso.fecha_inicio,
+                              "dd/MM/yyyy",
+                            )
+                          : ""}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+                        Fin descanso médico
+                      </label>
+                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                        {descanso?.fecha_final
+                          ? HDate.formatDateTimezone(
+                              descanso.fecha_final,
+                              "dd/MM/yyyy",
+                            )
+                          : ""}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+                        Días Totales
+                      </label>
+                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                        {descanso?.total_dias || 0} días
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+                        Fecha máxima canje
+                      </label>
+                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                        {fechaMaximaCanje
+                          ? HDate.formatDateTimezone(
+                              fechaMaximaCanje,
+                              "dd/MM/yyyy",
+                            )
+                          : ""}
+                      </p>
                     </div>
                   </div>
                 </CollapsibleContent>
               </Collapsible>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-x-8 gap-y-6">
                 <FormField
                   control={form.control}
                   name="fechaCanje"
                   render={({ field, fieldState }) => (
-                    <FormItem>
+                    <FormItem className="md:col-span-2 lg:col-span-1">
                       <RequiredLabel>Fecha de canje</RequiredLabel>
                       <FormControl>
-                        <Input
-                          type="date"
-                          max={maxInputDate}
-                          value={
-                            field.value ? format(field.value, "yyyy-MM-dd") : ""
-                          }
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value ? parseISO(e.target.value) : null,
-                            )
-                          }
-                          className={
-                            fieldState.invalid
-                              ? "border-red-500"
-                              : "focus:ring-blue-500"
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="codigoCanje"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <RequiredLabel>Código</RequiredLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Código de canje"
-                          autoComplete="off"
-                          maxLength={20}
-                          {...field}
-                          className={
-                            fieldState.invalid
-                              ? "border-red-500"
-                              : "focus:ring-blue-500"
-                          }
-                        />
+                        <div className="relative">
+                          <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 pointer-events-none" />
+                          <Input
+                            type="date"
+                            max={maxInputDate}
+                            className={`pl-10 focus:ring-2 focus:ring-blue-500/20 ${fieldState.invalid ? "border-red-500" : "border-slate-300"}`}
+                            {...field}
+                            value={
+                              field.value
+                                ? format(field.value, "yyyy-MM-dd")
+                                : ""
+                            }
+                            onChange={(e) =>
+                              field.onChange(
+                                e.target.value
+                                  ? parseISO(e.target.value)
+                                  : null,
+                              )
+                            }
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -411,7 +374,7 @@ export const CanjeForm = () => {
                   control={form.control}
                   name="estadoRegistro"
                   render={({ field, fieldState }) => (
-                    <FormItem>
+                    <FormItem className="md:col-span-2 lg:col-span-2">
                       <RequiredLabel>Estado del registro</RequiredLabel>
                       <Select
                         onValueChange={field.onChange}
@@ -419,27 +382,24 @@ export const CanjeForm = () => {
                       >
                         <FormControl>
                           <SelectTrigger
-                            className={
-                              fieldState.invalid
-                                ? "border-red-500"
-                                : "focus:ring-blue-500"
-                            }
+                            className={`h-10 bg-white font-medium ${fieldState.invalid ? "border-red-500" : "border-slate-300 focus:ring-blue-500/20"}`}
                           >
-                            <SelectValue placeholder="Seleccionar estado" />
+                            <SelectValue placeholder="Seleccione el estado actual..." />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-gray-400">
+                        <SelectContent className="bg-white">
                           {estadosPermitidos.map((estado) => (
                             <SelectItem
                               key={estado}
                               value={estado}
-                              className="cursor-pointer"
+                              className="cursor-pointer font-medium hover:bg-slate-100"
                             >
                               {estado}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -449,20 +409,17 @@ export const CanjeForm = () => {
                     control={form.control}
                     name="codigoCitt"
                     render={({ field, fieldState }) => (
-                      <FormItem>
-                        <RequiredLabel>Código Citt</RequiredLabel>
+                      <FormItem className="md:col-span-2">
+                        <RequiredLabel>Código CITT</RequiredLabel>
                         <FormControl>
-                          <Input
-                            placeholder="Código CITT"
-                            autoComplete="off"
-                            maxLength={20}
-                            {...field}
-                            className={
-                              fieldState.invalid
-                                ? "border-red-500"
-                                : "focus:ring-blue-500"
-                            }
-                          />
+                          <div className="relative">
+                            <ClipboardCheck className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 pointer-events-none" />
+                            <Input
+                              placeholder="Ingrese el CITT"
+                              className={`pl-10 focus:ring-2 focus:ring-blue-500/20 ${fieldState.invalid ? "border-red-500" : "border-slate-300"}`}
+                              {...field}
+                            />
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -471,24 +428,21 @@ export const CanjeForm = () => {
                 )}
               </div>
 
-              {/* <div className="grid grid-cols-1 gap-6"> */}
               {showObservacion && (
-                <div className="mt-6">
+                <div className="p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
                   <FormField
                     control={form.control}
                     name="observacion"
                     render={({ field, fieldState }) => (
                       <FormItem>
-                        <RequiredLabel>Observación</RequiredLabel>
+                        <RequiredLabel>
+                          Detalles de Observación / Documentación Pendiente
+                        </RequiredLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="Detalle la documentación pendiente..."
+                            placeholder="Escriba aquí los motivos de la observación o documentos faltantes..."
+                            className={`min-h-[100px] bg-white resize-none focus:ring-2 focus:ring-blue-500/20 ${fieldState.invalid ? "border-red-500" : "border-slate-300"}`}
                             {...field}
-                            className={
-                              fieldState.invalid
-                                ? "border-red-500"
-                                : "focus:ring-blue-500"
-                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -497,33 +451,32 @@ export const CanjeForm = () => {
                   />
                 </div>
               )}
-              {/* </div> */}
 
-              <div className="flex justify-end space-x-4 pt-4 border-t border-gray-100">
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer transition-colors"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Spinner className="mr-2 h-4 w-4 animate-spin" />
-                      {isEditMode ? "Actualizando..." : "Registrando..."}
-                    </>
-                  ) : isEditMode ? (
-                    "Actualizar"
-                  ) : (
-                    "Registrar"
-                  )}
-                </Button>
+              <div className="flex flex-col sm:flex-row justify-end items-center gap-4 pt-6 border-t border-slate-100">
                 <Button
                   type="button"
                   variant="outline"
                   disabled={isSubmitting}
                   onClick={() => navigate("/canje")}
-                  className="hover:bg-gray-200 cursor-pointer"
+                  className="w-full sm:w-auto px-8 h-11 font-bold text-slate-600 hover:bg-slate-100 transition-all border-slate-300"
                 >
                   Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto px-10 h-11 font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 transition-all disabled:opacity-70"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Spinner className="mr-2 h-4 w-4 animate-spin" />
+                      Procesando...
+                    </>
+                  ) : isEditMode ? (
+                    "Guardar Cambios"
+                  ) : (
+                    "Confirmar Registro"
+                  )}
                 </Button>
               </div>
             </form>

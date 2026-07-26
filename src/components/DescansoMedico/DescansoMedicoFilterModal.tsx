@@ -34,10 +34,12 @@ const getTipoDescansosMedicos = async (): Promise<Detalle[]> => {
 
   try {
     const estado: boolean = true;
+    // const enPersona: boolean = false;
 
     const response = await getDetalles(
       ParametroClase.TIPO_DESCANSO_MEDICO,
       estado,
+      // enPersona,
     );
     console.log("response getTipoDescansosMedicos");
     console.log({ response });
@@ -60,10 +62,12 @@ const getTipoContingencias = async (): Promise<Detalle[]> => {
 
   try {
     const estado: boolean = true;
+    // const enPersona: boolean = false;
 
     const response = await getDetalles(
       ParametroClase.TIPO_CONTINGENCIA,
       estado,
+      // enPersona,
     );
     console.log("response getTipoContingencias");
     console.log({ response });
@@ -175,7 +179,7 @@ export const DescansoMedicoFilterModal: React.FC<
       <DialogContent className="sm:max-w-lg p-0 bg-white rounded-xl shadow-2xl transition-all">
         <DialogHeader className="p-6 border-b border-gray-100">
           <DialogTitle className="text-2xl font-bold text-gray-800">
-            Filtros
+            Filtros de búsqueda
           </DialogTitle>
         </DialogHeader>
         <div className="grid gap-6 p-6">

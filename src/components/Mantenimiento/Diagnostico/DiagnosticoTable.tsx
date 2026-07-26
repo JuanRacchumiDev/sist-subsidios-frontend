@@ -1,11 +1,18 @@
-import { useEffect, useState } from "react";
-import { ReembolsoRow } from "./ReembolsoRow";
 import {
-  Reembolso,
-  ReembolsoFilter,
+  Diagnostico,
   Pagination as PaginationType,
-} from "../../interfaces/IReembolso";
-import { getReembolsosWithPaginate } from "@/services/reembolsoService";
+} from "../../../interfaces/IDiagnostico";
+import { getDiagnosticosWithPaginate } from "../../../services/diagnosticoService";
+import React, { useEffect, useState } from "react";
+import { Input } from "../../ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../ui/table";
 import {
   Pagination,
   PaginationContent,
@@ -14,23 +21,14 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "../ui/pagination";
-import { Input } from "../ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
-import { Button } from "../ui/button";
-import { FilterIcon } from "lucide-react";
-// import { ReembolsoFilterModal } from "./ReembolsoFilterModal";
-import { TableSpinner } from "../Common/TableSpinner";
+} from "../../ui/pagination";
+import { DiagnosticoRow } from "./DiagnosticoRow";
+import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
+import { TableSpinner } from "../../../components/Common/TableSpinner";
 
-export const ReembolsoTable = () => {
-  const [reembolsos, setReembolsos] = useState<Reembolso[]>([]);
+export const DiagnosticoTable: React.FC = () => {
+  const [diagnosticos, setDiagnosticos] = useState<Diagnostico[]>([]);
   const [pagination, setPagination] = useState<PaginationType>({
     currentPage: 1,
     limit: 10,
@@ -39,11 +37,30 @@ export const ReembolsoTable = () => {
     nextPage: null,
     previousPage: null,
   });
+
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterQuery, setFilterQuery] = useState("");
+  const [refreshToggle, setRefreshToggle] = useState(0);
+
+  const handleDiagnosticoStatusChange = () => {
+    setRefreshToggle((prev) => prev + 1);
+  };
 
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= pagination.totalPages) {
       setPagination((prev) => ({ ...prev, currentPage: page }));
+    }
+  };
+
+  const applySearch = () => {
+    setFilterQuery(searchTerm);
+    setPagination((prev) => ({ ...prev, currentPage: 1 }));
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      applySearch();
     }
   };
 
@@ -52,15 +69,18 @@ export const ReembolsoTable = () => {
       setIsLoading(true);
       try {
         const { currentPage, limit } = pagination;
-        const response = await getReembolsosWithPaginate(currentPage, limit);
 
-        const { result, data, pagination: detailtPagination } = response;
+        const response = await getDiagnosticosWithPaginate(
+          currentPage,
+          limit,
+          filterQuery,
+        );
 
-        if (result && data && detailtPagination) {
-          setReembolsos(data as Reembolso[]);
-          setPagination(detailtPagination);
+        if (response.result && response.data && response.pagination) {
+          setDiagnosticos(response.data);
+          setPagination(response.pagination);
         } else {
-          setReembolsos([]);
+          setDiagnosticos([]);
           setPagination({
             currentPage: 1,
             limit: 10,
@@ -71,14 +91,14 @@ export const ReembolsoTable = () => {
           });
         }
       } catch (error) {
-        console.error("Error al obtener reembolsos", error);
+        console.error("Error al obtener diagnósticos", error);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [pagination.currentPage, pagination.limit]);
+  }, [pagination.currentPage, pagination.limit, filterQuery, refreshToggle]);
 
   const renderPaginationItems = () => {
     const items = [];
@@ -128,28 +148,27 @@ export const ReembolsoTable = () => {
       <div className="flex justify-end items-center space-x-2 pb-4">
         <Input
           type="text"
-          placeholder="Buscar por razón social o RUC"
+          placeholder="Buscar por nombre"
           className="w-72 border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={handleKeyDown}
         />
+        <Button
+          onClick={applySearch}
+          className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-md flex items-center space-x-2"
+        >
+          <Search className="h-4 w-4" />
+          <span>Buscar</span>
+        </Button>
       </div>
       <div className="rounded-md border border-gray-200 shadow-sm">
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-100">
+              <TableHead className="text-gray-600 font-medium">CIE10</TableHead>
               <TableHead className="text-gray-600 font-medium">
-                Colaborador
-              </TableHead>
-              <TableHead className="text-gray-600 font-medium">
-                Fecha Reembolso
-              </TableHead>
-              <TableHead className="text-gray-600 font-medium">
-                Fecha Máxima Reembolso
-              </TableHead>
-              <TableHead className="text-gray-600 font-medium">
-                Código
-              </TableHead>
-              <TableHead className="text-gray-600 font-medium">
-                Número de expediente
+                Nombre
               </TableHead>
               <TableHead className="text-gray-600 font-medium">
                 Estado
@@ -161,18 +180,22 @@ export const ReembolsoTable = () => {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableSpinner colSpan={7} />
-            ) : reembolsos.length > 0 ? (
-              reembolsos.map((reembolso) => (
-                <ReembolsoRow key={reembolso.id} reembolso={reembolso} />
+              <TableSpinner colSpan={4} />
+            ) : diagnosticos.length > 0 ? (
+              diagnosticos.map((diagnostico) => (
+                <DiagnosticoRow
+                  key={diagnostico.codCie10}
+                  diagnostico={diagnostico}
+                  onStatusChange={handleDiagnosticoStatusChange}
+                />
               ))
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={7}
+                  colSpan={4}
                   className="text-center text-gray-500 py-6"
                 >
-                  No se encontraron reembolsos registrados
+                  No se encontraron diagnósticos registrados
                 </TableCell>
               </TableRow>
             )}
@@ -185,7 +208,7 @@ export const ReembolsoTable = () => {
             <PaginationItem>
               <PaginationPrevious
                 onClick={() => handlePageChange(pagination.currentPage - 1)}
-                className="hover:bg-gray-200 transition-colors"
+                className="hover:bg-gray-200 transition-colors hover:cursor-pointer"
               >
                 Anterior
               </PaginationPrevious>
@@ -196,7 +219,7 @@ export const ReembolsoTable = () => {
             <PaginationItem>
               <PaginationNext
                 onClick={() => handlePageChange(pagination.currentPage + 1)}
-                className="hover:bg-gray-200 transition-colors"
+                className="hover:bg-gray-200 hover:cursor-pointer transition-colors"
               >
                 Siguiente
               </PaginationNext>

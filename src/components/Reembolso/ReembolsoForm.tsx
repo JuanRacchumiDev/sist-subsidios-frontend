@@ -22,7 +22,7 @@ import {
 } from "../ui/form";
 import { RequiredLabel } from "../Common/RequiredLabel";
 import { Input } from "../ui/input";
-import { format, parseISO, addDays } from "date-fns";
+import { format, parseISO } from "date-fns";
 import {
   Select,
   SelectContent,
@@ -30,14 +30,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Textarea } from "../ui/textarea";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "../ui/collapsible";
-import { ChevronDown, ChevronUp, ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Info } from "lucide-react";
 
+import { Canje } from "../../interfaces/ICanje";
 import { Reembolso } from "../../interfaces/IReembolso";
 import {
   getReembolsoById,
@@ -49,14 +49,6 @@ import { getAuthData } from "../../utils/authMemo";
 
 export const formSchema = z.object({
   id: z.string().optional(),
-  // fechaPago: z
-  //   .date({
-  //     message: "La fecha de pago es requerida",
-  //   })
-  //   .nullable()
-  //   .refine((val) => val !== null, {
-  //     message: "La fecha de pago es requerida",
-  //   }),
   fechaPago: z.string().optional(),
   numeroExpediente: z.string().optional(),
   estadoRegistro: z.string({ message: "Debe seleccionar un estado" }),
@@ -68,6 +60,10 @@ export const ReembolsoForm = () => {
   const isEditMode = !!id;
   const { showToast } = useToast();
 
+  const [canje, setCanje] = useState<Canje | null>(null);
+  const [fechaMaximoReembolso, setFechaMaximoReembolso] = useState<string | "">(
+    "",
+  );
   const [idUserCrea, setIdUserCrea] = useState<string | "">("");
   const [isOpen, setIsOpen] = useState(false); // Estado para controlar el Collapsible
 
@@ -96,6 +92,8 @@ export const ReembolsoForm = () => {
   });
 
   const estadoRegistro = form.watch("estadoRegistro");
+  const showObservacion = estadoRegistro === EReembolso.REEMBOLSO_OBSERVADO;
+  const showCodigo = estadoRegistro === EReembolso.REEMBOLSO_CONFORME;
   const { isSubmitting } = form.formState;
 
   useEffect(() => {
@@ -118,6 +116,7 @@ export const ReembolsoForm = () => {
               numero_expediente,
               estado_registro,
               user_crea,
+              canje,
             } = reembolso;
 
             const dataForm = {
@@ -175,32 +174,136 @@ export const ReembolsoForm = () => {
 
   return (
     <>
-      <Card className="shadow-lg border-gray-200">
-        <CardHeader className="border-b border-gray-200 p-4 sm:p-6 flex flex-row items-center justify-between">
-          <div className="flex-shrink min-w-0">
-            <CardTitle className="text-xl font-bold text-gray-800">
+      <Card className="max-w-5xl mx-auto shadow-xl border-slate-200 overflow-hidden">
+        <CardHeader className="bg-slate-50/50 border-b border-slate-200 flex flex-row items-center justify-between py-6">
+          <div className="space-y-1">
+            <CardTitle className="text-2xl font-extrabold text-slate-900">
               {isEditMode
                 ? "Actualización de reembolso"
                 : "Registro de reembolso"}
             </CardTitle>
-            <CardDescription className="text-sm text-gray-500">
+            <CardDescription className="text-slate-500 font-medium">
               {isEditMode
-                ? "Formulario de actualización de reembolso"
-                : "Complete el formulario para registrar un reembolso"}
+                ? "Modifique los detalles del reembolso de subsidio"
+                : "Ingrese la información necesaria para el procesos de reembolso"}
             </CardDescription>
           </div>
-          <button
+          <Button
+            variant="ghost"
             onClick={handleGoBack}
-            className="flex items-center text-sm font-semibold text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-colors rounded-md p-2 ml-4 cursor-pointer"
-            aria-label="Volver al listado"
+            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-bold transition-all"
           >
-            <ArrowLeft className="h-4 w-4 mr-1" />
+            <ArrowLeft className="h-5 w-5 mr-2" />
             Volver
-          </button>
+          </Button>
         </CardHeader>
-        <CardContent className="pt-6">
+
+        <CardContent className="p-8">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <Collapsible
+                open={isOpen}
+                onOpenChange={setIsOpen}
+                className="group border border-blue-100 rounded-xl bg-blue-50/30 overflow-hidden transition-all shadow-sm"
+              >
+                <CollapsibleTrigger asChild>
+                  <div className="flex items-center justify-between px-5 py-3 cursor-pointer hover:bg-blue-50 transition-colors">
+                    <div className="flex items-center gap-2 text-blue-800 font-bold">
+                      <Info className="h-5 w-5" />
+                      <span>Información del Canje Relacionado</span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 rounded-full"
+                    >
+                      {isOpen ? (
+                        <ChevronUp className="h-5 w-5" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5" />
+                      )}
+                    </Button>
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="px-5 pb-5">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                    <div className="space-y-1">
+                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+                        Colaborador
+                      </label>
+                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                        {canje.descansoMedico.colaborador_dm.nombre_completo ||
+                          "---"}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+                        Tipo Descanso médico
+                      </label>
+                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                        {canje.descansoMedico.nombre_tipodescansomedico ||
+                          "---"}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+                        Tipo Contingencia
+                      </label>
+                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                        {canje.descansoMedico.nombre_tipocontingencia || "---"}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+                        Inicio descanso médico
+                      </label>
+                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                        {canje.descansoMedico.fecha_inicio
+                          ? HDate.formatDateTimezone(
+                              canje.descansoMedico.fecha_inicio,
+                              "dd/MM/yyyy",
+                            )
+                          : ""}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+                        Fin descanso médico
+                      </label>
+                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                        {canje.descansoMedico.fecha_final
+                          ? HDate.formatDateTimezone(
+                              canje.descansoMedico.fecha_final,
+                              "dd/MM/yyyy",
+                            )
+                          : ""}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+                        Días Totales
+                      </label>
+                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                        {canje.descansoMedico.total_dias || 0} días
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+                        Fecha máxima reembolso
+                      </label>
+                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                        {fechaMaximoReembolso
+                          ? HDate.formatDateTimezone(
+                              fechaMaximoReembolso,
+                              "dd/MM/yyyy",
+                            )
+                          : ""}
+                      </p>
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <FormField
                   control={form.control}

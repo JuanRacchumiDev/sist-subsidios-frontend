@@ -23,7 +23,7 @@ export interface Pagination {
     previousPage: number | null
 }
 
-export interface EmpresaPaginateResponse {
+export interface CargoPaginateResponse {
     result: boolean
     data?: Cargo[]
     pagination?: Pagination

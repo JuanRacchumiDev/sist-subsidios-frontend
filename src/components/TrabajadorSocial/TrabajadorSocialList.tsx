@@ -11,13 +11,13 @@ export const TrabajadorSocialList = () => {
           Listado de Trabajadores sociales
         </h1>
         <div className="flex space-x-3">
-          <a
+          {/* <a
             href="/trabajador-social/upload"
             className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg shadow hover:bg-blue-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
           >
             <Upload size={16} />
             <span>Cargar Excel</span>
-          </a>
+          </a> */}
           <Link
             to="/trabajador-social/nuevo"
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md"

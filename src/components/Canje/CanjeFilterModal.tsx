@@ -34,10 +34,12 @@ const getTipoDescansosMedicos = async (): Promise<Detalle[]> => {
 
   try {
     const estado: boolean = true;
+    // const enPersona: boolean = false;
 
     const response = await getDetalles(
       ParametroClase.TIPO_DESCANSO_MEDICO,
       estado,
+      // enPersona,
     );
     console.log("response getTipoDescansosMedicos");
     console.log({ response });
@@ -60,10 +62,12 @@ const getTipoContingencias = async (): Promise<Detalle[]> => {
 
   try {
     const estado: boolean = true;
+    // const enPersona: boolean = false;
 
     const response = await getDetalles(
       ParametroClase.TIPO_CONTINGENCIA,
       estado,
+      // enPersona,
     );
     console.log("response getTipoContingencias");
     console.log({ response });

@@ -137,9 +137,13 @@ export const DocumentoTipoContigenciaForm = () => {
       try {
         let listTipoContingencias: Detalle[] = [];
 
+        const estado: boolean = true;
+        // const enPersona: boolean = false;
+
         const response = await getDetalles(
           ParametroClase.TIPO_CONTINGENCIA,
-          true,
+          estado,
+          // enPersona,
         );
 
         console.log({ response });
@@ -209,7 +213,7 @@ export const DocumentoTipoContigenciaForm = () => {
             Volver
           </button>
         </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -217,7 +221,7 @@ export const DocumentoTipoContigenciaForm = () => {
                   control={form.control}
                   name="idTipoContingencia"
                   render={({ field, fieldState }) => (
-                    <FormItem className="mb-4">
+                    <FormItem className="w-full">
                       <RequiredLabel>Tipo de Contingencia</RequiredLabel>
                       <Select
                         onValueChange={field.onChange}
@@ -225,19 +229,16 @@ export const DocumentoTipoContigenciaForm = () => {
                       >
                         <FormControl>
                           <SelectTrigger
-                            className={`
-                            ${
+                            className={`w-full ${
                               fieldState.invalid
                                 ? "border-red-500 focus:ring-red-500"
                                 : "focus:ring-blue-500"
-                            }
-                              focus:ring-2 focus:ring-offset-2 transition-all duration-300
-                            `}
+                            } focus:ring-2 focus:ring-offset-2 transition-all duration-300 `}
                           >
                             <SelectValue placeholder="Seleccionar tipo de contingencia" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-gray-400">
+                        <SelectContent className="bg-white">
                           {tipoContingencias.map((tipo) => (
                             <SelectItem
                               value={tipo.id}

@@ -21,28 +21,30 @@ import { Input } from "../../ui/input";
 import { Spinner } from "../../Common/Spinner";
 
 import {
-  createDetalle,
-  updateDetalle,
-  getDetalleById,
-} from "../../../services/detalleParametroService";
+  createDiagnostico,
+  updateDiagnostico,
+  getDiagnosticoByCodigo,
+} from "../../../services/diagnosticoService";
 import {
-  Detalle,
-  DetalleResponse,
-} from "../../../interfaces/IDetalleParametro";
+  Diagnostico,
+  DiagnosticoResponse,
+} from "../../../interfaces/IDiagnostico";
 import { useToast } from "../../../context/ToastContext";
 import { RequiredLabel } from "../../../components/Common/RequiredLabel";
-import { ParametroClase } from "../../../constants/parametroClase";
 import { useEffect, useMemo } from "react";
 import { ArrowLeft } from "lucide-react";
 import { getAuthData } from "../../../utils/authMemo";
 
 const formSchema = z.object({
+  codCie10: z.string().min(2, {
+    message: "El código es requerido",
+  }),
   nombre: z.string().min(2, {
     message: "El nombre es requerido.",
   }),
 });
 
-export const CargoForm = () => {
+export const DiagnosticoForm = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { showToast } = useToast();
@@ -50,6 +52,7 @@ export const CargoForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      codCie10: "",
       nombre: "",
     },
   });
@@ -63,7 +66,7 @@ export const CargoForm = () => {
   const { id_usuario } = userProfile;
 
   const handleGoBack = () => {
-    navigate("/mantenimiento/cargo");
+    navigate("/mantenimiento/diagnostico");
   };
 
   const resetForm = () => {
@@ -75,40 +78,38 @@ export const CargoForm = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       let messageError: string = "";
-      let response: DetalleResponse;
+      let response: DiagnosticoResponse;
 
-      const payloadData: Detalle = {
+      const payloadData: Diagnostico = {
         ...values,
-        parametro_clase: ParametroClase.CARGO,
         estado: true,
       };
 
       if (isEditMode && id) {
         // messageError = "Error al actualizar el cargo";
         payloadData.user_actualiza = id_usuario;
-        response = await updateDetalle(id, payloadData);
+        response = await updateDiagnostico(id, payloadData);
       } else {
         // messageError = "Error al registrar el cargo";
         payloadData.user_crea = id_usuario;
-        response = await createDetalle(payloadData);
+        response = await createDiagnostico(payloadData);
       }
-
 
       const { result, message, error } = response;
 
-      messageError = message
+      messageError = message;
 
-      const colorNotification = (error && error.length > 0) ? "error" : "warning"
+      const colorNotification = error && error.length > 0 ? "error" : "warning";
 
       if (result) {
         showToast("success", message);
-        navigate("/mantenimiento/cargo");
+        navigate("/mantenimiento/diagnosrtico");
       } else {
         showToast(colorNotification, error || messageError);
         return;
       }
     } catch (error) {
-      console.error("Error al registrar cargo", error);
+      console.error("Error al registrar diagnóstico", error);
       showToast("error", error);
     }
   };
@@ -117,22 +118,23 @@ export const CargoForm = () => {
     const fetchData = async () => {
       try {
         if (isEditMode) {
-          const responseCargo = await getDetalleById(id);
-          const { result, data, message } = responseCargo;
+          const responseDiagnostico = await getDiagnosticoByCodigo(id);
+          const { result, data, message } = responseDiagnostico;
 
           if (result && data) {
-            const cargo = data as Detalle;
+            const diagnostico = data as Diagnostico;
             form.reset({
-              nombre: cargo.nombre,
+              codCie10: diagnostico.codCie10,
+              nombre: diagnostico.nombre,
             });
           } else {
-            showToast("error", message || "Cargo no encontrado");
-            navigate("/mantenimiento/cargo/nuevo");
+            showToast("error", message || "Diagnóstico no encontrado");
+            navigate("/mantenimiento/diagnostico/nuevo");
           }
         }
       } catch (error) {
         console.error("Error al obtener datos", error);
-        showToast("error", "Error al cargar los cargos del formulario.");
+        showToast("error", "Error al cargar los datos del formulario.");
       }
     };
 
@@ -140,17 +142,20 @@ export const CargoForm = () => {
   }, [id, isEditMode, form, navigate, showToast]);
 
   return (
-    <div className="flex justify-center w-full mx-auto max-w-md">
-      <Card className="shadow-lg border-gray-200 w-full">
+    // <div className="flex justify-center w-full mx-auto max-w-md">
+    <>
+      <Card className="shadow-lg border-gray-200">
         <CardHeader className="border-b border-gray-200 flex flex-row items-center justify-between">
           <div className="flex-shrink min-w-0">
             <CardTitle className="text-xl font-bold text-gray-800">
-              {isEditMode ? "Actualización de cargo" : "Registro de cargo"}
+              {isEditMode
+                ? "Actualización de diagnóstico"
+                : "Registro de diagnóstico"}
             </CardTitle>
             <CardDescription className="text-sm text-gray-500">
               {isEditMode
-                ? "Formulario de actualización de cargo"
-                : "Complete el formulario para registrar nuevo cargo"}
+                ? "Formulario de actualización de diagnóstico"
+                : "Complete el formulario para registrar nuevo diagnóstico"}
             </CardDescription>
           </div>
           <button
@@ -171,19 +176,20 @@ export const CargoForm = () => {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="nombre"
-                render={({ field, fieldState }) => (
-                  <FormItem>
-                    <RequiredLabel>Nombre</RequiredLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Director General"
-                        autoComplete="off"
-                        maxLength={50}
-                        {...field}
-                        className={`
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <FormField
+                  control={form.control}
+                  name="codCie10"
+                  render={({ field, fieldState }) => (
+                    <FormItem className="md:col-span-4">
+                      <RequiredLabel>Código CIE10</RequiredLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="A02.4"
+                          autoComplete="off"
+                          maxLength={10}
+                          {...field}
+                          className={`
                           ${
                             fieldState.invalid
                               ? "border-red-500 focus:ring-red-500"
@@ -191,12 +197,40 @@ export const CargoForm = () => {
                           }
                             transition-all duration-300 w-full
                           `}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="nombre"
+                  render={({ field, fieldState }) => (
+                    <FormItem className="md:col-span-8">
+                      <RequiredLabel>Nombre</RequiredLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Director General"
+                          autoComplete="off"
+                          maxLength={100}
+                          {...field}
+                          className={`
+                          ${
+                            fieldState.invalid
+                              ? "border-red-500 focus:ring-red-500"
+                              : "focus:ring-blue-500"
+                          }
+                            transition-all duration-300 w-full
+                          `}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <div className="flex justify-end space-x-4 pt-4">
                 <Button
                   type="submit"
@@ -228,6 +262,7 @@ export const CargoForm = () => {
           </Form>
         </CardContent>
       </Card>
-    </div>
+    </>
+    // </div>
   );
 };

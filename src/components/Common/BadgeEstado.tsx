@@ -12,7 +12,7 @@ const estadoStyles: Record<Estado, string> = {
   // Descanso Médico
   [EDescansoMedico.REGISTRO_INGRESADO]: "bg-blue-100 text-blue-800",
   [EDescansoMedico.REGISTRO_EXITOSO]: "bg-green-100 text-green-800",
-  [EDescansoMedico.DOCUMENTACION_INCORRECTA]: "bg-red-100 text-red-800",
+  [EDescansoMedico.DOCUMENTACION_NO_CONFORME]: "bg-red-100 text-red-800",
   [EDescansoMedico.POR_CANJEAR]: "bg-yellow-100 text-yellow-800",
 
   // Canje
@@ -28,7 +28,7 @@ const estadoStyles: Record<Estado, string> = {
 
   // Reembolso
   [EReembolso.REEMBOLSO_INGRESADO]: "bg-fuchsia-100 text-fuchsia-800",
-  [EReembolso.REEMBOLSO_REALIZADO]: "bg-green-100 text-green-800", // Similar a REGISTRO_EXITOSO
+  [EReembolso.REEMBOLSO_ENVIADO]: "bg-green-100 text-green-800", // Similar a REGISTRO_EXITOSO
   [EReembolso.REEMBOLSO_OBSERVADO]: "bg-orange-100 text-orange-800", // Similar a CANJE_ORSERVADO
   [EReembolso.REEMBOLSO_CONFORME]: "bg-lime-100 text-lime-800",
 };

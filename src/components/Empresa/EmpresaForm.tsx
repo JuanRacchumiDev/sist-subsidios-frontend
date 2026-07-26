@@ -51,8 +51,13 @@ const getTipoDocumentos = async (): Promise<Detalle[]> => {
 
   try {
     const estado: boolean = true;
+    // const enPersona: boolean = true;
 
-    const response = await getDetalles(ParametroClase.TIPO_DOCUMENTO, estado);
+    const response = await getDetalles(
+      ParametroClase.TIPO_DOCUMENTO,
+      estado,
+      // enPersona,
+    );
     console.log("response getTipoDocumentos");
     console.log({ response });
 
@@ -72,8 +77,14 @@ const getCargos = async (): Promise<Detalle[]> => {
 
   try {
     const estado: boolean = true;
+    // const enPersona: boolean = false;
 
-    const response = await getDetalles(ParametroClase.CARGO, estado);
+    const response = await getDetalles(
+      ParametroClase.CARGO,
+      estado,
+      // enPersona
+    );
+
     console.log("response getCargos");
     console.log({ response });
 
@@ -495,11 +506,12 @@ export const EmpresaForm = () => {
                                     form.setValue("direccion", direccion);
                                     setCamposHabilitadosEmpresa(false);
                                   } else {
-                                    setCamposHabilitadosEmpresa(true);
                                     showToast(
                                       "warning",
-                                      "No se encontraron datos de empresa",
+                                      message ||
+                                        "No se encontraron datos de empresa",
                                     );
+                                    setCamposHabilitadosEmpresa(false);
                                   }
                                 } catch (error) {
                                   setCamposHabilitadosEmpresa(true);
@@ -592,7 +604,7 @@ export const EmpresaForm = () => {
                     control={form.control}
                     name="idTipoDocumento"
                     render={({ field, fieldState }) => (
-                      <FormItem>
+                      <FormItem className="w-full">
                         <RequiredLabel>Tipo de Documento</RequiredLabel>
                         <Select
                           onValueChange={field.onChange}
@@ -601,19 +613,16 @@ export const EmpresaForm = () => {
                         >
                           <FormControl>
                             <SelectTrigger
-                              className={`
-                                ${
-                                  fieldState.invalid
-                                    ? "border-red-500 focus:ring-red-500"
-                                    : "focus:ring-blue-500"
-                                }
-                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
-                              `}
+                              className={`w-full ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              } focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer `}
                             >
                               <SelectValue placeholder="Seleccionar tipo de documento" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="bg-gray-400">
+                          <SelectContent className="bg-white">
                             {tipos.map((tipo) => (
                               <SelectItem
                                 value={tipo.id}

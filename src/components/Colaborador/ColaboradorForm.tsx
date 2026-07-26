@@ -106,8 +106,13 @@ const getTipoDocumentos = async (): Promise<Detalle[]> => {
 
   try {
     const estado: boolean = true;
+    // const enPersona: boolean = true;
 
-    const response = await getDetalles(ParametroClase.TIPO_DOCUMENTO, estado);
+    const response = await getDetalles(
+      ParametroClase.TIPO_DOCUMENTO,
+      estado,
+      // enPersona,
+    );
     console.log("response getTipoDocumentos");
     console.log({ response });
 
@@ -127,8 +132,14 @@ const getCargos = async (): Promise<Detalle[]> => {
 
   try {
     const estado: boolean = true;
+    // const enPersona: boolean = false;
 
-    const response = await getDetalles(ParametroClase.CARGO, estado);
+    const response = await getDetalles(
+      ParametroClase.CARGO,
+      estado,
+      // enPersona
+    );
+
     console.log("response getCargos");
     console.log({ response });
 
@@ -474,12 +485,13 @@ export const ColaboradorForm = () => {
                 <legend className="text-base font-semibold text-gray-800 px-2">
                   Información personal
                 </legend>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                   <FormField
                     control={form.control}
                     name="idTipoDocumento"
                     render={({ field, fieldState }) => (
-                      <FormItem className="mb-4">
+                      <FormItem className="w-full">
                         <RequiredLabel>Tipo de Documento</RequiredLabel>
                         <Select
                           onValueChange={field.onChange}
@@ -487,19 +499,20 @@ export const ColaboradorForm = () => {
                         >
                           <FormControl>
                             <SelectTrigger
-                              className={`
-                                ${
-                                  fieldState.invalid
-                                    ? "border-red-500 focus:ring-red-500"
-                                    : "focus:ring-blue-500"
-                                }
+                              className={`w-full ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              }
                                   focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
                               `}
+                              // disabled={!camposHabilitadosPersona}
+                              disabled={isEditMode ? true : false}
                             >
                               <SelectValue placeholder="Seleccionar tipo de documento" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="bg-gray-400">
+                          <SelectContent className="bg-white">
                             {tipos.map((tipo) => (
                               <SelectItem
                                 value={tipo.id}
@@ -601,6 +614,8 @@ export const ColaboradorForm = () => {
                               }
                                 transition-all duration-300
                             `}
+                            disabled={isEditMode ? true : false}
+                            // disabled={!camposHabilitadosPersona}
                           />
                         </FormControl>
                         <FormMessage />

@@ -1,7 +1,7 @@
 export enum EstadoDescansoMedico {
     REGISTRO_INGRESADO = 'registro_ingresado',
     REGISTRO_EXITOSO = 'registro_exitoso',
-    DOCUMENTACION_INCORRECTA = 'documentacion_incorrecta',
+    DOCUMENTACION_NO_CONFORME = 'documentacion_no_conforme',
     POR_CANJEAR = 'por_canjear'
 }
 
@@ -26,7 +26,7 @@ export enum EstadoCobro {
 
 export const LIST_ESTADOS_DESCANSOS_MEDICOS = {
     [EstadoDescansoMedico.REGISTRO_EXITOSO]: 'Registro exitoso',
-    [EstadoDescansoMedico.DOCUMENTACION_INCORRECTA]: 'Documentación incorrecta',
+    [EstadoDescansoMedico.DOCUMENTACION_NO_CONFORME]: 'Documentación no conforme',
     [EstadoDescansoMedico.POR_CANJEAR]: 'Por canjear',
 };
 
@@ -37,7 +37,7 @@ export const LIST_ESTADOS_CANJE = {
 };
 
 export const MENSAJES_OBSERVACION: Record<string, string> = {
-    [EstadoDescansoMedico.DOCUMENTACION_INCORRECTA]: "LA DOCUMENTACIÓN AGREGADA NO CUMPLE LOS REQUISITOS SOLICITADOS",
+    [EstadoDescansoMedico.DOCUMENTACION_NO_CONFORME]: "LA DOCUMENTACIÓN AGREGADA NO CUMPLE LOS REQUISITOS SOLICITADOS",
     [EstadoCanje.CANJE_ORSERVADO]: "LA DOCUMENTACIÓN AGREGADA NO CUMPLE LOS REQUISITOS SOLICITADOS",
     [EstadoReembolso.REEMBOLSO_OBSERVADO]: "LA DOCUMENTACIÓN AGREGADA NO CUMPLE LOS REQUISITOS SOLICITADOS"
 };

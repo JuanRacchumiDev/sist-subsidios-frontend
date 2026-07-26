@@ -43,7 +43,7 @@ import { createPersona, updatePersona } from "../../services/personaService";
 import SearchableCombobox from "../Common/SearchableCombobox";
 import { ArrowLeft } from "lucide-react";
 import { ParametroClase } from "../../constants/parametroClase";
-import { EMPRESA_DEFAULT } from "../../params/constants";
+import { EMPRESA_DEFAULT, DOMINIO_EMAIL_DEFAULT } from "../../params/constants";
 import { getAuthData } from "../../utils/authMemo";
 import { getEmpresaByRazonSocial } from "../../services/empresaService";
 
@@ -83,7 +83,10 @@ const formSchema = z.object({
   nombreSede: z.string().min(2, {
     message: "La sede es requerida.",
   }),
-  emailInstitucional: z.string().email({
+  // emailInstitucional: z.string().email({
+  //   message: "Por favor ingrese un correo institucional válido.",
+  // }),
+  emailInstitucional: z.string().min(10, {
     message: "Por favor ingrese un correo institucional válido.",
   }),
   emailPersonal: z.string().email({
@@ -121,8 +124,14 @@ const getTipoDocumentos = async (): Promise<Detalle[]> => {
 
   try {
     const estado: boolean = true;
+    // const enPersona: boolean = true;
 
-    const response = await getDetalles(ParametroClase.TIPO_DOCUMENTO, estado);
+    const response = await getDetalles(
+      ParametroClase.TIPO_DOCUMENTO,
+      estado,
+      // enPersona,
+    );
+
     console.log("response getTipoDocumentos");
     console.log({ response });
 
@@ -144,8 +153,14 @@ const getCargos = async (): Promise<Detalle[]> => {
 
   try {
     const estado: boolean = true;
+    // const enPersona: boolean = false;
 
-    const response = await getDetalles(ParametroClase.CARGO, estado);
+    const response = await getDetalles(
+      ParametroClase.CARGO,
+      estado,
+      // enPersona
+    );
+
     console.log("response getCargos");
     console.log({ response });
 
@@ -268,6 +283,9 @@ export const EspecialistaSHForm = () => {
 
     const nombreCompleto: string = `${nombres} ${apellidoPaterno} ${apellidoMaterno}`;
 
+    const emailInstitucionalCompleto: string = `${emailInstitucional}${DOMINIO_EMAIL_DEFAULT}`;
+    console.log({ emailInstitucionalCompleto });
+
     const fechaNacimientoToString: string | null = fechaNacimiento
       ? fechaNacimiento.toISOString()
       : null;
@@ -300,7 +318,7 @@ export const EspecialistaSHForm = () => {
       fecha_ingreso: fechaIngresoStr,
       nombre_area: nombreArea,
       nombre_sede: nombreSede,
-      email_institucional: emailInstitucional,
+      email_institucional: emailInstitucionalCompleto,
       email_personal: emailPersonal,
       telefono,
       nombre_grupo: "GRUPO ESPECIALISTA SH",
@@ -470,12 +488,13 @@ export const EspecialistaSHForm = () => {
                 <legend className="text-base font-semibold text-gray-800 px-2">
                   Información personal
                 </legend>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                   <FormField
                     control={form.control}
                     name="idTipoDocumento"
                     render={({ field, fieldState }) => (
-                      <FormItem className="mb-4">
+                      <FormItem className="w-full">
                         <RequiredLabel>Tipo de Documento</RequiredLabel>
                         <Select
                           onValueChange={field.onChange}
@@ -483,24 +502,23 @@ export const EspecialistaSHForm = () => {
                         >
                           <FormControl>
                             <SelectTrigger
-                              className={`
-                                ${
-                                  fieldState.invalid
-                                    ? "border-red-500 focus:ring-red-500"
-                                    : "focus:ring-blue-500"
-                                }
-                                  focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
-                              `}
+                              className={`w-full ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-500"
+                                  : "focus:ring-blue-500"
+                              } focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer `}
                             >
                               <SelectValue placeholder="Seleccionar tipo de documento" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="bg-gray-400">
+                          {/* <SelectContent className="bg-gray-400"> */}
+                          <SelectContent className="bg-white">
                             {tipos.map((tipo) => (
                               <SelectItem
                                 value={tipo.id}
                                 key={tipo.id}
-                                className="cursor-pointer hover:bg-gray-100 transition-colors"
+                                className="cursor-pointer hover:bg-gray-100"
+                                // className="cursor-pointer hover:bg-gray-100 transition-colors"
                               >
                                 {tipo.abreviatura}
                               </SelectItem>
@@ -731,7 +749,8 @@ export const EspecialistaSHForm = () => {
                 <legend className="text-base font-semibold text-gray-800 px-2">
                   Información laboral
                 </legend>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                   <FormField
                     control={form.control}
                     name="idCargo"
@@ -813,20 +832,22 @@ export const EspecialistaSHForm = () => {
                       <FormItem>
                         <RequiredLabel>Correo Institucional</RequiredLabel>
                         <FormControl>
-                          <Input
-                            placeholder="maria.lopez@empresa.com"
-                            autoComplete="off"
-                            maxLength={50}
-                            {...field}
-                            className={`
-                              ${
+                          <div className="flex">
+                            <Input
+                              placeholder="maria.lopez"
+                              autoComplete="off"
+                              maxLength={50}
+                              {...field}
+                              className={`rounded-r-none z-10 ${
                                 fieldState.invalid
                                   ? "border-red-500 focus:ring-red-500"
                                   : "focus:ring-blue-500"
-                              }
-                                transition-all duration-300
-                            `}
-                          />
+                              } transition-all duration-300 `}
+                            />
+                            <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm font-medium">
+                              @sophiahuman.com
+                            </span>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>

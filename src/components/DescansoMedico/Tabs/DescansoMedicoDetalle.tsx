@@ -98,12 +98,15 @@ const getDataColaboradores = async (
 
 const getDataTipoDescansosMedicos = async (): Promise<Detalle[]> => {
   let tipoDescansos: Detalle[] = [];
+
   const estadoTDM: boolean = true;
+  // const enPersona: boolean = false;
 
   try {
     const response = await getDetalles(
       ParametroClase.TIPO_DESCANSO_MEDICO,
       estadoTDM,
+      // enPersona,
     );
 
     const { result, data } = response;
@@ -143,12 +146,15 @@ const getDataAdjuntos = async (
 
 const getDataTipoContingencias = async (): Promise<Detalle[]> => {
   let tipoContingencias: Detalle[] = [];
+
   const estadoTC: boolean = true;
+  // const enPersona: boolean = false;
 
   try {
     const response = await getDetalles(
       ParametroClase.TIPO_CONTINGENCIA,
       estadoTC,
+      // enPersona,
     );
 
     const { result, data } = response;
@@ -392,7 +398,7 @@ export const DescansoMedicoDetalle = ({
         control={form.control}
         name="idTipoDescansoMedico"
         render={({ field, fieldState }) => (
-          <FormItem>
+          <FormItem className="w-full">
             <RequiredLabel>Tipo de descanso médico</RequiredLabel>
             <Select
               onValueChange={field.onChange}
@@ -401,19 +407,16 @@ export const DescansoMedicoDetalle = ({
             >
               <FormControl>
                 <SelectTrigger
-                  className={`
-                    ${
-                      fieldState.invalid
-                        ? "border-red-500 focus:ring-red-500"
-                        : "focus:ring-blue-500"
-                    }
-                      focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
-                  `}
+                  className={`w-full ${
+                    fieldState.invalid
+                      ? "border-red-500 focus:ring-red-500"
+                      : "focus:ring-blue-500"
+                  } focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer `}
                 >
                   <SelectValue placeholder="Seleccionar tipo de descanso médico" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent className="bg-gray-400">
+              <SelectContent className="bg-white">
                 {tipoDescansos.map((td) => (
                   <SelectItem
                     key={td.id}
@@ -463,7 +466,7 @@ export const DescansoMedicoDetalle = ({
         control={form.control}
         name="idTipoContingencia"
         render={({ field, fieldState }) => (
-          <FormItem>
+          <FormItem className="w-full">
             <RequiredLabel>Tipo de Contingencia</RequiredLabel>
             <Select
               onValueChange={field.onChange}
@@ -472,19 +475,16 @@ export const DescansoMedicoDetalle = ({
             >
               <FormControl>
                 <SelectTrigger
-                  className={`
-                    ${
-                      fieldState.invalid
-                        ? "border-red-500 focus:ring-red-500"
-                        : "focus:ring-blue-500"
-                    }
-                      focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
-                  `}
+                  className={`w-full ${
+                    fieldState.invalid
+                      ? "border-red-500 focus:ring-red-500"
+                      : "focus:ring-blue-500"
+                  } focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer `}
                 >
                   <SelectValue placeholder="Seleccionar tipo de contingencia" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent className="bg-gray-400">
+              <SelectContent className="bg-white">
                 {tipoContingencias.map((tc) => (
                   <SelectItem
                     key={tc.id}

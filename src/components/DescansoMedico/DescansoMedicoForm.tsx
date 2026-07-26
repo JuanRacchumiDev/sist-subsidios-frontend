@@ -39,7 +39,7 @@ import { EDescansoMedico } from "../../enums/EDescansoMedico";
 import { getAuthData } from "../../utils/authMemo";
 import HDate from "../../helpers/HDate";
 import { isAfter, isBefore, parseISO } from "date-fns";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, FileText, Stethoscope, ShieldCheck } from "lucide-react";
 
 export const formSchema = z
   .object({
@@ -529,25 +529,51 @@ export const DescansoMedicoForm = () => {
         <CardContent className="pt-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-3">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-3 bg-transparent h-auto gap-2">
                   <TabsTrigger
                     value="datos-descanso-medico"
-                    className="bg-blue-400 hover:bg-blue-500 hover: cursor-pointer text-white transition-colors duration-300 mr-2"
+                    className={`
+                      flex items-center justify-center gap-2 py-3 px-4 rounded-lg border-2 transition-all duration-300 cursor-pointer
+                      ${activeTab === "datos-descanso-medico" 
+                        ? "bg-blue-600 text-white border-blue-600 shadow-md" 
+                        : "bg-white text-blue-600 border-blue-100 hover:bg-blue-50"}
+                    `}
+                    // className="bg-blue-400 hover:bg-blue-500 hover: cursor-pointer text-white transition-colors duration-300 mr-2"
                   >
-                    Datos del descanso médico
+                    {/* Datos del descanso médico */}
+                    <FileText className={`h-5 w-5 ${activeTab === "datos-descanso-medico" ? "text-white" : "text-blue-500"}`} />
+                    <span className="font-semibold hidden sm:inline">Datos del descanso</span>
                   </TabsTrigger>
+                  
                   <TabsTrigger
                     value="datos-medicos"
-                    className="bg-blue-400 hover:bg-blue-500 hover: cursor-pointer text-white transition-colors duration-300 mr-2"
+                    className={`
+                      flex items-center justify-center gap-2 py-3 px-4 rounded-lg border-2 transition-all duration-300 cursor-pointer
+                      ${activeTab === "datos-medicos" 
+                        ? "bg-emerald-600 text-white border-emerald-600 shadow-md" 
+                        : "bg-white text-emerald-600 border-emerald-100 hover:bg-emerald-50"}
+                    `}
+                    // className="bg-blue-400 hover:bg-blue-500 hover: cursor-pointer text-white transition-colors duration-300 mr-2"
                   >
-                    Datos médicos
+                    {/* Datos médicos */}
+                    <Stethoscope className={`h-5 w-5 ${activeTab === "datos-medicos" ? "text-white" : "text-emerald-500"}`} />
+                    <span className="font-semibold hidden sm:inline">Datos médicos</span>
                   </TabsTrigger>
+                  
                   <TabsTrigger
                     value="validacion"
-                    className="bg-blue-400 hover:bg-blue-500 hover: cursor-pointer text-white transition-colors duration-300"
+                    className={`
+                      flex items-center justify-center gap-2 py-3 px-4 rounded-lg border-2 transition-all duration-300 cursor-pointer
+                      ${activeTab === "validacion" 
+                        ? "bg-amber-500 text-white border-amber-500 shadow-md" 
+                        : "bg-white text-amber-600 border-amber-100 hover:bg-amber-50"}
+                    `}
+                    // className="bg-blue-400 hover:bg-blue-500 hover: cursor-pointer text-white transition-colors duration-300"
                   >
-                    Validación
+                    {/* Validación */}
+                    <ShieldCheck className={`h-5 w-5 ${activeTab === "validacion" ? "text-white" : "text-amber-500"}`} />
+                    <span className="font-semibold hidden sm:inline">Validación</span>
                   </TabsTrigger>
                 </TabsList>
 
