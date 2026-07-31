@@ -1,7 +1,8 @@
 import { Persona, PersonaFilter, PersonaPaginateResponse } from '../interfaces/IPersona'
 import {
     getAll,
-    getAllWithPaginate,
+    getAllNoUsuarios,
+    getAllPaginate,
     getAllByEmpresa,
     getAllByEmpresaWithGrupo,
     getByEmpresaWithGrupo,
@@ -20,32 +21,39 @@ export const getPersonas = async () => {
     }
 }
 
-export const getPersonasWithPaginate = async (
+export const getPersonasNoUsuarios = async () => {
+    const response = await getAllNoUsuarios()
+
+    return {
+        ...response
+    }
+}
+
+export const getPersonasPaginate = async (
     page: number,
     limit: number,
-    filters: PersonaFilter = {}
+    filters: {}
 ): Promise<PersonaPaginateResponse> => {
     try {
-        const params = new URLSearchParams({
+        const queryParams = new URLSearchParams({
             page: page.toString(),
-            limit: limit.toString()
-        })
+            limit: limit.toString(),
+            ...Object.fromEntries(
+                Object.entries(filters).filter(([, value]) => value)
+            )
+        }).toString()
 
-        console.log({ params })
+        console.log({ queryParams })
 
-        Object.entries(filters).forEach(([key, value]) => {
-            if (value !== undefined && value !== null && value !== "") {
-                params.append(key, value.toString());
-            }
-        });
+        const response = await getAllPaginate(queryParams)
 
-        const response = await getAllWithPaginate(params.toString())
+        console.log({ response })
 
         return {
             ...response
         }
     } catch (error) {
-        console.error("Error en service getPersonasWithPaginate:", error);
+        console.error("Error en service getPersonasPaginate:", error);
         throw error;
     }
 }

@@ -2,7 +2,7 @@ import { DocumentoTipoContingencia, DocumentoTipoContingenciaFilter } from '../i
 import {
     getAll,
     getById,
-    getAllWithPaginate,
+    getAllPaginate,
     create,
     update,
     updateEstado
@@ -16,10 +16,10 @@ export const getDocumentosTipoCont = async () => {
     }
 }
 
-export const getDocumentosTipoContWithPaginate = async (
+export const getDocumentosTipoContPaginate = async (
     page: number,
     limit: number,
-    filters: DocumentoTipoContingenciaFilter = {}
+    filters: {}
 ) => {
     const queryParams = new URLSearchParams({
         page: page.toString(),
@@ -31,7 +31,9 @@ export const getDocumentosTipoContWithPaginate = async (
 
     console.log({ queryParams })
 
-    const response = await getAllWithPaginate(queryParams)
+    const response = await getAllPaginate(queryParams)
+
+    console.log({ response })
 
     return {
         ...response

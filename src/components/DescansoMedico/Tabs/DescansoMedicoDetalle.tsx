@@ -46,7 +46,7 @@ interface DescansoMedicoDetalleProps {
   isModeLetter?: boolean;
 }
 
-const getDataEmpresas = async (): Promise<Empresa[]> => {
+const loadEmpresas = async (): Promise<Empresa[]> => {
   let empresas: Empresa[] = [];
 
   try {
@@ -66,7 +66,7 @@ const getDataEmpresas = async (): Promise<Empresa[]> => {
   }
 };
 
-const getDataColaboradores = async (
+const loadColaboradores = async (
   idEmpresa: string | null = null,
 ): Promise<Persona[]> => {
   let colaboradores: Persona[] = [];
@@ -96,7 +96,7 @@ const getDataColaboradores = async (
   }
 };
 
-const getDataTipoDescansosMedicos = async (): Promise<Detalle[]> => {
+const loadTipoDescansosMedicos = async (): Promise<Detalle[]> => {
   let tipoDescansos: Detalle[] = [];
 
   const estadoTDM: boolean = true;
@@ -122,9 +122,7 @@ const getDataTipoDescansosMedicos = async (): Promise<Detalle[]> => {
   }
 };
 
-const getDataAdjuntos = async (
-  idDescansoMedico: string,
-): Promise<Adjunto[]> => {
+const loadAdjuntos = async (idDescansoMedico: string): Promise<Adjunto[]> => {
   let adjuntos: Adjunto[] = [];
 
   try {
@@ -144,7 +142,7 @@ const getDataAdjuntos = async (
   }
 };
 
-const getDataTipoContingencias = async (): Promise<Detalle[]> => {
+const loadTipoContingencias = async (): Promise<Detalle[]> => {
   let tipoContingencias: Detalle[] = [];
 
   const estadoTC: boolean = true;
@@ -206,28 +204,28 @@ export const DescansoMedicoDetalle = ({
     const fetchData = async () => {
       try {
         const [
-          empresasRes,
-          colaboradoresRes,
-          tipoDescansosRes,
-          tipoContingenciasRes,
-          adjuntosRes,
+          listEmpresas,
+          listColaboradores,
+          listTipoDescansosMedicos,
+          listTipoContingencias,
+          listAdjuntos,
         ] = await Promise.all([
-          getDataEmpresas(),
-          getDataColaboradores(),
-          getDataTipoDescansosMedicos(),
-          getDataTipoContingencias(),
-          getDataAdjuntos(id),
+          loadEmpresas(),
+          loadColaboradores(),
+          loadTipoDescansosMedicos(),
+          loadTipoContingencias(),
+          loadAdjuntos(id),
         ]);
 
         console.log("---- DescansoMedicoDetalle ----");
         console.log({ isModeLetter });
         console.log({ id });
 
-        setEmpresas(empresasRes);
-        setColaboradores(colaboradoresRes);
-        setTipoDescansos(tipoDescansosRes);
-        setTipoContingencias(tipoContingenciasRes);
-        setAdjuntos(adjuntosRes);
+        setEmpresas(listEmpresas);
+        setColaboradores(listColaboradores);
+        setTipoDescansos(listTipoDescansosMedicos);
+        setTipoContingencias(listTipoContingencias);
+        setAdjuntos(listAdjuntos);
 
         if (isModeLetter) {
           setIsEmpresaDisabled(true);
@@ -277,8 +275,7 @@ export const DescansoMedicoDetalle = ({
     if (selectedEmpresaId) {
       const fetchColaboradores = async () => {
         try {
-          const colaboradoresRes =
-            await getDataColaboradores(selectedEmpresaId);
+          const colaboradoresRes = await loadColaboradores(selectedEmpresaId);
           setColaboradores(colaboradoresRes);
         } catch (error) {
           console.error("Error al obtener colaboradores", error);
@@ -296,6 +293,7 @@ export const DescansoMedicoDetalle = ({
 
       if (selectedTipoContingenciaId) {
         console.log({ selectedTipoContingenciaId });
+
         try {
           const response = await getDetalleById(selectedTipoContingenciaId);
           console.log("---- response fetchDocumentos ----");

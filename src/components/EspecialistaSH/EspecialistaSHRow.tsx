@@ -1,4 +1,4 @@
-import { Persona, PersonaResponse } from "../../interfaces/IPersona";
+import { Persona } from "../../interfaces/IPersona";
 import { TableCell, TableRow } from "../ui/table";
 import {
   AlertTriangle,
@@ -21,82 +21,42 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { useToast } from "../../context/ToastContext";
 import { useState } from "react";
-import { updateTrabajadorSocialByEstado } from "@/services/trabajadorSocialService";
-import { ConfirmDialog } from "../Common/ConfirmDialog";
+import { ConfirmDialog } from "@/components/Common/ConfirmDialog";
 
 interface Props {
   especialistaSH: Persona;
-  onStatusChange?: (especialistaSHId: string) => void;
 }
 
-export const EspecialistaSHRow: React.FC<Props> = ({
-  especialistaSH,
-  onStatusChange,
-}) => {
+export const EspecialistaSHRow: React.FC<Props> = ({ especialistaSH }) => {
   const { showToast } = useToast();
-
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-
   const navigate = useNavigate();
 
   const nuevoEstado = !especialistaSH.estado;
   const action = nuevoEstado ? "activar" : "desactivar";
-  const modalTitle = `${
-    action.charAt(0).toUpperCase() + action.slice(1)
-  } Especialista SH`;
-  const modalMessage = `¿Deseas <strong>${action}</strong> al especialista SH: <strong>${especialistaSH.nombre_completo}</strong>?`;
+  const modalTitle = `${action.charAt(0).toUpperCase() + action.slice(1)} Registro`;
+  const modalMessage = `¿Deseas <strong>${action}</strong> la persona: <strong>${especialistaSH.nombre_completo}</strong>?`;
 
   const handleShowDetail = () => {
-    const urlEdit = `/especialista-sh/editar/${especialistaSH.id}`;
-    console.log({ urlEdit });
-    navigate(urlEdit);
+    navigate(`/especialista-sh/editar/${especialistaSH.id}`);
   };
 
-  // Abre el modal
   const handleOpenStatusModal = (event: React.MouseEvent) => {
     event.preventDefault();
     setIsDropdownOpen(false);
     setIsModalOpen(true);
   };
 
-  // Cierra el modal
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
 
   const handleConfirmStatus = async () => {
     setIsProcessing(true);
-
     try {
-      const payload: Persona = {
-        estado: nuevoEstado,
-      };
-
-      const response = await updateTrabajadorSocialByEstado(
-        especialistaSH.id,
-        payload,
-      );
-
-      const { result, data, message, error } = response as PersonaResponse;
-
-      if (result && data) {
-        showToast(
-          "success",
-          message ||
-            "Estado del especialista Sophia Human actualizado con éxito.",
-        );
-
-        if (onStatusChange) {
-          onStatusChange(especialistaSH.id);
-        }
-      } else {
-        showToast(
-          "error",
-          error || "Error al actualizar al el especialista de Sophia Human.",
-        );
-      }
+      showToast("error", "Error de conexión al intentar actualizar.");
     } catch (error) {
       console.error("Error en la actualización de estado:", error);
       showToast("error", "Error de conexión al intentar actualizar.");
@@ -108,67 +68,80 @@ export const EspecialistaSHRow: React.FC<Props> = ({
 
   const actionText = especialistaSH.estado ? "Desactivar" : "Activar";
   const ActionIcon = especialistaSH.estado ? ToggleLeft : ToggleRight;
-  const actionColor = especialistaSH.estado ? "text-red-600" : "text-green-600";
+  const actionColor = especialistaSH.estado
+    ? "text-rose-600"
+    : "text-emerald-600";
   const hoverBgColor = especialistaSH.estado
-    ? "hover:bg-red-100"
-    : "hover:bg-green-100";
+    ? "hover:bg-rose-50"
+    : "hover:bg-emerald-50";
 
   return (
     <>
       <TableRow
         key={especialistaSH.id}
-        className="hover:bg-blue-100 hover:cursor-pointer transition-colors duration-200"
+        className="hover:bg-slate-50/80 hover:cursor-pointer transition-colors duration-150 border-b border-slate-100"
       >
-        <TableCell className="py-3">{especialistaSH.abreviatura}</TableCell>
-        <TableCell className="py-3">
+        <TableCell className="py-2 px-3 text-xs text-slate-500">
+          {especialistaSH?.abreviatura}
+        </TableCell>
+        <TableCell className="py-2 px-3 text-xs text-slate-600 font-mono">
           {especialistaSH.numero_documento}
         </TableCell>
-        <TableCell className="py-3">{especialistaSH.nombre_completo}</TableCell>
-        <TableCell className="py-3">
+        <TableCell className="py-2 px-3 text-xs font-medium text-slate-700 max-w-[200px] truncate">
+          {especialistaSH.nombre_completo}
+        </TableCell>
+        <TableCell className="py-2 px-3 text-xs text-slate-500 max-w-[180px] truncate">
           {especialistaSH.nombre_o_razon_social}
         </TableCell>
-        <TableCell className="py-3">{especialistaSH.telefono}</TableCell>
-        <TableCell className="py-3">
-          {especialistaSH.estado ? (
-            <CircleCheck className="text-green-500 w-5 h-5" />
-          ) : (
-            <CircleX className="text-red-500 w-5 h-5" />
-          )}
+        <TableCell className="py-2 px-3 text-xs text-slate-500">
+          {especialistaSH.telefono || "-"}
         </TableCell>
-        <TableCell className="py-3">
+        <TableCell className="py-2 px-3 text-center">
+          <div className="flex items-center justify-center">
+            {especialistaSH.estado ? (
+              <CircleCheck className="text-emerald-500 w-4 h-4 stroke-[2.5]" />
+            ) : (
+              <CircleX className="text-rose-500 w-4 h-4 stroke-[2.5]" />
+            )}
+          </div>
+        </TableCell>
+        {/* Altura de los botones de acciones alineados */}
+        <TableCell className="py-2 px-3 text-right">
           <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
-            <DropdownMenuTrigger
-              asChild
-              className="focus:outline-none focus:ring-2 z-40 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer"
-            >
-              <Button variant="ghost" className="h-8 w-8 p-0">
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="h-7 w-7 p-0 focus-visible:ring-1 focus-visible:ring-slate-400 focus-visible:ring-offset-0"
+              >
                 <span className="sr-only">Abrir menú de acciones</span>
-                <MoreHorizontal className="h-4 w-4 text-gray-500" />
+                <MoreHorizontal className="h-3.5 w-3.5 text-slate-400" />
               </Button>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent
               align="end"
-              className="bg-white border shadow-lg"
+              className="bg-white border border-slate-200 shadow-md min-w-[140px] text-xs p-1 rounded-md"
             >
-              <DropdownMenuLabel className="font-semibold text-gray-700">
+              <DropdownMenuLabel className="font-medium text-slate-400 px-2 py-1 text-[10px] uppercase tracking-wider">
                 Acciones
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="bg-slate-100" />
+
               <DropdownMenuItem
                 onClick={handleShowDetail}
-                className="cursor-pointer hover:bg-gray-100 transition-colors flex items-center space-x-2 text-blue-600"
+                className="cursor-pointer hover:bg-slate-50 rounded-sm py-1 px-2 flex items-center gap-2 text-slate-700"
               >
-                <Edit className="h-4 w-4" />
-                <span>Ver/Editar Detalle</span>
+                <Edit className="h-3.5 w-3.5 text-slate-400" />
+                <span>Ver/Editar detalle</span>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="bg-slate-100" />
+
               <DropdownMenuItem
                 onClick={handleOpenStatusModal}
-                className={`cursor-pointer ${hoverBgColor} transition-colors flex items-center space-x-2 ${actionColor}`}
+                className={`cursor-pointer rounded-sm py-1 px-2 flex items-center gap-2 font-medium ${actionColor} ${hoverBgColor}`}
               >
-                <ActionIcon className="h-4 w-4" />
-                <span>{actionText} Especialista SH</span>
+                <ActionIcon className="h-3.5 w-3.5" />
+                <span>{actionText}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -186,7 +159,7 @@ export const EspecialistaSHRow: React.FC<Props> = ({
         icon={
           <AlertTriangle
             className={
-              especialistaSH.estado ? "text-red-500" : "text-green-500"
+              especialistaSH.estado ? "text-rose-500" : "text-emerald-500"
             }
           />
         }

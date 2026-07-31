@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { getDocumentosTipoContWithPaginate } from "../../../services/documentoTipoContService";
+import { JSX, useCallback, useEffect, useState } from "react";
 import {
   Pagination,
   PaginationContent,
@@ -17,122 +16,102 @@ import {
   TableHeader,
   TableRow,
 } from "../../ui/table";
-import { DocumentoTipoContingenciaRow } from "./DocumentoTipoContingenciaRow";
-import { useCallback } from "react";
 import {
   DocumentoTipoContingencia,
-  DocumentoTipoContingenciaFilter,
   Pagination as PaginationType,
 } from "../../../interfaces/IDocumentoTipoContingencia";
-import { FilterIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { DocumentoTipoContingenciaFilterModal } from "./DocumentoTipoContingenciaFilterModal";
+import { DocumentoTipoContingenciaRow } from "./DocumentoTipoContingenciaRow";
+import { GraduationCap, Search } from "lucide-react";
 import { TableSpinner } from "../../../components/Common/TableSpinner";
+import {
+  DocumentoTCFilters,
+  DocumentoTCFiltersData,
+} from "./DocumentoTipoContingenciaFilters";
+import { ParametroClase } from "../../../constants/parametroClase";
+import { getDocumentosTipoContPaginate } from "../../../services/documentoTipoContService";
 
-const initialFilters: DocumentoTipoContingenciaFilter = {
-  id_tipocontingencia: undefined,
-  nombre: undefined,
-};
-
-export const DocumentoTipoContingenciaTable: React.FC = () => {
+export const DocumentoTipoContingenciaTable = () => {
   const [documentos, setDocumentos] = useState<DocumentoTipoContingencia[]>([]);
-  const [pagination, setPagination] = useState<PaginationType>({
-    currentPage: 1,
-    limit: 10,
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(10);
+
+  const [paginationInfo, setPaginationInfo] = useState<
+    Omit<PaginationType, "currentPage" | "limit">
+  >({
     totalPages: 1,
     totalItems: 0,
     nextPage: null,
     previousPage: null,
   });
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [filters, setFilters] =
-    useState<DocumentoTipoContingenciaFilter>(initialFilters);
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [refreshToggle, setRefreshToggle] = useState(0);
-
-  const handleDocumentoStatusChange = () => {
-    setRefreshToggle((prev) => prev + 1);
-  };
-
-  const handleApplyFilters = (newFilters: DocumentoTipoContingenciaFilter) => {
-    const cleanedFilters: DocumentoTipoContingenciaFilter = Object.fromEntries(
-      Object.entries(newFilters).map(([key, value]) => [
-        key,
-        value === "" || value === null ? undefined : value,
-      ]),
-    ) as DocumentoTipoContingenciaFilter;
-
-    setFilters(cleanedFilters);
-    setPagination((prev) => ({ ...prev, currentPage: 1 }));
-    setIsFilterModalOpen(false);
-  };
+  const [searchFilters, setSearchFilters] = useState<DocumentoTCFiltersData>({
+    id_tipocontingencia: "",
+    search: "",
+  });
 
   const handlePageChange = (page: number) => {
-    if (page > 0 && page <= pagination.totalPages) {
-      setPagination((prev) => ({ ...prev, currentPage: page }));
+    if (page > 0 && page <= paginationInfo.totalPages) {
+      setCurrentPage(page);
     }
   };
 
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const { currentPage, limit } = pagination;
+  const fetchData = useCallback(
+    async (pageToFetch: number, filtersData: DocumentoTCFiltersData) => {
+      setIsLoading(true);
 
-      const cleanFilters = Object.fromEntries(
-        Object.entries(filters).filter(
-          ([, value]) => value !== undefined && value !== null && value !== "",
-        ),
-      );
+      try {
+        const filters = {
+          id_tipocontingencia: filtersData.id_tipocontingencia,
+          search: filtersData.search,
+        };
 
-      console.log({ cleanFilters });
+        const response = await getDocumentosTipoContPaginate(
+          pageToFetch,
+          limit,
+          filters,
+        );
 
-      const filterString = cleanFilters.nombre
-        ? String(cleanFilters.nombre)
-        : "";
+        const { result, data, pagination: newPagination } = response;
 
-      console.log({ filterString });
+        if (result && data) {
+          setDocumentos(data as DocumentoTipoContingencia[]);
 
-      const response = await getDocumentosTipoContWithPaginate(
-        currentPage,
-        limit,
-        cleanFilters,
-      );
-
-      console.log("response documentos", response);
-
-      if (response.result && response.data && response.pagination) {
-        setDocumentos(response.data);
-        setPagination(response.pagination);
-      } else {
-        setDocumentos([]);
-        setPagination({
-          currentPage: 1,
-          limit: 10,
-          totalPages: 1,
-          totalItems: 0,
-          nextPage: null,
-          previousPage: null,
-        });
+          if (newPagination) {
+            setPaginationInfo({
+              totalPages: newPagination.totalPages || 1,
+              totalItems: newPagination.totalItems || 0,
+              nextPage: newPagination.nextPage,
+              previousPage: newPagination.previousPage,
+            });
+            setTotalPages(newPagination.totalPages || 1);
+          }
+        } else {
+          setDocumentos([]);
+        }
+      } catch (error) {
+        console.error("Error al obtener documentos", error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error(
-        "Error al obtener documentos por tipo de contingencia",
-        error,
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [pagination.currentPage, pagination.limit, filters, refreshToggle]);
+    },
+    [limit],
+  );
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchData(currentPage, searchFilters);
+  }, [currentPage, searchFilters, fetchData]);
 
-  const renderPaginationItems = () => {
-    const items = [];
-    const startPage = Math.max(1, pagination.currentPage - 2);
-    const endPage = Math.min(pagination.totalPages, pagination.currentPage + 2);
+  const handleSearchSubmit = (newFilters: DocumentoTCFiltersData) => {
+    setSearchFilters(newFilters);
+    setCurrentPage(1);
+  };
+
+  const renderPaginationItems = (): JSX.Element[] => {
+    const items: JSX.Element[] = [];
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(paginationInfo.totalPages, currentPage + 2);
 
     if (startPage > 1) {
       items.push(
@@ -147,14 +126,12 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
         <PaginationItem key={i}>
           <PaginationLink
             onClick={() => handlePageChange(i)}
-            isActive={i === pagination.currentPage}
-            className={`
-              ${
-                i === pagination.currentPage
-                  ? "bg-blue-500 text-white"
-                  : "hover:bg-gray-200 transition-colors"
-              }
-            `}
+            isActive={i === currentPage}
+            className={`cursor-pointer transition-all rounded-md font-medium text-xs h-8 w-8 ${
+              i === currentPage
+                ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700 hover:text-white"
+                : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+            }`}
           >
             {i}
           </PaginationLink>
@@ -162,7 +139,7 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
       );
     }
 
-    if (endPage < pagination.totalPages) {
+    if (endPage < paginationInfo.totalPages) {
       items.push(
         <PaginationItem key="ellipsis-end">
           <PaginationEllipsis />
@@ -173,99 +150,97 @@ export const DocumentoTipoContingenciaTable: React.FC = () => {
   };
 
   return (
-    <div className="w-full space-y-4 pt-4">
-      <div className="flex justify-end items-center space-x-2 pb-4">
-        <Button
-          variant="outline"
-          onClick={() => setIsFilterModalOpen(true)}
-          className="flex items-center space-x-2 border-blue-500 text-blue-500 hover:bg-blue-50 hover:text-blue-600 hover:cursor-pointer transition"
-        >
-          <FilterIcon className="w-4 h-4" />
-          <span>
-            Filtros (
-            {
-              Object.values(filters).filter(
-                (v) => v !== undefined && v !== null && v !== "",
-              ).length
-            }
-            )
-          </span>
-        </Button>
-      </div>
-      <div className="rounded-md border border-gray-200 shadow-sm">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-gray-100">
-              <TableHead className="text-gray-600 font-medium">
-                Tipo Contingencia
-              </TableHead>
-              <TableHead className="text-gray-600 font-medium">
-                Nombre
-              </TableHead>
-              <TableHead className="text-gray-600 font-medium">
-                Estado
-              </TableHead>
-              <TableHead className="text-gray-600 font-medium">
-                Opciones
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableSpinner colSpan={4} />
-            ) : documentos.length > 0 ? (
-              documentos.map((documento) => (
-                <DocumentoTipoContingenciaRow
-                  key={documento.id}
-                  documento={documento}
-                  onStatusChange={handleDocumentoStatusChange}
-                />
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={4}
-                  className="text-center text-gray-500 py-6"
-                >
-                  No se encontraron documentos registrados
-                </TableCell>
+    <div className="w-full space-y-3">
+      <div className="bg-white overflow-hidden">
+        <DocumentoTCFilters onSearch={handleSearchSubmit} />
+
+        <div className="overflow-x-auto border-t border-slate-100">
+          <Table className="w-full text-left border-collapse">
+            <TableHeader>
+              <TableRow className="bg-slate-50/75 hover:bg-slate-50/75 border-b border-slate-200">
+                <TableHead className="w-[35%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
+                  Tipo Contingencia
+                </TableHead>
+                <TableHead className="w-[35%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
+                  Nombre
+                </TableHead>
+                <TableHead className="w-[7%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider text-center">
+                  Estado
+                </TableHead>
+                <TableHead className="w-[8%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider text-right">
+                  Acciones
+                </TableHead>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableSpinner colSpan={4} />
+              ) : documentos.length > 0 ? (
+                documentos.map((documento) => (
+                  <DocumentoTipoContingenciaRow
+                    key={documento.id}
+                    documento={documento}
+                  />
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-24 text-center">
+                    <div className="flex flex-col items-center justify-center text-slate-400 space-y-1">
+                      <div className="p-3 bg-slate-50 rounded-full border border-slate-100">
+                        <GraduationCap className="w-6 h-6 text-slate-400" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-medium text-slate-600">
+                          No se encontraron registros
+                        </span>
+                        <p className="text-[11px]">
+                          Intenta ajustar o limpiar los filtros de búsqueda
+                        </p>
+                      </div>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
-      <div className="mt-4 flex justify-end">
-        <Pagination>
-          <PaginationContent>
+
+      <div className="flex items-center justify-between px-3 pb-3">
+        <div className="text-[11px] text-slate-500 font-medium">
+          Mostrando{" "}
+          <span className="text-slate-800 font-semibold">
+            {documentos.length}
+          </span>{" "}
+          registros de este grupo
+        </div>
+
+        <Pagination className="justify-end w-auto m-0">
+          <PaginationContent className="gap-0.5">
             <PaginationItem>
               <PaginationPrevious
-                onClick={() => handlePageChange(pagination.currentPage - 1)}
-                className="hover:bg-gray-200 transition-colors hover:cursor-pointer"
-              >
-                Anterior
-              </PaginationPrevious>
+                onClick={() => handlePageChange(currentPage - 1)}
+                className={`h-7 px-2 text-xs rounded-md border border-slate-200 text-slate-600 cursor-pointer transition-colors hover:bg-slate-50 hover:text-slate-900 ${
+                  currentPage === 1 ? "pointer-events-none opacity-30" : ""
+                }`}
+              />
             </PaginationItem>
 
             {renderPaginationItems()}
 
             <PaginationItem>
               <PaginationNext
-                onClick={() => handlePageChange(pagination.currentPage + 1)}
-                className="hover:bg-gray-200 hover:cursor-pointer transition-colors"
-              >
-                Siguiente
-              </PaginationNext>
+                onClick={() => handlePageChange(currentPage + 1)}
+                className={`h-7 px-2 text-xs rounded-md border border-slate-200 text-slate-600 cursor-pointer transition-colors hover:bg-slate-50 hover:text-slate-900 ${
+                  currentPage === paginationInfo.totalPages
+                    ? "pointer-events-none opacity-30"
+                    : ""
+                }`}
+              />
             </PaginationItem>
           </PaginationContent>
         </Pagination>
       </div>
-
-      <DocumentoTipoContingenciaFilterModal
-        isOpen={isFilterModalOpen}
-        onClose={() => setIsFilterModalOpen(false)}
-        currentFilters={filters}
-        onApplyFilters={handleApplyFilters}
-      />
     </div>
   );
 };

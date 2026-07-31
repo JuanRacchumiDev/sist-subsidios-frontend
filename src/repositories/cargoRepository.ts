@@ -23,7 +23,7 @@ export const getAll = async (): Promise<CargoResponse> => {
     }
 }
 
-export const getAllWithPaginate = async (queryParams: string) => {
+export const getAllPaginate = async (queryParams: string) => {
     try {
         const urlApi = `${'/cargos/paginate/?'}${queryParams}`
 

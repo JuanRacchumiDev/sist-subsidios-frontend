@@ -4,7 +4,7 @@ import {
     getById,
     getByRazonSocial,
     create,
-    getAllWithPaginate,
+    getAllPaginate,
     updateEstado
 } from '../repositories/empresaRepository'
 
@@ -16,18 +16,26 @@ export const getEmpresas = async () => {
     }
 }
 
-export const getEmpresasWithPaginate = async (
+export const getEmpresasPaginate = async (
     page: number,
     limit: number,
-    filter: string
+    filters: {}
 ) => {
+    console.log({ page })
+    console.log({ limit })
+    console.log({ filters })
+
     const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
-        filter: filter
+        ...Object.fromEntries(
+            Object.entries(filters).filter(([, value]) => value)
+        )
     }).toString()
 
-    const response = await getAllWithPaginate(queryParams)
+    console.log({ queryParams })
+
+    const response = await getAllPaginate(queryParams)
 
     return {
         ...response

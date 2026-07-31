@@ -2,7 +2,7 @@ import { EmpresaList } from "../EmpresaList";
 
 export const EmpresaListPage = () => {
   return (
-    <div>
+    <div className="w-full">
       <EmpresaList />
     </div>
   );

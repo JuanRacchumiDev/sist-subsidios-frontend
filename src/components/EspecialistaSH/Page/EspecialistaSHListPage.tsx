@@ -2,7 +2,7 @@ import { EspecialistaSHList } from "../EspecialistaSHList";
 
 export const EspecialistaSHListPage = () => {
   return (
-    <div>
+    <div className="w-full">
       <EspecialistaSHList />
     </div>
   );

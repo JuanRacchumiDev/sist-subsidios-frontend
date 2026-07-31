@@ -158,23 +158,27 @@ export const formSchema = z
     }
   });
 
-type TDescanso = {
-  idEmpresa?: string;
-  idColaborador?: string;
-  idTipoDescansoMedico?: string;
-  idTipoContingencia?: string;
-  fechaOtorgamiento?: null;
-  fechaInicio?: null;
-  fechaFinal?: null;
-  codigoCitt?: string;
-  totalDias?: string;
-  colegiadoMedico?: string;
-  medicoTratante?: string;
-  idDiagnostico?: string;
-  nombreEstablecimiento?: string;
-  aceptaResponsabilidad?: boolean;
-  aceptaPoliticaSubsidio?: boolean;
-  observacion?: string;
+const defaultValues = {
+  id: "",
+  idEmpresa: "",
+  idColaborador: "",
+  idTipoDescansoMedico: "",
+  idTipoContingencia: "",
+  fechaOtorgamiento: null,
+  fechaInicio: null,
+  fechaFinal: null,
+  codigoCitt: "",
+  totalDias: "",
+  colegiadoMedico: "",
+  medicoTratante: "",
+  idDiagnostico: "",
+  nombreEstablecimiento: "",
+  documentos: {},
+  aceptaResponsabilidad: false,
+  aceptaPoliticaSubsidio: false,
+  // estadoRegistro: id_persona ? EDescansoMedico.REGISTRO_INGRESADO : "",
+  estadoRegistro: "",
+  observacion: "",
 };
 
 export const DescansoMedicoForm = () => {
@@ -208,25 +212,7 @@ export const DescansoMedicoForm = () => {
   };
 
   const resetForm = () => {
-    const dataForm: TDescanso = {
-      idEmpresa: "",
-      idColaborador: "",
-      idTipoDescansoMedico: "",
-      idTipoContingencia: "",
-      fechaOtorgamiento: null,
-      fechaInicio: null,
-      fechaFinal: null,
-      totalDias: "",
-      colegiadoMedico: "",
-      medicoTratante: "",
-      idDiagnostico: "",
-      nombreEstablecimiento: "",
-      aceptaResponsabilidad: false,
-      aceptaPoliticaSubsidio: false,
-      observacion: "",
-    };
-
-    form.reset(dataForm);
+    form.reset(defaultValues);
   };
 
   const isModeLetter =
@@ -235,43 +221,6 @@ export const DescansoMedicoForm = () => {
     isEditMode
       ? true
       : false;
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      id: "",
-      idEmpresa: "",
-      idColaborador: "",
-      idTipoDescansoMedico: "",
-      idTipoContingencia: "",
-      fechaOtorgamiento: null,
-      fechaInicio: null,
-      fechaFinal: null,
-      codigoCitt: "",
-      totalDias: "",
-      colegiadoMedico: "",
-      medicoTratante: "",
-      idDiagnostico: "",
-      nombreEstablecimiento: "",
-      documentos: {},
-      aceptaResponsabilidad: false,
-      aceptaPoliticaSubsidio: false,
-      estadoRegistro: id_persona ? EDescansoMedico.REGISTRO_INGRESADO : "",
-      observacion: "",
-    },
-  });
-
-  const { isSubmitting } = form.formState;
-
-  // const currentEstado = form.watch("estadoRegistro");
-
-  // const isButtonDisabled =
-  //   isSubmitting || (isEditMode && currentEstado === "Registro exitoso");
-
-  const isRegistroBloqueado =
-    isEditMode && estadoOriginal === "Registro exitoso";
-
-  const isButtonDisabled = isSubmitting || isRegistroBloqueado;
 
   useEffect(() => {
     const fecthDescansoMedico = async () => {
@@ -371,6 +320,18 @@ export const DescansoMedicoForm = () => {
     fecthDescansoMedico();
   }, [id, isEditMode]);
 
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues,
+  });
+
+  const isRegistroBloqueado =
+    isEditMode && estadoOriginal === "Registro exitoso";
+
+  const { isSubmitting } = form.formState;
+
+  const isButtonDisabled = isSubmitting || isRegistroBloqueado;
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       console.log({ values });
@@ -414,6 +375,7 @@ export const DescansoMedicoForm = () => {
 
       const { result: resultTipoDescanso, data: dataTipoDescanso } =
         responseTipoDescanso;
+
       if (resultTipoDescanso && dataTipoDescanso) {
         const { nombre } = dataTipoDescanso as Detalle;
         nombreTipoDescanso = nombre;
@@ -494,106 +456,113 @@ export const DescansoMedicoForm = () => {
 
   return (
     <>
-      <Card className="shadow-lg border-gray-200">
-        <CardHeader className="border-b border-gray-200 flex flex-row items-center justify-between">
-          <div className="flex-shrink min-w-0">
-            <CardTitle className="text-xl font-bold text-gray-800">
+      <Card className="shadow-xl border-none bg-white">
+        <CardHeader className="border-b border-gray-100 p-6 flex flex-row items-center justify-between bg-gray-50/50 rounded-t-xl">
+          <div className="space-y-1">
+            <CardTitle className="text-2xl font-extrabold text-slate-800 tracking-tight">
               {isEditMode
-                ? "Actualización de descanso médico"
-                : "Registro de descanso médico"}
+                ? `Editar descansp médico`
+                : `Nuevo registro de descanso médico`}
             </CardTitle>
-            <CardDescription className="text-sm text-gray-500">
+            <CardDescription className="text-slate-500 font-medium">
               {isEditMode
-                ? "Formulario de actualización de descanso médico"
-                : "Complete el formulario para registrar un descanso médico"}
+                ? `Actualización de información de descanso médico`
+                : `Complete la información para registrar un descanso médico`}
             </CardDescription>
           </div>
-          <button
+          <Button
+            variant="ghost"
             onClick={handleGoBack}
-            className="
-              flex items-center text-sm font-semibold 
-              text-blue-600 
-              hover:text-blue-800 
-              hover:bg-blue-50 
-              transition-colors 
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 
-              rounded-md p-2 ml-4 
-              cursor-pointer
-            "
-            aria-label="Volver al listado"
+            className="text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-all"
           >
-            <ArrowLeft className="h-4 w-4 mr-1" />
+            <ArrowLeft className="h-4 w-4 mr-2" />
             Volver
-          </button>
+          </Button>
         </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
                 <TabsList className="grid w-full grid-cols-3 bg-transparent h-auto gap-2">
                   <TabsTrigger
                     value="datos-descanso-medico"
                     className={`
                       flex items-center justify-center gap-2 py-3 px-4 rounded-lg border-2 transition-all duration-300 cursor-pointer
-                      ${activeTab === "datos-descanso-medico" 
-                        ? "bg-blue-600 text-white border-blue-600 shadow-md" 
-                        : "bg-white text-blue-600 border-blue-100 hover:bg-blue-50"}
+                      ${
+                        activeTab === "datos-descanso-medico"
+                          ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                          : "bg-white text-blue-600 border-blue-100 hover:bg-blue-50"
+                      }
                     `}
-                    // className="bg-blue-400 hover:bg-blue-500 hover: cursor-pointer text-white transition-colors duration-300 mr-2"
                   >
-                    {/* Datos del descanso médico */}
-                    <FileText className={`h-5 w-5 ${activeTab === "datos-descanso-medico" ? "text-white" : "text-blue-500"}`} />
-                    <span className="font-semibold hidden sm:inline">Datos del descanso</span>
+                    <FileText
+                      className={`h-5 w-5 ${activeTab === "datos-descanso-medico" ? "text-white" : "text-blue-500"}`}
+                    />
+                    <span className="font-semibold hidden sm:inline">
+                      Datos del descanso
+                    </span>
                   </TabsTrigger>
-                  
+
                   <TabsTrigger
                     value="datos-medicos"
                     className={`
                       flex items-center justify-center gap-2 py-3 px-4 rounded-lg border-2 transition-all duration-300 cursor-pointer
-                      ${activeTab === "datos-medicos" 
-                        ? "bg-emerald-600 text-white border-emerald-600 shadow-md" 
-                        : "bg-white text-emerald-600 border-emerald-100 hover:bg-emerald-50"}
+                      ${
+                        activeTab === "datos-medicos"
+                          ? "bg-emerald-600 text-white border-emerald-600 shadow-md"
+                          : "bg-white text-emerald-600 border-emerald-100 hover:bg-emerald-50"
+                      }
                     `}
-                    // className="bg-blue-400 hover:bg-blue-500 hover: cursor-pointer text-white transition-colors duration-300 mr-2"
                   >
-                    {/* Datos médicos */}
-                    <Stethoscope className={`h-5 w-5 ${activeTab === "datos-medicos" ? "text-white" : "text-emerald-500"}`} />
-                    <span className="font-semibold hidden sm:inline">Datos médicos</span>
+                    <Stethoscope
+                      className={`h-5 w-5 ${activeTab === "datos-medicos" ? "text-white" : "text-emerald-500"}`}
+                    />
+                    <span className="font-semibold hidden sm:inline">
+                      Datos médicos
+                    </span>
                   </TabsTrigger>
-                  
+
                   <TabsTrigger
                     value="validacion"
                     className={`
                       flex items-center justify-center gap-2 py-3 px-4 rounded-lg border-2 transition-all duration-300 cursor-pointer
-                      ${activeTab === "validacion" 
-                        ? "bg-amber-500 text-white border-amber-500 shadow-md" 
-                        : "bg-white text-amber-600 border-amber-100 hover:bg-amber-50"}
+                      ${
+                        activeTab === "validacion"
+                          ? "bg-amber-500 text-white border-amber-500 shadow-md"
+                          : "bg-white text-amber-600 border-amber-100 hover:bg-amber-50"
+                      }
                     `}
-                    // className="bg-blue-400 hover:bg-blue-500 hover: cursor-pointer text-white transition-colors duration-300"
                   >
-                    {/* Validación */}
-                    <ShieldCheck className={`h-5 w-5 ${activeTab === "validacion" ? "text-white" : "text-amber-500"}`} />
-                    <span className="font-semibold hidden sm:inline">Validación</span>
+                    <ShieldCheck
+                      className={`h-5 w-5 ${activeTab === "validacion" ? "text-white" : "text-amber-500"}`}
+                    />
+                    <span className="font-semibold hidden sm:inline">
+                      Validación
+                    </span>
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="datos-descanso-medico" className="mt-6">
+                <TabsContent value="datos-descanso-medico" className="mt-3">
                   <DescansoMedicoDetalle
                     form={form}
                     isModeLetter={isModeLetter}
                   />
                 </TabsContent>
 
-                <TabsContent value="datos-medicos" className="mt-6">
+                <TabsContent value="datos-medicos" className="mt-3">
                   <DatosMedicos form={form} isModeLetter={isModeLetter} />
                 </TabsContent>
 
-                <TabsContent value="validacion" className="mt-6">
+                <TabsContent value="validacion" className="mt-3">
                   <Validacion form={form} isModeLetter={isModeLetter} />
                 </TabsContent>
               </Tabs>
 
-              <div className="space-y-4 mt-6">
+              <div className="space-y-4 mt-3">
                 <FormField
                   control={form.control}
                   name="aceptaResponsabilidad"
@@ -689,7 +658,6 @@ export const DescansoMedicoForm = () => {
                 <Button
                   type="submit"
                   disabled={isButtonDisabled}
-                  // className="bg-blue-600 hover:bg-blue-700 hover: cursor-pointer text-white transition-colors duration-300"
                   className={`${isRegistroBloqueado ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 cursor-pointer"} text-white transition-colors duration-300`}
                 >
                   {isSubmitting ? (

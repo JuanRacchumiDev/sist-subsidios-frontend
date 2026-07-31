@@ -21,7 +21,7 @@ export const getAll = async (): Promise<EmpresaResponse> => {
     }
 }
 
-export const getAllWithPaginate = async (queryParams: string) => {
+export const getAllPaginate = async (queryParams: string) => {
     try {
         console.log({ queryParams })
 
@@ -29,16 +29,40 @@ export const getAllWithPaginate = async (queryParams: string) => {
 
         const response = await apiClient.get(urlApi)
 
-        const { data: dataEmpresas } = response
+        console.log({ response })
 
-        const { result, data, pagination, status } = dataEmpresas
+        const { data: { result, data, message } } = response
+
+        const { current_page, per_page, last_page, total, next_page_url, prev_page_url } = data
+
+        const paginationInfo = {
+            currentPage: current_page,
+            limit: per_page,
+            totalPages: last_page,
+            totalItems: total,
+            nextPage: next_page_url,
+            previousPage: prev_page_url
+        };
 
         return {
             result,
             data,
-            pagination,
-            status
+            message,
+            pagination: paginationInfo
         }
+
+        // const response = await apiClient.get(urlApi)
+
+        // const { data: dataEmpresas } = response
+
+        // const { result, data, pagination, status } = dataEmpresas
+
+        // return {
+        //     result,
+        //     data,
+        //     pagination,
+        //     status
+        // }
 
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Error desconocido'

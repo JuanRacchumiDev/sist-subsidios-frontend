@@ -24,7 +24,7 @@ export const getAll = async (): Promise<CanjeResponse> => {
 }
 
 
-export const getAllWithPaginate = async (queryParams: string) => {
+export const getAllPaginate = async (queryParams: string) => {
     try {
         const urlApi = `${'/canjes/paginate?'}${queryParams}`
 

@@ -1,10 +1,10 @@
-import { Cargo } from '../interfaces/ICargo'
+import { Cargo, CargoPaginateResponse } from '../interfaces/ICargo'
 import {
     getAll,
     getById,
     create,
     update,
-    getAllWithPaginate,
+    getAllPaginate,
     updateEstado
 } from '../repositories/cargoRepository'
 
@@ -16,18 +16,24 @@ export const getCargos = async () => {
     }
 }
 
-export const getCargosWithPaginate = async (
+export const getCargosPaginate = async (
     page: number,
     limit: number,
-    filter: string
-) => {
+    filters: {}
+): Promise<CargoPaginateResponse> => {
     const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
-        filter: filter
+        ...Object.fromEntries(
+            Object.entries(filters).filter(([, value]) => value)
+        )
     }).toString()
 
-    const response = await getAllWithPaginate(queryParams)
+    console.log({ queryParams })
+
+    const response = await getAllPaginate(queryParams)
+
+    console.log({ response })
 
     return {
         ...response

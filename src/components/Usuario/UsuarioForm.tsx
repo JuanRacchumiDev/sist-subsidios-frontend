@@ -12,7 +12,7 @@ import {
 } from "../../components/ui/card";
 import { useToast } from "../../context/ToastContext";
 import { Spinner } from "../../components/Common/Spinner";
-import { getPersonas } from "../../services/personaService";
+import { getPersonasNoUsuarios } from "../../services/personaService";
 import { getDetalles } from "../../services/detalleParametroService";
 import { Detalle } from "../../interfaces/IDetalleParametro";
 import { Persona } from "../../interfaces/IPersona";
@@ -40,7 +40,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Button } from "../ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Save, XCircle } from "lucide-react";
 import { ParametroClase } from "../../constants/parametroClase";
 import { getAuthData } from "../../utils/authMemo";
 
@@ -61,13 +61,13 @@ export const formSchema = z.object({
   }),
 });
 
-const getDataPersonas = async (): Promise<Persona[]> => {
+const loadPersonas = async (): Promise<Persona[]> => {
   let personas: Persona[] = [];
 
   try {
-    const response = await getPersonas();
+    const response = await getPersonasNoUsuarios();
 
-    console.log("---- response getDataPersonas ----");
+    console.log("---- response loadPersonas ----");
     console.log({ response });
 
     if (response.result && response.data) {
@@ -81,7 +81,7 @@ const getDataPersonas = async (): Promise<Persona[]> => {
   }
 };
 
-const getDataPerfiles = async (): Promise<Detalle[]> => {
+const loadPerfiles = async (): Promise<Detalle[]> => {
   let perfiles: Detalle[] = [];
 
   try {
@@ -116,6 +116,7 @@ export const UsuarioForm = () => {
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [perfiles, setPerfiles] = useState<Detalle[]>([]);
   const [correos, setCorreos] = useState<string[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(false);
 
   const isEditMode = !!id;
 
@@ -147,6 +148,73 @@ export const UsuarioForm = () => {
       email: "",
     },
   });
+
+  const watchedIdPersona = form.watch("idPersona");
+
+  useEffect(() => {
+    if (watchedIdPersona) {
+      const selectedPersona = personas.find((c) => c.id === watchedIdPersona);
+
+      if (selectedPersona) {
+        const listCorreos: string[] = [];
+        const { email_institucional, email_personal } = selectedPersona;
+
+        if (email_personal) listCorreos.push(email_personal);
+        if (email_institucional) listCorreos.push(email_institucional);
+
+        setCorreos(listCorreos);
+
+        // Opcional: Si quieres que el campo email se limpie o resetee al cambiar de persona
+        form.setValue("email", "");
+      }
+    } else {
+      setCorreos([]);
+    }
+  }, [watchedIdPersona, personas, form]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoadingData(true);
+
+      try {
+        const [listPersonas, listPerfiles] = await Promise.all([
+          loadPersonas(),
+          loadPerfiles(),
+        ]);
+
+        setPersonas(listPersonas);
+        setPerfiles(listPerfiles);
+
+        if (isEditMode && id) {
+          const responseUsuario = await getUsuarioById(id);
+          const { result, data, message } = responseUsuario;
+
+          if (result && data) {
+            const usuario = data as Usuario;
+            const { id_perfil, id_persona, username, email } = usuario;
+
+            form.reset({
+              idPerfil: id_perfil ?? "",
+              idPersona: id_persona ?? "",
+              username: username ?? "",
+              email: email ?? "",
+            });
+          } else {
+            showToast("error", message || "Usuario no encontrado");
+            navigate("/usuario/nuevo");
+          }
+        }
+      } catch (error) {
+        console.error("Error al obtener datos", error);
+        showToast("error", "Error al cargar los datos del formulario.");
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    fetchData();
+  }, [id, isEditMode]);
+  // [id, form, navigate, showToast]
 
   const { isSubmitting } = form.formState;
 
@@ -184,124 +252,44 @@ export const UsuarioForm = () => {
         return;
       }
     } catch (error) {
-      console.error("Error al registrar colaborador", error);
+      console.error("Error al registrar usuario", error);
       showToast("error", error);
     }
   };
 
-  const watchedIdPersona = form.watch("idPersona");
-
-  useEffect(() => {
-    if (watchedIdPersona) {
-      const selectedPersona = personas.find((c) => c.id === watchedIdPersona);
-
-      if (selectedPersona) {
-        const listCorreos: string[] = [];
-        const { email_institucional, email_personal } = selectedPersona;
-
-        if (email_personal) listCorreos.push(email_personal);
-        if (email_institucional) listCorreos.push(email_institucional);
-
-        setCorreos(listCorreos);
-
-        // Opcional: Si quieres que el campo email se limpie o resetee al cambiar de persona
-        form.setValue("email", "");
-      }
-    } else {
-      setCorreos([]);
-    }
-  }, [watchedIdPersona, personas, form]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        let listPersonas: Persona[] = [];
-        let listPerfiles: Detalle[] = [];
-
-        const [responsePersonas, responsePerfiles] = await Promise.all([
-          getDataPersonas(),
-          getDataPerfiles(),
-        ]);
-
-        console.log({ responsePersonas });
-
-        console.log({ responsePerfiles });
-
-        if (responsePersonas) {
-          listPersonas = responsePersonas as Persona[];
-        }
-
-        if (responsePerfiles) {
-          listPerfiles = responsePerfiles as Detalle[];
-        }
-
-        setPersonas(listPersonas);
-        setPerfiles(listPerfiles);
-
-        if (id) {
-          const responseUsuario = await getUsuarioById(id);
-          const { result, data, message } = responseUsuario;
-
-          if (result && data) {
-            const usuario = data as Usuario;
-            const { id_perfil, id_persona, username, email } = usuario;
-
-            form.reset({
-              idPerfil: id_perfil ?? "",
-              idPersona: id_persona ?? "",
-              username: username ?? "",
-              email: email ?? "",
-            });
-          } else {
-            showToast("error", message || "Usuario no encontrado");
-            navigate("/usuario/nuevo");
-          }
-        }
-      } catch (error) {
-        console.error("Error al obtener datos", error);
-        showToast("error", "Error al cargar los datos del formulario.");
-      }
-    };
-
-    fetchData();
-  }, [id, form, navigate, showToast]);
-
   return (
     <>
-      <Card className="shadow-lg border-gray-200">
-        <CardHeader className="border-b border-gray-200 flex flex-row items-center justify-between">
-          <div className="flex-shrink min-w-0">
-            <CardTitle className="text-xl font-bold text-gray-800">
-              {isEditMode ? "Actualización de usuario" : "Registro de usuario"}
+      <Card className="shadow-xl border-none bg-white">
+        <CardHeader className="border-b border-gray-100 p-6 flex flex-row items-center justify-between bg-gray-50/50 rounded-t-xl">
+          <div className="space-y-1">
+            <CardTitle className="text-2xl font-extrabold text-slate-800 tracking-tight">
+              {isEditMode ? `Editar usuario` : `Nuevo registro de usuario`}
             </CardTitle>
-            <CardDescription className="text-sm text-gray-500">
+            <CardDescription className="text-slate-500 font-medium">
               {isEditMode
-                ? "Formulario de actualización de usuario"
-                : "Complete el formulario para registrar un usuario"}
+                ? `Actualización de información de usuario`
+                : `Complete la información para registrar un usuario`}
             </CardDescription>
           </div>
-          <button
+          <Button
+            variant="ghost"
             onClick={handleGoBack}
-            className="
-              flex items-center text-sm font-semibold 
-              text-blue-600 
-              hover:text-blue-800 
-              hover:bg-blue-50 
-              transition-colors 
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 
-              rounded-md p-2 ml-4 
-              cursor-pointer
-            "
-            aria-label="Volver al listado"
+            className="text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-all"
           >
-            <ArrowLeft className="h-4 w-4 mr-1" />
+            <ArrowLeft className="h-4 w-4 mr-2" />
             Volver
-          </button>
+          </Button>
         </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent className="px-6 sm:px-8 relative">
+          {isLoadingData && (
+            <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center z-10">
+              <Spinner className="h-8 w-8 text-blue-600 animate-spin" />
+            </div>
+          )}
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
                 <FormField
                   control={form.control}
                   name="idPersona"
@@ -327,7 +315,7 @@ export const UsuarioForm = () => {
                   control={form.control}
                   name="idPerfil"
                   render={({ field, fieldState }) => (
-                    <FormItem>
+                    <FormItem className="flex flex-col">
                       <RequiredLabel>Perfil</RequiredLabel>
                       <Select
                         onValueChange={field.onChange}
@@ -335,19 +323,16 @@ export const UsuarioForm = () => {
                       >
                         <FormControl>
                           <SelectTrigger
-                            className={`
-                              ${
-                                fieldState.invalid
-                                  ? "border-red-500 focus:ring-red-500"
-                                  : "focus:ring-blue-500"
-                              }
-                                focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
-                            `}
+                            className={`w-full transition-all bg-white ${
+                              fieldState.invalid
+                                ? "border-red-400 focus:ring-red-100"
+                                : "border-slate-200 focus:ring-blue-100 focus:border-blue-500"
+                            }`}
                           >
-                            <SelectValue placeholder="Seleccionar perfil" />
+                            <SelectValue placeholder="Seleccionar..." />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-gray-400">
+                        <SelectContent className="bg-white">
                           {perfiles.map((perfil) => (
                             <SelectItem
                               value={perfil.id}
@@ -359,7 +344,7 @@ export const UsuarioForm = () => {
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormMessage />
+                      <FormMessage className="text-xs font-medium text-red-500" />
                     </FormItem>
                   )}
                 />
@@ -376,10 +361,14 @@ export const UsuarioForm = () => {
                           autoComplete="off"
                           maxLength={12}
                           {...field}
-                          className={fieldState.invalid ? "border-red-500" : ""}
+                          className={`transition-all bg-white ${
+                            fieldState.invalid
+                              ? "border-red-400 focus-visible:ring-red-100"
+                              : "border-slate-200 focus-visible:ring-blue-100 focus-visible:border-blue-500"
+                          }`}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs font-medium text-red-500" />
                     </FormItem>
                   )}
                 />
@@ -396,19 +385,16 @@ export const UsuarioForm = () => {
                       >
                         <FormControl>
                           <SelectTrigger
-                            className={`
-                              ${
-                                fieldState.invalid
-                                  ? "border-red-500 focus:ring-red-500"
-                                  : "focus:ring-blue-500"
-                              }
-                                focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer
-                            `}
+                            className={`w-full transition-all bg-white ${
+                              fieldState.invalid
+                                ? "border-red-400 focus:ring-red-100"
+                                : "border-slate-200 focus:ring-blue-100 focus:border-blue-500"
+                            }`}
                           >
-                            <SelectValue placeholder="Seleccionar email" />
+                            <SelectValue placeholder="Seleccionar..." />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-gray-400">
+                        <SelectContent className="bg-white">
                           {correos.map((correo) => (
                             <SelectItem
                               value={correo}
@@ -420,36 +406,33 @@ export const UsuarioForm = () => {
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormMessage />
+                      <FormMessage className="text-xs font-medium text-red-500" />
                     </FormItem>
                   )}
                 />
               </div>
 
-              <div className="flex justify-end space-x-4 pt-4">
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t border-gray-100">
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-blue-600 hover:bg-blue-700 hover: cursor-pointer text-white transition-colors duration-300"
+                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md shadow-blue-100 transition-all active:scale-[0.98]"
                 >
                   {isSubmitting ? (
-                    <>
-                      <Spinner className="mr-2 h-4 w-4 animate-spin" />
-                      {isEditMode ? "Actualizando..." : "Registrando..."}
-                    </>
-                  ) : isEditMode ? (
-                    "Actualizar"
+                    <Spinner className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    "Registrar"
+                    <Save className="h-4 w-4 mr-2" />
                   )}
+                  {isEditMode ? "Actualizar Datos" : "Confirmar Registro"}
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   disabled={isSubmitting}
-                  onClick={() => resetForm()}
-                  className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
+                  onClick={resetForm}
+                  className="w-full sm:w-auto border-slate-200 text-slate-700 hover:bg-slate-50 font-medium transition-all"
                 >
+                  <XCircle className="h-4 w-4 mr-2 text-slate-500" />
                   Cancelar
                 </Button>
               </div>

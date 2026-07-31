@@ -32,7 +32,7 @@ import {
 import { useToast } from "../../../context/ToastContext";
 import { RequiredLabel } from "../../../components/Common/RequiredLabel";
 import { ParametroClase } from "../../../constants/parametroClase";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { getAuthData } from "../../../utils/authMemo";
 
@@ -44,6 +44,7 @@ const formSchema = z.object({
 
 export const CargoForm = () => {
   const navigate = useNavigate();
+  const [isLoadingData, setIsLoadingData] = useState(false);
   const { id } = useParams<{ id: string }>();
   const { showToast } = useToast();
 
@@ -54,9 +55,10 @@ export const CargoForm = () => {
     },
   });
 
-  const { isSubmitting } = form.formState;
-
   const isEditMode = !!id;
+
+  const inputErrorClass = (invalid: boolean) =>
+    invalid ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-500";
 
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
 
@@ -72,6 +74,8 @@ export const CargoForm = () => {
     });
   };
 
+  const { isSubmitting } = form.formState;
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       let messageError: string = "";
@@ -84,21 +88,18 @@ export const CargoForm = () => {
       };
 
       if (isEditMode && id) {
-        // messageError = "Error al actualizar el cargo";
         payloadData.user_actualiza = id_usuario;
         response = await updateDetalle(id, payloadData);
       } else {
-        // messageError = "Error al registrar el cargo";
         payloadData.user_crea = id_usuario;
         response = await createDetalle(payloadData);
       }
 
-
       const { result, message, error } = response;
 
-      messageError = message
+      messageError = message;
 
-      const colorNotification = (error && error.length > 0) ? "error" : "warning"
+      const colorNotification = error && error.length > 0 ? "error" : "warning";
 
       if (result) {
         showToast("success", message);
@@ -115,6 +116,8 @@ export const CargoForm = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoadingData(true);
+
       try {
         if (isEditMode) {
           const responseCargo = await getDetalleById(id);
@@ -122,6 +125,7 @@ export const CargoForm = () => {
 
           if (result && data) {
             const cargo = data as Detalle;
+
             form.reset({
               nombre: cargo.nombre,
             });
@@ -133,6 +137,8 @@ export const CargoForm = () => {
       } catch (error) {
         console.error("Error al obtener datos", error);
         showToast("error", "Error al cargar los cargos del formulario.");
+      } finally {
+        setIsLoadingData(false);
       }
     };
 
@@ -140,94 +146,85 @@ export const CargoForm = () => {
   }, [id, isEditMode, form, navigate, showToast]);
 
   return (
-    <div className="flex justify-center w-full mx-auto max-w-md">
-      <Card className="shadow-lg border-gray-200 w-full">
-        <CardHeader className="border-b border-gray-200 flex flex-row items-center justify-between">
-          <div className="flex-shrink min-w-0">
-            <CardTitle className="text-xl font-bold text-gray-800">
-              {isEditMode ? "Actualización de cargo" : "Registro de cargo"}
-            </CardTitle>
-            <CardDescription className="text-sm text-gray-500">
-              {isEditMode
-                ? "Formulario de actualización de cargo"
-                : "Complete el formulario para registrar nuevo cargo"}
-            </CardDescription>
+    <Card className="shadow-xl border-none bg-white">
+      <CardHeader className="border-b border-gray-100 p-6 flex flex-row items-center justify-between bg-gray-50/50 rounded-t-xl">
+        <div className="space-y-1">
+          <CardTitle className="text-2xl font-extrabold text-slate-800 tracking-tight">
+            {isEditMode ? `Editar cargo` : `Nuevo Registro de cargo`}
+          </CardTitle>
+          <CardDescription className="text-slate-500 font-medium">
+            {isEditMode
+              ? `Actualización de información de cargo`
+              : `Complete la información para registrar un cargo`}
+          </CardDescription>
+        </div>
+        <Button
+          variant="ghost"
+          onClick={handleGoBack}
+          className="text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-all"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Volver
+        </Button>
+      </CardHeader>
+      <CardContent>
+        {isLoadingData && (
+          <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center z-10">
+            <Spinner className="h-8 w-8 text-blue-600 animate-spin" />
           </div>
-          <button
-            onClick={handleGoBack}
-            className="flex items-center text-sm font-semibold 
-              text-blue-600 
-              hover:text-blue-800 
-              hover:bg-blue-50 
-              transition-colors 
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 
-              rounded-md p-2 ml-4 
-              cursor-pointer"
-            aria-label="Volver al listado"
-          >
-            <ArrowLeft className="h-4 w-4 mr-1" /> Volver
-          </button>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="nombre"
-                render={({ field, fieldState }) => (
-                  <FormItem>
-                    <RequiredLabel>Nombre</RequiredLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Director General"
-                        autoComplete="off"
-                        maxLength={50}
-                        {...field}
-                        className={`
-                          ${
-                            fieldState.invalid
-                              ? "border-red-500 focus:ring-red-500"
-                              : "focus:ring-blue-500"
-                          }
-                            transition-all duration-300 w-full
-                          `}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+        )}
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="nombre"
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <RequiredLabel>Nombre</RequiredLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Director General"
+                      autoComplete="off"
+                      maxLength={50}
+                      {...field}
+                      className={inputErrorClass(fieldState.invalid)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex justify-end space-x-4 pt-4">
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-blue-600 hover:bg-blue-700 hover: cursor-pointer text-white transition-colors duration-300"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Spinner className="mr-2 h-4 w-4 animate-spin" />
+                    {isEditMode ? "Actualizando..." : "Registrando..."}
+                  </>
+                ) : isEditMode ? (
+                  "Actualizar"
+                ) : (
+                  "Registrar"
                 )}
-              />
-              <div className="flex justify-end space-x-4 pt-4">
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-blue-600 hover:bg-blue-700 hover: cursor-pointer text-white transition-colors duration-300"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Spinner className="mr-2 h-4 w-4 animate-spin" />
-                      {isEditMode ? "Actualizando..." : "Registrando..."}
-                    </>
-                  ) : isEditMode ? (
-                    "Actualizar"
-                  ) : (
-                    "Registrar"
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={isSubmitting}
-                  onClick={() => resetForm()}
-                  className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
-                >
-                  Cancelar
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isSubmitting}
+                onClick={() => resetForm()}
+                className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
+              >
+                Cancelar
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 };

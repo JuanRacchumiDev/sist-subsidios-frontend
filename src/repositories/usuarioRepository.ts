@@ -23,17 +23,15 @@ export const getAll = async (): Promise<UsuarioResponse> => {
     }
 }
 
-export const getAllWithPaginate = async (queryParams: string) => {
+export const getAllPaginate = async (queryParams: string) => {
     try {
         const urlApi = `${'/usuarios/paginate?'}${queryParams}`
 
         const response = await apiClient.get(urlApi)
 
-        console.log('---- response getAllWithPaginate ----')
+        console.log('---- response getAllPaginate ----')
         console.log({ response })
-        const { data: dataUsuarios } = response
-
-        const { result, data, pagination, status } = dataUsuarios
+        const { data: { result, data, pagination, status } } = response
 
         return {
             result,

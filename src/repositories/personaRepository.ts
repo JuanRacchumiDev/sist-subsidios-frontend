@@ -22,20 +22,42 @@ export const getAll = async (): Promise<PersonaResponse> => {
     }
 }
 
-export const getAllWithPaginate = async (queryParams: string) => {
+export const getAllNoUsuarios = async (): Promise<PersonaResponse> => {
     try {
-        const urlApi = `${'/personas/buscar-por-grupo/paginate?'}${queryParams}`
-        console.log({ urlApi })
+        const response = await apiClient.get('/personas/no-usuarios')
 
-        const response = await apiClient.get(urlApi)
-
-        const { data: dataPersonas } = response
-
-        const { result, data, pagination, status } = dataPersonas
+        const { data: { result, data, status, message, error } } = response
 
         return {
             result,
             data,
+            status,
+            message,
+            error
+        }
+
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+        console.log('errorMessage', errorMessage)
+        return { result: false, error: errorMessage, status: 500 }
+    }
+}
+
+export const getAllPaginate = async (queryParams: string) => {
+    try {
+        const urlApi = `/personas/buscar-por-grupo/paginate?${queryParams}`
+        console.log({ urlApi })
+
+        const response = await apiClient.get(urlApi)
+
+        console.log({ response })
+
+        const { data: { result, data, pagination, status, message } } = response
+
+        return {
+            result,
+            data,
+            message,
             pagination,
             status
         }

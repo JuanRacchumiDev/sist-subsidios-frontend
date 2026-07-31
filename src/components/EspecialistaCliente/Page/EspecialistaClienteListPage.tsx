@@ -2,7 +2,7 @@ import { EspecialistaClienteList } from "../EspecialistaClienteList";
 
 export const EspecialistaClienteListPage = () => {
   return (
-    <div>
+    <div className="w-full">
       <EspecialistaClienteList />
     </div>
   );

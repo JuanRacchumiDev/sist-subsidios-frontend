@@ -2,7 +2,7 @@ import { DescansoMedico } from '../interfaces/IDescansoMedico'
 import {
     getAll,
     getById,
-    getAllWithPaginate,
+    getAllPaginate,
     getAllForReports,
     create,
     update
@@ -17,10 +17,10 @@ export const getDescansos = async () => {
     }
 }
 
-export const getDescansosWithPaginate = async (
+export const getDescansosPaginate = async (
     page: number,
     limit: number,
-    filters: DescansoMedicoFilter = {}
+    filters: {}
 ) => {
     const params: any = {
         page: page.toString(),
@@ -37,7 +37,7 @@ export const getDescansosWithPaginate = async (
 
     console.log({ queryParams })
 
-    const response = await getAllWithPaginate(queryParams)
+    const response = await getAllPaginate(queryParams)
 
     return {
         ...response

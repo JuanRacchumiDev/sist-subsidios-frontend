@@ -1,10 +1,10 @@
-import { Usuario, UsuarioFilter } from '../interfaces/IUsuario'
+import { Usuario } from '../interfaces/IUsuario'
 import {
     getAll,
     getById,
     create,
     update,
-    getAllWithPaginate,
+    getAllPaginate,
     updateEstado
 } from '../repositories/usuarioRepository'
 
@@ -16,10 +16,10 @@ export const getUsuarios = async () => {
     }
 }
 
-export const getUsuariosWithPaginate = async (
+export const getUsuariosPaginate = async (
     page: number,
     limit: number,
-    filters: UsuarioFilter = {}
+    filters: {}
 ) => {
     const params: any = {
         page: page.toString(),
@@ -36,7 +36,9 @@ export const getUsuariosWithPaginate = async (
 
     console.log({ queryParams })
 
-    const response = await getAllWithPaginate(queryParams)
+    const response = await getAllPaginate(queryParams)
+
+    console.log({ response })
 
     return {
         ...response

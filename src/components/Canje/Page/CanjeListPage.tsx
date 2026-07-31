@@ -2,7 +2,7 @@ import { CanjeList } from "../CanjeList";
 
 export const CanjeListPage = () => {
   return (
-    <div>
+    <div className="w-full">
       <CanjeList />
     </div>
   );

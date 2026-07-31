@@ -1,14 +1,18 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "../ui/card";
 import { DescansoMedicoTable } from "./DescansoMedicoTable";
-import { FileSpreadsheet } from "lucide-react";
+import { ArrowLeft, FileSpreadsheet, GraduationCap, Plus } from "lucide-react";
 import { Spinner } from "../Common/Spinner";
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { getDescansosForReport } from "../../services/descansoMedicoService";
 import HDate from "../../helpers/HDate";
+import { buttonVariants } from "../ui/button";
+import { cn } from "@/lib/utils";
 
 export const DescansoMedicoList = () => {
+  const newRoute = `/descanso-medico/nuevo`;
+
   const [loading, setLoading] = useState(false);
 
   const handleDownloadReport = async (type: "pdf" | "excel") => {
@@ -17,11 +21,13 @@ export const DescansoMedicoList = () => {
     try {
       const response = await getDescansosForReport(type);
 
-      if (!response.result) {
-        throw new Error(response.error || "Error al generar el reporte");
+      const { result, error, data } = response;
+
+      if (!result) {
+        throw new Error(error || "Error al generar el reporte");
       }
 
-      const blob = new Blob([response.data], {
+      const blob = new Blob([data], {
         type:
           type === "pdf"
             ? "application/pdf"
@@ -51,12 +57,39 @@ export const DescansoMedicoList = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Listado de descansos médicos
-        </h1>
-        <div className="flex space-x-3 items-center">
+    <div className="animate-in fade-in duration-200">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-1.5 text-slate-500">
+            <GraduationCap className="w-3.5 h-3.5" />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Gestión de subsidios de salud
+            </span>
+          </div>
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+            Listado de{" "}
+            <span className="text-indigo-600">descansos médicos</span>
+          </h1>
+          <p className="text-xs text-slate-500">
+            Administra, visualiza y gestiona la información de todos los
+            descansos médicos.
+          </p>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
+          <Link
+            to="/dashboard"
+            className={cn(
+              buttonVariants({ variant: "outline", size: "sm" }),
+              "hidden sm:flex gap-1.5 border-slate-200 text-slate-600 hover:bg-slate-50 text-xs px-3 h-8",
+            )}
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Panel Principal
+          </Link>
+
           {loading ? (
             <div className="flex items-center space-x-2">
               <Spinner className="h-5 w-5 animate-spin text-blue-600" />
@@ -75,15 +108,21 @@ export const DescansoMedicoList = () => {
           )}
 
           <Link
-            to="/descanso-medico/nuevo"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+            to={newRoute}
+            className={cn(
+              buttonVariants({ size: "sm" }), // Tamaño ajustado a 'sm' para entorno compacto
+              "bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs gap-1.5 px-3 h-8 text-xs font-medium transition-colors",
+            )}
           >
+            <Plus className="w-4 h-4" />
             Nuevo descanso médico
           </Link>
         </div>
       </div>
-      <Card className="shadow-lg border-gray-200">
-        <CardContent>
+
+      {/* Main Content Card */}
+      <Card className="border-slate-200 shadow-sm rounded-lg overflow-hidden bg-white">
+        <CardContent className="p-0">
           <DescansoMedicoTable />
         </CardContent>
       </Card>

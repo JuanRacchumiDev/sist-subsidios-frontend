@@ -2,7 +2,7 @@ import { Canje, CanjeFilter } from '../interfaces/ICanje'
 import {
     getAll,
     getById,
-    getAllWithPaginate,
+    getAllPaginate,
     getAllForReports,
     create,
     update
@@ -16,7 +16,7 @@ export const getCanjes = async () => {
     }
 }
 
-export const getCanjesWithPaginate = async (
+export const getCanjesPaginate = async (
     page: number,
     limit: number,
     filters: CanjeFilter = {}
@@ -36,7 +36,7 @@ export const getCanjesWithPaginate = async (
 
     console.log({ queryParams })
 
-    const response = await getAllWithPaginate(queryParams)
+    const response = await getAllPaginate(queryParams)
 
     return {
         ...response

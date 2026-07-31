@@ -2,7 +2,7 @@ import { TrabajadorSocialList } from "../TrabajadorSocialList";
 
 export const TrabajadorSocialListPage = () => {
   return (
-    <div>
+    <div className="w-full">
       <TrabajadorSocialList />
     </div>
   );

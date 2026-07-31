@@ -1,4 +1,10 @@
-import { Calendar, CalendarCheck, CalendarX } from "lucide-react";
+import {
+  ArrowLeft,
+  Calendar,
+  CalendarCheck,
+  CalendarX,
+  GraduationCap,
+} from "lucide-react";
 import { Spinner } from "../Common/Spinner";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
@@ -6,6 +12,9 @@ import { CanjeTable } from "./CanjeTable";
 import { useState } from "react";
 import { getCanjesForReport } from "../../services/canjeService";
 import HDate from "../../helpers/HDate";
+import { Link } from "react-router-dom";
+import { buttonVariants } from "../ui/button";
+import { cn } from "@/lib/utils";
 
 type ReportType = "no_consecutivos" | "consecutivos" | "global";
 
@@ -22,13 +31,13 @@ export const CanjeList = () => {
     try {
       const response = await getCanjesForReport(outputType, reportType, limit);
 
-      console.log({ response });
+      const { result, error, data } = response;
 
-      if (!response.result) {
-        throw new Error(response.error || "Error al generar el reporte");
+      if (!result) {
+        throw new Error(error || "Error al generar el reporte");
       }
 
-      const blob = new Blob([response.data], {
+      const blob = new Blob([data], {
         type:
           outputType === "pdf"
             ? "application/pdf"
@@ -58,10 +67,35 @@ export const CanjeList = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Listado de canjes</h1>
-        <div className="flex space-x-3 items-center">
+    <div className="animate-in fade-in duration-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-1.5 text-slate-500">
+            <GraduationCap className="w-3.5 h-3.5" />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Gestión de subsidios de salud
+            </span>
+          </div>
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+            Listado de <span className="text-indigo-600">canjes</span>
+          </h1>
+          <p className="text-xs text-slate-500">
+            Administra, visualiza y gestiona la información de todos los canjes.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Link
+            to="/dashboard"
+            className={cn(
+              buttonVariants({ variant: "outline", size: "sm" }),
+              "hidden sm:flex gap-1.5 border-slate-200 text-slate-600 hover:bg-slate-50 text-xs px-3 h-8",
+            )}
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Panel Principal
+          </Link>
+
           {loading ? (
             <div className="flex items-center space-x-2">
               <Spinner className="h-5 w-5 animate-spin text-blue-600" />
@@ -74,27 +108,25 @@ export const CanjeList = () => {
                 onClick={() =>
                   handleDownloadReport("excel", "no_consecutivos", 90)
                 }
-                className="bg-transparent border border-gray-400 text-red-600 hover:bg-red-50 hover:border-red-600 hover:text-red-700 transition-colors shadow-none p-2 cursor-pointer"
+                className="bg-transparent border border-gray-400 text-green-600 hover:bg-green-50 hover:border-green-600 hover:text-green-700 transition-colors shadow-none px-2 py-2 cursor-pointer"
                 title="Reporte 90 días No Consecutivos (Excel)"
               >
                 <CalendarX className="h-6 w-6" />
               </Button>
-
               {/* Ícono 2: 150 días Consecutivos */}
               <Button
                 onClick={() =>
                   handleDownloadReport("excel", "consecutivos", 150)
                 }
-                className="bg-transparent border border-gray-400 text-yellow-600 hover:bg-yellow-50 hover:border-yellow-600 hover:text-yellow-700 transition-colors shadow-none p-2 cursor-pointer"
+                className="bg-transparent border border-gray-400 text-green-600 hover:bg-green-50 hover:border-green-600 hover:text-green-700 transition-colors shadow-none px-2 py-2 cursor-pointer"
                 title="Reporte 150 días Consecutivos (Excel)"
               >
                 <CalendarCheck className="h-6 w-6" />
               </Button>
-
               {/* Ícono 3: 340 días Global (Consecutivos y No Consecutivos) */}
               <Button
                 onClick={() => handleDownloadReport("excel", "global", 340)}
-                className="bg-transparent border border-gray-400 text-blue-600 hover:bg-blue-50 hover:border-blue-600 hover:text-blue-700 transition-colors shadow-none p-2 cursor-pointer"
+                className="bg-transparent border border-gray-400 text-green-600 hover:bg-green-50 hover:border-green-600 hover:text-green-700 transition-colors shadow-none px-2 py-2 cursor-pointer"
                 title="Reporte 340 días Global (Excel)"
               >
                 <Calendar className="h-6 w-6" />
@@ -103,8 +135,9 @@ export const CanjeList = () => {
           )}
         </div>
       </div>
-      <Card className="shadow-lg border-gray-200">
-        <CardContent>
+
+      <Card className="border-slate-200 shadow-sm rounded-lg overflow-hidden bg-white">
+        <CardContent className="p-0">
           <CanjeTable />
         </CardContent>
       </Card>

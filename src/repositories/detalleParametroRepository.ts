@@ -24,9 +24,9 @@ export const getAll = async (queryParams: string): Promise<DetalleResponse> => {
     }
 }
 
-export const getAllWithPaginate = async (clase: number, queryParams: string) => {
+export const getAllPaginate = async (queryParams: string) => {
     try {
-        const urlApi = `${'/detalles/paginate/'}${clase}${'?'}${queryParams}`
+        const urlApi = `${'/detalles/paginate'}${'?'}${queryParams}`
 
         const response = await apiClient.get(urlApi)
 

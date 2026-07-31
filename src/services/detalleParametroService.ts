@@ -1,9 +1,9 @@
-import { Detalle } from '../interfaces/IDetalleParametro'
+import { Detalle, DetallePaginateResponse } from '../interfaces/IDetalleParametro'
 import { ParametroClase } from '../constants/parametroClase'
 import {
     getAll,
     getById,
-    getAllWithPaginate,
+    getAllPaginate,
     create,
     update
 } from '../repositories/detalleParametroRepository'
@@ -26,24 +26,24 @@ export const getDetalles = async (
     }
 }
 
-export const getDetallesWithPaginate = async (
-    clase: ParametroClase,
+export const getDetallesPaginate = async (
     page: number,
     limit: number,
-    filter: string | Record<string, any>
-) => {
-    const filterValue = typeof filter === 'object'
-        ? JSON.stringify(filter)
-        : filter
+    filters: {}
+): Promise<DetallePaginateResponse> => {
 
     const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
-        filter: filterValue
+        ...Object.fromEntries(
+            Object.entries(filters).filter(([, value]) => value)
+        )
     }).toString()
 
-    const response = await getAllWithPaginate(clase, queryParams)
-    console.log('---- detalleParametroService getDetallesWithPaginate ----')
+    console.log({ queryParams })
+
+    const response = await getAllPaginate(queryParams)
+    console.log('---- detalleParametroService getDetallePaginate ----')
     console.log({ response })
 
     return {

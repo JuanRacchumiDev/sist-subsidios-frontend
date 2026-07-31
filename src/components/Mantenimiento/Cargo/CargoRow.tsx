@@ -1,14 +1,14 @@
-import React, { useState } from "react";
 import { Cargo, CargoResponse } from "../../../interfaces/ICargo";
+import React, { useState } from "react";
 import { TableCell, TableRow } from "../../ui/table";
 import {
-  AlertTriangle,
   CircleCheck,
   CircleX,
-  Edit,
   MoreHorizontal,
   ToggleLeft,
   ToggleRight,
+  Edit,
+  AlertTriangle,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -20,9 +20,9 @@ import {
 } from "../../ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../ui/button";
+import { updateCargoByEstado } from "../../../services/cargoService";
 import { useToast } from "../../../context/ToastContext";
 import { ConfirmDialog } from "../../Common/ConfirmDialog";
-import { updateCargoByEstado } from "../../../services/cargoService";
 
 interface Props {
   cargo: Cargo;
@@ -46,9 +46,7 @@ export const CargoRow: React.FC<Props> = ({ cargo, onStatusChange }) => {
   const modalMessage = `¿Deseas <strong>${action}</strong> el cargo: <strong>${cargo.nombre}</strong>?`;
 
   const handleShowDetail = () => {
-    const url = `/mantenimiento/cargo/editar/${cargo.id}`;
-    console.log({ url });
-    navigate(url);
+    navigate(`/mantenimiento/cargo/editar/${cargo.id}`);
   };
 
   // Abre el modal
@@ -78,14 +76,14 @@ export const CargoRow: React.FC<Props> = ({ cargo, onStatusChange }) => {
       if (result && data) {
         showToast(
           "success",
-          message || "Estado del cargo actualizado con éxito.",
+          message || "Estado de el cargo actualizado con éxito.",
         );
 
         if (onStatusChange) {
           onStatusChange(cargo.id);
         }
       } else {
-        showToast("error", error || "Error al actualizar el cargo.");
+        showToast("error", error || "Error al actualizar la cargo.");
       }
     } catch (error) {
       console.error("Error en la actualización de estado:", error);
@@ -96,6 +94,7 @@ export const CargoRow: React.FC<Props> = ({ cargo, onStatusChange }) => {
     }
   };
 
+  // Determinar texto y color de acción
   const actionText = cargo.estado ? "Desactivar" : "Activar";
   const ActionIcon = cargo.estado ? ToggleLeft : ToggleRight;
   const actionColor = cargo.estado ? "text-red-600" : "text-green-600";
@@ -105,52 +104,56 @@ export const CargoRow: React.FC<Props> = ({ cargo, onStatusChange }) => {
     <>
       <TableRow
         key={cargo.id}
-        className="hover:bg-blue-100 hover:cursor-pointer transition-colors duration-200"
+        className="hover:bg-slate-50/80 hover:cursor-pointer transition-colors duration-150 border-b border-slate-100"
       >
-        <TableCell className="py-3">{cargo.nombre}</TableCell>
-        <TableCell className="py-3">
-          {cargo.estado ? (
-            <CircleCheck className="text-green-500 w-5 h-5" />
-          ) : (
-            <CircleX className="text-red-500 w-5 h-5" />
-          )}
+        <TableCell className="py-2 px-3 text-xs text-slate-500">
+          {cargo.nombre}
         </TableCell>
-        <TableCell className="py-3">
+        <TableCell className="py-2 px-3 text-center">
+          <div className="flex items-center justify-center">
+            {cargo.estado ? (
+              <CircleCheck className="text-emerald-500 w-4 h-4 stroke-[2.5]" />
+            ) : (
+              <CircleX className="text-rose-500 w-4 h-4 stroke-[2.5]" />
+            )}
+          </div>
+        </TableCell>
+        <TableCell className="py-2 px-3 text-right">
           <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
-            <DropdownMenuTrigger
-              asChild
-              className="focus:outline-none focus:ring-2 z-40 focus:ring-gray-400 focus:border-transparent transition duration-300 cursor-pointer"
-            >
-              <Button variant="ghost" className="h-8 w-8 p-0">
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="h-7 w-7 p-0 focus-visible:ring-1 focus-visible:ring-slate-400 focus-visible:ring-offset-0"
+              >
                 <span className="sr-only">Abrir menú de acciones</span>
-                <MoreHorizontal className="h-4 w-4 text-gray-500" />
+                <MoreHorizontal className="h-3.5 w-3.5 text-slate-400" />
               </Button>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent
               align="end"
-              className="bg-white border shadow-lg"
+              className="bg-white border border-slate-200 shadow-md min-w-[140px] text-xs p-1 rounded-md"
             >
-              <DropdownMenuLabel className="font-semibold text-gray-700">
+              <DropdownMenuLabel className="font-medium text-slate-400 px-2 py-1 text-[10px] uppercase tracking-wider">
                 Acciones
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="bg-slate-100" />
 
               <DropdownMenuItem
                 onClick={handleShowDetail}
-                className="cursor-pointer hover:bg-gray-100 transition-colors flex items-center space-x-2 text-blue-600"
+                className="cursor-pointer hover:bg-slate-50 rounded-sm py-1 px-2 flex items-center gap-2 text-slate-700"
               >
-                <Edit className="h-4 w-4" />
-                <span>Ver/Editar Detalle</span>
+                <Edit className="h-3.5 w-3.5 text-slate-400" />
+                <span>Ver/Editar detalle</span>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="bg-slate-100" />
 
               <DropdownMenuItem
                 onClick={handleOpenStatusModal}
-                className={`cursor-pointer ${hoverBgColor} transition-colors flex items-center space-x-2 ${actionColor}`}
+                className={`cursor-pointer rounded-sm py-1 px-2 flex items-center gap-2 font-medium ${actionColor} ${hoverBgColor}`}
               >
-                <ActionIcon className="h-4 w-4" />
-                <span>{actionText} Cargo</span>
+                <ActionIcon className="h-3.5 w-3.5" />
+                <span>{actionText}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
