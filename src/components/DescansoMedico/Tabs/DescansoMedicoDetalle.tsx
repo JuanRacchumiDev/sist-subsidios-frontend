@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
+import * as z from "zod";
+import { UseFormReturn } from "react-hook-form";
+import { useParams } from "react-router-dom";
 import {
   FormControl,
   FormField,
   FormItem,
   FormMessage,
 } from "../../../components/ui/form";
+import { Input } from "../../../components/ui/input";
 import { RequiredLabel } from "../../../components/Common/RequiredLabel";
 import {
   Select,
@@ -15,31 +19,36 @@ import {
 } from "../../../components/ui/select";
 import { differenceInCalendarDays, format, parseISO } from "date-fns";
 import { useToast } from "../../../context/ToastContext";
+
 import { Empresa } from "../../../interfaces/IEmpresa";
-import { getEmpresas } from "../../../services/empresaService";
-import SearchableCombobox from "../../../components/Common/SearchableCombobox";
 import { Persona, PersonaResponse } from "../../../interfaces/IPersona";
+import { Detalle } from "../../../interfaces/IDetalleParametro";
+import { DocumentoTipoContingencia } from "../../../interfaces/IDocumentoTipoContingencia";
+import { Adjunto } from "../../../interfaces/IAdjunto";
+import { DescansoMedico } from "../../../interfaces/IDescansoMedico";
+
+import { getEmpresas } from "../../../services/empresaService";
 import {
   getPersonas,
   getPersonasByEmpresaWithGrupo,
 } from "../../../services/personaService";
-import { Detalle } from "../../../interfaces/IDetalleParametro";
 import {
   getDetalleById,
   getDetalles,
 } from "../../../services/detalleParametroService";
-import { DocumentoTipoContingencia } from "../../../interfaces/IDocumentoTipoContingencia";
-import { Input } from "../../../components/ui/input";
-import * as z from "zod";
-import { UseFormReturn } from "react-hook-form";
-import { useParams } from "react-router-dom";
+import { getDescansoById } from "../../../services/descansoMedicoService";
+
+import SearchableCombobox from "../../../components/Common/SearchableCombobox";
 import { formSchema } from "../DescansoMedicoForm";
 import Documentos from "../../../components/TipoContingencia/Documentos";
 import { getAuthData } from "../../../utils/authMemo";
-import { Adjunto } from "../../../interfaces/IAdjunto";
-import { DescansoMedico } from "../../../interfaces/IDescansoMedico";
-import { getDescansoById } from "../../../services/descansoMedicoService";
+
 import { ParametroClase } from "../../../constants/parametroClase";
+
+// Constantes de validación para adjuntos
+export const MAX_FILE_SIZE_MB = 2;
+export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+export const ALLOWED_FILE_TYPES = ["application/pdf"];
 
 interface DescansoMedicoDetalleProps {
   form: UseFormReturn<z.infer<typeof formSchema>>;
@@ -190,11 +199,8 @@ export const DescansoMedicoDetalle = ({
   const [isCitt, setIsCitt] = useState<boolean | null>(false);
 
   const selectedEmpresaId = form.watch("idEmpresa");
-
   const selectedTipoDescansoId = form.watch("idTipoDescansoMedico");
-
   const selectedTipoContingenciaId = form.watch("idTipoContingencia");
-
   const fechaInicio = form.watch("fechaInicio");
   const fechaFinal = form.watch("fechaFinal");
 
@@ -343,61 +349,68 @@ export const DescansoMedicoDetalle = ({
   }, [fechaInicio, fechaFinal, form]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-1 text-xs">
+      {/* Empresa */}
       <FormField
         control={form.control}
         name="idEmpresa"
-        render={({ field, fieldState }) => {
-          return (
-            <FormItem className="flex flex-col">
-              <RequiredLabel>Empresa</RequiredLabel>
-              <SearchableCombobox<Empresa>
-                placeholder="Buscar una empresa"
-                options={empresas}
-                value={field.value}
-                onChange={field.onChange}
-                displayKey="nombre_o_razon_social"
-                valueKey="id"
-                searchKeys={["nombre_o_razon_social"]}
-                disabled={isEmpresaDisabled}
-                isInvalid={fieldState.invalid}
-              />
-              <FormMessage />
-            </FormItem>
-          );
-        }}
+        render={({ field, fieldState }) => (
+          <FormItem className="flex flex-col space-y-1">
+            <RequiredLabel className="text-xs font-semibold text-gray-700">
+              Empresa
+            </RequiredLabel>
+            <SearchableCombobox<Empresa>
+              placeholder="Buscar una empresa"
+              options={empresas}
+              value={field.value}
+              onChange={field.onChange}
+              displayKey="nombre_o_razon_social"
+              valueKey="id"
+              searchKeys={["nombre_o_razon_social"]}
+              disabled={isEmpresaDisabled}
+              isInvalid={fieldState.invalid}
+              className="h-8 text-xs"
+            />
+            <FormMessage className="text-[10px]" />
+          </FormItem>
+        )}
       />
 
+      {/* Colaborador */}
       <FormField
         control={form.control}
         name="idColaborador"
-        render={({ field, fieldState }) => {
-          return (
-            <FormItem className="flex flex-col">
-              <RequiredLabel>Colaborador</RequiredLabel>
-              <SearchableCombobox<Persona>
-                placeholder="Buscar un colaborador"
-                options={colaboradores}
-                value={field.value}
-                onChange={field.onChange}
-                displayKey="nombre_completo"
-                valueKey="id"
-                searchKeys={["nombre_completo"]}
-                disabled={isColaboradorDisabled}
-                isInvalid={fieldState.invalid}
-              />
-              <FormMessage />
-            </FormItem>
-          );
-        }}
+        render={({ field, fieldState }) => (
+          <FormItem className="flex flex-col space-y-1">
+            <RequiredLabel className="text-xs font-semibold text-gray-700">
+              Colaborador
+            </RequiredLabel>
+            <SearchableCombobox<Persona>
+              placeholder="Buscar un colaborador"
+              options={colaboradores}
+              value={field.value}
+              onChange={field.onChange}
+              displayKey="nombre_completo"
+              valueKey="id"
+              searchKeys={["nombre_completo"]}
+              disabled={isColaboradorDisabled}
+              isInvalid={fieldState.invalid}
+              className="h-8 text-xs"
+            />
+            <FormMessage className="text-[10px]" />
+          </FormItem>
+        )}
       />
 
+      {/* Tipo de descanso médico */}
       <FormField
         control={form.control}
         name="idTipoDescansoMedico"
         render={({ field, fieldState }) => (
-          <FormItem className="w-full">
-            <RequiredLabel>Tipo de descanso médico</RequiredLabel>
+          <FormItem className="w-full space-y-1">
+            <RequiredLabel className="text-xs font-semibold text-gray-700">
+              Tipo de descanso médico
+            </RequiredLabel>
             <Select
               onValueChange={field.onChange}
               value={field.value ?? ""}
@@ -405,67 +418,70 @@ export const DescansoMedicoDetalle = ({
             >
               <FormControl>
                 <SelectTrigger
-                  className={`w-full ${
+                  className={`w-full h-8 text-xs ${
                     fieldState.invalid
                       ? "border-red-500 focus:ring-red-500"
                       : "focus:ring-blue-500"
-                  } focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer `}
+                  } focus:ring-1 transition-all duration-200 cursor-pointer`}
                 >
-                  <SelectValue placeholder="Seleccionar tipo de descanso médico" />
+                  <SelectValue placeholder="Seleccionar tipo" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-white text-xs">
                 {tipoDescansos.map((td) => (
                   <SelectItem
                     key={td.id}
                     value={td.id}
-                    className="cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="cursor-pointer hover:bg-gray-100 py-1 text-xs"
                   >
                     {td.nombre}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <FormMessage />
+            <FormMessage className="text-[10px]" />
           </FormItem>
         )}
       />
 
+      {/* Código CITT */}
       {isCitt && (
         <FormField
           control={form.control}
           name="codigoCitt"
           render={({ field, fieldState }) => (
-            <FormItem>
-              <RequiredLabel>Código CITT</RequiredLabel>
+            <FormItem className="space-y-1">
+              <RequiredLabel className="text-xs font-semibold text-gray-700">
+                Código CITT
+              </RequiredLabel>
               <FormControl>
                 <Input
                   placeholder="0253523"
                   maxLength={30}
                   autoComplete="off"
                   {...field}
-                  className={`
-                    ${
-                      fieldState.invalid
-                        ? "border-red-500 focus:ring-red-500"
-                        : "focus:ring-blue-500"
-                    }
-                      transition-all duration-300
-                  `}
+                  className={`h-8 text-xs ${
+                    fieldState.invalid
+                      ? "border-red-500 focus:ring-red-500"
+                      : "focus:ring-blue-500"
+                  } transition-all duration-200`}
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-[10px]" />
             </FormItem>
           )}
         />
       )}
 
+      {/* Tipo de Contingencia */}
       <FormField
         control={form.control}
         name="idTipoContingencia"
         render={({ field, fieldState }) => (
-          <FormItem className="w-full">
-            <RequiredLabel>Tipo de Contingencia</RequiredLabel>
+          <FormItem className="w-full space-y-1">
+            <RequiredLabel className="text-xs font-semibold text-gray-700">
+              Tipo de Contingencia
+            </RequiredLabel>
             <Select
               onValueChange={field.onChange}
               value={field.value ?? ""}
@@ -473,49 +489,56 @@ export const DescansoMedicoDetalle = ({
             >
               <FormControl>
                 <SelectTrigger
-                  className={`w-full ${
+                  className={`w-full h-8 text-xs ${
                     fieldState.invalid
                       ? "border-red-500 focus:ring-red-500"
                       : "focus:ring-blue-500"
-                  } focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer `}
+                  } focus:ring-1 transition-all duration-200 cursor-pointer`}
                 >
-                  <SelectValue placeholder="Seleccionar tipo de contingencia" />
+                  <SelectValue placeholder="Seleccionar contingencia" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-white text-xs">
                 {tipoContingencias.map((tc) => (
                   <SelectItem
                     key={tc.id}
                     value={tc.id}
-                    className="cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="cursor-pointer hover:bg-gray-100 py-1 text-xs"
                   >
                     {tc.nombre}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <FormMessage />
+            <FormMessage className="text-[10px]" />
           </FormItem>
         )}
       />
 
+      {/* Componente de Documentos adjuntos con validaciones */}
       {documentosTipoContingencia.length > 0 && (
-        <Documentos
-          documentos={documentosTipoContingencia}
-          form={form}
-          adjuntosExistentes={adjuntos}
-          isModeLetter={isModeLetter}
-          idDescanso={id}
-        />
+        <div className="col-span-1 md:col-span-2">
+          <Documentos
+            documentos={documentosTipoContingencia}
+            form={form}
+            adjuntosExistentes={adjuntos}
+            isModeLetter={isModeLetter}
+            idDescanso={id}
+            maxFileSizeMb={MAX_FILE_SIZE_MB}
+          />
+        </div>
       )}
 
-      <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-4 gap-6">
+      {/* Fechas y Cálculo de Días */}
+      <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-4 gap-3 pt-1 border-t border-gray-100">
         <FormField
           control={form.control}
           name="fechaOtorgamiento"
           render={({ field, fieldState }) => (
-            <FormItem>
-              <RequiredLabel>Fecha de Otorgamiento</RequiredLabel>
+            <FormItem className="space-y-1">
+              <RequiredLabel className="text-xs font-semibold text-gray-700">
+                F. Otorgamiento
+              </RequiredLabel>
               <FormControl>
                 <Input
                   type="date"
@@ -526,17 +549,14 @@ export const DescansoMedicoDetalle = ({
                       e.target.value ? parseISO(e.target.value) : null,
                     )
                   }
-                  className={`
-                    ${
-                      fieldState.invalid
-                        ? "border-red-500 focus:ring-red-500"
-                        : "focus:ring-blue-500"
-                    }
-                      transition-all duration-300
-                  `}
+                  className={`h-8 text-xs ${
+                    fieldState.invalid
+                      ? "border-red-500 focus:ring-red-500"
+                      : "focus:ring-blue-500"
+                  } transition-all duration-200`}
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-[10px]" />
             </FormItem>
           )}
         />
@@ -545,8 +565,10 @@ export const DescansoMedicoDetalle = ({
           control={form.control}
           name="fechaInicio"
           render={({ field, fieldState }) => (
-            <FormItem>
-              <RequiredLabel>Fecha de Inicio</RequiredLabel>
+            <FormItem className="space-y-1">
+              <RequiredLabel className="text-xs font-semibold text-gray-700">
+                Fecha Inicio
+              </RequiredLabel>
               <FormControl>
                 <Input
                   type="date"
@@ -557,17 +579,14 @@ export const DescansoMedicoDetalle = ({
                       e.target.value ? parseISO(e.target.value) : null,
                     )
                   }
-                  className={`
-                    ${
-                      fieldState.invalid
-                        ? "border-red-500 focus:ring-red-500"
-                        : "focus:ring-blue-500"
-                    }
-                      transition-all duration-300
-                  `}
+                  className={`h-8 text-xs ${
+                    fieldState.invalid
+                      ? "border-red-500 focus:ring-red-500"
+                      : "focus:ring-blue-500"
+                  } transition-all duration-200`}
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-[10px]" />
             </FormItem>
           )}
         />
@@ -576,8 +595,10 @@ export const DescansoMedicoDetalle = ({
           control={form.control}
           name="fechaFinal"
           render={({ field, fieldState }) => (
-            <FormItem>
-              <RequiredLabel>Fecha final</RequiredLabel>
+            <FormItem className="space-y-1">
+              <RequiredLabel className="text-xs font-semibold text-gray-700">
+                Fecha Final
+              </RequiredLabel>
               <FormControl>
                 <Input
                   type="date"
@@ -588,17 +609,14 @@ export const DescansoMedicoDetalle = ({
                       e.target.value ? parseISO(e.target.value) : null,
                     )
                   }
-                  className={`
-                    ${
-                      fieldState.invalid
-                        ? "border-red-500 focus:ring-red-500"
-                        : "focus:ring-blue-500"
-                    }
-                      transition-all duration-300
-                  `}
+                  className={`h-8 text-xs ${
+                    fieldState.invalid
+                      ? "border-red-500 focus:ring-red-500"
+                      : "focus:ring-blue-500"
+                  } transition-all duration-200`}
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-[10px]" />
             </FormItem>
           )}
         />
@@ -607,25 +625,24 @@ export const DescansoMedicoDetalle = ({
           control={form.control}
           name="totalDias"
           render={({ fieldState }) => (
-            <FormItem>
-              <RequiredLabel>Número de Días</RequiredLabel>
+            <FormItem className="space-y-1">
+              <RequiredLabel className="text-xs font-semibold text-gray-700">
+                Total Días
+              </RequiredLabel>
               <FormControl>
                 <Input
                   readOnly
                   value={totalDias !== null ? totalDias.toString() : ""}
                   disabled={isModeLetter}
-                  className={`
-                    ${
-                      fieldState.invalid
-                        ? "border-red-500 focus:ring-red-500"
-                        : "focus:ring-blue-500"
-                    }
-                      transition-all duration-300
-                  `}
+                  className={`h-8 text-xs bg-gray-50 font-medium ${
+                    fieldState.invalid
+                      ? "border-red-500 focus:ring-red-500"
+                      : "focus:ring-blue-500"
+                  } transition-all duration-200`}
                   autoComplete="off"
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-[10px]" />
             </FormItem>
           )}
         />

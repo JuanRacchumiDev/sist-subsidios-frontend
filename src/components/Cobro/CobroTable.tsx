@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { CobroRow } from "./CobroRow";
 import { Cobro, Pagination as PaginationType } from "../../interfaces/ICobro";
-import { getCobrosWithPaginate } from "../../services/cobroService";
+import { getCobrosPaginate } from "../../services/cobroService";
 import {
   Pagination,
   PaginationContent,
@@ -46,7 +46,7 @@ export const CobroTable = () => {
       setIsLoading(true);
       try {
         const { currentPage, limit } = pagination;
-        const response = await getCobrosWithPaginate(currentPage, limit);
+        const response = await getCobrosPaginate(currentPage, limit);
 
         const { result, data, pagination: detailtPagination } = response;
 

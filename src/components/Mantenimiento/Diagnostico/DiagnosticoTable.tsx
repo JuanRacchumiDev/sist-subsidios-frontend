@@ -2,7 +2,7 @@ import {
   Diagnostico,
   Pagination as PaginationType,
 } from "../../../interfaces/IDiagnostico";
-import { getDiagnosticosWithPaginate } from "../../../services/diagnosticoService";
+import { getDiagnosticosPaginate } from "../../../services/diagnosticoService";
 import React, { useEffect, useState } from "react";
 import { Input } from "../../ui/input";
 import {
@@ -70,7 +70,7 @@ export const DiagnosticoTable: React.FC = () => {
       try {
         const { currentPage, limit } = pagination;
 
-        const response = await getDiagnosticosWithPaginate(
+        const response = await getDiagnosticosPaginate(
           currentPage,
           limit,
           filterQuery,

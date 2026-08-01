@@ -2,7 +2,7 @@ import { Reembolso } from '../interfaces/IReembolso'
 import {
     getAll,
     getById,
-    getAllWithPaginate,
+    getAllPaginate,
     create,
     update
 } from '../repositories/reembolsoRepository'
@@ -15,8 +15,8 @@ export const getReembolsos = async () => {
     }
 }
 
-export const getReembolsosWithPaginate = async (page: number, limit: number) => {
-    const response = await getAllWithPaginate(page, limit)
+export const getReembolsosPaginate = async (page: number, limit: number) => {
+    const response = await getAllPaginate(page, limit)
 
     return {
         ...response

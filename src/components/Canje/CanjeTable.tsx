@@ -167,13 +167,13 @@ export const CanjeTable: React.FC = ({}) => {
                   Colaborador
                 </TableHead>
                 <TableHead className="w-[15%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
-                  Fecha otorgamiento
+                  F. otorgamiento
                 </TableHead>
                 <TableHead className="w-[32%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
-                  Fecha Inicio
+                  F. Inicio
                 </TableHead>
                 <TableHead className="w-[15%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
-                  Fecha Final
+                  F. Final
                 </TableHead>
                 <TableHead className="w-[8%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
                   Total días

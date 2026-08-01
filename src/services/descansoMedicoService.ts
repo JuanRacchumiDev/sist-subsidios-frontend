@@ -7,7 +7,6 @@ import {
     create,
     update
 } from '../repositories/descansoMedicoRepository'
-import { DescansoMedicoFilter } from '../interfaces/IDescansoMedico'
 
 export const getDescansos = async () => {
     const response = await getAll()
@@ -22,18 +21,29 @@ export const getDescansosPaginate = async (
     limit: number,
     filters: {}
 ) => {
-    const params: any = {
+    console.log('---- filters in descansoMedicoService ----')
+    console.log({ filters })
+
+    // const params: any = {
+    //     page: page.toString(),
+    //     limit: limit.toString()
+    // };
+
+    // Object.entries(filters).forEach(([key, value]) => {
+    //     if (value !== undefined && value !== undefined && value !== "") {
+    //         params[key] = value
+    //     }
+    // })
+
+    // const queryParams = new URLSearchParams(params).toString()
+
+    const queryParams = new URLSearchParams({
         page: page.toString(),
-        limit: limit.toString()
-    };
-
-    Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== undefined && value !== "") {
-            params[key] = value
-        }
-    })
-
-    const queryParams = new URLSearchParams(params).toString()
+        limit: limit.toString(),
+        ...Object.fromEntries(
+            Object.entries(filters).filter(([, value]) => value)
+        )
+    }).toString()
 
     console.log({ queryParams })
 

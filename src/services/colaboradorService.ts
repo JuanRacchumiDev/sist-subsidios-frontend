@@ -4,7 +4,7 @@ import {
     getById,
     getByIdTipoDocAndNumcDoc,
     getAllByIdEmpresa,
-    getAllWithPaginate,
+    getAllPaginate,
     create,
     updateEstado
 } from '../repositories/colaboradorRepository'
@@ -17,7 +17,7 @@ export const getColaboradores = async () => {
     }
 }
 
-export const getColaboradoresWithPaginate = async (
+export const getColaboradoresPaginate = async (
     page: number,
     limit: number,
     filters: ColaboradorFilter = {}
@@ -30,7 +30,7 @@ export const getColaboradoresWithPaginate = async (
         )
     }).toString()
 
-    const response = await getAllWithPaginate(queryParams)
+    const response = await getAllPaginate(queryParams)
 
     return {
         ...response

@@ -137,7 +137,7 @@ export const UsuarioFilters: React.FC<UsuarioFilterProps> = ({ onSearch }) => {
         </div>
 
         {/* Input: Búsqueda */}
-        <div className="md:col-span-2 space-y-1.5">
+        <div className="md:col-span-3 space-y-1.5">
           <label className="text-[10px] font-bold uppercase text-slate-500 ml-1 tracking-wider flex items-center gap-1">
             Búsqueda
           </label>

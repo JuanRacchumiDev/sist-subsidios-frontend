@@ -1,3 +1,20 @@
+import { useMemo, useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useNavigate, useParams } from "react-router-dom";
+import { isAfter, isBefore, parseISO } from "date-fns";
+import {
+  ArrowLeft,
+  FileText,
+  Stethoscope,
+  ShieldCheck,
+  Lock,
+  RotateCcw,
+  Save,
+  ExternalLink,
+  AlertCircle,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -5,41 +22,40 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo, useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
 import { Form, FormField, FormItem, FormMessage } from "../ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { DescansoMedicoDetalle } from "./Tabs/DescansoMedicoDetalle";
-import { DatosMedicos } from "./Tabs/DatosMedicos";
-import { InfoModal } from "../Common/InfoModal";
 import { Button } from "../ui/button";
 import { Spinner } from "../Common/Spinner";
-import { useNavigate, useParams } from "react-router-dom";
+import { InfoModal } from "../Common/InfoModal";
+
+// Sub-componentes
+import { DescansoMedicoDetalle } from "./Tabs/DescansoMedicoDetalle";
+import { DatosMedicos } from "./Tabs/DatosMedicos";
 import { Validacion } from "./Tabs/Validacion";
+
+// Interfaces y servicios
 import {
   DescansoMedico,
   DescansoMedicoResponse,
 } from "../../interfaces/IDescansoMedico";
-import { getPersonaById } from "../../services/personaService";
 import { Persona } from "../../interfaces/IPersona";
-import { getDetalleById } from "../../services/detalleParametroService";
 import { Detalle } from "../../interfaces/IDetalleParametro";
-import { getDiagnosticoByCodigo } from "../../services/diagnosticoService";
 import { Diagnostico } from "../../interfaces/IDiagnostico";
+
+import { getPersonaById } from "../../services/personaService";
+import { getDetalleById } from "../../services/detalleParametroService";
+import { getDiagnosticoByCodigo } from "../../services/diagnosticoService";
 import {
   createDescanso,
   getDescansoById,
   updateDescanso,
 } from "../../services/descansoMedicoService";
 import { createCodigoTempAuth } from "../../services/authService";
+
 import { useToast } from "../../context/ToastContext";
 import { EDescansoMedico } from "../../enums/EDescansoMedico";
 import { getAuthData } from "../../utils/authMemo";
 import HDate from "../../helpers/HDate";
-import { isAfter, isBefore, parseISO } from "date-fns";
-import { ArrowLeft, FileText, Stethoscope, ShieldCheck } from "lucide-react";
 
 export const formSchema = z
   .object({
@@ -188,17 +204,12 @@ export const DescansoMedicoForm = () => {
   const [estadoOriginal, setEstadoOriginal] = useState<string | null>(null);
 
   const navigate = useNavigate();
-
   const { id } = useParams<{ id: string }>();
-
   const { showToast } = useToast();
 
   const isEditMode = !!id;
-
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
-
   console.log({ userProfile });
-
   const { nombre_perfil_url, id_persona, id_empresa, id_usuario } = userProfile;
 
   console.log({ nombre_perfil_url });
@@ -211,16 +222,19 @@ export const DescansoMedicoForm = () => {
     navigate("/descanso-medico");
   };
 
-  const resetForm = () => {
-    form.reset(defaultValues);
-  };
-
   const isModeLetter =
     (nombre_perfil_url === "especialista-empresa" ||
       nombre_perfil_url === "administrador") &&
-    isEditMode
-      ? true
-      : false;
+    isEditMode;
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues,
+  });
+
+  const resetForm = () => {
+    form.reset(defaultValues);
+  };
 
   useEffect(() => {
     const fecthDescansoMedico = async () => {
@@ -320,11 +334,6 @@ export const DescansoMedicoForm = () => {
     fecthDescansoMedico();
   }, [id, isEditMode]);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues,
-  });
-
   const isRegistroBloqueado =
     isEditMode && estadoOriginal === "Registro exitoso";
 
@@ -334,6 +343,18 @@ export const DescansoMedicoForm = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      let response: DescansoMedicoResponse;
+
+      let nombreColaborador: string = "";
+
+      let nombreTipoDescanso: string = "";
+
+      let nombreTipoContingencia: string = "";
+
+      let nombreDiagnostico: string = "";
+
+      const fechaActual = HDate.formatDateTimezone(new Date());
+
       console.log({ values });
 
       const {
@@ -356,9 +377,6 @@ export const DescansoMedicoForm = () => {
         observacion,
       } = values;
 
-      const fechaRegistro = HDate.formatDateTimezone(new Date());
-
-      let nombreColaborador: string = "";
       const responseColaborador = await getPersonaById(idColaborador);
       const { result: resultCol, data: dataCol } = responseColaborador;
 
@@ -368,8 +386,6 @@ export const DescansoMedicoForm = () => {
 
         nombreColaborador = `${nombres} ${apellido_paterno} ${apellido_materno}`;
       }
-
-      let nombreTipoDescanso: string = "";
 
       const responseTipoDescanso = await getDetalleById(idTipoDescansoMedico);
 
@@ -381,8 +397,6 @@ export const DescansoMedicoForm = () => {
         nombreTipoDescanso = nombre;
       }
 
-      let nombreTipoContingencia: string = "";
-
       const responseTipoContingencia = await getDetalleById(idTipoContingencia);
 
       const { result: resultTipoContingencia, data: dataTipoContingencia } =
@@ -392,7 +406,6 @@ export const DescansoMedicoForm = () => {
         nombreTipoContingencia = nombre;
       }
 
-      let nombreDiagnostico: string = "";
       const responseDiagnostico = await getDiagnosticoByCodigo(idDiagnostico);
       const { result: resultDx, data: dataDx } = responseDiagnostico;
 
@@ -411,7 +424,6 @@ export const DescansoMedicoForm = () => {
         fecha_otorgamiento: HDate.formatDateTimezone(fechaOtorgamiento),
         fecha_inicio: HDate.formatDateTimezone(fechaInicio),
         fecha_final: HDate.formatDateTimezone(fechaFinal),
-        fecha_registro: fechaRegistro,
         numero_colegiatura: colegiadoMedico,
         medico_tratante: medicoTratante,
         total_dias: parseInt(totalDias),
@@ -426,19 +438,19 @@ export const DescansoMedicoForm = () => {
         observacion,
       };
 
-      console.log({ payloadDescansoMedico });
-
-      let response: DescansoMedicoResponse;
-
       if (isEditMode) {
         console.log("update");
+        payloadDescansoMedico.fecha_actualiza = fechaActual;
         payloadDescansoMedico.user_actualiza = id_usuario;
         response = await updateDescanso(id, payloadDescansoMedico);
       } else {
         console.log("create");
+        payloadDescansoMedico.fecha_registro = fechaActual;
         payloadDescansoMedico.user_crea = id_usuario;
         response = await createDescanso(payloadDescansoMedico);
       }
+
+      console.log({ payloadDescansoMedico });
 
       const { result, message } = response;
 
@@ -455,250 +467,267 @@ export const DescansoMedicoForm = () => {
   };
 
   return (
-    <>
-      <Card className="shadow-xl border-none bg-white">
-        <CardHeader className="border-b border-gray-100 p-6 flex flex-row items-center justify-between bg-gray-50/50 rounded-t-xl">
-          <div className="space-y-1">
-            <CardTitle className="text-2xl font-extrabold text-slate-800 tracking-tight">
+    <div className="max-w-4xl mx-auto py-3 px-2 sm:px-4">
+      <Card className="shadow-md border border-slate-200 bg-white rounded-xl overflow-hidden">
+        {/* Header Principal Compacto */}
+        <CardHeader className="border-b border-slate-100 bg-slate-50/60 py-3 px-4 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.2 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100">
+                {isEditMode ? "Modo Edición" : "Nuevo Registro"}
+              </span>
+            </div>
+            <CardTitle className="text-lg font-bold text-slate-900 tracking-tight">
               {isEditMode
-                ? `Editar descansp médico`
-                : `Nuevo registro de descanso médico`}
+                ? "Editar descanso médico"
+                : "Nuevo registro de descanso médico"}
             </CardTitle>
-            <CardDescription className="text-slate-500 font-medium">
+            <CardDescription className="text-slate-500 font-normal text-xs">
               {isEditMode
-                ? `Actualización de información de descanso médico`
-                : `Complete la información para registrar un descanso médico`}
+                ? "Actualice la información general y médica de este registro."
+                : "Complete todos los campos requeridos para registrar el descanso médico."}
             </CardDescription>
           </div>
+
           <Button
-            variant="ghost"
+            variant="outline"
+            size="sm"
             onClick={handleGoBack}
-            className="text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-all"
+            className="h-8 text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-100 border-slate-200 transition-all rounded-md px-3 self-start sm:self-auto"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />
             Volver
           </Button>
         </CardHeader>
-        <CardContent>
+
+        {/* Notificación de Bloqueo por Estado */}
+        {isRegistroBloqueado && (
+          <div className="bg-amber-50 border-b border-amber-200 py-2 px-4 sm:px-5 flex items-center gap-2 text-amber-800 text-xs font-medium">
+            <Lock className="h-4 w-4 text-amber-600 shrink-0" />
+            <span>
+              Este descanso médico ya cuenta con el estado{" "}
+              <strong>"Registro exitoso"</strong> y no se puede modificar.
+            </span>
+          </div>
+        )}
+
+        <CardContent className="p-4 sm:p-5">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {/* Contenedor de Pestañas Integrado y Compacto */}
               <Tabs
                 value={activeTab}
                 onValueChange={setActiveTab}
-                className="w-full"
+                className="w-full space-y-4"
               >
-                <TabsList className="grid w-full grid-cols-3 bg-transparent h-auto gap-2">
+                <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 bg-slate-100/90 p-1 rounded-lg gap-1 h-auto">
+                  {/* Tab 1: Datos del descanso */}
                   <TabsTrigger
                     value="datos-descanso-medico"
-                    className={`
-                      flex items-center justify-center gap-2 py-3 px-4 rounded-lg border-2 transition-all duration-300 cursor-pointer
-                      ${
-                        activeTab === "datos-descanso-medico"
-                          ? "bg-blue-600 text-white border-blue-600 shadow-md"
-                          : "bg-white text-blue-600 border-blue-100 hover:bg-blue-50"
-                      }
-                    `}
+                    className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs font-medium text-slate-600 transition-all data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-xs"
                   >
-                    <FileText
-                      className={`h-5 w-5 ${activeTab === "datos-descanso-medico" ? "text-white" : "text-blue-500"}`}
-                    />
-                    <span className="font-semibold hidden sm:inline">
-                      Datos del descanso
-                    </span>
+                    <FileText className="h-3.5 w-3.5" />
+                    <span>Datos del descanso</span>
                   </TabsTrigger>
 
+                  {/* Tab 2: Datos médicos */}
                   <TabsTrigger
                     value="datos-medicos"
-                    className={`
-                      flex items-center justify-center gap-2 py-3 px-4 rounded-lg border-2 transition-all duration-300 cursor-pointer
-                      ${
-                        activeTab === "datos-medicos"
-                          ? "bg-emerald-600 text-white border-emerald-600 shadow-md"
-                          : "bg-white text-emerald-600 border-emerald-100 hover:bg-emerald-50"
-                      }
-                    `}
+                    className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs font-medium text-slate-600 transition-all data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-xs"
                   >
-                    <Stethoscope
-                      className={`h-5 w-5 ${activeTab === "datos-medicos" ? "text-white" : "text-emerald-500"}`}
-                    />
-                    <span className="font-semibold hidden sm:inline">
-                      Datos médicos
-                    </span>
+                    <Stethoscope className="h-3.5 w-3.5" />
+                    <span>Datos médicos</span>
                   </TabsTrigger>
 
+                  {/* Tab 3: Validación */}
                   <TabsTrigger
                     value="validacion"
-                    className={`
-                      flex items-center justify-center gap-2 py-3 px-4 rounded-lg border-2 transition-all duration-300 cursor-pointer
-                      ${
-                        activeTab === "validacion"
-                          ? "bg-amber-500 text-white border-amber-500 shadow-md"
-                          : "bg-white text-amber-600 border-amber-100 hover:bg-amber-50"
-                      }
-                    `}
+                    className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs font-medium text-slate-600 transition-all data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-xs"
                   >
-                    <ShieldCheck
-                      className={`h-5 w-5 ${activeTab === "validacion" ? "text-white" : "text-amber-500"}`}
-                    />
-                    <span className="font-semibold hidden sm:inline">
-                      Validación
-                    </span>
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    <span>Validación</span>
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="datos-descanso-medico" className="mt-3">
-                  <DescansoMedicoDetalle
-                    form={form}
-                    isModeLetter={isModeLetter}
-                  />
-                </TabsContent>
+                <div className="pt-1">
+                  <TabsContent
+                    value="datos-descanso-medico"
+                    className="m-0 focus-visible:outline-none"
+                  >
+                    <DescansoMedicoDetalle
+                      form={form}
+                      isModeLetter={isModeLetter}
+                    />
+                  </TabsContent>
 
-                <TabsContent value="datos-medicos" className="mt-3">
-                  <DatosMedicos form={form} isModeLetter={isModeLetter} />
-                </TabsContent>
+                  <TabsContent
+                    value="datos-medicos"
+                    className="m-0 focus-visible:outline-none"
+                  >
+                    <DatosMedicos form={form} isModeLetter={isModeLetter} />
+                  </TabsContent>
 
-                <TabsContent value="validacion" className="mt-3">
-                  <Validacion form={form} isModeLetter={isModeLetter} />
-                </TabsContent>
+                  <TabsContent
+                    value="validacion"
+                    className="m-0 focus-visible:outline-none"
+                  >
+                    <Validacion form={form} isModeLetter={isModeLetter} />
+                  </TabsContent>
+                </div>
               </Tabs>
 
-              <div className="space-y-4 mt-3">
-                <FormField
-                  control={form.control}
-                  name="aceptaResponsabilidad"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked={field.value}
-                          onChange={field.onChange}
-                          id="responsabilidad"
-                          className={`ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300
-                            ${
+              {/* Declaraciones y Términos (Compacto) */}
+              <div className="bg-slate-50/80 rounded-lg border border-slate-200/80 p-3 sm:p-4 space-y-2.5">
+                <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Declaraciones obligatorias
+                </h4>
+
+                <div className="space-y-2">
+                  {/* Checkbox 1 */}
+                  <FormField
+                    control={form.control}
+                    name="aceptaResponsabilidad"
+                    render={({ field, fieldState }) => (
+                      <FormItem className="space-y-0.5">
+                        <div className="flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            checked={field.value}
+                            onChange={field.onChange}
+                            disabled={isRegistroBloqueado}
+                            id="responsabilidad"
+                            className={`mt-0.5 h-3.5 w-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 transition cursor-pointer disabled:cursor-not-allowed ${
                               fieldState.invalid
-                                ? "text-red-500 focus-visible:ring-red-500 border-red-500"
-                                : "text-blue-600 focus-visible:ring-blue-600 border-gray-300"
+                                ? "border-red-500 focus:ring-red-500"
+                                : ""
                             }`}
-                        />
-                        <div className="grid gap-1.5 leading-none">
-                          <div className="flex items-center">
+                          />
+                          <div className="text-xs leading-tight">
                             <label
                               htmlFor="responsabilidad"
-                              className={`text-sm text-gray-700 font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
-                                fieldState.invalid ? "text-red-600" : ""
-                              }`}
+                              className="font-medium text-slate-700 cursor-pointer"
                             >
-                              <span className="text-red-500 mr-1">*</span>
+                              <span className="text-red-500 mr-0.5">*</span>
                               Declaro que la información proporcionada es
-                              verdadera y es mi responsabilidad
+                              verdadera y asumo la responsabilidad sobre los
+                              datos entregados.
                             </label>
                             <button
                               type="button"
                               onClick={() => setShowResponsabilidad(true)}
-                              className="text-blue-500 underline text-sm text-left ml-2"
+                              className="inline-flex items-center text-indigo-600 hover:text-indigo-800 text-[11px] font-semibold ml-1.5 hover:underline focus:outline-none"
                             >
-                              Ver más
+                              Ver detalle{" "}
+                              <ExternalLink className="h-2.5 w-2.5 ml-0.5" />
                             </button>
                           </div>
                         </div>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage className="ml-5 text-[11px]" />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="aceptaPoliticaSubsidio"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked={field.value}
-                          onChange={field.onChange}
-                          id="politicaSubsidio"
-                          className={`ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300
-                            ${
+                  {/* Checkbox 2 */}
+                  <FormField
+                    control={form.control}
+                    name="aceptaPoliticaSubsidio"
+                    render={({ field, fieldState }) => (
+                      <FormItem className="space-y-0.5">
+                        <div className="flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            checked={field.value}
+                            onChange={field.onChange}
+                            disabled={isRegistroBloqueado}
+                            id="politicaSubsidio"
+                            className={`mt-0.5 h-3.5 w-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 transition cursor-pointer disabled:cursor-not-allowed ${
                               fieldState.invalid
-                                ? "text-red-500 focus-visible:ring-red-500 border-red-500"
-                                : "text-blue-600 focus-visible:ring-blue-600 border-gray-300"
+                                ? "border-red-500 focus:ring-red-500"
+                                : ""
                             }`}
-                        />
-                        <div className="grid gap-1.5 leading-none">
-                          <div className="flex items-center">
+                          />
+                          <div className="text-xs leading-tight">
                             <label
                               htmlFor="politicaSubsidio"
-                              className={`text-sm text-gray-700 font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
-                                fieldState.invalid ? "text-red-600" : ""
-                              }`}
+                              className="font-medium text-slate-700 cursor-pointer"
                             >
-                              <span className="text-red-500 mr-1">*</span>
-                              Acepto la política de la empresa en caso de
-                              subsidio por documentación incorrecta
+                              <span className="text-red-500 mr-0.5">*</span>
+                              Acepto las políticas internas referentes al
+                              proceso de subsidios y validez documental.
                             </label>
                             <button
                               type="button"
                               onClick={() => setShowPoliticaSubsidio(true)}
-                              className="text-blue-500 underline text-sm text-left ml-2"
+                              className="inline-flex items-center text-indigo-600 hover:text-indigo-800 text-[11px] font-semibold ml-1.5 hover:underline focus:outline-none"
                             >
-                              Ver más
+                              Ver detalle{" "}
+                              <ExternalLink className="h-2.5 w-2.5 ml-0.5" />
                             </button>
                           </div>
                         </div>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage className="ml-5 text-[11px]" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
-              <div className="flex justify-end space-x-4 pt-4">
-                <Button
-                  type="submit"
-                  disabled={isButtonDisabled}
-                  className={`${isRegistroBloqueado ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 cursor-pointer"} text-white transition-colors duration-300`}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Spinner className="mr-2 h-4 w-4 animate-spin" />
-                      {isEditMode ? "Actualizando..." : "Registrando..."}
-                    </>
-                  ) : isEditMode ? (
-                    "Actualizar"
-                  ) : (
-                    "Registrar"
-                  )}
-                </Button>
+              {/* Botones de Acción Reducidos */}
+              <div className="flex flex-col-reverse sm:flex-row justify-end items-center gap-2 pt-3 border-t border-slate-100">
                 <Button
                   type="button"
                   variant="outline"
+                  size="sm"
                   disabled={isSubmitting}
-                  onClick={() => resetForm()}
-                  className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
+                  onClick={resetForm}
+                  className="w-full sm:w-auto h-8 text-xs text-slate-600 border-slate-200 hover:bg-slate-100 rounded-md px-3"
                 >
-                  Cancelar
+                  <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                  Restablecer
+                </Button>
+
+                <Button
+                  type="submit"
+                  size="sm"
+                  disabled={isButtonDisabled}
+                  className={`w-full sm:w-auto h-8 text-xs rounded-md px-4 font-medium transition-all ${
+                    isRegistroBloqueado
+                      ? "bg-slate-300 text-slate-500 cursor-not-allowed"
+                      : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                  }`}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Spinner className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                      {isEditMode ? "Guardando..." : "Procesando..."}
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-3.5 w-3.5 mr-1.5" />
+                      {isEditMode ? "Actualizar registro" : "Guardar registro"}
+                    </>
+                  )}
                 </Button>
               </div>
             </form>
 
+            {/* Modales Informativos */}
             <InfoModal
               open={showResponsabilidad}
               onClose={() => setShowResponsabilidad(false)}
               title="Responsabilidad del colaborador"
-              content="Como colaborador, usted es responsable de la veracidad y autenticidad de los documentos entregados"
+              content="Como colaborador, usted es responsable de la veracidad y autenticidad de los documentos entregados. La presentación de documentos alterados o falsos acarreará sanciones legales y administrativas."
             />
 
             <InfoModal
               open={showPoliticaSubsidio}
               onClose={() => setShowPoliticaSubsidio(false)}
               title="Política de subsidio"
-              content="La empresa se reserva el derecho de rechazar subsidios si la documentación no está completa o es observada"
+              content="La empresa se reserva el derecho de rechazar tramitaciones de subsidios si la documentación entregada no cumple con las exigencias de ESSALUD o es presentada fuera de los plazos normativos vigentes."
             />
           </Form>
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 };

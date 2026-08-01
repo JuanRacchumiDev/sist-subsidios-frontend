@@ -21,20 +21,18 @@ import {
   Pagination as PaginationType,
 } from "../../../interfaces/IDocumentoTipoContingencia";
 import { DocumentoTipoContingenciaRow } from "./DocumentoTipoContingenciaRow";
-import { GraduationCap, Search } from "lucide-react";
+import { GraduationCap } from "lucide-react";
 import { TableSpinner } from "../../../components/Common/TableSpinner";
 import {
   DocumentoTCFilters,
   DocumentoTCFiltersData,
 } from "./DocumentoTipoContingenciaFilters";
-import { ParametroClase } from "../../../constants/parametroClase";
 import { getDocumentosTipoContPaginate } from "../../../services/documentoTipoContService";
 
 export const DocumentoTipoContingenciaTable = () => {
   const [documentos, setDocumentos] = useState<DocumentoTipoContingencia[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [limit] = useState(10);
 
   const [paginationInfo, setPaginationInfo] = useState<
@@ -61,12 +59,12 @@ export const DocumentoTipoContingenciaTable = () => {
     async (pageToFetch: number, filtersData: DocumentoTCFiltersData) => {
       setIsLoading(true);
 
-      try {
-        const filters = {
-          id_tipocontingencia: filtersData.id_tipocontingencia,
-          search: filtersData.search,
-        };
+      const filters = {
+        id_tipocontingencia: filtersData.id_tipocontingencia,
+        search: filtersData.search,
+      };
 
+      try {
         const response = await getDocumentosTipoContPaginate(
           pageToFetch,
           limit,
@@ -85,7 +83,6 @@ export const DocumentoTipoContingenciaTable = () => {
               nextPage: newPagination.nextPage,
               previousPage: newPagination.previousPage,
             });
-            setTotalPages(newPagination.totalPages || 1);
           }
         } else {
           setDocumentos([]);

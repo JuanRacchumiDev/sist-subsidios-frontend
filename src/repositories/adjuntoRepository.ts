@@ -22,7 +22,7 @@ export const getAll = async (): Promise<AdjuntoResponse> => {
     }
 }
 
-export const getAllWithPaginate = async (page: number, limit: number) => {
+export const getAllPaginate = async (page: number, limit: number) => {
     try {
         const urlApi = `${'/adjuntos/paginate?page='}${page}${'&limit='}${limit}`
 
@@ -128,15 +128,6 @@ export const upload = async (params: Adjunto = {}, formData: FormData): Promise<
         }
 
         console.log({ formData })
-
-        // if (params) {
-        //     console.log('actualizar adjunto')
-        //     const { id_descansomedico, id_documento } = params
-        //     uri = `/adjuntos?id_descansomedico=${id_descansomedico}&id_documento=${id_documento}`
-        // } else {
-        //     console.log('nuevo adjunto')
-        //     uri = `/adjuntos`
-        // }
 
         if (params) {
             const { id_descansomedico, id_documento } = params

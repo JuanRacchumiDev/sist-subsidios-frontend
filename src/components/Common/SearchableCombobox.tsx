@@ -29,6 +29,7 @@ interface SearchableComboboxProps<T extends { [key: string]: any }> {
   searchKeys: (keyof T)[];
   disabled?: boolean;
   isInvalid?: boolean;
+  className?: string;
   renderOption?: (option: T) => React.ReactNode;
 }
 
@@ -43,6 +44,7 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
   searchKeys,
   disabled,
   isInvalid,
+  className,
   renderOption,
 }: SearchableComboboxProps<T>) => {
   const [open, setOpen] = useState(false);
@@ -65,35 +67,33 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
               variant="outline"
               role="combobox"
               className={cn(
-                // Ajustado el ancho para evitar que sea fijo y mejor manejo de texto
-                "w-full justify-between cursor-pointer h-auto min-h-10 px-3 py-2 text-left",
+                "w-full justify-between cursor-pointer h-8 px-2.5 text-xs text-left font-normal",
                 !value && "text-muted-foreground",
                 isInvalid
                   ? "border-red-500 focus:ring-red-500"
                   : "focus:ring-blue-500",
-                "focus:ring-2 focus:ring-offset-2 transition-all duration-300", // Altura y padding estándar
+                "focus:ring-1 transition-all duration-200",
+                className,
               )}
               disabled={disabled}
             >
-              <span className="block line-clamp-2 sm:line-clamp-1 pr-2 wrap-break-word">
-                {displayValue}
-              </span>
-              <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50 self-center" />
+              <span className="block truncate pr-2">{displayValue}</span>
+              <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 opacity-50 self-center" />
             </Button>
           </FormControl>
         </PopoverTrigger>
 
         <PopoverContent
-          className="w-(--radix-popover-trigger-width) min-w-[320px] p-0 bg-white"
+          className="w-(--radix-popover-trigger-width) min-w-[280px] p-0 bg-white"
           align="start"
         >
           <Command className="w-full">
             <CommandInput
               placeholder={`Buscar ${label ? label.toLowerCase() : ""}...`}
-              className="h-9 px-3 border-b border-gray-200 focus:ring-0 w-full"
+              className="h-8 px-2.5 text-xs border-b border-gray-200 focus:ring-0 w-full"
             />
-            <CommandList className="max-h-[350px] overflow-y-auto w-full">
-              <CommandEmpty className="py-6 text-center text-sm">
+            <CommandList className="max-h-[250px] overflow-y-auto w-full">
+              <CommandEmpty className="py-4 text-center text-xs text-gray-500">
                 No se encontraron resultados {label ? label.toLowerCase() : ""}
               </CommandEmpty>
               <CommandGroup className="p-1 w-full">
@@ -101,7 +101,6 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
                   options.map((option) => {
                     const optionValue = String(option[valueKey]);
 
-                    // Generar un valor de búsqueda que combine los campos especificados en `searchKeys`
                     const searchValue = searchKeys
                       .map((key) => option[key])
                       .join(" ")
@@ -116,7 +115,7 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
                           setOpen(false);
                         }}
                         className={cn(
-                          "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none",
+                          "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1 text-xs outline-none",
                           "hover:bg-blue-50 hover:text-blue-700",
                           value === option[valueKey] &&
                             "bg-blue-50 font-medium text-blue-700",
@@ -124,9 +123,9 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
                       >
                         <Check
                           className={cn(
-                            "mr-2 h-4 w-4 shrink-0",
+                            "mr-1.5 h-3.5 w-3.5 shrink-0",
                             value === option[valueKey]
-                              ? "opacity-100" // Color azul para el check
+                              ? "opacity-100"
                               : "opacity-0",
                           )}
                         />

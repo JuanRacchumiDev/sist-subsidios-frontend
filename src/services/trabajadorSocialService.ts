@@ -3,7 +3,7 @@ import {
     getAll,
     getById,
     getByIdTipoDocAndNumDoc,
-    getAllWithPaginate,
+    getAllPaginate,
     create,
     updateEstado
 } from '../repositories/trabajadorSocialRepository'
@@ -16,7 +16,7 @@ export const getTrabajadoresSociales = async () => {
     }
 }
 
-export const getTrabjadoresSocialesWithPaginate = async (
+export const getTrabajadoresSocialesPaginate = async (
     page: number,
     limit: number,
     filters: TrabajadorSocialFilter = {}
@@ -29,7 +29,7 @@ export const getTrabjadoresSocialesWithPaginate = async (
         )
     }).toString()
 
-    const response = await getAllWithPaginate(queryParams)
+    const response = await getAllPaginate(queryParams)
 
     return {
         ...response

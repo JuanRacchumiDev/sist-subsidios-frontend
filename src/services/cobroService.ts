@@ -2,7 +2,7 @@ import { Cobro } from '@/interfaces/ICobro'
 import {
     getAll,
     getById,
-    getAllWithPaginate,
+    getAllPaginate,
     create,
     update
 } from '../repositories/cobroRepository'
@@ -15,8 +15,8 @@ export const getCobros = async () => {
     }
 }
 
-export const getCobrosWithPaginate = async (page: number, limit: number) => {
-    const response = await getAllWithPaginate(page, limit)
+export const getCobrosPaginate = async (page: number, limit: number) => {
+    const response = await getAllPaginate(page, limit)
 
     return {
         ...response

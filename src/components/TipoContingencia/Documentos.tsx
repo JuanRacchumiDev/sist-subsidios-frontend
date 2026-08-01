@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from "../../components/ui/form";
 import { RequiredLabel } from "../../components/Common/RequiredLabel";
-import { Eye, Upload } from "lucide-react";
+import { Eye, Upload, FileCheck } from "lucide-react";
 import { Button } from "../ui/button";
 import { useToast } from "../../context/ToastContext";
 import { uploadAdjunto, viewAdjunto } from "../../services/adjuntoService";
@@ -20,6 +20,7 @@ import { getEmpresaById } from "../../services/empresaService";
 import { Empresa } from "../../interfaces/IEmpresa";
 import { getPersonaById } from "../../services/personaService";
 import { Persona } from "../../interfaces/IPersona";
+import { cn } from "../../lib/utils";
 
 interface DocumentosRequeridosProps {
   documentos: DocumentoTipoContingencia[];
@@ -27,6 +28,7 @@ interface DocumentosRequeridosProps {
   adjuntosExistentes?: Adjunto[];
   isModeLetter?: boolean;
   idDescanso?: string;
+  maxFileSizeMb?: number; // Prop opcional para definir el límite en MB (Por defecto: 2)
 }
 
 export const Documentos = ({
@@ -35,6 +37,7 @@ export const Documentos = ({
   adjuntosExistentes = [],
   isModeLetter = false,
   idDescanso = "",
+  maxFileSizeMb = 2,
 }: DocumentosRequeridosProps) => {
   const { showToast } = useToast();
 
@@ -47,14 +50,8 @@ export const Documentos = ({
   }, [adjuntosExistentes, form]);
 
   const handleViewDocument = async (id: string) => {
-    console.log("---- id documento adjunto ----");
-    console.log({ id });
-
     try {
       const response: responseViewFile = await viewAdjunto(id);
-      console.log("---- response handleViewDocument ----");
-      console.log({ response });
-
       const { result, data } = response;
 
       if (result && data) {
@@ -73,16 +70,31 @@ export const Documentos = ({
     e: React.ChangeEvent<HTMLInputElement>,
     idDocumento: string,
   ) => {
-    let paramsAdjunto: Adjunto | null = null;
-
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const idEmpresa = form.getValues("idEmpresa");
-    console.log({ idEmpresa });
+    // --- 1. VALIDACIÓN DE FORMATO PDF ---
+    const isPdf = file.type === "application/pdf" || file.name.endsWith(".pdf");
+    if (!isPdf) {
+      showToast("error", "Solo se permiten archivos en formato PDF.");
+      e.target.value = "";
+      return;
+    }
 
+    // --- 2. VALIDACIÓN DE TAMAÑO EN MB ---
+    const maxSizeBytes = maxFileSizeMb * 1024 * 1024;
+    if (file.size > maxSizeBytes) {
+      showToast(
+        "error",
+        `El archivo supera el límite máximo de ${maxFileSizeMb} MB.`,
+      );
+      e.target.value = "";
+      return;
+    }
+
+    let paramsAdjunto: Adjunto | null = null;
+    const idEmpresa = form.getValues("idEmpresa");
     const idColaborador = form.getValues("idColaborador");
-    console.log({ idColaborador });
 
     const formData = new FormData();
     formData.append("file", file);
@@ -91,21 +103,14 @@ export const Documentos = ({
     // Validando si existe el id de descanso médico
     if (idDescanso && idDescanso.length > 0) {
       formData.append("id_descansomedico", idDescanso);
-
       paramsAdjunto = {
         id_descansomedico: idDescanso,
         id_documento: idDocumento,
       };
     }
 
-    console.log({ paramsAdjunto });
-
-    console.log("---- formData v1 ----");
-    console.log({ formData });
-
     if (idEmpresa) {
       const responseEmpresa = await getEmpresaById(idEmpresa);
-      console.log("response empresa", responseEmpresa);
       const { result, data } = responseEmpresa;
       if (result && data) {
         const { numero } = data as Empresa;
@@ -113,31 +118,18 @@ export const Documentos = ({
       }
     }
 
-    console.log("---- formData v2 ----");
-    console.log({ formData });
-
     if (idColaborador) {
       const responseColaborador = await getPersonaById(idColaborador);
-      console.log({ responseColaborador });
       const { result, data } = responseColaborador;
       if (result && data) {
         const { id: idPersona, numero_documento } = data as Persona;
-        console.log({ idPersona });
-        console.log({ numero_documento });
         formData.append("id_persona", idPersona);
         formData.append("numero_documento", numero_documento);
       }
     }
 
-    console.log("---- formData v3 ----");
-    console.log({ formData });
-
     try {
       const response = await uploadAdjunto(paramsAdjunto, formData);
-
-      console.log("---- response uploadAdjunto ----");
-      console.log({ response });
-
       const { result, data, message } = response;
 
       if (result && data) {
@@ -151,81 +143,102 @@ export const Documentos = ({
     } catch (error) {
       console.error("Error uploading file:", error);
       showToast("error", "Error al subir el documento.");
+    } finally {
+      e.target.value = ""; // Limpia el valor para permitir volver a subir el mismo archivo
     }
   };
 
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:col-span-2">
-      <h3 className="font-semibold text-lg col-span-full">
-        Documentos Requeridos
-      </h3>
-      {documentos.map((doc) => {
-        const uploadedFileId = form.watch(`documentos.${doc.id}`);
-        const existingAdjunto = adjuntosExistentes.find(
-          (adj) => adj.id_documento === doc.id,
-        );
-        const fileIdToUse = uploadedFileId || existingAdjunto?.id || null;
+  if (!documentos || documentos.length === 0) {
+    return null;
+  }
 
-        return (
-          <FormField
-            key={doc.id}
-            control={form.control}
-            name={`documentos.${doc.id}`}
-            render={() => {
-              return (
-                <FormItem>
-                  <RequiredLabel>{doc.nombre}</RequiredLabel>
-                  <FormControl>
-                    <div className="flex items-center gap-2">
-                      <label
-                        htmlFor={`file-input-${doc.id}`}
-                        className={`
-                        flex
-                        items-center
-                        justify-center
-                        p-2
-                        border
-                        rounded-md
-                        transition-colors
-                        duration-200
-                        ${
-                          isModeLetter
-                            ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                            : "cursor-pointer hover:bg-gray-100"
-                        }
-                      `}
-                      >
-                        <Upload className="mr-2 h-4 w-4" />
-                        {fileIdToUse ? "Cambiar Documento" : "Subir Documento"}
-                      </label>
-                      <input
-                        id={`file-input-${doc.id}`}
-                        type="file"
-                        accept=".pdf"
-                        className="hidden"
-                        onChange={(e) => handleFileChange(e, doc.id)}
-                        disabled={isModeLetter}
-                      />
-                      {fileIdToUse && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="cursor-pointer hover:bg-gray-300"
-                          size="icon"
-                          onClick={() => handleViewDocument(fileIdToUse)}
+  return (
+    <div className="space-y-2 col-span-full border-t border-gray-100 pt-3 mt-1">
+      <div className="flex items-center justify-between mb-1">
+        <h3 className="font-semibold text-xs text-gray-800 tracking-tight">
+          Documentos Requeridos
+        </h3>
+        <span className="text-[10px] text-gray-400">
+          Formato: PDF (Máx. {maxFileSizeMb}MB)
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+        {documentos.map((doc) => {
+          const uploadedFileId = form.watch(`documentos.${doc.id}`);
+          const existingAdjunto = adjuntosExistentes.find(
+            (adj) => adj.id_documento === doc.id,
+          );
+          const fileIdToUse = uploadedFileId || existingAdjunto?.id || null;
+
+          return (
+            <FormField
+              key={doc.id}
+              control={form.control}
+              name={`documentos.${doc.id}`}
+              render={() => {
+                return (
+                  <FormItem className="space-y-1">
+                    <RequiredLabel className="text-[11px] font-medium text-gray-700 truncate block">
+                      {doc.nombre}
+                    </RequiredLabel>
+                    <FormControl>
+                      <div className="flex items-center gap-1.5">
+                        <label
+                          htmlFor={`file-input-${doc.id}`}
+                          className={cn(
+                            "flex-1 flex items-center justify-center gap-1.5 h-8 px-2.5 border rounded-md text-xs transition-all duration-150 select-none",
+                            isModeLetter
+                              ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                              : fileIdToUse
+                                ? "bg-blue-50/50 border-blue-200 text-blue-700 hover:bg-blue-100/60 cursor-pointer font-medium"
+                                : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 cursor-pointer",
+                          )}
                         >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
-        );
-      })}
+                          {fileIdToUse ? (
+                            <>
+                              <FileCheck className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+                              <span className="truncate">Cambiar PDF</span>
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="h-3.5 w-3.5 text-gray-500 shrink-0" />
+                              <span className="truncate">Subir PDF</span>
+                            </>
+                          )}
+                        </label>
+
+                        <input
+                          id={`file-input-${doc.id}`}
+                          type="file"
+                          accept="application/pdf"
+                          className="hidden"
+                          onChange={(e) => handleFileChange(e, doc.id)}
+                          disabled={isModeLetter}
+                        />
+
+                        {fileIdToUse && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8 shrink-0 border-gray-300 hover:bg-gray-100 text-gray-600 hover:text-gray-900"
+                            onClick={() => handleViewDocument(fileIdToUse)}
+                            title="Ver documento"
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormMessage className="text-[10px]" />
+                  </FormItem>
+                );
+              }}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 };

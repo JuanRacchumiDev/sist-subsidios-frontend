@@ -76,6 +76,9 @@ export const DescansoMedicoTable: React.FC = ({}) => {
         user_crea: "",
       };
 
+      console.log("---- filters inicial ----");
+      console.log({ filters });
+
       const { nombre_perfil_url, id_empresa, id_usuario } = userProfile;
 
       if (nombre_perfil_url === "especialista-empresa") {
@@ -83,6 +86,9 @@ export const DescansoMedicoTable: React.FC = ({}) => {
       } else if (nombre_perfil_url === "colaborador") {
         filters["user_crea"] = id_usuario;
       }
+
+      console.log("---- filters modificado ----");
+      console.log({ filters });
 
       try {
         const response = await getDescansosPaginate(
@@ -179,13 +185,13 @@ export const DescansoMedicoTable: React.FC = ({}) => {
                   Colaborador
                 </TableHead>
                 <TableHead className="w-[15%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
-                  Fecha otorgamiento
+                  F. otorgamiento
                 </TableHead>
                 <TableHead className="w-[32%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
-                  Fecha Inicio
+                  F. Inicio
                 </TableHead>
                 <TableHead className="w-[15%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
-                  Fecha Final
+                  F. Final
                 </TableHead>
                 <TableHead className="w-[8%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
                   Total días

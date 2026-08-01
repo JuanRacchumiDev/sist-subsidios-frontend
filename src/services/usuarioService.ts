@@ -1,4 +1,4 @@
-import { Usuario } from '../interfaces/IUsuario'
+import { Usuario, UsuarioPaginateResponse } from '../interfaces/IUsuario'
 import {
     getAll,
     getById,
@@ -20,19 +20,27 @@ export const getUsuariosPaginate = async (
     page: number,
     limit: number,
     filters: {}
-) => {
-    const params: any = {
+): Promise<UsuarioPaginateResponse> => {
+    const queryParams = new URLSearchParams({
         page: page.toString(),
-        limit: limit.toString()
-    };
+        limit: limit.toString(),
+        ...Object.fromEntries(
+            Object.entries(filters).filter(([, value]) => value)
+        )
+    }).toString()
 
-    Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== undefined && value !== "") {
-            params[key] = value
-        }
-    })
+    // const params: any = {
+    //     page: page.toString(),
+    //     limit: limit.toString()
+    // };
 
-    const queryParams = new URLSearchParams(params).toString()
+    // Object.entries(filters).forEach(([key, value]) => {
+    //     if (value !== undefined && value !== undefined && value !== "") {
+    //         params[key] = value
+    //     }
+    // })
+
+    // const queryParams = new URLSearchParams(params).toString()
 
     console.log({ queryParams })
 

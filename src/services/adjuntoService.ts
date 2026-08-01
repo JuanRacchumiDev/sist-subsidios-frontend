@@ -6,7 +6,7 @@ import {
     getById,
     create,
     update,
-    getAllWithPaginate,
+    getAllPaginate,
     upload,
     viewFile
 } from '../repositories/adjuntoRepository'
@@ -20,8 +20,8 @@ export const getAdjuntos = async () => {
     }
 }
 
-export const getAdjuntosWithPaginate = async (page: number, limit: number) => {
-    const response = await getAllWithPaginate(page, limit)
+export const getAdjuntosPaginate = async (page: number, limit: number) => {
+    const response = await getAllPaginate(page, limit)
 
     return {
         ...response

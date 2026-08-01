@@ -4,7 +4,7 @@ import {
     getById,
     create,
     update,
-    getAllWithPaginate
+    getAllPaginate
 } from '../repositories/perfilRepository'
 
 export const getPerfiles = async () => {
@@ -15,8 +15,8 @@ export const getPerfiles = async () => {
     }
 }
 
-export const getPerfilesWithPaginate = async (page: number, limit: number) => {
-    const response = await getAllWithPaginate(page, limit)
+export const getPerfilesPaginate = async (page: number, limit: number) => {
+    const response = await getAllPaginate(page, limit)
 
     return {
         ...response

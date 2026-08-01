@@ -1,11 +1,12 @@
 import {
     getAll,
-    getAllWithPaginate,
+    getAllPaginate,
     getByCodigo,
     create,
     update,
     updateEstado
 } from '../repositories/diagnosticoRepository'
+import { Diagnostico } from '../interfaces/IDiagnostico'
 
 export const getDiagnosticos = async () => {
     const response = await getAll()
@@ -15,7 +16,7 @@ export const getDiagnosticos = async () => {
     }
 }
 
-export const getDiagnosticosWithPaginate = async (
+export const getDiagnosticosPaginate = async (
     page: number,
     limit: number,
     filter: string
@@ -26,7 +27,7 @@ export const getDiagnosticosWithPaginate = async (
         filter: filter
     }).toString()
 
-    const response = await getAllWithPaginate(queryParams)
+    const response = await getAllPaginate(queryParams)
 
     return {
         ...response

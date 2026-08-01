@@ -1,5 +1,5 @@
 import apiClient from "./apiClient"
-import { DiagnosticoResponse } from '../interfaces/IDiagnostico'
+import { Diagnostico, DiagnosticoResponse } from '../interfaces/IDiagnostico'
 
 export const getAll = async (): Promise<DiagnosticoResponse> => {
     try {
@@ -23,7 +23,7 @@ export const getAll = async (): Promise<DiagnosticoResponse> => {
     }
 }
 
-export const getAllWithPaginate = async (queryParams: string) => {
+export const getAllPaginate = async (queryParams: string) => {
     try {
         const urlApi = `${'/diagnosticos/paginate/?'}${queryParams}`
 
@@ -88,7 +88,7 @@ export const create = async (payload: Diagnostico): Promise<DiagnosticoResponse>
     }
 }
 
-export const update = async (id: string, payload: Diagnostico): Promise<DiagnosticoResponse> => {
+export const update = async (codigo: string, payload: Diagnostico): Promise<DiagnosticoResponse> => {
     try {
         const urlApi = `${'/diagnosticos/'}${codigo}`
 

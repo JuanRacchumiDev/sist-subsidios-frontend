@@ -28,6 +28,8 @@ export const getAllPaginate = async (queryParams: string) => {
     try {
         const urlApi = `${'/descansos/paginate?'}${queryParams}`
 
+        console.log({ urlApi })
+
         const response = await apiClient.get(urlApi)
 
         const { data: dataDescansos } = response

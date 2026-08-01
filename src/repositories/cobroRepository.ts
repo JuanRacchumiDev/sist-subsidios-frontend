@@ -24,7 +24,7 @@ export const getAll = async (): Promise<CobroResponse> => {
 }
 
 
-export const getAllWithPaginate = async (page: number, limit: number) => {
+export const getAllPaginate = async (page: number, limit: number) => {
     try {
         const urlApi = `${'/cobros/paginate?page='}${page}${'&limit='}${limit}`
 

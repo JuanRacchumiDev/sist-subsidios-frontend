@@ -21,7 +21,7 @@ export const getAll = async () => {
     }
 }
 
-export const getAllWithPaginate = async (page: number, limit: number) => {
+export const getAllPaginate = async (page: number, limit: number) => {
     try {
         const urlApi = `${'/perfiles/paginate?page='}${page}${'&limit='}${limit}`
 

@@ -22,7 +22,7 @@ export const getAll = async (): Promise<ColaboradorResponse> => {
     }
 }
 
-export const getAllWithPaginate = async (queryParams: string) => {
+export const getAllPaginate = async (queryParams: string) => {
     try {
         const urlApi = `${'/colaboradores/paginate?'}${queryParams}`
 

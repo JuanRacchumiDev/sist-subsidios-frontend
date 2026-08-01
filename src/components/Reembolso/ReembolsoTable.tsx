@@ -5,7 +5,7 @@ import {
   ReembolsoFilter,
   Pagination as PaginationType,
 } from "../../interfaces/IReembolso";
-import { getReembolsosWithPaginate } from "@/services/reembolsoService";
+import { getReembolsosPaginate } from "@/services/reembolsoService";
 import {
   Pagination,
   PaginationContent,
@@ -52,7 +52,7 @@ export const ReembolsoTable = () => {
       setIsLoading(true);
       try {
         const { currentPage, limit } = pagination;
-        const response = await getReembolsosWithPaginate(currentPage, limit);
+        const response = await getReembolsosPaginate(currentPage, limit);
 
         const { result, data, pagination: detailtPagination } = response;
 
