@@ -23,7 +23,7 @@ import { Canje, Pagination as PaginationType } from "../../interfaces/ICanje";
 import { CanjeFilters, CanjeFiltersData } from "./CanjeFilters";
 import { getAuthData } from "../../utils/authMemo";
 
-export const CanjeTable: React.FC = ({}) => {
+export const CanjeTable: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [canjes, setCanjes] = useState<Canje[]>([]);
 
@@ -190,13 +190,13 @@ export const CanjeTable: React.FC = ({}) => {
                 <TableHead className="w-[8%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
                   Mes devengado
                 </TableHead>
-                <TableHead className="w-[7%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider text-center">
+                <TableHead className="w-[7%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
                   Estado
                 </TableHead>
-                <TableHead className="w-[7%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider text-center">
+                <TableHead className="w-[7%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
                   Subsidiado
                 </TableHead>
-                <TableHead className="w-[8%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider text-right">
+                <TableHead className="w-[8%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
                   Acciones
                 </TableHead>
               </TableRow>

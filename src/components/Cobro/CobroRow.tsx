@@ -11,10 +11,9 @@ import {
 } from "../ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
-import HDate from "../../helpers/HDate";
-import { Cobro } from "@/interfaces/ICobro";
+import { Cobro } from "../../interfaces/ICobro";
 import BadgeEstado from "../Common/BadgeEstado";
-import { ECobro } from "@/enums/ECobro";
+import { ECobro } from "../../enums/ECobro";
 
 interface Props {
   cobro: Cobro;

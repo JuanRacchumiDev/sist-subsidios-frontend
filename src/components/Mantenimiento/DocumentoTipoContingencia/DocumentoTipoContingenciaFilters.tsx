@@ -9,9 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
-import { Detalle } from "@/interfaces/IDetalleParametro";
-import { getDetalles } from "@/services/detalleParametroService";
-import { ParametroClase } from "@/constants/parametroClase";
+import { Detalle } from "../../../interfaces/IDetalleParametro";
+import { getDetalles } from "../../../services/detalleParametroService";
+import { ParametroClase } from "../../../constants/parametroClase";
 import { useToast } from "../../../context/ToastContext";
 
 interface DocumentoTCFilterProps {

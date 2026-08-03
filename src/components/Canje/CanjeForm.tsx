@@ -12,7 +12,7 @@ import * as z from "zod";
 import { Button } from "../ui/button";
 import { Spinner } from "../Common/Spinner";
 import { useNavigate, useParams } from "react-router-dom";
-import { ECanje } from "@/enums/ECanje";
+import { ECanje } from "../../enums/ECanje";
 import {
   Form,
   FormControl,
@@ -43,6 +43,8 @@ import {
   Calendar,
   Info,
   ClipboardCheck,
+  RotateCcw,
+  Save,
 } from "lucide-react";
 
 import { DescansoMedico } from "../../interfaces/IDescansoMedico";
@@ -106,7 +108,6 @@ export const CanjeForm = () => {
   const estadoRegistro = form.watch("estadoRegistro");
   const showObservacion = estadoRegistro === ECanje.CANJE_ORSERVADO;
   const showCodigoCitt = estadoRegistro === ECanje.CANJE_CONFORME;
-  const { isSubmitting } = form.formState;
 
   // Lógica para calcular la fecha máxima de canje permitida
   const maxInputDate = useMemo(() => {
@@ -170,6 +171,8 @@ export const CanjeForm = () => {
     fetchData();
   }, [id, isEditMode, form]);
 
+  const { isSubmitting } = form.formState;
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const { fechaCanje, codigoCitt, estadoRegistro, observacion } = values;
@@ -208,147 +211,177 @@ export const CanjeForm = () => {
   };
 
   return (
-    <>
-      <Card className="max-w-5xl mx-auto shadow-xl border-slate-200 overflow-hidden">
-        <CardHeader className="bg-slate-50/50 border-b border-slate-200 flex flex-row items-center justify-between py-6">
-          <div className="space-y-1">
-            <CardTitle className="text-2xl font-extrabold text-slate-900">
-              {isEditMode ? "Actualización de Canje" : "Registro de Canje"}
+    <div className="max-w-4xl mx-auto py-3 px-2 sm:px-4">
+      <Card className="shadow-md border border-slate-200 bg-white rounded-xl overflow-hidden">
+        <CardHeader className="border-b border-slate-100 bg-slate-50/60 pt-3 px-4 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.2 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100">
+                {isEditMode ? "Modo Edición" : "Nuevo Registro"}
+              </span>
+            </div>
+            <CardTitle className="text-lg font-bold text-slate-900 tracking-tight">
+              {isEditMode ? "Editar canje" : "Nuevo registro de canje"}
             </CardTitle>
-            <CardDescription className="text-slate-500 font-medium">
+            <CardDescription className="text-slate-500 font-normal text-xs">
               {isEditMode
-                ? "Modifique los detalles del canje de subsidio"
-                : "Ingrese la información necesaria para el proceso de canje"}
+                ? "Actualice la información general y médica de este registro."
+                : "Complete todos los campos requeridos para registrar el canje"}
             </CardDescription>
           </div>
+
           <Button
-            variant="ghost"
+            variant="outline"
+            size="sm"
             onClick={handleGoBack}
-            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-bold transition-all"
+            className="h-8 text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-100 border-slate-200 transition-all rounded-md px-3 self-start sm:self-auto"
           >
-            <ArrowLeft className="h-5 w-5 mr-2" />
+            <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />
             Volver
           </Button>
         </CardHeader>
 
-        <CardContent className="p-8">
+        <CardContent className="pb-4 px-4 sm:pb-5 sm:px-5">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {/* Informacion del Descanso Medico (Collapsible) */}
               <Collapsible
                 open={isOpen}
                 onOpenChange={setIsOpen}
-                className="group border border-blue-100 rounded-xl bg-blue-50/30 overflow-hidden transition-all shadow-sm"
+                className="border border-blue-100 rounded-lg bg-blue-50/20 overflow-hidden"
               >
                 <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between px-5 py-3 cursor-pointer hover:bg-blue-50 transition-colors">
-                    <div className="flex items-center gap-2 text-blue-800 font-bold">
-                      <Info className="h-5 w-5" />
+                  <div className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-blue-50/50 transition-colors">
+                    <div className="flex items-center gap-1.5 text-blue-900 font-semibold text-xs">
+                      <Info className="h-4 w-4 text-blue-600" />
                       <span>Información del Descanso Médico Relacionado</span>
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 w-8 p-0 rounded-full"
+                      className="h-6 w-6 p-0 rounded-full text-slate-500"
                     >
                       {isOpen ? (
-                        <ChevronUp className="h-5 w-5" />
+                        <ChevronUp className="h-3.5 w-3.5" />
                       ) : (
-                        <ChevronDown className="h-5 w-5" />
+                        <ChevronDown className="h-3.5 w-3.5" />
                       )}
                     </Button>
                   </div>
                 </CollapsibleTrigger>
-                <CollapsibleContent className="px-5 pb-5">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-                    <div className="space-y-1">
-                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+                <CollapsibleContent className="px-3 pb-3 pt-1 border-t border-blue-100/60">
+                  <div className="grid grid-cols-12 gap-2.5">
+                    {/* PRIMERA FILA */}
+                    {/* Colaborador - 6 Columnas */}
+                    <div className="col-span-12 md:col-span-6 space-y-0.5">
+                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
                         Colaborador
                       </label>
-                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
                         {descanso?.colaborador_dm.nombre_completo || "---"}
                       </p>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
-                        Tipo Descanso médico
+
+                    {/* Tipo Descanso - 3 Columnas */}
+                    <div className="col-span-6 md:col-span-3 space-y-0.5">
+                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                        Tipo Descanso
                       </label>
-                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
                         {descanso?.nombre_tipodescansomedico || "---"}
                       </p>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+
+                    {/* Tipo Contingencia - 3 Columnas */}
+                    <div className="col-span-6 md:col-span-3 space-y-0.5">
+                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
                         Tipo Contingencia
                       </label>
-                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
                         {descanso?.nombre_tipocontingencia || "---"}
                       </p>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
-                        Inicio descanso médico
+
+                    {/* SEGUNDA FILA */}
+                    {/* Inicio Descanso - 3 Columnas */}
+                    <div className="col-span-6 md:col-span-3 space-y-0.5">
+                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                        Inicio Descanso
                       </label>
-                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
                         {descanso?.fecha_inicio
                           ? HDate.formatDateTimezone(
                               descanso.fecha_inicio,
                               "dd/MM/yyyy",
                             )
-                          : ""}
+                          : "---"}
                       </p>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
-                        Fin descanso médico
+
+                    {/* Fin Descanso - 3 Columnas */}
+                    <div className="col-span-6 md:col-span-3 space-y-0.5">
+                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                        Fin Descanso
                       </label>
-                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
                         {descanso?.fecha_final
                           ? HDate.formatDateTimezone(
                               descanso.fecha_final,
                               "dd/MM/yyyy",
                             )
-                          : ""}
+                          : "---"}
                       </p>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+
+                    {/* Días Totales - 3 Columnas */}
+                    <div className="col-span-6 md:col-span-3 space-y-0.5">
+                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
                         Días Totales
                       </label>
-                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
                         {descanso?.total_dias || 0} días
                       </p>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
-                        Fecha máxima canje
+
+                    {/* Fecha Máxima Canje - 3 Columnas */}
+                    <div className="col-span-6 md:col-span-3 space-y-0.5">
+                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                        Fecha Máxima Canje
                       </label>
-                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
                         {fechaMaximaCanje
                           ? HDate.formatDateTimezone(
                               fechaMaximaCanje,
                               "dd/MM/yyyy",
                             )
-                          : ""}
+                          : "---"}
                       </p>
                     </div>
                   </div>
                 </CollapsibleContent>
               </Collapsible>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-x-8 gap-y-6">
+              {/* Form Fields Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <FormField
                   control={form.control}
                   name="fechaCanje"
                   render={({ field, fieldState }) => (
-                    <FormItem className="md:col-span-2 lg:col-span-1">
-                      <RequiredLabel>Fecha de canje</RequiredLabel>
+                    <FormItem className="space-y-1">
+                      <RequiredLabel className="text-xs font-medium">
+                        Fecha de canje
+                      </RequiredLabel>
                       <FormControl>
                         <div className="relative">
-                          <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 pointer-events-none" />
+                          <Calendar className="absolute left-2.5 top-2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
                           <Input
                             type="date"
                             max={maxInputDate}
-                            className={`pl-10 focus:ring-2 focus:ring-blue-500/20 ${fieldState.invalid ? "border-red-500" : "border-slate-300"}`}
+                            className={`pl-8 h-8 text-xs focus-visible:ring-1 ${
+                              fieldState.invalid
+                                ? "border-red-500"
+                                : "border-slate-300"
+                            }`}
                             {...field}
                             value={
                               field.value
@@ -365,7 +398,7 @@ export const CanjeForm = () => {
                           />
                         </div>
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-[11px]" />
                     </FormItem>
                   )}
                 />
@@ -374,17 +407,23 @@ export const CanjeForm = () => {
                   control={form.control}
                   name="estadoRegistro"
                   render={({ field, fieldState }) => (
-                    <FormItem className="md:col-span-2 lg:col-span-2">
-                      <RequiredLabel>Estado del registro</RequiredLabel>
+                    <FormItem className="space-y-1">
+                      <RequiredLabel className="text-xs font-medium">
+                        Estado del registro
+                      </RequiredLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value ?? ""}
                       >
                         <FormControl>
                           <SelectTrigger
-                            className={`h-10 bg-white font-medium ${fieldState.invalid ? "border-red-500" : "border-slate-300 focus:ring-blue-500/20"}`}
+                            className={`h-8 text-xs bg-white ${
+                              fieldState.invalid
+                                ? "border-red-500"
+                                : "border-slate-300"
+                            }`}
                           >
-                            <SelectValue placeholder="Seleccione el estado actual..." />
+                            <SelectValue placeholder="Seleccione estado..." />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="bg-white">
@@ -392,14 +431,14 @@ export const CanjeForm = () => {
                             <SelectItem
                               key={estado}
                               value={estado}
-                              className="cursor-pointer font-medium hover:bg-slate-100"
+                              className="cursor-pointer text-xs font-medium hover:bg-slate-100 py-1.5"
                             >
                               {estado}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormMessage />
+                      <FormMessage className="text-[11px]" />
                     </FormItem>
                   )}
                 />
@@ -409,73 +448,90 @@ export const CanjeForm = () => {
                     control={form.control}
                     name="codigoCitt"
                     render={({ field, fieldState }) => (
-                      <FormItem className="md:col-span-2">
-                        <RequiredLabel>Código CITT</RequiredLabel>
+                      <FormItem className="space-y-1">
+                        <RequiredLabel className="text-xs font-medium">
+                          Código CITT
+                        </RequiredLabel>
                         <FormControl>
                           <div className="relative">
-                            <ClipboardCheck className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 pointer-events-none" />
+                            <ClipboardCheck className="absolute left-2.5 top-2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
                             <Input
-                              placeholder="Ingrese el CITT"
-                              className={`pl-10 focus:ring-2 focus:ring-blue-500/20 ${fieldState.invalid ? "border-red-500" : "border-slate-300"}`}
+                              placeholder="Ingrese CITT"
+                              className={`pl-8 h-8 text-xs focus-visible:ring-1 ${
+                                fieldState.invalid
+                                  ? "border-red-500"
+                                  : "border-slate-300"
+                              }`}
                               {...field}
                             />
                           </div>
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-[11px]" />
                       </FormItem>
                     )}
                   />
                 )}
               </div>
 
+              {/* Observación Section */}
               {showObservacion && (
-                <div className="p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-md">
                   <FormField
                     control={form.control}
                     name="observacion"
                     render={({ field, fieldState }) => (
-                      <FormItem>
-                        <RequiredLabel>
+                      <FormItem className="space-y-1">
+                        <RequiredLabel className="text-xs font-medium">
                           Detalles de Observación / Documentación Pendiente
                         </RequiredLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="Escriba aquí los motivos de la observación o documentos faltantes..."
-                            className={`min-h-[100px] bg-white resize-none focus:ring-2 focus:ring-blue-500/20 ${fieldState.invalid ? "border-red-500" : "border-slate-300"}`}
+                            placeholder="Motivos de la observación o documentos faltantes..."
+                            className={`min-h-[70px] text-xs bg-white resize-none focus-visible:ring-1 ${
+                              fieldState.invalid
+                                ? "border-red-500"
+                                : "border-slate-300"
+                            }`}
                             {...field}
                           />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-[11px]" />
                       </FormItem>
                     )}
                   />
                 </div>
               )}
 
-              <div className="flex flex-col sm:flex-row justify-end items-center gap-4 pt-6 border-t border-slate-100">
+              {/* Form Footer Action Buttons */}
+              <div className="flex flex-col-reverse sm:flex-row justify-end items-center gap-2 pt-3 border-t border-slate-100">
                 <Button
                   type="button"
                   variant="outline"
+                  size="sm"
                   disabled={isSubmitting}
-                  onClick={() => navigate("/canje")}
-                  className="w-full sm:w-auto px-8 h-11 font-bold text-slate-600 hover:bg-slate-100 transition-all border-slate-300"
+                  onClick={handleGoBack}
+                  className="w-full sm:w-auto h-8 text-xs text-slate-600 border-slate-200 hover:bg-slate-100 rounded-md px-3"
                 >
-                  Cancelar
+                  <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                  Restablecer
                 </Button>
+
                 <Button
                   type="submit"
+                  size="sm"
                   disabled={isSubmitting}
-                  className="w-full sm:w-auto px-10 h-11 font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 transition-all disabled:opacity-70"
+                  className="w-full sm:w-auto h-8 text-xs rounded-md px-4 font-medium transition-all bg-indigo-600 hover:bg-indigo-700 text-white"
                 >
                   {isSubmitting ? (
                     <>
-                      <Spinner className="mr-2 h-4 w-4 animate-spin" />
-                      Procesando...
+                      <Spinner className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                      {isEditMode ? "Guardando..." : "Procesando..."}
                     </>
-                  ) : isEditMode ? (
-                    "Guardar Cambios"
                   ) : (
-                    "Confirmar Registro"
+                    <>
+                      <Save className="h-3.5 w-3.5 mr-1.5" />
+                      {isEditMode ? "Actualizar registro" : "Guardar registro"}
+                    </>
                   )}
                 </Button>
               </div>
@@ -483,6 +539,6 @@ export const CanjeForm = () => {
           </Form>
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 };

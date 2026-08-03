@@ -3,7 +3,7 @@ import { Card, CardContent } from "../ui/card";
 import { EspecialistaSHTable } from "./EspecialistaSHTable";
 import { Plus, GraduationCap, ArrowLeft } from "lucide-react";
 import { buttonVariants } from "../ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 
 export const EspecialistaSHList = () => {
   const newRoute = `/especialista-sh/nuevo`;

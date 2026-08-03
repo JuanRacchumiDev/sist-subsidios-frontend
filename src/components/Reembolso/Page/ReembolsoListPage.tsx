@@ -2,7 +2,7 @@ import { ReembolsoList } from "../ReembolsoList";
 
 export const ReembolsoListPage = () => {
   return (
-    <div>
+    <div className="w-full">
       <ReembolsoList />
     </div>
   );

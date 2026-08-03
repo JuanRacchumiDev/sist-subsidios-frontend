@@ -27,68 +27,44 @@ export const CanjeRow: React.FC<Props> = ({ canje }) => {
     navigate(`/canje/editar/${canje.id}`);
   };
 
-  const rowDisabledClasses = canje.is_reembolsable
-    ? "hover:bg-blue-100 hover:cursor-pointer transition-colors duration-200"
-    : "bg-gray-100 text-gray-500 cursor-not-allowed";
-  const textDisabledClasses = canje.is_reembolsable
-    ? "text-gray-900"
-    : "text-gray-500";
-  const highlightClasses = "text-center";
-
   return (
-    <TableRow key={canje.id} className={rowDisabledClasses}>
-      <TableCell
-        className={`py-2 px-3 text-xs text-slate-500 ${textDisabledClasses}`}
-      >
-        {canje.nombres_colaborador} {canje.apellido_paterno_colaborador}{" "}
-        {canje.apellido_materno_colaborador}
+    <TableRow
+      key={canje.id}
+      className="hover:bg-slate-50/80 hover:cursor-pointer transition-colors duration-150 border-b border-slate-100"
+    >
+      <TableCell className="py-2 px-3 text-xs text-slate-500">
+        {canje.nombre_colaborador}
       </TableCell>
 
-      <TableCell
-        className={`${highlightClasses} py-2 px-3 text-xs text-slate-500`}
-      >
+      <TableCell className="py-2 px-3 text-xs text-slate-500">
         {HDate.formatDateTimezone(canje.fecha_otorgamiento, "dd/MM/yyyy")}
       </TableCell>
 
-      <TableCell
-        className={`${highlightClasses} py-2 px-3 text-xs text-slate-500`}
-      >
+      <TableCell className="py-2 px-3 text-xs text-slate-500">
         {HDate.formatDateTimezone(canje.fecha_inicio_subsidio, "dd/MM/yyyy")}
       </TableCell>
 
-      <TableCell
-        className={`${highlightClasses} py-2 px-3 text-xs text-slate-500`}
-      >
+      <TableCell className="py-2 px-3 text-xs text-slate-500">
         {HDate.formatDateTimezone(canje.fecha_final_subsidio, "dd/MM/yyyy")}
       </TableCell>
 
-      <TableCell
-        className={`${highlightClasses} py-2 px-3 text-xs text-slate-500`}
-      >
+      <TableCell className="py-2 px-3 text-xs text-slate-500">
         {canje.total_dias}
       </TableCell>
 
-      <TableCell
-        className={`${highlightClasses} py-2 px-3 text-xs text-slate-500`}
-      >
+      <TableCell className="py-2 px-3 text-xs text-slate-500">
         {HDate.formatDateTimezone(canje.fecha_maxima_canje, "dd/MM/yyyy")}
       </TableCell>
 
-      <TableCell
-        className={`${highlightClasses} py-2 px-3 text-xs text-slate-500`}
-      >
+      <TableCell className="py-2 px-3 text-xs text-slate-500">
         {canje.nombre_tipodescansomedico}
       </TableCell>
 
-      <TableCell
-        className={`${highlightClasses} py-2 px-3 text-xs text-slate-500`}
-      >
+      <TableCell className="py-2 px-3 text-xs text-slate-500">
         {canje.nombre_tipocontingencia}
       </TableCell>
 
-      <TableCell
-        className={`${highlightClasses} py-2 px-3 text-xs text-slate-500`}
-      >
+      <TableCell className="py-2 px-3 text-xs text-slate-500">
         {canje.mes_devengado}
       </TableCell>
 
@@ -96,15 +72,11 @@ export const CanjeRow: React.FC<Props> = ({ canje }) => {
         <BadgeEstado estado={canje.estado_registro as ECanje} />
       </TableCell>
 
-      <TableCell
-        className={`py-3 font-semibold ${
-          canje.is_reembolsable ? "text-green-600" : "text-red-600"
-        }`}
-      >
+      <TableCell className="py-2 px-3 text-xs text-slate-500">
         {canje.is_reembolsable ? <span>SI</span> : <span>NO</span>}
       </TableCell>
 
-      <TableCell className="py-3">
+      <TableCell className="py-2 px-3 text-right">
         <DropdownMenu>
           <DropdownMenuTrigger
             asChild

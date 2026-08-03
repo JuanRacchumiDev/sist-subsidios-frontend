@@ -20,7 +20,7 @@ import {
 import { Detalle } from "../../interfaces/IDetalleParametro";
 import { PersonaFilter } from "../../interfaces/IPersona";
 import { getDetalles } from "../../services/detalleParametroService";
-import { Empresa, EmpresaResponse } from "@/interfaces/IEmpresa";
+import { Empresa, EmpresaResponse } from "../../interfaces/IEmpresa";
 import { getEmpresas } from "../../services/empresaService";
 import { ParametroClase } from "../../constants/parametroClase";
 

@@ -24,19 +24,6 @@ export const getDescansosPaginate = async (
     console.log('---- filters in descansoMedicoService ----')
     console.log({ filters })
 
-    // const params: any = {
-    //     page: page.toString(),
-    //     limit: limit.toString()
-    // };
-
-    // Object.entries(filters).forEach(([key, value]) => {
-    //     if (value !== undefined && value !== undefined && value !== "") {
-    //         params[key] = value
-    //     }
-    // })
-
-    // const queryParams = new URLSearchParams(params).toString()
-
     const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),

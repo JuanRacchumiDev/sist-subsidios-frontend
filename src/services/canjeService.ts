@@ -19,20 +19,18 @@ export const getCanjes = async () => {
 export const getCanjesPaginate = async (
     page: number,
     limit: number,
-    filters: CanjeFilter = {}
+    filters: {}
 ) => {
-    const params: any = {
+    console.log('---- filters in canjeService ----')
+    console.log({ filters })
+
+    const queryParams = new URLSearchParams({
         page: page.toString(),
-        limit: limit.toString()
-    };
-
-    Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== undefined && value !== "") {
-            params[key] = value
-        }
-    })
-
-    const queryParams = new URLSearchParams(params).toString()
+        limit: limit.toString(),
+        ...Object.fromEntries(
+            Object.entries(filters).filter(([, value]) => value)
+        )
+    }).toString()
 
     console.log({ queryParams })
 

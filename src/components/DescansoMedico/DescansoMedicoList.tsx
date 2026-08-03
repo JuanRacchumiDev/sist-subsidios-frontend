@@ -8,7 +8,7 @@ import { Button } from "../ui/button";
 import { getDescansosForReport } from "../../services/descansoMedicoService";
 import HDate from "../../helpers/HDate";
 import { buttonVariants } from "../ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 
 export const DescansoMedicoList = () => {
   const newRoute = `/descanso-medico/nuevo`;

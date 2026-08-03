@@ -12,7 +12,7 @@ import * as z from "zod";
 import { Button } from "../ui/button";
 import { Spinner } from "../Common/Spinner";
 import { useNavigate, useParams } from "react-router-dom";
-import { EReembolso } from "@/enums/EReembolso";
+import { EReembolso } from "../../enums/EReembolso";
 import {
   Form,
   FormControl,
@@ -35,7 +35,16 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "../ui/collapsible";
-import { ArrowLeft, ChevronDown, ChevronUp, Info } from "lucide-react";
+import {
+  ArrowLeft,
+  Calendar,
+  ChevronDown,
+  ChevronUp,
+  FileText,
+  Info,
+  RotateCcw,
+  Save,
+} from "lucide-react";
 
 import { Canje } from "../../interfaces/ICanje";
 import { Reembolso } from "../../interfaces/IReembolso";
@@ -46,12 +55,14 @@ import {
 import { useToast } from "../../context/ToastContext";
 import HDate from "../../helpers/HDate";
 import { getAuthData } from "../../utils/authMemo";
+import { Textarea } from "../ui/textarea";
 
 export const formSchema = z.object({
   id: z.string().optional(),
-  fechaPago: z.string().optional(),
+  fechaPago: z.string().optional().nullable(),
   numeroExpediente: z.string().optional(),
   estadoRegistro: z.string({ message: "Debe seleccionar un estado" }),
+  observacion: z.string().optional(),
 });
 
 export const ReembolsoForm = () => {
@@ -60,18 +71,14 @@ export const ReembolsoForm = () => {
   const isEditMode = !!id;
   const { showToast } = useToast();
 
-  const [canje, setCanje] = useState<Canje | null>(null);
-  const [fechaMaximoReembolso, setFechaMaximoReembolso] = useState<string | "">(
-    "",
-  );
-  const [idUserCrea, setIdUserCrea] = useState<string | "">("");
-  const [isOpen, setIsOpen] = useState(false); // Estado para controlar el Collapsible
+  const [defineCanje, setDefineCanje] = useState<Canje | null>(null);
+  const [fechaMaximoReembolso, setFechaMaximoReembolso] = useState<string>("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [defineNombreColaborador, setDefineNombreColaborador] =
+    useState<string>("");
 
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
-  console.log({ userProfile });
-
-  const { id_usuario } = userProfile;
-  console.log({ id_usuario });
+  const id_usuario = userProfile?.id_usuario;
 
   const estadosPermitidos: EReembolso[] = useMemo(() => {
     return Object.values(EReembolso);
@@ -88,64 +95,76 @@ export const ReembolsoForm = () => {
       fechaPago: null,
       numeroExpediente: "",
       estadoRegistro: EReembolso.REEMBOLSO_INGRESADO,
+      observacion: "",
     },
   });
 
   const estadoRegistro = form.watch("estadoRegistro");
   const showObservacion = estadoRegistro === EReembolso.REEMBOLSO_OBSERVADO;
-  const showCodigo = estadoRegistro === EReembolso.REEMBOLSO_CONFORME;
-  const { isSubmitting } = form.formState;
+  const showExpediente = estadoRegistro === EReembolso.REEMBOLSO_CORRECTO;
 
   useEffect(() => {
     const fetchData = async () => {
       if (isEditMode && id) {
         try {
           const responseReembolso = await getReembolsoById(id);
-
-          console.log({ responseReembolso });
-
           const { result, data } = responseReembolso;
 
           if (result && data) {
             const reembolso = data as Reembolso;
 
-            console.log({ reembolso });
-
             const {
               fecha_pago,
               numero_expediente,
               estado_registro,
-              user_crea,
+              nombre_colaborador,
               canje,
+              fecha_maxima_reembolso,
+              observacion,
             } = reembolso;
+
+            if (canje) {
+              setDefineCanje(canje as Canje);
+            }
+
+            if (nombre_colaborador) {
+              setDefineNombreColaborador(nombre_colaborador as string);
+            }
+
+            if (fecha_maxima_reembolso) {
+              setFechaMaximoReembolso(fecha_maxima_reembolso as string);
+            }
 
             const dataForm = {
               fechaPago: fecha_pago || null,
               numeroExpediente: numero_expediente || "",
-              estadoRegistro: estado_registro,
+              estadoRegistro: estado_registro || EReembolso.REEMBOLSO_INGRESADO,
+              observacion: observacion || "",
             };
 
             form.reset(dataForm);
-
-            setIdUserCrea(user_crea);
           }
         } catch (error) {
-          showToast("error", "Error al cargar los datos del descanso médico.");
-          console.error("Error fetching descanso medico:", error);
+          showToast("error", "Error al cargar los datos del reembolso.");
+          console.error("Error fetching reembolso:", error);
         }
       }
     };
     fetchData();
   }, [id, isEditMode, form]);
 
+  const { isSubmitting } = form.formState;
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const { fechaPago, numeroExpediente, estadoRegistro } = values;
+      const { fechaPago, numeroExpediente, estadoRegistro, observacion } =
+        values;
 
       const payloadReembolso: Reembolso = {
-        fecha_pago: HDate.formatDateTimezone(fechaPago),
+        fecha_pago: fechaPago ? HDate.formatDateTimezone(fechaPago) : undefined,
         numero_expediente: numeroExpediente,
         estado_registro: estadoRegistro as EReembolso,
+        observacion,
       };
 
       if (isEditMode && id) {
@@ -156,8 +175,7 @@ export const ReembolsoForm = () => {
 
       console.log({ payloadReembolso });
 
-      const response = await updateReembolso(id, payloadReembolso);
-
+      const response = await updateReembolso(id!, payloadReembolso);
       const { result, message } = response;
 
       if (result) {
@@ -166,267 +184,365 @@ export const ReembolsoForm = () => {
       } else {
         showToast("error", message || "Error al procesar el reembolso");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al registrar reembolso", error);
-      showToast("error", error);
+      showToast("error", error?.message || "Ocurrió un error inesperado");
     }
   };
 
   return (
-    <>
-      <Card className="max-w-5xl mx-auto shadow-xl border-slate-200 overflow-hidden">
-        <CardHeader className="bg-slate-50/50 border-b border-slate-200 flex flex-row items-center justify-between py-6">
-          <div className="space-y-1">
-            <CardTitle className="text-2xl font-extrabold text-slate-900">
-              {isEditMode
-                ? "Actualización de reembolso"
-                : "Registro de reembolso"}
+    <div className="max-w-4xl mx-auto py-3 px-2 sm:px-4">
+      <Card className="shadow-md border border-slate-200 bg-white rounded-xl overflow-hidden">
+        <CardHeader className="border-b border-slate-100 bg-slate-50/60 pt-3 px-4 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.2 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100">
+                {isEditMode ? "Modo Edición" : "Nuevo Registro"}
+              </span>
+            </div>
+            <CardTitle className="text-lg font-bold text-slate-900 tracking-tight">
+              {isEditMode ? "Editar reembolso" : "Nuevo registro de reembolso"}
             </CardTitle>
-            <CardDescription className="text-slate-500 font-medium">
+            <CardDescription className="text-slate-500 font-normal text-xs">
               {isEditMode
-                ? "Modifique los detalles del reembolso de subsidio"
-                : "Ingrese la información necesaria para el procesos de reembolso"}
+                ? "Actualice la información general y médica de este registro."
+                : "Complete todos los campos requeridos para registrar el reembolso"}
             </CardDescription>
           </div>
+
           <Button
-            variant="ghost"
+            variant="outline"
+            size="sm"
             onClick={handleGoBack}
-            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-bold transition-all"
+            className="h-8 text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-100 border-slate-200 transition-all rounded-md px-3 self-start sm:self-auto"
           >
-            <ArrowLeft className="h-5 w-5 mr-2" />
+            <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />
             Volver
           </Button>
         </CardHeader>
 
-        <CardContent className="p-8">
+        <CardContent className="pb-4 px-4 sm:pb-5 sm:px-5">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <Collapsible
                 open={isOpen}
                 onOpenChange={setIsOpen}
-                className="group border border-blue-100 rounded-xl bg-blue-50/30 overflow-hidden transition-all shadow-sm"
+                className="border border-blue-100 rounded-lg bg-blue-50/20 overflow-hidden"
               >
                 <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between px-5 py-3 cursor-pointer hover:bg-blue-50 transition-colors">
-                    <div className="flex items-center gap-2 text-blue-800 font-bold">
-                      <Info className="h-5 w-5" />
+                  <div className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-blue-50/50 transition-colors">
+                    <div className="flex items-center gap-1.5 text-blue-900 font-semibold text-xs">
+                      <Info className="h-4 w-4 text-blue-600" />
                       <span>Información del Canje Relacionado</span>
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 w-8 p-0 rounded-full"
+                      className="h-6 w-6 p-0 rounded-full text-slate-500"
                     >
                       {isOpen ? (
-                        <ChevronUp className="h-5 w-5" />
+                        <ChevronUp className="h-3.5 w-3.5" />
                       ) : (
-                        <ChevronDown className="h-5 w-5" />
+                        <ChevronDown className="h-3.5 w-3.5" />
                       )}
                     </Button>
                   </div>
                 </CollapsibleTrigger>
-                <CollapsibleContent className="px-5 pb-5">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-                    <div className="space-y-1">
-                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+
+                <CollapsibleContent className="px-3 pb-3 pt-1 border-t border-blue-100/60">
+                  <div className="grid grid-cols-12 gap-2.5">
+                    {/* FILA 1 */}
+                    {/* Colaborador - 6 columnas */}
+                    <div className="col-span-12 md:col-span-6 space-y-0.5">
+                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
                         Colaborador
                       </label>
-                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
-                        {canje.descansoMedico.colaborador_dm.nombre_completo ||
+                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
+                        {defineNombreColaborador ||
+                          defineCanje?.descansoMedico?.colaborador_dm
+                            ?.nombre_completo ||
                           "---"}
                       </p>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
-                        Tipo Descanso médico
+
+                    {/* Tipo Descanso - 3 columnas */}
+                    <div className="col-span-6 md:col-span-3 space-y-0.5">
+                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                        Tipo Descanso
                       </label>
-                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
-                        {canje.descansoMedico.nombre_tipodescansomedico ||
+                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
+                        {defineCanje?.nombre_tipodescansomedico ||
+                          defineCanje?.descansoMedico
+                            ?.nombre_tipodescansomedico ||
                           "---"}
                       </p>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+
+                    {/* Tipo Contingencia - 3 columnas */}
+                    <div className="col-span-6 md:col-span-3 space-y-0.5">
+                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
                         Tipo Contingencia
                       </label>
-                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
-                        {canje.descansoMedico.nombre_tipocontingencia || "---"}
+                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
+                        {defineCanje?.nombre_tipocontingencia ||
+                          defineCanje?.descansoMedico
+                            ?.nombre_tipocontingencia ||
+                          "---"}
                       </p>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
-                        Inicio descanso médico
+
+                    {/* FILA 2 */}
+                    {/* Inicio Descanso - 3 columnas */}
+                    <div className="col-span-6 md:col-span-3 space-y-0.5">
+                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                        Inicio Descanso
                       </label>
-                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
-                        {canje.descansoMedico.fecha_inicio
+                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
+                        {defineCanje?.descansoMedico?.fecha_inicio
                           ? HDate.formatDateTimezone(
-                              canje.descansoMedico.fecha_inicio,
+                              defineCanje.descansoMedico.fecha_inicio,
                               "dd/MM/yyyy",
                             )
-                          : ""}
+                          : "---"}
                       </p>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
-                        Fin descanso médico
+
+                    {/* Fin Descanso - 3 columnas */}
+                    <div className="col-span-6 md:col-span-3 space-y-0.5">
+                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                        Fin Descanso
                       </label>
-                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
-                        {canje.descansoMedico.fecha_final
+                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
+                        {defineCanje?.descansoMedico?.fecha_final
                           ? HDate.formatDateTimezone(
-                              canje.descansoMedico.fecha_final,
+                              defineCanje.descansoMedico.fecha_final,
                               "dd/MM/yyyy",
                             )
-                          : ""}
+                          : "---"}
                       </p>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
+
+                    {/* Días Totales - 3 columnas */}
+                    <div className="col-span-6 md:col-span-3 space-y-0.5">
+                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
                         Días Totales
                       </label>
-                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
-                        {canje.descansoMedico.total_dias || 0} días
+                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
+                        {defineCanje?.descansoMedico?.total_dias
+                          ? `${defineCanje.descansoMedico.total_dias} días`
+                          : "---"}
                       </p>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[11px] uppercase tracking-wider font-bold text-slate-500">
-                        Fecha máxima reembolso
+
+                    {/* Fecha Máxima Reembolso - 3 columnas */}
+                    <div className="col-span-6 md:col-span-3 space-y-0.5">
+                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                        Fecha Máxima Reembolso
                       </label>
-                      <p className="text-sm font-semibold text-slate-800 bg-white p-2 rounded border border-blue-100">
+                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
                         {fechaMaximoReembolso
                           ? HDate.formatDateTimezone(
                               fechaMaximoReembolso,
                               "dd/MM/yyyy",
                             )
-                          : ""}
+                          : "---"}
                       </p>
                     </div>
                   </div>
                 </CollapsibleContent>
               </Collapsible>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <FormField
-                  control={form.control}
-                  name="fechaPago"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <RequiredLabel>Fecha de pago</RequiredLabel>
-                      <FormControl>
-                        <Input
-                          type="date"
-                          value={
-                            field.value ? format(field.value, "yyyy-MM-dd") : ""
-                          }
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value ? parseISO(e.target.value) : null,
-                            )
-                          }
-                          className={
-                            fieldState.invalid
-                              ? "border-red-500"
-                              : "focus:ring-blue-500"
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="numeroExpediente"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <RequiredLabel>Número de expediente</RequiredLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Número de expediente"
-                          autoComplete="off"
-                          maxLength={20}
-                          {...field}
-                          className={
-                            fieldState.invalid
-                              ? "border-red-500"
-                              : "focus:ring-blue-500"
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
+              {/* FORMULARIO */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+                {/* Estado del registro */}
                 <FormField
                   control={form.control}
                   name="estadoRegistro"
                   render={({ field, fieldState }) => (
-                    <FormItem>
-                      <RequiredLabel>Estado del registro</RequiredLabel>
+                    <FormItem
+                      className={`space-y-1.5 transition-all duration-200 ${
+                        !showExpediente ? "md:col-span-3 lg:col-span-1" : ""
+                      }`}
+                    >
+                      <RequiredLabel className="text-xs font-semibold text-slate-700">
+                        Estado del registro
+                      </RequiredLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value ?? ""}
                       >
                         <FormControl>
                           <SelectTrigger
-                            className={
+                            className={`w-full h-9 text-xs bg-white shadow-sm transition-colors ${
                               fieldState.invalid
-                                ? "border-red-500"
-                                : "focus:ring-blue-500"
-                            }
+                                ? "border-red-500 focus:ring-red-200"
+                                : "border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                            }`}
                           >
-                            <SelectValue placeholder="Seleccionar estado" />
+                            <SelectValue placeholder="Seleccione estado..." />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-gray-400">
+                        <SelectContent className="bg-white border-slate-200 shadow-md">
                           {estadosPermitidos.map((estado) => (
                             <SelectItem
                               key={estado}
                               value={estado}
-                              className="cursor-pointer"
+                              className="cursor-pointer text-xs font-medium hover:bg-slate-100 py-2 focus:bg-slate-100"
                             >
                               {estado}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
+                      <FormMessage className="text-[11px]" />
                     </FormItem>
                   )}
                 />
+
+                {showExpediente && (
+                  <>
+                    {/* Fecha de pago */}
+                    <FormField
+                      control={form.control}
+                      name="fechaPago"
+                      render={({ field, fieldState }) => (
+                        <FormItem className="space-y-1.5">
+                          <RequiredLabel className="text-xs font-semibold text-slate-700">
+                            Fecha de pago
+                          </RequiredLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Calendar className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400 pointer-events-none" />
+                              <Input
+                                type="date"
+                                value={
+                                  field.value
+                                    ? format(
+                                        typeof field.value === "string"
+                                          ? parseISO(field.value)
+                                          : field.value,
+                                        "yyyy-MM-dd",
+                                      )
+                                    : ""
+                                }
+                                onChange={(e) =>
+                                  field.onChange(
+                                    e.target.value
+                                      ? parseISO(e.target.value)
+                                      : null,
+                                  )
+                                }
+                                className={`pl-9 h-9 text-xs bg-white shadow-sm transition-colors ${
+                                  fieldState.invalid
+                                    ? "border-red-500 focus:ring-red-200"
+                                    : "border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                }`}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage className="text-[11px]" />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Número de expediente */}
+                    <FormField
+                      control={form.control}
+                      name="numeroExpediente"
+                      render={({ field, fieldState }) => (
+                        <FormItem className="space-y-1.5">
+                          <RequiredLabel className="text-xs font-semibold text-slate-700">
+                            Número de expediente
+                          </RequiredLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <FileText className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400 pointer-events-none" />
+                              <Input
+                                placeholder="Ingrese N° de expediente"
+                                autoComplete="off"
+                                maxLength={20}
+                                {...field}
+                                className={`pl-9 h-9 text-xs bg-white shadow-sm transition-colors ${
+                                  fieldState.invalid
+                                    ? "border-red-500 focus:ring-red-200"
+                                    : "border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                }`}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage className="text-[11px]" />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
               </div>
 
-              <div className="flex justify-end space-x-4 pt-4 border-t border-gray-100">
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer transition-colors"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Spinner className="mr-2 h-4 w-4 animate-spin" />
-                      {isEditMode ? "Actualizando..." : "Registrando..."}
-                    </>
-                  ) : isEditMode ? (
-                    "Actualizar"
-                  ) : (
-                    "Registrar"
-                  )}
-                </Button>
+              {showObservacion && (
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-md">
+                  <FormField
+                    control={form.control}
+                    name="observacion"
+                    render={({ field, fieldState }) => (
+                      <FormItem className="space-y-1">
+                        <RequiredLabel className="text-xs font-medium">
+                          Detalles de Observación / Documentación Pendiente
+                        </RequiredLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Motivos de la observación o documentos faltantes..."
+                            className={`min-h-[70px] text-xs bg-white resize-none focus-visible:ring-1 ${
+                              fieldState.invalid
+                                ? "border-red-500"
+                                : "border-slate-300"
+                            }`}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage className="text-[11px]" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+
+              {/* ACCIONES */}
+              <div className="flex flex-col-reverse sm:flex-row justify-end items-center gap-2 pt-3 border-t border-slate-100">
                 <Button
                   type="button"
                   variant="outline"
+                  size="sm"
                   disabled={isSubmitting}
-                  onClick={() => navigate("/reembolso")}
-                  className="hover:bg-gray-200 cursor-pointer"
+                  onClick={handleGoBack}
+                  className="w-full sm:w-auto h-8 text-xs text-slate-600 border-slate-200 hover:bg-slate-100 rounded-md px-3"
                 >
-                  Cancelar
+                  <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                  Restablecer
+                </Button>
+
+                <Button
+                  type="submit"
+                  size="sm"
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto h-8 text-xs rounded-md px-4 font-medium transition-all bg-indigo-600 hover:bg-indigo-700 text-white"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Spinner className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                      {isEditMode ? "Guardando..." : "Procesando..."}
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-3.5 w-3.5 mr-1.5" />
+                      {isEditMode ? "Actualizar registro" : "Guardar registro"}
+                    </>
+                  )}
                 </Button>
               </div>
             </form>
           </Form>
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 };

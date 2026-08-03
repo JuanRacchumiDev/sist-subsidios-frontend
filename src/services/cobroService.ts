@@ -1,4 +1,4 @@
-import { Cobro } from '@/interfaces/ICobro'
+import { Cobro } from '../interfaces/ICobro'
 import {
     getAll,
     getById,

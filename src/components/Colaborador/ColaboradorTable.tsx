@@ -19,7 +19,10 @@ import {
 } from "../ui/table";
 import { ColaboradorRow } from "./ColaboradorRow";
 import { TableSpinner } from "../../components/Common/TableSpinner";
-import { Persona, Pagination as PaginationType } from "@/interfaces/IPersona";
+import {
+  Persona,
+  Pagination as PaginationType,
+} from "../../interfaces/IPersona";
 import { ParametroClase } from "../../params/parametroClase";
 import {
   ColaboradorFilters,

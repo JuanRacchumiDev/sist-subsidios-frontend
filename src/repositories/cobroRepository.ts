@@ -1,4 +1,4 @@
-import { Cobro, CobroResponse } from "@/interfaces/ICobro"
+import { Cobro, CobroResponse } from "../interfaces/ICobro"
 import apiClient from "./apiClient"
 
 export const getAll = async (): Promise<CobroResponse> => {

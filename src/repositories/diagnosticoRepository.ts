@@ -73,14 +73,15 @@ export const create = async (payload: Diagnostico): Promise<DiagnosticoResponse>
     try {
         const response = await apiClient.post('/diagnosticos', payload)
 
-        const { data: { result, message, status } } = response
+        const { data: { result, data, status, message, error } } = response
 
         return {
             result,
+            data,
+            status,
             message,
-            status
+            error
         }
-
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
         console.log('errorMessage', errorMessage)

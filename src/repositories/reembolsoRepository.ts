@@ -24,9 +24,9 @@ export const getAll = async (): Promise<ReembolsoResponse> => {
 }
 
 
-export const getAllPaginate = async (page: number, limit: number) => {
+export const getAllPaginate = async (queryParams: string) => {
     try {
-        const urlApi = `${'/reembolsos/paginate?page='}${page}${'&limit='}${limit}`
+        const urlApi = `${'/reembolsos/paginate?'}${queryParams}`
 
         const response = await apiClient.get(urlApi)
 

@@ -3,7 +3,7 @@ import { Card, CardContent } from "../ui/card";
 import { EspecialistaClienteTable } from "./EspecialistaClienteTable";
 import { Plus, GraduationCap, ArrowLeft } from "lucide-react";
 import { buttonVariants } from "../ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 
 export const EspecialistaClienteList = () => {
   const newRoute = `/especialista-cliente/nuevo`;

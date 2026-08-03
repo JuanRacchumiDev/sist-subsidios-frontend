@@ -15,8 +15,25 @@ export const getReembolsos = async () => {
     }
 }
 
-export const getReembolsosPaginate = async (page: number, limit: number) => {
-    const response = await getAllPaginate(page, limit)
+export const getReembolsosPaginate = async (
+    page: number,
+    limit: number,
+    filters: {}
+) => {
+    console.log('---- filters in reembolsoService ----')
+    console.log({ filters })
+
+    const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...Object.fromEntries(
+            Object.entries(filters).filter(([, value]) => value)
+        )
+    }).toString()
+
+    console.log({ queryParams })
+
+    const response = await getAllPaginate(queryParams)
 
     return {
         ...response

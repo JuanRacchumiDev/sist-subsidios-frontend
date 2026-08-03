@@ -3,7 +3,7 @@ import { Card, CardContent } from "../ui/card";
 import { UsuarioTable } from "./UsuarioTable";
 import { Plus, GraduationCap, ArrowLeft } from "lucide-react";
 import { buttonVariants } from "../ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 
 export const UsuarioList = () => {
   const newRoute = `/usuario/nuevo`;

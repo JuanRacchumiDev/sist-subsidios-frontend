@@ -29,6 +29,10 @@ export const MantenimientoPage = () => {
 
         <Route path="/diagnostico" element={<DiagnosticoList />} />
         <Route path="/diagnostico/nuevo" element={<DiagnosticoForm />} />
+        <Route
+          path="/diagnostico/editar/:codigo"
+          element={<DiagnosticoForm />}
+        />
       </Routes>
     </div>
   );

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Detalle } from "../../interfaces/IDetalleParametro";
 import { getDetalles } from "../../services/detalleParametroService";
-import { ParametroClase } from "@/constants/parametroClase";
+import { ParametroClase } from "../../constants/parametroClase";
 import {
   Select,
   SelectContent,

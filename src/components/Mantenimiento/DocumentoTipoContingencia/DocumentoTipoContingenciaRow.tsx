@@ -25,7 +25,7 @@ import { Button } from "../../ui/button";
 import { useToast } from "../../../context/ToastContext";
 import { ConfirmDialog } from "../../Common/ConfirmDialog";
 import { useState } from "react";
-import { updateDocumentoTipoContByEstado } from "@/services/documentoTipoContService";
+import { updateDocumentoTipoContByEstado } from "../../../services/documentoTipoContService";
 
 interface Props {
   documento: DocumentoTipoContingencia;

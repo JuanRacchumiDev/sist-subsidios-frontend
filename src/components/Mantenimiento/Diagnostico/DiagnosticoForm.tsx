@@ -1,3 +1,7 @@
+import { useEffect, useState, useMemo } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Card,
@@ -5,7 +9,9 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../../ui/card";
+} from "../../../components/ui/card";
+import { useToast } from "../../../context/ToastContext";
+import { Spinner } from "../../../components/Common/Spinner";
 import {
   Form,
   FormControl,
@@ -13,12 +19,8 @@ import {
   FormItem,
   FormMessage,
 } from "../../ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
 import { Button } from "../../ui/button";
-import { Input } from "../../ui/input";
-import { Spinner } from "../../Common/Spinner";
+import { RequiredLabel } from "../../Common/RequiredLabel";
 
 import {
   createDiagnostico,
@@ -29,10 +31,8 @@ import {
   Diagnostico,
   DiagnosticoResponse,
 } from "../../../interfaces/IDiagnostico";
-import { useToast } from "../../../context/ToastContext";
-import { RequiredLabel } from "../../../components/Common/RequiredLabel";
-import { useEffect, useMemo } from "react";
-import { ArrowLeft } from "lucide-react";
+import { Input } from "../../../components/ui/input";
+import { ArrowLeft, Save, XCircle } from "lucide-react";
 import { getAuthData } from "../../../utils/authMemo";
 
 const formSchema = z.object({
@@ -46,8 +46,10 @@ const formSchema = z.object({
 
 export const DiagnosticoForm = () => {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const { codigo } = useParams<{ codigo: string }>();
   const { showToast } = useToast();
+
+  const [isLoadingData, setIsLoadingData] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -57,55 +59,94 @@ export const DiagnosticoForm = () => {
     },
   });
 
-  const { isSubmitting } = form.formState;
-
-  const isEditMode = !!id;
+  const isEditMode = !!codigo;
 
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
+  console.log({ userProfile });
 
   const { id_usuario } = userProfile;
+  console.log({ id_usuario });
 
   const handleGoBack = () => {
     navigate("/mantenimiento/diagnostico");
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoadingData(true);
+
+      try {
+        if (isEditMode && codigo) {
+          const responseDiagnostico = await getDiagnosticoByCodigo(codigo);
+
+          const { result, data } = responseDiagnostico;
+
+          if (result && data) {
+            const diagnostico = data as Diagnostico;
+
+            const dataForm = {
+              codCie10: diagnostico.codCie10,
+              nombre: diagnostico.nombre || "",
+            };
+
+            form.reset(dataForm);
+          }
+        }
+      } catch (error) {
+        console.error("Error al obtener datos", error);
+        showToast("error", "Error al cargar los datos del formulario.");
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    fetchData();
+  }, [codigo, isEditMode]);
+
   const resetForm = () => {
     form.reset({
+      codCie10: "",
       nombre: "",
     });
   };
+
+  const { isSubmitting } = form.formState;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       let messageError: string = "";
       let response: DiagnosticoResponse;
 
-      const payloadData: Diagnostico = {
-        ...values,
-        estado: true,
+      const { codCie10, nombre } = values;
+
+      const payload: Diagnostico = {
+        codCie10,
+        nombre,
       };
 
-      if (isEditMode && id) {
-        // messageError = "Error al actualizar el cargo";
-        payloadData.user_actualiza = id_usuario;
-        response = await updateDiagnostico(id, payloadData);
+      if (isEditMode && codigo) {
+        console.log("actualizar diagnóstico");
+        messageError = "Error al actualizar el diagnóstico";
+        payload.user_actualiza = id_usuario;
+        console.log({ payload });
+        response = await updateDiagnostico(codigo, payload);
       } else {
-        // messageError = "Error al registrar el cargo";
-        payloadData.user_crea = id_usuario;
-        response = await createDiagnostico(payloadData);
+        console.log("crear diagnóstico");
+        messageError = "Error al registrar el diagnóstico";
+        payload.user_crea = id_usuario;
+        console.log({ payload });
+        response = await createDiagnostico(payload);
       }
+
+      console.log({ response });
 
       const { result, message, error } = response;
 
-      messageError = message;
-
-      const colorNotification = error && error.length > 0 ? "error" : "warning";
-
       if (result) {
         showToast("success", message);
-        navigate("/mantenimiento/diagnosrtico");
+        navigate("/mantenimiento/diagnostico");
       } else {
-        showToast(colorNotification, error || messageError);
+        showToast("error", error || messageError);
         return;
       }
     } catch (error) {
@@ -114,78 +155,50 @@ export const DiagnosticoForm = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (isEditMode) {
-          const responseDiagnostico = await getDiagnosticoByCodigo(id);
-          const { result, data, message } = responseDiagnostico;
-
-          if (result && data) {
-            const diagnostico = data as Diagnostico;
-            form.reset({
-              codCie10: diagnostico.codCie10,
-              nombre: diagnostico.nombre,
-            });
-          } else {
-            showToast("error", message || "Diagnóstico no encontrado");
-            navigate("/mantenimiento/diagnostico/nuevo");
-          }
-        }
-      } catch (error) {
-        console.error("Error al obtener datos", error);
-        showToast("error", "Error al cargar los datos del formulario.");
-      }
-    };
-
-    fetchData();
-  }, [id, isEditMode, form, navigate, showToast]);
-
   return (
-    // <div className="flex justify-center w-full mx-auto max-w-md">
     <>
-      <Card className="shadow-lg border-gray-200">
-        <CardHeader className="border-b border-gray-200 flex flex-row items-center justify-between">
-          <div className="flex-shrink min-w-0">
-            <CardTitle className="text-xl font-bold text-gray-800">
+      <Card className="shadow-xl border-none bg-white">
+        <CardHeader className="border-b border-gray-100 p-6 flex flex-row items-center justify-between bg-gray-50/50 rounded-t-xl">
+          <div className="space-y-1">
+            <CardTitle className="text-2xl font-extrabold text-slate-800 tracking-tight">
               {isEditMode
-                ? "Actualización de diagnóstico"
-                : "Registro de diagnóstico"}
+                ? `Editar diagnóstico`
+                : `Nuevo registro de diagnóstico`}
             </CardTitle>
-            <CardDescription className="text-sm text-gray-500">
+            <CardDescription className="text-slate-500 font-medium">
               {isEditMode
-                ? "Formulario de actualización de diagnóstico"
-                : "Complete el formulario para registrar nuevo diagnóstico"}
+                ? `Actualización de información de diagnóstico`
+                : `Complete la información para registrar un diagnóstico`}
             </CardDescription>
           </div>
-          <button
+          <Button
+            variant="ghost"
             onClick={handleGoBack}
-            className="flex items-center text-sm font-semibold 
-              text-blue-600 
-              hover:text-blue-800 
-              hover:bg-blue-50 
-              transition-colors 
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 
-              rounded-md p-2 ml-4 
-              cursor-pointer"
-            aria-label="Volver al listado"
+            className="text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-all"
           >
-            <ArrowLeft className="h-4 w-4 mr-1" /> Volver
-          </button>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver
+          </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 sm:px-8 relative">
+          {isLoadingData && (
+            <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center z-10">
+              <Spinner className="h-8 w-8 text-blue-600 animate-spin" />
+            </div>
+          )}
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-x-6 gap-y-5">
                 <FormField
                   control={form.control}
                   name="codCie10"
                   render={({ field, fieldState }) => (
-                    <FormItem className="md:col-span-4">
-                      <RequiredLabel>Código CIE10</RequiredLabel>
+                    <FormItem>
+                      <RequiredLabel>Nombre</RequiredLabel>
                       <FormControl>
                         <Input
-                          placeholder="A02.4"
+                          placeholder="A02.5"
                           autoComplete="off"
                           maxLength={10}
                           {...field}
@@ -195,11 +208,11 @@ export const DiagnosticoForm = () => {
                               ? "border-red-500 focus:ring-red-500"
                               : "focus:ring-blue-500"
                           }
-                            transition-all duration-300 w-full
+                            transition-all duration-300
                           `}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs font-medium text-red-500" />
                     </FormItem>
                   )}
                 />
@@ -208,11 +221,11 @@ export const DiagnosticoForm = () => {
                   control={form.control}
                   name="nombre"
                   render={({ field, fieldState }) => (
-                    <FormItem className="md:col-span-8">
+                    <FormItem>
                       <RequiredLabel>Nombre</RequiredLabel>
                       <FormControl>
                         <Input
-                          placeholder="Director General"
+                          placeholder="Fiebre tifoidea"
                           autoComplete="off"
                           maxLength={100}
                           {...field}
@@ -222,39 +235,37 @@ export const DiagnosticoForm = () => {
                               ? "border-red-500 focus:ring-red-500"
                               : "focus:ring-blue-500"
                           }
-                            transition-all duration-300 w-full
+                            transition-all duration-300
                           `}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs font-medium text-red-500" />
                     </FormItem>
                   )}
                 />
               </div>
-              <div className="flex justify-end space-x-4 pt-4">
+
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t border-gray-100">
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-blue-600 hover:bg-blue-700 hover: cursor-pointer text-white transition-colors duration-300"
+                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md shadow-blue-100 transition-all active:scale-[0.98]"
                 >
                   {isSubmitting ? (
-                    <>
-                      <Spinner className="mr-2 h-4 w-4 animate-spin" />
-                      {isEditMode ? "Actualizando..." : "Registrando..."}
-                    </>
-                  ) : isEditMode ? (
-                    "Actualizar"
+                    <Spinner className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    "Registrar"
+                    <Save className="h-4 w-4 mr-2" />
                   )}
+                  {isEditMode ? "Actualizar Datos" : "Confirmar Registro"}
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   disabled={isSubmitting}
-                  onClick={() => resetForm()}
-                  className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
+                  onClick={resetForm}
+                  className="w-full sm:w-auto border-slate-200 text-slate-700 hover:bg-slate-50 font-medium transition-all"
                 >
+                  <XCircle className="h-4 w-4 mr-2 text-slate-500" />
                   Cancelar
                 </Button>
               </div>
@@ -263,6 +274,5 @@ export const DiagnosticoForm = () => {
         </CardContent>
       </Card>
     </>
-    // </div>
   );
 };

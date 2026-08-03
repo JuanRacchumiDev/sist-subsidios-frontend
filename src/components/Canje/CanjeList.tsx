@@ -14,7 +14,7 @@ import { getCanjesForReport } from "../../services/canjeService";
 import HDate from "../../helpers/HDate";
 import { Link } from "react-router-dom";
 import { buttonVariants } from "../ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 
 type ReportType = "no_consecutivos" | "consecutivos" | "global";
 

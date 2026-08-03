@@ -21,7 +21,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { useToast } from "../../context/ToastContext";
 import { useState } from "react";
-import { ConfirmDialog } from "@/components/Common/ConfirmDialog";
+import { ConfirmDialog } from "../../components/Common/ConfirmDialog";
 
 interface Props {
   especialistaCliente: Persona;

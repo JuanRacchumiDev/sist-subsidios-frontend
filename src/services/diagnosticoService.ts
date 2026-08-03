@@ -19,13 +19,20 @@ export const getDiagnosticos = async () => {
 export const getDiagnosticosPaginate = async (
     page: number,
     limit: number,
-    filter: string
+    filters: {}
 ) => {
+    console.log('---- filters in diagnosticoService ----')
+    console.log({ filters })
+
     const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
-        filter: filter
+        ...Object.fromEntries(
+            Object.entries(filters).filter(([, value]) => value)
+        )
     }).toString()
+
+    console.log({ queryParams })
 
     const response = await getAllPaginate(queryParams)
 

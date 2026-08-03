@@ -1,4 +1,4 @@
-import { Canje, CanjeResponse } from "@/interfaces/ICanje"
+import { Canje, CanjeResponse } from "../interfaces/ICanje"
 import apiClient from "./apiClient"
 
 export const getAll = async (): Promise<CanjeResponse> => {

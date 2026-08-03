@@ -81,7 +81,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
           {!collapsed && (
             <div className="min-w-0 flex-1">
               <h1 className="text-sm font-bold text-slate-900 leading-tight truncate tracking-tight">
-                SIST. ACADÉMICO
+                SIST. SUBSIDIOS DE SALUD
               </h1>
               <p className="text-[10px] text-indigo-600 font-bold uppercase tracking-wider truncate">
                 {panelSubtitle}

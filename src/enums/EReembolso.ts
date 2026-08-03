@@ -4,7 +4,8 @@
  */
 export enum EReembolso {
     REEMBOLSO_INGRESADO = 'Reembolso ingresado',
-    REEMBOLSO_ENVIADO = 'Reembolso enviado',
+    PENDIENTE_SUBSIDIO = 'Pendiente de subsidio diario',
+    SOLICITUD_ESSALUD = 'Solicitud a ESSALUD',
     REEMBOLSO_OBSERVADO = 'Reembolso observado',
-    REEMBOLSO_CONFORME = 'Reembolso conforme'
+    REEMBOLSO_CORRECTO = 'Reembolso correcto'
 }
