@@ -41,7 +41,7 @@ export const getDescansosPaginate = async (
     }
 }
 
-export const getDescansosForReport = async (tipo: string) => {
+export const getDescansosForReport = async (tipo: string,) => {
     const response = await getAllForReports(tipo)
 
     return response

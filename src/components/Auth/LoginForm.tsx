@@ -47,7 +47,7 @@ export const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
 
       console.log("response login", response);
 
-      const { result, status, message } = response as TAuthResponse;
+      const { result, status, message, error } = response as TAuthResponse;
 
       if (result && status === 200) {
         showToast("success", message);
@@ -55,7 +55,7 @@ export const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
         navigate("/dashboard");
         return;
       }
-      showToast("error", message);
+      showToast("error", message || error);
     } catch (error) {
       console.log("error", error);
       showToast("error", "Error al iniciar sesión");

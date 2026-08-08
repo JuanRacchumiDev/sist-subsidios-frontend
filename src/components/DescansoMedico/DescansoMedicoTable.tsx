@@ -28,6 +28,7 @@ import {
   DescansoMedicoFiltersData,
 } from "./DescansoMedicoFilters";
 import { getAuthData } from "../../utils/authMemo";
+import { EPerfil } from "../../enums/EPerfil";
 
 export const DescansoMedicoTable: React.FC = ({}) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -81,9 +82,9 @@ export const DescansoMedicoTable: React.FC = ({}) => {
 
       const { nombre_perfil_url, id_empresa, id_usuario } = userProfile;
 
-      if (nombre_perfil_url === "especialista-empresa") {
+      if (nombre_perfil_url === EPerfil.ESPECIALISTA_EMPRESA) {
         filters["id_empresa"] = id_empresa;
-      } else if (nombre_perfil_url === "colaborador") {
+      } else if (nombre_perfil_url === EPerfil.COLABORADOR) {
         filters["user_crea"] = id_usuario;
       }
 

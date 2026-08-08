@@ -8,6 +8,7 @@ import {
 } from "../../utils/menuItems";
 import { ChevronDown, Zap } from "lucide-react";
 import { getAuthData } from "../../utils/authMemo";
+import { EPerfil } from "../../enums/EPerfil";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -43,13 +44,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
     console.log({ nombre_perfil_url });
 
     switch (nombre_perfil_url) {
-      case "colaborador":
+      case EPerfil.COLABORADOR:
         return COLABORADOR_MENU_ITEMS;
-      case "especialista-sophia-human":
+      case EPerfil.ESPECIALISTA_SOPHIA_HUMAN:
         return ESP_SH_MENU_ITEMS;
-      case "especialista-empresa":
+      case EPerfil.ESPECIALISTA_EMPRESA:
         return ESP_EMPRESA_MENU_ITEMS;
-      case "administrador":
+      case EPerfil.ADMINISTRADOR:
         return ADMIN_MENU_ITEMS;
       default:
         return [];
@@ -58,9 +59,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
 
   const panelSubtitle = useMemo(() => {
     if (!userProfile) return "Panel";
-    return userProfile.nombre_perfil?.toLowerCase() === "administrador"
+    return userProfile.nombre_perfil?.toLowerCase() === EPerfil.ADMINISTRADOR
       ? "Admin Panel"
-      : "Portal Alumno";
+      : "Colaborador Panel";
   }, [userProfile]);
 
   return (

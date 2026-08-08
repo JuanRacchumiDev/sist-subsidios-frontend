@@ -22,6 +22,7 @@ import { Button } from "../ui/button";
 import { useToast } from "../../context/ToastContext";
 import { useState } from "react";
 import { ConfirmDialog } from "../../components/Common/ConfirmDialog";
+import { EPerfil } from "../../enums/EPerfil";
 
 interface Props {
   especialistaCliente: Persona;
@@ -42,7 +43,7 @@ export const EspecialistaClienteRow: React.FC<Props> = ({
   const modalMessage = `¿Deseas <strong>${action}</strong> la persona: <strong>${especialistaCliente.nombre_completo}</strong>?`;
 
   const handleShowDetail = () => {
-    const grupo = "especialista-cliente";
+    const grupo = EPerfil.ESPECIALISTA_EMPRESA;
     navigate(`/${grupo}/editar/${especialistaCliente.id}`);
   };
 

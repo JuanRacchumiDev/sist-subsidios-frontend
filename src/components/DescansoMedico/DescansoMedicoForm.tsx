@@ -56,6 +56,7 @@ import { useToast } from "../../context/ToastContext";
 import { EDescansoMedico } from "../../enums/EDescansoMedico";
 import { getAuthData } from "../../utils/authMemo";
 import HDate from "../../helpers/HDate";
+import { EPerfil } from "../../enums/EPerfil";
 
 export const formSchema = z
   .object({
@@ -223,8 +224,8 @@ export const DescansoMedicoForm = () => {
   };
 
   const isModeLetter =
-    (nombre_perfil_url === "especialista-empresa" ||
-      nombre_perfil_url === "administrador") &&
+    (nombre_perfil_url === EPerfil.ESPECIALISTA_EMPRESA ||
+      nombre_perfil_url === EPerfil.ADMINISTRADOR) &&
     isEditMode;
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -438,7 +439,7 @@ export const DescansoMedicoForm = () => {
         observacion,
       };
 
-      if (isEditMode) {
+      if (isEditMode && id) {
         console.log("update");
         payloadDescansoMedico.fecha_actualiza = fechaActual;
         payloadDescansoMedico.user_actualiza = id_usuario;

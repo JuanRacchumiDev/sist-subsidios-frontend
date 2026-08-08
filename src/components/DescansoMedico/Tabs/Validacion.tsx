@@ -20,6 +20,7 @@ import { useEffect, useMemo } from "react";
 import { EDescansoMedico } from "../../../enums/EDescansoMedico";
 import { getAuthData } from "../../../utils/authMemo";
 import { useParams } from "react-router-dom";
+import { EPerfil } from "../../../enums/EPerfil";
 
 interface ValidacionProps {
   form: UseFormReturn<z.infer<typeof formSchema>>;
@@ -48,15 +49,15 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
     console.log("---- nombre_perfil_url in component Validacion ----");
     console.log({ nombre_perfil_url });
 
-    if (nombre_perfil_url === "especialista-empresa") {
+    if (nombre_perfil_url === EPerfil.ESPECIALISTA_EMPRESA) {
       estadosPermitidos.push(EDescansoMedico.REGISTRO_INGRESADO);
       estadosPermitidos.push(EDescansoMedico.REGISTRO_EXITOSO);
       estadosPermitidos.push(EDescansoMedico.DOCUMENTACION_NO_CONFORME);
-    } else if (nombre_perfil_url === "especialista-sophia-human") {
+    } else if (nombre_perfil_url === EPerfil.ESPECIALISTA_SOPHIA_HUMAN) {
       estadosPermitidos.push(EDescansoMedico.REGISTRO_INGRESADO);
       estadosPermitidos.push(EDescansoMedico.REGISTRO_EXITOSO);
       estadosPermitidos.push(EDescansoMedico.DOCUMENTACION_NO_CONFORME);
-    } else if (nombre_perfil_url === "colaborador") {
+    } else if (nombre_perfil_url === EPerfil.COLABORADOR) {
       if (isEditMode) {
         estadosPermitidos.push(
           form.getValues("estadoRegistro") as EDescansoMedico,
@@ -66,7 +67,7 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
         estadosPermitidos.push(EDescansoMedico.REGISTRO_INGRESADO);
         isDisabled = true;
       }
-    } else if (nombre_perfil_url === "administrador") {
+    } else if (nombre_perfil_url === EPerfil.ADMINISTRADOR) {
       estadosPermitidos.push(EDescansoMedico.REGISTRO_INGRESADO);
       estadosPermitidos.push(EDescansoMedico.REGISTRO_EXITOSO);
       estadosPermitidos.push(EDescansoMedico.DOCUMENTACION_NO_CONFORME);

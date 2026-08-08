@@ -44,6 +44,7 @@ import Documentos from "../../../components/TipoContingencia/Documentos";
 import { getAuthData } from "../../../utils/authMemo";
 
 import { ParametroClase } from "../../../constants/parametroClase";
+import { EPerfil } from "../../../enums/EPerfil";
 
 // Constantes de validación para adjuntos
 export const MAX_FILE_SIZE_MB = 2;
@@ -240,15 +241,15 @@ export const DescansoMedicoDetalle = ({
           const { nombre_perfil_url, id_persona } = userProfile;
 
           if (
-            nombre_perfil_url === "especialista-empresa" ||
-            nombre_perfil_url === "colaborador"
+            nombre_perfil_url === EPerfil.ESPECIALISTA_EMPRESA ||
+            nombre_perfil_url === EPerfil.COLABORADOR
           ) {
             setIsEmpresaDisabled(true);
           } else {
             setIsEmpresaDisabled(false);
           }
 
-          if (nombre_perfil_url === "colaborador" && id_persona) {
+          if (nombre_perfil_url === EPerfil.COLABORADOR && id_persona) {
             setIsColaboradorDisabled(true);
           }
         }

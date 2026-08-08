@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { DocumentoTipoContingencia } from "../../interfaces/IDocumentoTipoContingencia";
 import { Adjunto } from "../../interfaces/IAdjunto";
 import { UseFormReturn } from "react-hook-form";
@@ -21,6 +21,7 @@ import { Empresa } from "../../interfaces/IEmpresa";
 import { getPersonaById } from "../../services/personaService";
 import { Persona } from "../../interfaces/IPersona";
 import { cn } from "../../lib/utils";
+import { getAuthData } from "../../utils/authMemo";
 
 interface DocumentosRequeridosProps {
   documentos: DocumentoTipoContingencia[];
@@ -40,6 +41,11 @@ export const Documentos = ({
   maxFileSizeMb = 2,
 }: DocumentosRequeridosProps) => {
   const { showToast } = useToast();
+
+  const userProfile = useMemo(() => getAuthData()?.usuario, []);
+  console.log({ userProfile });
+
+  const { id_usuario } = userProfile;
 
   useEffect(() => {
     adjuntosExistentes.forEach((adjunto) => {
@@ -103,10 +109,13 @@ export const Documentos = ({
     // Validando si existe el id de descanso médico
     if (idDescanso && idDescanso.length > 0) {
       formData.append("id_descansomedico", idDescanso);
+      formData.append("user_actualiza", id_usuario);
       paramsAdjunto = {
         id_descansomedico: idDescanso,
         id_documento: idDocumento,
       };
+    } else {
+      formData.append("user_crea", id_usuario);
     }
 
     if (idEmpresa) {

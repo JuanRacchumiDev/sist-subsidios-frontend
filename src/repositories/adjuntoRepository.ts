@@ -1,6 +1,8 @@
 import apiClient from "./apiClient";
+// import { useMemo } from "react"
 import { Adjunto, AdjuntoResponse } from '../interfaces/IAdjunto'
 import { responseViewFile } from '../types/TFile';
+// import { getAuthData } from "../utils/authMemo";
 
 export const getAll = async (): Promise<AdjuntoResponse> => {
     try {
@@ -115,6 +117,10 @@ export const upload = async (params: Adjunto = {}, formData: FormData): Promise<
         console.log({ params })
         console.log({ formData })
 
+        // Obteniendo información del usuario autenticado
+        // const userProfile = useMemo(() => getAuthData()?.usuario, []);
+        // const { id_usuario } = userProfile
+
         let response: any = null
         let uri: string = `/adjuntos`
 
@@ -130,15 +136,24 @@ export const upload = async (params: Adjunto = {}, formData: FormData): Promise<
         console.log({ formData })
 
         if (params) {
+            console.log('---- actualizar adjunto ----')
             const { id_descansomedico, id_documento } = params
             uri += `?id_descansomedico=${id_descansomedico}&id_documento=${id_documento}`
 
+            // Agregando a formData el usuario que actualiza
+            // formData.append("user_actualiza", id_usuario)
+
+            // Obteniendo respuesta
             response = await apiClient.patch(uri, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             })
         } else {
+            console.log('---- crear adjunto ----')
+            // formData.append("user_crea", id_usuario)
+
+            // Obteniendo respuesta
             response = await apiClient.post(uri, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
