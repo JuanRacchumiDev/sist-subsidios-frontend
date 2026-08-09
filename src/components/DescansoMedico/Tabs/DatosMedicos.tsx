@@ -17,7 +17,7 @@ import SearchableCombobox from "../../../components/Common/SearchableCombobox";
 
 interface DatosMedicosProps {
   form: UseFormReturn<z.infer<typeof formSchema>>;
-  isModeLetter?: boolean;
+  isModoLectura?: boolean;
 }
 
 interface DiagnosticoConFormato extends Diagnostico {
@@ -36,13 +36,13 @@ const dataDiagnosticos = async () => {
 
 export const DatosMedicos = ({
   form,
-  isModeLetter = false,
+  isModoLectura = false,
 }: DatosMedicosProps) => {
   console.log("---- variable form in component DatosMedicos ----");
   console.log({ form });
 
-  console.log("---- variable isModeLetter in component DatosMedicos ----");
-  console.log({ isModeLetter });
+  console.log("---- variable isModoLectura in component DatosMedicos ----");
+  console.log({ isModoLectura });
 
   const { showToast } = useToast();
 
@@ -92,7 +92,7 @@ export const DatosMedicos = ({
                   }
                     transition-all duration-300
                 `}
-                disabled={isModeLetter}
+                disabled={isModoLectura}
               />
             </FormControl>
             <FormMessage />
@@ -120,7 +120,7 @@ export const DatosMedicos = ({
                   }
                     transition-all duration-300
                 `}
-                disabled={isModeLetter}
+                disabled={isModoLectura}
               />
             </FormControl>
             <FormMessage />
@@ -143,7 +143,7 @@ export const DatosMedicos = ({
                 displayKey="display"
                 valueKey="codCie10"
                 searchKeys={["codCie10", "nombre"]}
-                disabled={isModeLetter}
+                disabled={isModoLectura}
                 isInvalid={fieldState.invalid}
               />
               <FormMessage />
@@ -172,7 +172,7 @@ export const DatosMedicos = ({
                   }
                     transition-all duration-300
                 `}
-                disabled={isModeLetter}
+                disabled={isModoLectura}
               />
             </FormControl>
             <FormMessage />

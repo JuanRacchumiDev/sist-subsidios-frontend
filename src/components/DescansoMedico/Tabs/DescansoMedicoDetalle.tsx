@@ -53,7 +53,7 @@ export const ALLOWED_FILE_TYPES = ["application/pdf"];
 
 interface DescansoMedicoDetalleProps {
   form: UseFormReturn<z.infer<typeof formSchema>>;
-  isModeLetter?: boolean;
+  isModoLectura?: boolean;
 }
 
 const loadEmpresas = async (): Promise<Empresa[]> => {
@@ -180,7 +180,7 @@ const loadTipoContingencias = async (): Promise<Detalle[]> => {
 
 export const DescansoMedicoDetalle = ({
   form,
-  isModeLetter = false,
+  isModoLectura = false,
 }: DescansoMedicoDetalleProps) => {
   const { id } = useParams<{ id: string }>();
   const { showToast } = useToast();
@@ -225,7 +225,7 @@ export const DescansoMedicoDetalle = ({
         ]);
 
         console.log("---- DescansoMedicoDetalle ----");
-        console.log({ isModeLetter });
+        console.log({ isModoLectura });
         console.log({ id });
 
         setEmpresas(listEmpresas);
@@ -234,7 +234,7 @@ export const DescansoMedicoDetalle = ({
         setTipoContingencias(listTipoContingencias);
         setAdjuntos(listAdjuntos);
 
-        if (isModeLetter) {
+        if (isModoLectura) {
           setIsEmpresaDisabled(true);
           setIsColaboradorDisabled(true);
         } else {
@@ -357,10 +357,11 @@ export const DescansoMedicoDetalle = ({
         name="idEmpresa"
         render={({ field, fieldState }) => (
           <FormItem className="flex flex-col space-y-1">
-            <RequiredLabel className="text-xs font-semibold text-gray-700">
+            {/* <RequiredLabel className="text-xs font-semibold text-gray-700">
               Empresa
-            </RequiredLabel>
+            </RequiredLabel> */}
             <SearchableCombobox<Empresa>
+              label="Empresa"
               placeholder="Buscar una empresa"
               options={empresas}
               value={field.value}
@@ -383,19 +384,21 @@ export const DescansoMedicoDetalle = ({
         name="idColaborador"
         render={({ field, fieldState }) => (
           <FormItem className="flex flex-col space-y-1">
-            <RequiredLabel className="text-xs font-semibold text-gray-700">
+            {/* <RequiredLabel className="text-xs font-semibold text-gray-700">
               Colaborador
-            </RequiredLabel>
+            </RequiredLabel> */}
             <SearchableCombobox<Persona>
+              label="Colaborador"
               placeholder="Buscar un colaborador"
               options={colaboradores}
               value={field.value}
-              onChange={field.onChange}
+              onChange={(value) => field.onChange(value || "")}
               displayKey="nombre_completo"
               valueKey="id"
               searchKeys={["nombre_completo"]}
-              disabled={isColaboradorDisabled}
+              disabled={isColaboradorDisabled || isModoLectura}
               isInvalid={fieldState.invalid}
+              // errorMessage={fieldState.error?.message}
               className="h-8 text-xs"
             />
             <FormMessage className="text-[10px]" />
@@ -415,7 +418,7 @@ export const DescansoMedicoDetalle = ({
             <Select
               onValueChange={field.onChange}
               value={field.value ?? ""}
-              disabled={isModeLetter}
+              disabled={isModoLectura}
             >
               <FormControl>
                 <SelectTrigger
@@ -486,7 +489,7 @@ export const DescansoMedicoDetalle = ({
             <Select
               onValueChange={field.onChange}
               value={field.value ?? ""}
-              disabled={isModeLetter}
+              disabled={isModoLectura}
             >
               <FormControl>
                 <SelectTrigger
@@ -523,7 +526,7 @@ export const DescansoMedicoDetalle = ({
             documentos={documentosTipoContingencia}
             form={form}
             adjuntosExistentes={adjuntos}
-            isModeLetter={isModeLetter}
+            isModoLectura={isModoLectura}
             idDescanso={id}
             maxFileSizeMb={MAX_FILE_SIZE_MB}
           />
@@ -544,7 +547,7 @@ export const DescansoMedicoDetalle = ({
                 <Input
                   type="date"
                   value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                  disabled={isModeLetter}
+                  disabled={isModoLectura}
                   onChange={(e) =>
                     field.onChange(
                       e.target.value ? parseISO(e.target.value) : null,
@@ -574,7 +577,7 @@ export const DescansoMedicoDetalle = ({
                 <Input
                   type="date"
                   value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                  disabled={isModeLetter}
+                  disabled={isModoLectura}
                   onChange={(e) =>
                     field.onChange(
                       e.target.value ? parseISO(e.target.value) : null,
@@ -604,7 +607,7 @@ export const DescansoMedicoDetalle = ({
                 <Input
                   type="date"
                   value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                  disabled={isModeLetter}
+                  disabled={isModoLectura}
                   onChange={(e) =>
                     field.onChange(
                       e.target.value ? parseISO(e.target.value) : null,
@@ -634,7 +637,7 @@ export const DescansoMedicoDetalle = ({
                 <Input
                   readOnly
                   value={totalDias !== null ? totalDias.toString() : ""}
-                  disabled={isModeLetter}
+                  disabled={isModoLectura}
                   className={`h-8 text-xs bg-gray-50 font-medium ${
                     fieldState.invalid
                       ? "border-red-500 focus:ring-red-500"

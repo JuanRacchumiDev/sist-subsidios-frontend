@@ -24,15 +24,18 @@ import { EPerfil } from "../../../enums/EPerfil";
 
 interface ValidacionProps {
   form: UseFormReturn<z.infer<typeof formSchema>>;
-  isModeLetter?: boolean;
+  isModoLectura?: boolean;
 }
 
-export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
+export const Validacion = ({
+  form,
+  isModoLectura = false,
+}: ValidacionProps) => {
   console.log("---- variable form in component Validacion ----");
   console.log({ form });
 
-  console.log("---- variable isModeLetter in component Validacion ----");
-  console.log({ isModeLetter });
+  console.log("---- variable isModoLectura in component Validacion ----");
+  console.log({ isModoLectura });
 
   const { id } = useParams<{ id: string }>();
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
@@ -97,7 +100,11 @@ export const Validacion = ({ form, isModeLetter = false }: ValidacionProps) => {
         render={({ field, fieldState }) => (
           <FormItem className="w-full">
             <RequiredLabel>Estado del registro</RequiredLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
+            <Select
+              onValueChange={field.onChange}
+              value={field.value}
+              disabled={isModoLectura}
+            >
               <FormControl>
                 <SelectTrigger
                   className={`w-full ${

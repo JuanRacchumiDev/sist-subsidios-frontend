@@ -45,6 +45,7 @@ import {
   ClipboardCheck,
   RotateCcw,
   Save,
+  Lock,
 } from "lucide-react";
 
 import { DescansoMedico } from "../../interfaces/IDescansoMedico";
@@ -79,6 +80,7 @@ export const CanjeForm = () => {
   const [fechaMaximaCanje, setFechaMaximaCanje] = useState<string | "">("");
   const [idUserCrea, setIdUserCrea] = useState<string | "">("");
   const [isOpen, setIsOpen] = useState(false); // Estado para controlar el Collapsible
+  const [estado, setEstado] = useState<string | null>();
 
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
   console.log({ userProfile });
@@ -141,6 +143,8 @@ export const CanjeForm = () => {
               descansoMedico,
             } = canje;
 
+            setEstado(estado_registro);
+
             let fechaDefault: Date | null = null;
 
             if (fecha_canje) {
@@ -171,13 +175,19 @@ export const CanjeForm = () => {
     fetchData();
   }, [id, isEditMode, form]);
 
+  const isRegistroBloqueado = isEditMode && estado === ECanje.CANJE_CONFORME;
+
   const { isSubmitting } = form.formState;
+
+  const isButtonDisabled = isSubmitting || isRegistroBloqueado;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const { fechaCanje, codigoCitt, estadoRegistro, observacion } = values;
 
       console.log({ idUserCrea });
+
+      const fechaActual = HDate.formatDateTimezone(new Date());
 
       const payloadCanje: Canje = {
         fecha_canje: HDate.formatDateTimezone(fechaCanje),
@@ -187,8 +197,10 @@ export const CanjeForm = () => {
       };
 
       if (isEditMode && id) {
+        payloadCanje.fecha_actualiza = fechaActual;
         payloadCanje.user_actualiza = id_usuario;
       } else {
+        payloadCanje.fecha_registro = fechaActual;
         payloadCanje.user_crea = id_usuario;
       }
 
@@ -241,6 +253,17 @@ export const CanjeForm = () => {
           </Button>
         </CardHeader>
 
+        {/* Notificación de bloqueo por estado */}
+        {isRegistroBloqueado && (
+          <div className="bg-amber-50 border-b border-amber-200 py-2 px-4 sm:px-5 flex items-center gap-2 text-amber-800 text-xs font-medium">
+            <Lock className="h-4 w-4 text-amber-600 shrink-0" />
+            <span>
+              Este canje ya cuenta con el estado{" "}
+              <strong>"Registro conforme"</strong> y no se puede modificar.
+            </span>
+          </div>
+        )}
+
         <CardContent className="pb-4 px-4 sm:pb-5 sm:px-5">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -257,6 +280,7 @@ export const CanjeForm = () => {
                       <span>Información del Descanso Médico Relacionado</span>
                     </div>
                     <Button
+                      type="button"
                       variant="ghost"
                       size="sm"
                       className="h-6 w-6 p-0 rounded-full text-slate-500"
@@ -377,6 +401,8 @@ export const CanjeForm = () => {
                           <Input
                             type="date"
                             max={maxInputDate}
+                            autoComplete="off"
+                            disabled={isButtonDisabled}
                             className={`pl-8 h-8 text-xs focus-visible:ring-1 ${
                               fieldState.invalid
                                 ? "border-red-500"
@@ -414,6 +440,7 @@ export const CanjeForm = () => {
                       <Select
                         onValueChange={field.onChange}
                         value={field.value ?? ""}
+                        disabled={isButtonDisabled}
                       >
                         <FormControl>
                           <SelectTrigger
@@ -457,12 +484,15 @@ export const CanjeForm = () => {
                             <ClipboardCheck className="absolute left-2.5 top-2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
                             <Input
                               placeholder="Ingrese CITT"
+                              autoComplete="off"
+                              maxLength={12}
                               className={`pl-8 h-8 text-xs focus-visible:ring-1 ${
                                 fieldState.invalid
                                   ? "border-red-500"
                                   : "border-slate-300"
                               }`}
                               {...field}
+                              disabled={isButtonDisabled}
                             />
                           </div>
                         </FormControl>
@@ -486,6 +516,7 @@ export const CanjeForm = () => {
                         </RequiredLabel>
                         <FormControl>
                           <Textarea
+                            autoComplete="off"
                             placeholder="Motivos de la observación o documentos faltantes..."
                             className={`min-h-[70px] text-xs bg-white resize-none focus-visible:ring-1 ${
                               fieldState.invalid
@@ -493,6 +524,7 @@ export const CanjeForm = () => {
                                 : "border-slate-300"
                             }`}
                             {...field}
+                            disabled={isButtonDisabled}
                           />
                         </FormControl>
                         <FormMessage className="text-[11px]" />
@@ -519,8 +551,12 @@ export const CanjeForm = () => {
                 <Button
                   type="submit"
                   size="sm"
-                  disabled={isSubmitting}
-                  className="w-full sm:w-auto h-8 text-xs rounded-md px-4 font-medium transition-all bg-indigo-600 hover:bg-indigo-700 text-white"
+                  disabled={isButtonDisabled}
+                  className={`w-full sm:w-auto h-8 text-xs rounded-md px-4 font-medium transition-all ${
+                    isRegistroBloqueado
+                      ? "bg-slate-300 text-slate-500 cursor-not-allowed"
+                      : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                  }`}
                 >
                   {isSubmitting ? (
                     <>

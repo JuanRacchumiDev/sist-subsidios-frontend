@@ -27,7 +27,7 @@ interface DocumentosRequeridosProps {
   documentos: DocumentoTipoContingencia[];
   form: UseFormReturn<z.infer<typeof formSchema>>;
   adjuntosExistentes?: Adjunto[];
-  isModeLetter?: boolean;
+  isModoLectura?: boolean;
   idDescanso?: string;
   maxFileSizeMb?: number; // Prop opcional para definir el límite en MB (Por defecto: 2)
 }
@@ -36,7 +36,7 @@ export const Documentos = ({
   documentos,
   form,
   adjuntosExistentes = [],
-  isModeLetter = false,
+  isModoLectura = false,
   idDescanso = "",
   maxFileSizeMb = 2,
 }: DocumentosRequeridosProps) => {
@@ -197,7 +197,7 @@ export const Documentos = ({
                           htmlFor={`file-input-${doc.id}`}
                           className={cn(
                             "flex-1 flex items-center justify-center gap-1.5 h-8 px-2.5 border rounded-md text-xs transition-all duration-150 select-none",
-                            isModeLetter
+                            isModoLectura
                               ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
                               : fileIdToUse
                                 ? "bg-blue-50/50 border-blue-200 text-blue-700 hover:bg-blue-100/60 cursor-pointer font-medium"
@@ -223,7 +223,7 @@ export const Documentos = ({
                           accept="application/pdf"
                           className="hidden"
                           onChange={(e) => handleFileChange(e, doc.id)}
-                          disabled={isModeLetter}
+                          disabled={isModoLectura}
                         />
 
                         {fileIdToUse && (

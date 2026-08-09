@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { FieldErrors, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useNavigate, useParams } from "react-router-dom";
@@ -175,7 +175,9 @@ export const formSchema = z
     }
   });
 
-const defaultValues = {
+type FormSchemaType = z.infer<typeof formSchema>;
+
+const defaultValues: FormSchemaType = {
   id: "",
   idEmpresa: "",
   idColaborador: "",
@@ -193,7 +195,6 @@ const defaultValues = {
   documentos: {},
   aceptaResponsabilidad: false,
   aceptaPoliticaSubsidio: false,
-  // estadoRegistro: id_persona ? EDescansoMedico.REGISTRO_INGRESADO : "",
   estadoRegistro: "",
   observacion: "",
 };
@@ -202,7 +203,7 @@ export const DescansoMedicoForm = () => {
   const [showResponsabilidad, setShowResponsabilidad] = useState(false);
   const [showPoliticaSubsidio, setShowPoliticaSubsidio] = useState(false);
   const [activeTab, setActiveTab] = useState("datos-descanso-medico");
-  const [estadoOriginal, setEstadoOriginal] = useState<string | null>(null);
+  const [estado, setEstado] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -211,7 +212,8 @@ export const DescansoMedicoForm = () => {
   const isEditMode = !!id;
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
   console.log({ userProfile });
-  const { nombre_perfil_url, id_persona, id_empresa, id_usuario } = userProfile;
+  const { nombre_perfil_url, id_persona, id_empresa, id_usuario } =
+    userProfile || {};
 
   console.log({ nombre_perfil_url });
 
@@ -223,12 +225,12 @@ export const DescansoMedicoForm = () => {
     navigate("/descanso-medico");
   };
 
-  const isModeLetter =
+  const isModoLectura =
     (nombre_perfil_url === EPerfil.ESPECIALISTA_EMPRESA ||
       nombre_perfil_url === EPerfil.ADMINISTRADOR) &&
     isEditMode;
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
@@ -278,7 +280,7 @@ export const DescansoMedicoForm = () => {
               observacion,
             } = descanso;
 
-            setEstadoOriginal(estado_registro);
+            setEstado(estado_registro);
 
             const responseColaborador = await getPersonaById(id_colaborador);
 
@@ -323,7 +325,7 @@ export const DescansoMedicoForm = () => {
           console.error("Error fetching descanso medico:", error);
         }
       } else {
-        if (userProfile) {
+        if (userProfile && id_empresa && id_persona) {
           form.setValue("idEmpresa", id_empresa);
           form.setValue("idColaborador", id_persona);
         }
@@ -336,7 +338,7 @@ export const DescansoMedicoForm = () => {
   }, [id, isEditMode]);
 
   const isRegistroBloqueado =
-    isEditMode && estadoOriginal === "Registro exitoso";
+    isEditMode && estado === EDescansoMedico.REGISTRO_EXITOSO;
 
   const { isSubmitting } = form.formState;
 
@@ -427,7 +429,8 @@ export const DescansoMedicoForm = () => {
         fecha_final: HDate.formatDateTimezone(fechaFinal),
         numero_colegiatura: colegiadoMedico,
         medico_tratante: medicoTratante,
-        total_dias: parseInt(totalDias),
+        total_dias: totalDias ? parseInt(totalDias) : 0,
+        nombre_perfil_url,
         is_acepta_responsabilidad: aceptaResponsabilidad,
         is_acepta_politica: aceptaPoliticaSubsidio,
         nombre_colaborador: nombreColaborador,
@@ -462,8 +465,8 @@ export const DescansoMedicoForm = () => {
         showToast("error", message || "Error al procesar el descanso médico.");
       }
     } catch (error) {
-      console.error("Error al registrar cargo", error);
-      showToast("error", error);
+      console.error("Error al registrar descanso médico", error);
+      showToast("error", error?.message || "Ocurrió un error inesperado");
     }
   };
 
@@ -501,7 +504,7 @@ export const DescansoMedicoForm = () => {
           </Button>
         </CardHeader>
 
-        {/* Notificación de Bloqueo por Estado */}
+        {/* Notificación de bloqueo por estado */}
         {isRegistroBloqueado && (
           <div className="bg-amber-50 border-b border-amber-200 py-2 px-4 sm:px-5 flex items-center gap-2 text-amber-800 text-xs font-medium">
             <Lock className="h-4 w-4 text-amber-600 shrink-0" />
@@ -557,7 +560,7 @@ export const DescansoMedicoForm = () => {
                   >
                     <DescansoMedicoDetalle
                       form={form}
-                      isModeLetter={isModeLetter}
+                      isModoLectura={isModoLectura}
                     />
                   </TabsContent>
 
@@ -565,14 +568,14 @@ export const DescansoMedicoForm = () => {
                     value="datos-medicos"
                     className="m-0 focus-visible:outline-none"
                   >
-                    <DatosMedicos form={form} isModeLetter={isModeLetter} />
+                    <DatosMedicos form={form} isModoLectura={isModoLectura} />
                   </TabsContent>
 
                   <TabsContent
                     value="validacion"
                     className="m-0 focus-visible:outline-none"
                   >
-                    <Validacion form={form} isModeLetter={isModeLetter} />
+                    <Validacion form={form} isModoLectura={isModoLectura} />
                   </TabsContent>
                 </div>
               </Tabs>

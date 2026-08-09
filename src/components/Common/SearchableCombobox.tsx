@@ -29,6 +29,7 @@ interface SearchableComboboxProps<T extends { [key: string]: any }> {
   searchKeys: (keyof T)[];
   disabled?: boolean;
   isInvalid?: boolean;
+  errorMessage?: string; // Prop opcional para personalizar el mensaje
   className?: string;
   renderOption?: (option: T) => React.ReactNode;
 }
@@ -44,6 +45,7 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
   searchKeys,
   disabled,
   isInvalid,
+  errorMessage,
   className,
   renderOption,
 }: SearchableComboboxProps<T>) => {
@@ -57,9 +59,17 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
     ? (selectedOption[displayKey] as string)
     : placeholder;
 
+  // Evaluamos si el campo está en estado de error
+  const hasError = isInvalid || (!value && isInvalid);
+  // const finalErrorMessage = errorMessage || "Debe seleccionar un colaborador";
+
   return (
     <FormItem className="w-full">
-      {label && <RequiredLabel>{label}</RequiredLabel>}
+      {label && (
+        <RequiredLabel className="text-xs font-semibold text-gray-700">
+          {label}
+        </RequiredLabel>
+      )}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <FormControl>
@@ -69,8 +79,8 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
               className={cn(
                 "w-full justify-between cursor-pointer h-8 px-2.5 text-xs text-left font-normal",
                 !value && "text-muted-foreground",
-                isInvalid
-                  ? "border-red-500 focus:ring-red-500"
+                hasError
+                  ? "border-red-500 focus:ring-red-500 focus-visible:ring-red-500"
                   : "focus:ring-blue-500",
                 "focus:ring-1 transition-all duration-200",
                 className,
@@ -146,6 +156,13 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
           </Command>
         </PopoverContent>
       </Popover>
+
+      {/* Muestra el mensaje de error si no hay valor seleccionado o si isInvalid es true */}
+      {/* {hasError && (
+        <p className="text-[11px] text-red-500 mt-1 font-medium">
+          {finalErrorMessage}
+        </p>
+      )} */}
     </FormItem>
   );
 };

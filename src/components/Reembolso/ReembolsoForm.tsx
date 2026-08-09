@@ -42,6 +42,7 @@ import {
   ChevronUp,
   FileText,
   Info,
+  Lock,
   RotateCcw,
   Save,
 } from "lucide-react";
@@ -59,8 +60,8 @@ import { Textarea } from "../ui/textarea";
 
 export const formSchema = z.object({
   id: z.string().optional(),
-  fechaPago: z.string().optional().nullable(),
-  numeroExpediente: z.string().optional(),
+  fechaSolicitud: z.string().optional().nullable(),
+  valorDia: z.coerce.number().optional(),
   estadoRegistro: z.string({ message: "Debe seleccionar un estado" }),
   observacion: z.string().optional(),
 });
@@ -76,6 +77,7 @@ export const ReembolsoForm = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [defineNombreColaborador, setDefineNombreColaborador] =
     useState<string>("");
+  const [estado, setEstado] = useState<string | null>();
 
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
   const id_usuario = userProfile?.id_usuario;
@@ -88,12 +90,15 @@ export const ReembolsoForm = () => {
     navigate("/reembolso");
   };
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  type FormInput = z.input<typeof formSchema>;
+  type FormOutput = z.infer<typeof formSchema>;
+
+  const form = useForm<FormInput, any, FormOutput>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       id: "",
-      fechaPago: null,
-      numeroExpediente: "",
+      fechaSolicitud: "",
+      valorDia: 0,
       estadoRegistro: EReembolso.REEMBOLSO_INGRESADO,
       observacion: "",
     },
@@ -101,27 +106,42 @@ export const ReembolsoForm = () => {
 
   const estadoRegistro = form.watch("estadoRegistro");
   const showObservacion = estadoRegistro === EReembolso.REEMBOLSO_OBSERVADO;
-  const showExpediente = estadoRegistro === EReembolso.REEMBOLSO_CORRECTO;
+  const showPendienteSubsidio =
+    estadoRegistro === EReembolso.PENDIENTE_SUBSIDIO;
+  const showSolicitudEssalud = estadoRegistro === EReembolso.SOLICITUD_ESSALUD;
+
+  console.log({ id });
+
+  console.log({ isEditMode });
 
   useEffect(() => {
     const fetchData = async () => {
+      // Log para depurar qué valor tiene id al montar el componente
+      console.log("Componente montado. id:", id, "| isEditMode:", isEditMode);
+
       if (isEditMode && id) {
+        console.log("Modo edición detectado. Solicitando datos para id:", id);
         try {
           const responseReembolso = await getReembolsoById(id);
+          console.log("Respuesta recibida del backend:", responseReembolso);
+
           const { result, data } = responseReembolso;
 
           if (result && data) {
             const reembolso = data as Reembolso;
+            console.log("Objeto reembolso:", reembolso);
 
             const {
-              fecha_pago,
-              numero_expediente,
+              fecha_solicitud,
+              valor_dia,
               estado_registro,
               nombre_colaborador,
               canje,
               fecha_maxima_reembolso,
               observacion,
             } = reembolso;
+
+            setEstado(estado_registro);
 
             if (canje) {
               setDefineCanje(canje as Canje);
@@ -136,40 +156,56 @@ export const ReembolsoForm = () => {
             }
 
             const dataForm = {
-              fechaPago: fecha_pago || null,
-              numeroExpediente: numero_expediente || "",
+              fechaSolicitud: fecha_solicitud || "",
+              valorDia: valor_dia || 0,
               estadoRegistro: estado_registro || EReembolso.REEMBOLSO_INGRESADO,
               observacion: observacion || "",
             };
 
+            console.log({ dataForm });
+
+            // Actualizamos el formulario
             form.reset(dataForm);
           }
         } catch (error) {
           showToast("error", "Error al cargar los datos del reembolso.");
           console.error("Error fetching reembolso:", error);
         }
+      } else {
+        console.log("Modo creación (no edición)");
       }
     };
+
     fetchData();
-  }, [id, isEditMode, form]);
+  }, [id, isEditMode, form]); // Solo depender de id e isEditMode
+
+  const isRegistroBloqueado =
+    isEditMode && estado === EReembolso.REEMBOLSO_CORRECTO;
 
   const { isSubmitting } = form.formState;
 
+  const isButtonDisabled = isSubmitting || isRegistroBloqueado;
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const { fechaPago, numeroExpediente, estadoRegistro, observacion } =
-        values;
+      const { fechaSolicitud, valorDia, estadoRegistro, observacion } = values;
+
+      const fechaActual = HDate.formatDateTimezone(new Date());
 
       const payloadReembolso: Reembolso = {
-        fecha_pago: fechaPago ? HDate.formatDateTimezone(fechaPago) : undefined,
-        numero_expediente: numeroExpediente,
+        fecha_solicitud: fechaSolicitud
+          ? HDate.formatDateTimezone(fechaSolicitud)
+          : undefined,
+        valor_dia: valorDia,
         estado_registro: estadoRegistro as EReembolso,
         observacion,
       };
 
       if (isEditMode && id) {
+        payloadReembolso.fecha_actualiza = fechaActual;
         payloadReembolso.user_actualiza = id_usuario;
       } else {
+        payloadReembolso.fecha_registro = fechaActual;
         payloadReembolso.user_crea = id_usuario;
       }
 
@@ -221,6 +257,17 @@ export const ReembolsoForm = () => {
           </Button>
         </CardHeader>
 
+        {/* Notificación de bloqueo por estado */}
+        {isRegistroBloqueado && (
+          <div className="bg-amber-50 border-b border-amber-200 py-2 px-4 sm:px-5 flex items-center gap-2 text-amber-800 text-xs font-medium">
+            <Lock className="h-4 w-4 text-amber-600 shrink-0" />
+            <span>
+              Este reembolso ya cuenta con el estado{" "}
+              <strong>"Registro conforme"</strong> y no se puede modificar.
+            </span>
+          </div>
+        )}
+
         <CardContent className="pb-4 px-4 sm:pb-5 sm:px-5">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -236,6 +283,7 @@ export const ReembolsoForm = () => {
                       <span>Información del Canje Relacionado</span>
                     </div>
                     <Button
+                      type="button"
                       variant="ghost"
                       size="sm"
                       className="h-6 w-6 p-0 rounded-full text-slate-500"
@@ -354,14 +402,15 @@ export const ReembolsoForm = () => {
 
               {/* FORMULARIO */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
-                {/* Estado del registro */}
                 <FormField
                   control={form.control}
                   name="estadoRegistro"
                   render={({ field, fieldState }) => (
                     <FormItem
                       className={`space-y-1.5 transition-all duration-200 ${
-                        !showExpediente ? "md:col-span-3 lg:col-span-1" : ""
+                        !showPendienteSubsidio
+                          ? "md:col-span-3 lg:col-span-1"
+                          : ""
                       }`}
                     >
                       <RequiredLabel className="text-xs font-semibold text-slate-700">
@@ -370,6 +419,7 @@ export const ReembolsoForm = () => {
                       <Select
                         onValueChange={field.onChange}
                         value={field.value ?? ""}
+                        disabled={isButtonDisabled}
                       >
                         <FormControl>
                           <SelectTrigger
@@ -399,16 +449,15 @@ export const ReembolsoForm = () => {
                   )}
                 />
 
-                {showExpediente && (
+                {showSolicitudEssalud && (
                   <>
-                    {/* Fecha de pago */}
                     <FormField
                       control={form.control}
-                      name="fechaPago"
+                      name="fechaSolicitud"
                       render={({ field, fieldState }) => (
                         <FormItem className="space-y-1.5">
                           <RequiredLabel className="text-xs font-semibold text-slate-700">
-                            Fecha de pago
+                            Fecha de solicitud
                           </RequiredLabel>
                           <FormControl>
                             <div className="relative">
@@ -437,36 +486,7 @@ export const ReembolsoForm = () => {
                                     ? "border-red-500 focus:ring-red-200"
                                     : "border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                                 }`}
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage className="text-[11px]" />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Número de expediente */}
-                    <FormField
-                      control={form.control}
-                      name="numeroExpediente"
-                      render={({ field, fieldState }) => (
-                        <FormItem className="space-y-1.5">
-                          <RequiredLabel className="text-xs font-semibold text-slate-700">
-                            Número de expediente
-                          </RequiredLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <FileText className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400 pointer-events-none" />
-                              <Input
-                                placeholder="Ingrese N° de expediente"
-                                autoComplete="off"
-                                maxLength={20}
-                                {...field}
-                                className={`pl-9 h-9 text-xs bg-white shadow-sm transition-colors ${
-                                  fieldState.invalid
-                                    ? "border-red-500 focus:ring-red-200"
-                                    : "border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                                }`}
+                                disabled={isButtonDisabled}
                               />
                             </div>
                           </FormControl>
@@ -475,6 +495,48 @@ export const ReembolsoForm = () => {
                       )}
                     />
                   </>
+                )}
+
+                {showPendienteSubsidio && (
+                  <FormField
+                    control={form.control}
+                    name="valorDia"
+                    render={({ field, fieldState }) => (
+                      <FormItem className="space-y-1.5">
+                        <RequiredLabel className="text-xs font-semibold text-slate-700">
+                          Valor por día
+                        </RequiredLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <FileText className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400 pointer-events-none" />
+                            <Input
+                              type="number"
+                              placeholder="10.00"
+                              autoComplete="off"
+                              maxLength={20}
+                              value={(field.value as number | string) ?? ""}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                field.onChange(
+                                  val === "" ? undefined : parseFloat(val),
+                                );
+                              }}
+                              // onBlur={field.onBlur} // Recomendado incluir onBlur
+                              // name={field.name} // Recomendado incluir name
+                              // ref={field.ref} // Recomendado incluir ref para auto-focus de errores
+                              className={`pl-9 h-9 text-xs bg-white shadow-sm transition-colors ${
+                                fieldState.invalid
+                                  ? "border-red-500 focus:ring-red-200"
+                                  : "border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                              }`}
+                              disabled={isButtonDisabled}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage className="text-[11px]" />
+                      </FormItem>
+                    )}
+                  />
                 )}
               </div>
 
@@ -497,6 +559,7 @@ export const ReembolsoForm = () => {
                                 : "border-slate-300"
                             }`}
                             {...field}
+                            disabled={isButtonDisabled}
                           />
                         </FormControl>
                         <FormMessage className="text-[11px]" />
@@ -523,8 +586,14 @@ export const ReembolsoForm = () => {
                 <Button
                   type="submit"
                   size="sm"
-                  disabled={isSubmitting}
-                  className="w-full sm:w-auto h-8 text-xs rounded-md px-4 font-medium transition-all bg-indigo-600 hover:bg-indigo-700 text-white"
+                  // disabled={isSubmitting}
+                  // className="w-full sm:w-auto h-8 text-xs rounded-md px-4 font-medium transition-all bg-indigo-600 hover:bg-indigo-700 text-white"
+                  disabled={isButtonDisabled}
+                  className={`w-full sm:w-auto h-8 text-xs rounded-md px-4 font-medium transition-all ${
+                    isRegistroBloqueado
+                      ? "bg-slate-300 text-slate-500 cursor-not-allowed"
+                      : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                  }`}
                 >
                   {isSubmitting ? (
                     <>

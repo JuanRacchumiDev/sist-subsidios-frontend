@@ -54,6 +54,9 @@ export const getById = async (id: string): Promise<ReembolsoResponse> => {
 
         const response = await apiClient.get(urlApi)
 
+        console.log('---- response getById reembolsoRepository ----')
+        console.log({ response })
+
         const { data: { result, data, message, error, status } } = response
 
         return {
