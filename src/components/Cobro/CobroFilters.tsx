@@ -7,18 +7,16 @@ const defaultValues = {
   search: "",
 };
 
-interface ReembolsoFilterProps {
-  onSearch: (filters: ReembolsoFiltersData) => void;
+interface CobroFilterProps {
+  onSearch: (filters: CobroFiltersData) => void;
 }
 
-export interface ReembolsoFiltersData {
+export interface CobroFiltersData {
   search: string;
 }
 
-export const ReembolsoFilters: React.FC<ReembolsoFilterProps> = ({
-  onSearch,
-}) => {
-  const [filters, setFilters] = useState<ReembolsoFiltersData>(defaultValues);
+export const CobroFilters: React.FC<CobroFilterProps> = ({ onSearch }) => {
+  const [filters, setFilters] = useState<CobroFiltersData>(defaultValues);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

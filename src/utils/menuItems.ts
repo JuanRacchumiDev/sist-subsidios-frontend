@@ -1,16 +1,19 @@
 import {
+    ArrowLeftRight,
     Briefcase,
-    Building,
-    DollarSign,
+    Building2,
+    CircleDollarSign,
     FileText,
+    HandCoins,
+    HeartHandshake,
     HeartPulse,
     LayoutDashboard,
-    RefreshCw,
     Settings,
-    User2Icon,
+    Stethoscope,
     UserCheck,
+    UserCog,
     Users,
-    Wallet
+    UserSquare2
 } from "lucide-react";
 
 export const ADMIN_MENU_ITEMS = [
@@ -24,14 +27,14 @@ export const ADMIN_MENU_ITEMS = [
     },
     {
         id: "empresa",
-        icon: Building,
+        icon: Building2,
         label: "Empresas",
         active: false,
         path: "/empresa",
     },
     {
         id: "trabajador-social",
-        icon: User2Icon,
+        icon: HeartHandshake,
         label: "Trabajadores sociales",
         active: false,
         path: "/trabajador-social"
@@ -46,7 +49,7 @@ export const ADMIN_MENU_ITEMS = [
     },
     {
         id: "especialista-cliente",
-        icon: Users,
+        icon: UserCheck,
         label: "Especialistas Cliente",
         active: false,
         badge: "New",
@@ -54,7 +57,7 @@ export const ADMIN_MENU_ITEMS = [
     },
     {
         id: "especialista-sh",
-        icon: Users,
+        icon: UserCog,
         label: "Especialistas SH",
         active: false,
         badge: "New",
@@ -69,28 +72,28 @@ export const ADMIN_MENU_ITEMS = [
     },
     {
         id: "canje",
-        icon: RefreshCw,
+        icon: ArrowLeftRight,
         label: "Canjes",
         active: false,
         path: "/canje",
     },
     {
         id: "reembolso",
-        icon: Wallet,
+        icon: HandCoins,
         label: "Reembolsos",
         active: false,
         path: "/reembolso",
     },
     {
         id: "cobro",
-        icon: DollarSign,
+        icon: CircleDollarSign,
         label: "Cobros",
         active: false,
         path: "/cobro",
     },
     {
         id: "usuario",
-        icon: UserCheck,
+        icon: UserSquare2,
         label: "Usuarios",
         active: false,
         path: "/usuario",
@@ -115,12 +118,12 @@ export const ADMIN_MENU_ITEMS = [
             {
                 id: "diagnostico",
                 label: "Diagnóstico",
-                icon: Briefcase,
+                icon: Stethoscope,
                 path: "/mantenimiento/diagnostico"
             }
         ],
     },
-]
+];
 
 export const ESP_EMPRESA_MENU_ITEMS = [
     {
@@ -140,21 +143,21 @@ export const ESP_EMPRESA_MENU_ITEMS = [
     },
     {
         id: "canje",
-        icon: RefreshCw,
+        icon: ArrowLeftRight,
         label: "Canjes",
         active: false,
         path: "/canje",
     },
     {
         id: "reembolso",
-        icon: Wallet,
+        icon: HandCoins,
         label: "Reembolsos",
         active: false,
         path: "/reembolso",
     },
     {
         id: "cobro",
-        icon: DollarSign,
+        icon: CircleDollarSign,
         label: "Cobros",
         active: false,
         path: "/cobro",
@@ -172,7 +175,7 @@ export const ESP_SH_MENU_ITEMS = [
     },
     {
         id: "trabajador-social",
-        icon: User2Icon,
+        icon: HeartHandshake,
         label: "Trabajadores sociales",
         active: false,
         path: "/trabajador-social"
@@ -186,21 +189,21 @@ export const ESP_SH_MENU_ITEMS = [
     },
     {
         id: "canje",
-        icon: RefreshCw,
+        icon: ArrowLeftRight,
         label: "Canjes",
         active: false,
         path: "/canje",
     },
     {
         id: "reembolso",
-        icon: Wallet,
+        icon: HandCoins,
         label: "Reembolsos",
         active: false,
         path: "/reembolso",
     },
     {
         id: "cobro",
-        icon: DollarSign,
+        icon: CircleDollarSign,
         label: "Cobros",
         active: false,
         path: "/cobro",
@@ -225,7 +228,7 @@ export const ESP_SH_MENU_ITEMS = [
             {
                 id: "diagnostico",
                 label: "Diagnóstico",
-                icon: Briefcase,
+                icon: Stethoscope,
                 path: "/mantenimiento/diagnostico"
             }
         ],
@@ -240,4 +243,4 @@ export const COLABORADOR_MENU_ITEMS = [
         active: false,
         path: "/descanso-medico",
     },
-]
+];

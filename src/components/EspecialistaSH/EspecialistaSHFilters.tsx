@@ -48,6 +48,7 @@ export const EspecialistaSHFilters: React.FC<EspecialistaSHFilterProps> = ({
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
+            type="text"
             name="search"
             placeholder="Ej. Juan Perez..."
             autoComplete="off"
@@ -63,6 +64,7 @@ export const EspecialistaSHFilters: React.FC<EspecialistaSHFilterProps> = ({
           Nro. Documento
         </label>
         <Input
+          type="text"
           name="documento"
           placeholder="DNI / RUC"
           autoComplete="off"

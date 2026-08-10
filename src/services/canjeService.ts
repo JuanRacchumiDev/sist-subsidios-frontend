@@ -1,4 +1,4 @@
-import { Canje, CanjeFilter } from '../interfaces/ICanje'
+import { Canje, OutputType, ReportType } from '../interfaces/ICanje'
 import {
     getAll,
     getById,
@@ -41,11 +41,15 @@ export const getCanjesPaginate = async (
     }
 }
 
-export const getCanjesForReport = async (outputType: string, reportType: string, limit: number) => {
-    const response = await getAllForReports(outputType, reportType, limit)
-
-    return response
-}
+export const getCanjesForReport = async (
+    outputType: OutputType,
+    reportType: ReportType,
+    limit: number,
+    fechaInicio?: string,
+    fechaFinal?: string
+) => {
+    return await getAllForReports(outputType, reportType, limit, fechaInicio, fechaFinal);
+};
 
 export const getCanjeById = async (id: string) => {
     const response = await getById(id)

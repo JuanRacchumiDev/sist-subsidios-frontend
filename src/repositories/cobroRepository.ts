@@ -5,9 +5,7 @@ export const getAll = async (): Promise<CobroResponse> => {
     try {
         const response = await apiClient.get('/cobros')
 
-        const { data: dataCobros } = response
-
-        const { result, data, message, status, error } = dataCobros
+        const { data: { result, data, message, status, error } } = response
 
         return {
             result,
@@ -24,15 +22,13 @@ export const getAll = async (): Promise<CobroResponse> => {
 }
 
 
-export const getAllPaginate = async (page: number, limit: number) => {
+export const getAllPaginate = async (queryParams: string) => {
     try {
-        const urlApi = `${'/cobros/paginate?page='}${page}${'&limit='}${limit}`
+        const urlApi = `${'/cobros/paginate?'}${queryParams}`
 
         const response = await apiClient.get(urlApi)
 
-        const { data: dataCobros } = response
-
-        const { result, data, pagination, status } = dataCobros
+        const { data: { result, data, pagination, status } } = response
 
         return {
             result,
@@ -53,6 +49,9 @@ export const getById = async (id: string): Promise<CobroResponse> => {
         const urlApi = `${'/cobros/'}${id}`
 
         const response = await apiClient.get(urlApi)
+
+        console.log('---- response getById cobroRepository ----')
+        console.log({ response })
 
         const { data: { result, data, message, error, status } } = response
 

@@ -34,14 +34,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
 
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
 
+  // Menú según el perfil del usuario
   const filteredMenuItems = useMemo(() => {
-    if (!userProfile) {
-      return [];
-    }
+    if (!userProfile) return [];
 
     const { nombre_perfil_url } = userProfile;
-
-    console.log({ nombre_perfil_url });
 
     switch (nombre_perfil_url) {
       case EPerfil.COLABORADOR:
@@ -57,11 +54,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
     }
   }, [userProfile]);
 
+  // Título dinámico del panel según el rol del usuario
   const panelSubtitle = useMemo(() => {
     if (!userProfile) return "Panel";
-    return userProfile.nombre_perfil?.toLowerCase() === EPerfil.ADMINISTRADOR
-      ? "Admin Panel"
-      : "Colaborador Panel";
+
+    const perfil = userProfile.nombre_perfil_url || userProfile.nombre_perfil;
+
+    switch (perfil) {
+      case EPerfil.ADMINISTRADOR:
+        return "Panel Admin";
+      case EPerfil.COLABORADOR:
+        return "Colaborador Panel";
+      case EPerfil.ESPECIALISTA_SOPHIA_HUMAN:
+        return "Especialista SH Panel";
+      case EPerfil.ESPECIALISTA_EMPRESA:
+        return "Especialista Cliente";
+      default:
+        return "Panel";
+    }
   }, [userProfile]);
 
   return (
@@ -73,7 +83,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
       {/* Encabezado / Logo */}
       <div className="p-4 border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-30">
         <div
-          className={`flex items-center ${collapsed ? "justify-center" : "space-x-3"}`}
+          className={`flex items-center ${
+            collapsed ? "justify-center" : "space-x-3"
+          }`}
         >
           <div className="w-10 h-10 bg-linear-to-br from-indigo-600 to-indigo-800 rounded-xl flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0">
             <Zap className="w-5 h-5 text-white" />
@@ -100,10 +112,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
             item.submenu?.some((sub) =>
               location.pathname.startsWith(sub.path),
             ) ?? false;
-          const isDirectActive = item.path
-            ? location.pathname === item.path ||
-              location.pathname.startsWith(item.path)
-            : false;
 
           return (
             <div key={item.id} className="relative group">
@@ -240,10 +248,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
                 : "U"}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-slate-800 truncate">
+              <p className="text-xs font-bold text-slate-800">
                 {userProfile?.nombre_completo || "Usuario"}
               </p>
-              <p className="text-[10px] text-slate-500 font-medium truncate capitalize">
+              <p className="text-[10px] text-slate-500 font-medium capitalize">
                 {userProfile?.nombre_perfil || "Perfil"}
               </p>
             </div>

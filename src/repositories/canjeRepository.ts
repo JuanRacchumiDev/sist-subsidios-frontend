@@ -1,4 +1,4 @@
-import { Canje, CanjeResponse } from "../interfaces/ICanje"
+import { Canje, CanjeResponse, OutputType, ReportType } from "../interfaces/ICanje"
 import apiClient from "./apiClient"
 
 export const getAll = async (): Promise<CanjeResponse> => {
@@ -22,7 +22,6 @@ export const getAll = async (): Promise<CanjeResponse> => {
         return { result: false, data: [], error: errorMessage, status: 500 }
     }
 }
-
 
 export const getAllPaginate = async (queryParams: string) => {
     try {
@@ -48,28 +47,38 @@ export const getAllPaginate = async (queryParams: string) => {
     }
 }
 
-export const getAllForReports = async (outputType: string, reportType: string, limit: number) => {
+export const getAllForReports = async (
+    outputType: OutputType,
+    reportType: ReportType,
+    limit: number,
+    fechaInicio?: string,
+    fechaFinal?: string
+) => {
     try {
-        const urlApi = `${'/canjes/reportes/subsidios?type='}${reportType}${'&limit='}${limit}${'&output='}${outputType}`
+        const params = new URLSearchParams({
+            type: reportType,
+            limit: limit.toString(),
+            output: outputType,
+        });
 
-        console.log({ urlApi })
+        if (fechaInicio) params.append("fechaInicio", fechaInicio);
+        if (fechaFinal) params.append("fechaFinal", fechaFinal);
 
-        const response = await apiClient.get(urlApi, {
-            responseType: 'blob'
-        })
+        const response = await apiClient.get(`/canjes/reportes/subsidios?${params.toString()}`, {
+            responseType: "blob",
+        });
 
         return {
             result: true,
             data: response.data,
             status: response.status,
-            message: "Reporte generado correctamente"
+            message: "Reporte generado correctamente",
         };
     } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
-        console.log('errorMessage', errorMessage)
-        return { result: false, error: errorMessage, status: 500 }
+        const errorMessage = error instanceof Error ? error.message : "Error desconocido";
+        return { result: false, error: errorMessage, status: 500 };
     }
-}
+};
 
 export const getById = async (id: string): Promise<CanjeResponse> => {
     try {

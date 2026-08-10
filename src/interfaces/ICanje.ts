@@ -78,3 +78,14 @@ export interface CanjeFilter {
     fecha_inicio_subsidio?: string
     fecha_final_subsidio?: string
 }
+
+export type ReportType = "no_consecutivos" | "consecutivos" | "global";
+export type OutputType = "pdf" | "excel";
+
+export interface ReportParams {
+    outputType: OutputType;
+    reportType: ReportType;
+    limit: number;
+    fechaInicio?: string;
+    fechaFinal?: string;
+}

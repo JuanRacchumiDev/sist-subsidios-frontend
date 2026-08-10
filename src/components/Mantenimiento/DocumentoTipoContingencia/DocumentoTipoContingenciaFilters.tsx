@@ -127,15 +127,22 @@ export const DocumentoTCFilters: React.FC<DocumentoTCFilterProps> = ({
             value={filters.id_tipocontingencia}
             onValueChange={handleSelectChange}
           >
-            <SelectTrigger className="bg-white border-slate-200 w-full">
+            <SelectTrigger className="bg-white border-slate-200 w-full focus:ring-1 focus:ring-slate-400">
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">
+            <SelectContent className="bg-white border border-slate-200 shadow-lg z-50 max-h-60 overflow-y-auto rounded-md">
+              <SelectItem
+                value="all"
+                className="cursor-pointer hover:bg-slate-100"
+              >
                 Todos los tipos de contingencia
               </SelectItem>
               {tipoContingencias.map((tipo) => (
-                <SelectItem key={tipo.id} value={tipo.id || ""}>
+                <SelectItem
+                  key={tipo.id}
+                  value={tipo.id || ""}
+                  className="cursor-pointer hover:bg-slate-100"
+                >
                   {tipo.nombre}
                 </SelectItem>
               ))}
@@ -149,6 +156,7 @@ export const DocumentoTCFilters: React.FC<DocumentoTCFilterProps> = ({
             Nombre
           </label>
           <Input
+            type="text"
             id="search"
             name="search"
             autoComplete="off"

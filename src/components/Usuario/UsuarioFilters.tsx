@@ -122,13 +122,22 @@ export const UsuarioFilters: React.FC<UsuarioFilterProps> = ({ onSearch }) => {
             value={filters.id_perfil}
             onValueChange={(val) => handleSelectChange("id_perfil", val)}
           >
-            <SelectTrigger className="bg-white border-slate-200 w-full">
+            <SelectTrigger className="bg-white border-slate-200 w-full focus:ring-1 focus:ring-slate-400">
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los perfiles</SelectItem>
+            <SelectContent className="bg-white border border-slate-200 shadow-lg z-50 max-h-60 overflow-y-auto rounded-md">
+              <SelectItem
+                value="all"
+                className="cursor-pointer hover:bg-slate-100"
+              >
+                Todos los perfiles
+              </SelectItem>
               {perfiles.map((perfil) => (
-                <SelectItem key={perfil.id} value={perfil.id || ""}>
+                <SelectItem
+                  key={perfil.id}
+                  value={perfil.id || ""}
+                  className="cursor-pointer hover:bg-slate-100"
+                >
                   {perfil.nombre}
                 </SelectItem>
               ))}
@@ -142,6 +151,7 @@ export const UsuarioFilters: React.FC<UsuarioFilterProps> = ({ onSearch }) => {
             Búsqueda
           </label>
           <Input
+            type="text"
             id="search"
             name="search"
             autoComplete="off"

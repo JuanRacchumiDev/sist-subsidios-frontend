@@ -23,22 +23,15 @@ const loadTiposDescansoMedico = async (): Promise<Detalle[]> => {
 
   try {
     const estado: boolean = true;
-
     const response = await getDetalles(
       ParametroClase.TIPO_DESCANSO_MEDICO,
       estado,
     );
 
-    console.log("response loadTiposDescansoMedico");
-    console.log({ response });
-
     const { result, data } = response;
-
     if (result && data) {
       tiposDescansoMedico = data as Detalle[];
     }
-
-    console.log({ tiposDescansoMedico });
 
     return tiposDescansoMedico;
   } catch (error) {
@@ -52,17 +45,12 @@ const loadTiposContingencia = async (): Promise<Detalle[]> => {
 
   try {
     const estado: boolean = true;
-
     const response = await getDetalles(
       ParametroClase.TIPO_CONTINGENCIA,
       estado,
     );
 
-    console.log("response loadTiposContingencia");
-    console.log({ response });
-
     const { result, data } = response;
-
     if (result && data) {
       tiposContingencia = data as Detalle[];
     }
@@ -170,11 +158,11 @@ export const DescansoMedicoFilters: React.FC<DescansoMedicoFilterProps> = ({
   return (
     <form
       onSubmit={handleSearch}
-      className="p-4 bg-slate-50/50 border-b border-slate-200 w-full"
+      className="p-4 bg-slate-50 border-b border-slate-200 w-full"
     >
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-        {/* Select: Tipo contingencia */}
-        <div className="md:col-span-3 space-y-1.5">
+        {/* Select: Tipo contingencia (2 cols) */}
+        <div className="md:col-span-2 space-y-1.5">
           <label className="text-[10px] font-bold uppercase text-slate-500 ml-1 tracking-wider flex items-center gap-1">
             Tipo contingencia
           </label>
@@ -184,17 +172,21 @@ export const DescansoMedicoFilters: React.FC<DescansoMedicoFilterProps> = ({
               handleSelectChange("id_tipocontingencia", val)
             }
           >
-            <SelectTrigger className="bg-white border-slate-200 w-full">
+            <SelectTrigger className="bg-white border-slate-200 w-full focus:ring-1 focus:ring-slate-400">
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">
-                Todos los tipos de contingencia
+            <SelectContent className="bg-white border border-slate-200 shadow-lg z-50 max-h-60 overflow-y-auto rounded-md">
+              <SelectItem
+                value="all"
+                className="cursor-pointer hover:bg-slate-100"
+              >
+                Todos los tipos
               </SelectItem>
               {tipoContingencias.map((tipoContingencia) => (
                 <SelectItem
                   key={tipoContingencia.id}
                   value={tipoContingencia.id || ""}
+                  className="cursor-pointer hover:bg-slate-100"
                 >
                   {tipoContingencia.nombre}
                 </SelectItem>
@@ -203,8 +195,8 @@ export const DescansoMedicoFilters: React.FC<DescansoMedicoFilterProps> = ({
           </Select>
         </div>
 
-        {/* Select: Tipo descanso médico */}
-        <div className="md:col-span-3 space-y-1.5">
+        {/* Select: Tipo descanso médico (2 cols) */}
+        <div className="md:col-span-2 space-y-1.5">
           <label className="text-[10px] font-bold uppercase text-slate-500 ml-1 tracking-wider flex items-center gap-1">
             Tipo descanso médico
           </label>
@@ -214,15 +206,22 @@ export const DescansoMedicoFilters: React.FC<DescansoMedicoFilterProps> = ({
               handleSelectChange("id_tipodescansomedico", val)
             }
           >
-            <SelectTrigger className="bg-white border-slate-200 w-full">
+            <SelectTrigger className="bg-white border-slate-200 w-full focus:ring-1 focus:ring-slate-400">
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">
-                Todos los tipos de descanso médico
+            <SelectContent className="bg-white border border-slate-200 shadow-lg z-50 max-h-60 overflow-y-auto rounded-md">
+              <SelectItem
+                value="all"
+                className="cursor-pointer hover:bg-slate-100"
+              >
+                Todos los tipos
               </SelectItem>
               {tipoDescansosMedicos.map((tipoDescanso) => (
-                <SelectItem key={tipoDescanso.id} value={tipoDescanso.id || ""}>
+                <SelectItem
+                  key={tipoDescanso.id}
+                  value={tipoDescanso.id || ""}
+                  className="cursor-pointer hover:bg-slate-100"
+                >
                   {tipoDescanso.nombre}
                 </SelectItem>
               ))}
@@ -230,7 +229,7 @@ export const DescansoMedicoFilters: React.FC<DescansoMedicoFilterProps> = ({
           </Select>
         </div>
 
-        {/* Input: Fecha de inicio */}
+        {/* Input: Fecha de inicio (2 cols) */}
         <div className="md:col-span-2 space-y-1.5">
           <label className="text-[10px] font-bold uppercase text-slate-500 ml-1 tracking-wider flex items-center gap-1">
             Fecha de Inicio
@@ -239,13 +238,14 @@ export const DescansoMedicoFilters: React.FC<DescansoMedicoFilterProps> = ({
             id="fecha_inicio"
             name="fecha_inicio"
             type="date"
+            autoComplete="off"
             value={filters.fecha_inicio || ""}
             onChange={handleInputChange}
-            className="md:col-span-3 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+            className="bg-white border-slate-200 focus:border-slate-400 focus:ring-slate-400"
           />
         </div>
 
-        {/* Input: Fecha final */}
+        {/* Input: Fecha final (2 cols) */}
         <div className="md:col-span-2 space-y-1.5">
           <label className="text-[10px] font-bold uppercase text-slate-500 ml-1 tracking-wider flex items-center gap-1">
             Fecha final
@@ -254,45 +254,48 @@ export const DescansoMedicoFilters: React.FC<DescansoMedicoFilterProps> = ({
             id="fecha_final"
             name="fecha_final"
             type="date"
+            autoComplete="off"
             value={filters.fecha_final || ""}
             onChange={handleInputChange}
-            className="md:col-span-3 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+            className="bg-white border-slate-200 focus:border-slate-400 focus:ring-slate-400"
           />
         </div>
 
-        {/* Input: Búsqueda */}
-        <div className="md:col-span-2 space-y-1.5">
+        {/* Input: Colaborador ampliado (3 cols) */}
+        <div className="md:col-span-2 space-y-1.5 mr-1">
           <label className="text-[10px] font-bold uppercase text-slate-500 ml-1 tracking-wider flex items-center gap-1">
             Colaborador
           </label>
           <Input
+            type="text"
             id="search"
             name="search"
             autoComplete="off"
             value={filters.search || ""}
             onChange={handleInputChange}
             placeholder="Escribe el nombre completo"
-            className="md:col-span-3 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+            className="bg-white border-slate-200 focus:border-slate-400 focus:ring-slate-400 text-sm"
           />
         </div>
 
-        {/* Botones de Acción */}
-        <div className="md:col-span-2 flex gap-2">
+        {/* Botones de Acción reducidos (1 col) */}
+        <div className="md:col-span-2 flex gap-1.5 justify-end">
           <Button
             type="submit"
-            className="bg-slate-800 hover:bg-slate-900 text-white gap-2"
+            className="flex-1 bg-slate-800 hover:bg-slate-900 text-white gap-1 px-2.5 text-xs h-10 font-medium"
+            title="Filtrar"
           >
-            <Filter className="w-4 h-4" />
-            Filtrar
+            <Filter className="w-3.5 h-3.5" />
+            <span className="hidden lg:inline">Filtrar</span>
           </Button>
           <Button
             type="button"
             variant="outline"
             onClick={handleReset}
-            className="border-slate-200 text-slate-600 hover:bg-slate-100"
+            className="border-slate-200 text-slate-600 hover:bg-slate-100 px-2.5 h-10 shrink-0"
             title="Resetear filtros"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-3.5 h-3.5" />
           </Button>
         </div>
       </div>

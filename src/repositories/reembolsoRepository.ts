@@ -5,9 +5,7 @@ export const getAll = async (): Promise<ReembolsoResponse> => {
     try {
         const response = await apiClient.get('/reembolsos')
 
-        const { data: dataCanjes } = response
-
-        const { result, data, message, status, error } = dataCanjes
+        const { data: { result, data, message, status, error } } = response
 
         return {
             result,
@@ -30,9 +28,7 @@ export const getAllPaginate = async (queryParams: string) => {
 
         const response = await apiClient.get(urlApi)
 
-        const { data: dataCanjes } = response
-
-        const { result, data, pagination, status } = dataCanjes
+        const { data: { result, data, pagination, status } } = response
 
         return {
             result,

@@ -82,7 +82,8 @@ function App() {
           )}
 
           <main className="flex-1 overflow-y-auto bg-transparent">
-            <div className="p-6 space-y-6">
+            {/* Clases dinámicas: Si es LoginPage no se aplica relleno ni espaciado, en rutas internas sí */}
+            <div className={isLoginPage ? "h-full w-full" : "p-6 space-y-6"}>
               <Routes>
                 <Route
                   path="/"
@@ -201,6 +202,10 @@ function App() {
                     <Route path="/cobro" element={<CobroListPage />}></Route>
                     <Route
                       path="/cobro/nuevo"
+                      element={<CobroFormPage />}
+                    ></Route>
+                    <Route
+                      path="/cobro/editar/:id"
                       element={<CobroFormPage />}
                     ></Route>
 

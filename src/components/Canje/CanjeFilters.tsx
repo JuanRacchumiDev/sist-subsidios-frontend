@@ -169,7 +169,7 @@ export const CanjeFilters: React.FC<CanjeFilterProps> = ({ onSearch }) => {
     >
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
         {/* Select: Tipo contingencia */}
-        <div className="md:col-span-3 space-y-1.5">
+        <div className="md:col-span-2 space-y-1.5">
           <label className="text-[10px] font-bold uppercase text-slate-500 ml-1 tracking-wider flex items-center gap-1">
             Tipo contingencia
           </label>
@@ -179,17 +179,21 @@ export const CanjeFilters: React.FC<CanjeFilterProps> = ({ onSearch }) => {
               handleSelectChange("id_tipocontingencia", val)
             }
           >
-            <SelectTrigger className="bg-white border-slate-200 w-full">
+            <SelectTrigger className="bg-white border-slate-200 w-full focus:ring-1 focus:ring-slate-400">
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">
-                Todos los tipos de contingencia
+            <SelectContent className="bg-white border border-slate-200 shadow-lg z-50 max-h-60 overflow-y-auto rounded-md">
+              <SelectItem
+                value="all"
+                className="cursor-pointer hover:bg-slate-100"
+              >
+                Todos los tipos
               </SelectItem>
               {tipoContingencias.map((tipoContingencia) => (
                 <SelectItem
                   key={tipoContingencia.id}
                   value={tipoContingencia.id || ""}
+                  className="cursor-pointer hover:bg-slate-100"
                 >
                   {tipoContingencia.nombre}
                 </SelectItem>
@@ -199,7 +203,7 @@ export const CanjeFilters: React.FC<CanjeFilterProps> = ({ onSearch }) => {
         </div>
 
         {/* Select: Tipo descanso médico */}
-        <div className="md:col-span-3 space-y-1.5">
+        <div className="md:col-span-2 space-y-1.5">
           <label className="text-[10px] font-bold uppercase text-slate-500 ml-1 tracking-wider flex items-center gap-1">
             Tipo descanso médico
           </label>
@@ -209,15 +213,22 @@ export const CanjeFilters: React.FC<CanjeFilterProps> = ({ onSearch }) => {
               handleSelectChange("id_tipodescansomedico", val)
             }
           >
-            <SelectTrigger className="bg-white border-slate-200 w-full">
+            <SelectTrigger className="bg-white border-slate-200 w-full focus:ring-1 focus:ring-slate-400">
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">
-                Todos los tipos de descanso médico
+            <SelectContent className="bg-white border border-slate-200 shadow-lg z-50 max-h-60 overflow-y-auto rounded-md">
+              <SelectItem
+                value="all"
+                className="cursor-pointer hover:bg-slate-100"
+              >
+                Todos los tipos
               </SelectItem>
               {tipoDescansosMedicos.map((tipoDescanso) => (
-                <SelectItem key={tipoDescanso.id} value={tipoDescanso.id || ""}>
+                <SelectItem
+                  key={tipoDescanso.id}
+                  value={tipoDescanso.id || ""}
+                  className="cursor-pointer hover:bg-slate-100"
+                >
                   {tipoDescanso.nombre}
                 </SelectItem>
               ))}
@@ -234,6 +245,7 @@ export const CanjeFilters: React.FC<CanjeFilterProps> = ({ onSearch }) => {
             id="fecha_inicio"
             name="fecha_inicio"
             type="date"
+            autoComplete="off"
             value={filters.fecha_inicio || ""}
             onChange={handleInputChange}
             className="md:col-span-3 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -249,6 +261,7 @@ export const CanjeFilters: React.FC<CanjeFilterProps> = ({ onSearch }) => {
             id="fecha_final"
             name="fecha_final"
             type="date"
+            autoComplete="off"
             value={filters.fecha_final || ""}
             onChange={handleInputChange}
             className="md:col-span-3 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -261,6 +274,7 @@ export const CanjeFilters: React.FC<CanjeFilterProps> = ({ onSearch }) => {
             Colaborador
           </label>
           <Input
+            type="text"
             id="search"
             name="search"
             autoComplete="off"
