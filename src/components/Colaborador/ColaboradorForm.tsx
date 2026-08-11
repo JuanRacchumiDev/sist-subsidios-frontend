@@ -45,6 +45,7 @@ import SearchableCombobox from "../Common/SearchableCombobox";
 import { ArrowLeft, Save, XCircle } from "lucide-react";
 import { getAuthData } from "../../utils/authMemo";
 import { ParametroClase } from "../../constants/parametroClase";
+import { EOrigen } from "../../enums/EOrigen";
 
 const formSchema = z.object({
   idTipoDocumento: z
@@ -97,6 +98,11 @@ const formSchema = z.object({
     message: "El número de celular debe tener al menos 9 dígitos.",
   }),
   fechaIngreso: z.date().optional(),
+  sexo: z
+    .string({
+      message: "Por favor seleccione un sexo.",
+    })
+    .min(1, "Por favor seleccione un sexo"),
   esAsociadoSindicato: z.boolean().optional(),
   esPresentaInconvenientes: z.boolean().optional(),
 });
@@ -192,6 +198,7 @@ const defaultValues = {
   emailPersonal: "",
   telefono: "",
   fechaIngreso: null,
+  sexo: "",
   esAsociadoSindicato: false,
   esPresentaInconvenientes: false,
 };
@@ -283,6 +290,7 @@ export const ColaboradorForm = () => {
               email_institucional,
               email_personal,
               telefono,
+              sexo,
               is_asociado_sindicato,
               is_tiene_inconvenientes,
             } = colaborador;
@@ -306,6 +314,7 @@ export const ColaboradorForm = () => {
               emailInstitucional: email_institucional || "",
               emailPersonal: email_personal || "",
               telefono: telefono || "",
+              sexo: sexo || "",
               esAsociadoSindicato: is_asociado_sindicato || false,
               esPresentaInconvenientes: is_tiene_inconvenientes || false,
             };
@@ -351,6 +360,7 @@ export const ColaboradorForm = () => {
       telefono,
       esAsociadoSindicato,
       esPresentaInconvenientes,
+      sexo,
     } = values;
 
     const nombreCompleto: string = `${nombres} ${apellidoPaterno} ${apellidoMaterno}`;
@@ -392,6 +402,13 @@ export const ColaboradorForm = () => {
       is_asociado_sindicato: esAsociadoSindicato,
       is_tiene_inconvenientes: esPresentaInconvenientes,
     };
+
+    if (!idPersona) {
+      payload.origen = EOrigen.WEB;
+      if (sexo) {
+        payload.sexo = sexo;
+      }
+    }
 
     console.log("---- payload persona ----");
     console.log({ payload });
@@ -547,6 +564,8 @@ export const ColaboradorForm = () => {
                                     field.value,
                                   );
 
+                                console.log({ responsePersona });
+
                                 const { result, data, message } =
                                   responsePersona;
 
@@ -593,22 +612,16 @@ export const ColaboradorForm = () => {
                                     setCampoFecNacHabilitado(true);
                                   }
 
-                                  // if (persona.fecha_nacimiento) {
-                                  //   form.setValue(
-                                  //     "fechaNacimiento",
-                                  //     parseISO(persona.fecha_nacimiento),
-                                  //     { shouldValidate: true },
-                                  //   );
-                                  // }
-                                  // setCamposHabilitados(false);
-
                                   showToast("success", message as string);
                                 } else {
                                   setCamposHabilitados(true);
 
+                                  setCampoFecNacHabilitado(true);
+
                                   showToast(
                                     "warning",
-                                    "No se encontraron registros previos. Complete los datos manualmente.",
+                                    message ||
+                                      "No se encontraron registros previos. Complete los datos manualmente.",
                                   );
                                 }
                               } catch (error) {
@@ -963,6 +976,44 @@ export const ColaboradorForm = () => {
                     </FormItem>
                   )}
                 />
+
+                {!idPersona && !isEditMode && (
+                  <FormField
+                    control={form.control}
+                    name="sexo"
+                    render={({ field, fieldState }) => (
+                      <FormItem className="flex flex-col">
+                        <RequiredLabel>Sexo</RequiredLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value ?? ""}
+                          disabled={isSubmitting || isEditMode}
+                        >
+                          <FormControl>
+                            <SelectTrigger
+                              className={`w-full transition-all bg-white ${
+                                fieldState.invalid
+                                  ? "border-red-400 focus:ring-red-100"
+                                  : "border-slate-200 focus:ring-blue-100 focus:border-blue-500"
+                              }`}
+                            >
+                              <SelectValue placeholder="Seleccionar..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-white">
+                            <SelectItem value="M" key="M">
+                              Masculino
+                            </SelectItem>
+                            <SelectItem value="F" key="F">
+                              Femenino
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage className="text-xs font-medium text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">

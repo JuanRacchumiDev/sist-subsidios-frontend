@@ -47,6 +47,7 @@ import { ParametroClase } from "../../constants/parametroClase";
 import { EMPRESA_DEFAULT, DOMINIO_EMAIL_DEFAULT } from "../../params/constants";
 import { getAuthData } from "../../utils/authMemo";
 import { getEmpresaByRazonSocial } from "../../services/empresaService";
+import { EOrigen } from "../../enums/EOrigen";
 
 const formSchema = z.object({
   idTipoDocumento: z
@@ -97,6 +98,11 @@ const formSchema = z.object({
     message: "El número de celular debe tener al menos 9 dígitos.",
   }),
   fechaIngreso: z.date().optional(),
+  sexo: z
+    .string({
+      message: "Por favor seleccione un sexo.",
+    })
+    .min(1, "Por favor seleccione un sexo"),
 });
 
 const loadEmpresa = async (): Promise<Empresa> => {
@@ -212,6 +218,7 @@ const defaultValues = {
   emailPersonal: "",
   telefono: "",
   fechaIngreso: null,
+  sexo: "",
 };
 
 export const EspecialistaSHForm = () => {
@@ -310,6 +317,7 @@ export const EspecialistaSHForm = () => {
               email_institucional,
               email_personal,
               telefono,
+              sexo,
             } = especialistaSH;
 
             setIdPersona(id);
@@ -331,6 +339,7 @@ export const EspecialistaSHForm = () => {
               emailInstitucional: email_institucional || "",
               emailPersonal: email_personal || "",
               telefono: telefono || "",
+              sexo: sexo || "",
             };
 
             form.reset(dataForm);
@@ -371,6 +380,7 @@ export const EspecialistaSHForm = () => {
       emailInstitucional,
       emailPersonal,
       telefono,
+      sexo,
     } = values;
 
     const nombreCompleto: string = `${nombres} ${apellidoPaterno} ${apellidoMaterno}`;
@@ -410,6 +420,13 @@ export const EspecialistaSHForm = () => {
       telefono,
       nombre_grupo: "GRUPO ESPECIALISTA SH",
     };
+
+    if (!idPersona) {
+      payload.origen = EOrigen.WEB;
+      if (sexo) {
+        payload.sexo = sexo;
+      }
+    }
 
     console.log("---- payload persona ----");
     console.log({ payload });
@@ -624,9 +641,12 @@ export const EspecialistaSHForm = () => {
                                 } else {
                                   setCamposHabilitados(true);
 
+                                  setCampoFecNacHabilitado(true);
+
                                   showToast(
                                     "warning",
-                                    "No se encontraron registros previos. Complete los datos manualmente.",
+                                    message ||
+                                      "No se encontraron registros previos. Complete los datos manualmente.",
                                   );
                                 }
                               } catch (error) {
@@ -961,6 +981,44 @@ export const EspecialistaSHForm = () => {
                     </FormItem>
                   )}
                 />
+
+                {!idPersona && !isEditMode && (
+                  <FormField
+                    control={form.control}
+                    name="sexo"
+                    render={({ field, fieldState }) => (
+                      <FormItem className="flex flex-col">
+                        <RequiredLabel>Sexo</RequiredLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value ?? ""}
+                          disabled={isSubmitting || isEditMode}
+                        >
+                          <FormControl>
+                            <SelectTrigger
+                              className={`w-full transition-all bg-white ${
+                                fieldState.invalid
+                                  ? "border-red-400 focus:ring-red-100"
+                                  : "border-slate-200 focus:ring-blue-100 focus:border-blue-500"
+                              }`}
+                            >
+                              <SelectValue placeholder="Seleccionar..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-white">
+                            <SelectItem value="M" key="M">
+                              Masculino
+                            </SelectItem>
+                            <SelectItem value="F" key="F">
+                              Femenino
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage className="text-xs font-medium text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                )}
               </div>
 
               <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t border-gray-100">

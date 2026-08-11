@@ -79,7 +79,7 @@ export const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
             onChange={(e) => setEmail(e.target.value)}
             className="w-full pl-9 pr-3 py-2 bg-slate-50/50 border border-slate-300 rounded-lg text-slate-900 text-xs sm:text-sm placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all shadow-sm"
             placeholder="usuario@institucion.gob.pe"
-            autoComplete="email"
+            autoComplete="off"
             disabled={loading}
             required
           />
@@ -120,7 +120,7 @@ export const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full pl-9 pr-9 py-2 bg-slate-50/50 border border-slate-300 rounded-lg text-slate-900 text-xs sm:text-sm placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all shadow-sm"
             placeholder="••••••••••••"
-            autoComplete="current-password"
+            autoComplete="off"
             disabled={loading}
             required
           />
