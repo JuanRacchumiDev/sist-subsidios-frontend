@@ -45,6 +45,7 @@ import {
   Lock,
   RotateCcw,
   Save,
+  DollarSign,
 } from "lucide-react";
 
 import { Canje } from "../../interfaces/ICanje";
@@ -61,7 +62,11 @@ import { Textarea } from "../ui/textarea";
 export const formSchema = z.object({
   id: z.string().optional(),
   fechaSolicitud: z.string().optional().nullable(),
-  valorDia: z.coerce.number().optional(),
+  valorDia: z.coerce
+    .number()
+    .min(0, "El valor debe ser mayor o igual a 0")
+    .optional(),
+  valorTotalSubsidio: z.coerce.number().optional(),
   estadoRegistro: z.string({ message: "Debe seleccionar un estado" }),
   observacion: z.string().optional(),
 });
@@ -78,6 +83,9 @@ export const ReembolsoForm = () => {
   const [defineNombreColaborador, setDefineNombreColaborador] =
     useState<string>("");
   const [estado, setEstado] = useState<string | null>();
+
+  // Estado local para mantener el valor visible con coma o punto mientras edita
+  const [valorDiaInput, setValorDiaInput] = useState<string>("0");
 
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
   const id_usuario = userProfile?.id_usuario;
@@ -99,6 +107,7 @@ export const ReembolsoForm = () => {
       id: "",
       fechaSolicitud: "",
       valorDia: 0,
+      valorTotalSubsidio: 0,
       estadoRegistro: EReembolso.REEMBOLSO_INGRESADO,
       observacion: "",
     },
@@ -108,28 +117,49 @@ export const ReembolsoForm = () => {
   const showObservacion = estadoRegistro === EReembolso.REEMBOLSO_OBSERVADO;
   const showPendienteSubsidio =
     estadoRegistro === EReembolso.PENDIENTE_SUBSIDIO;
+
   const showSolicitudEssalud = estadoRegistro === EReembolso.SOLICITUD_ESSALUD;
 
-  console.log({ id });
+  // Función para procesar y validar el input de valorDia
+  const handleValorDiaChange = (rawValue: string) => {
+    setValorDiaInput(rawValue);
 
-  console.log({ isEditMode });
+    if (rawValue.trim() === "") {
+      form.setValue("valorDia", 0);
+      recalcularTotalSubsidio(0);
+      return;
+    }
+
+    // Permitir coma o punto reemplazando coma por punto
+    const cleanValue = rawValue.replace(",", ".");
+    const parsedNumber = parseFloat(cleanValue);
+
+    // Si no es un número válido o contiene caracteres no numéricos extra
+    if (isNaN(parsedNumber) || !/^\d*(\.\d*)?$/.test(cleanValue)) {
+      form.setValue("valorDia", 0);
+      recalcularTotalSubsidio(0);
+    } else {
+      form.setValue("valorDia", parsedNumber);
+      recalcularTotalSubsidio(parsedNumber);
+    }
+  };
+
+  // Función helper para recalcular el valorTotalSubsidio
+  const recalcularTotalSubsidio = (valorDiaNum: number) => {
+    const totalDias = defineCanje?.total_dias || 0;
+    const total = valorDiaNum * totalDias;
+    form.setValue("valorTotalSubsidio", Number(total.toFixed(2)));
+  };
 
   useEffect(() => {
     const fetchData = async () => {
-      // Log para depurar qué valor tiene id al montar el componente
-      console.log("Componente montado. id:", id, "| isEditMode:", isEditMode);
-
       if (isEditMode && id) {
-        console.log("Modo edición detectado. Solicitando datos para id:", id);
         try {
           const responseReembolso = await getReembolsoById(id);
-          console.log("Respuesta recibida del backend:", responseReembolso);
-
           const { result, data } = responseReembolso;
 
           if (result && data) {
             const reembolso = data as Reembolso;
-            console.log("Objeto reembolso:", reembolso);
 
             const {
               fecha_solicitud,
@@ -143,8 +173,10 @@ export const ReembolsoForm = () => {
 
             setEstado(estado_registro);
 
+            let totalDias = 0;
             if (canje) {
               setDefineCanje(canje as Canje);
+              totalDias = canje.total_dias || 0;
             }
 
             if (nombre_colaborador) {
@@ -155,35 +187,35 @@ export const ReembolsoForm = () => {
               setFechaMaximoReembolso(fecha_maxima_reembolso as string);
             }
 
+            const valDiaNum = valor_dia || 0;
+            const valorTotalSubsidio = valDiaNum * totalDias;
+
+            setValorDiaInput(valDiaNum.toString());
+
             const dataForm = {
               fechaSolicitud: fecha_solicitud || "",
-              valorDia: valor_dia || 0,
+              valorDia: valDiaNum,
+              valorTotalSubsidio: Number(valorTotalSubsidio.toFixed(2)),
               estadoRegistro: estado_registro || EReembolso.REEMBOLSO_INGRESADO,
               observacion: observacion || "",
             };
 
-            console.log({ dataForm });
-
-            // Actualizamos el formulario
             form.reset(dataForm);
           }
         } catch (error) {
           showToast("error", "Error al cargar los datos del reembolso.");
           console.error("Error fetching reembolso:", error);
         }
-      } else {
-        console.log("Modo creación (no edición)");
       }
     };
 
     fetchData();
-  }, [id, isEditMode, form]); // Solo depender de id e isEditMode
+  }, [id, isEditMode, form]);
 
   const isRegistroBloqueado =
     isEditMode && estado === EReembolso.REEMBOLSO_CORRECTO;
 
   const { isSubmitting } = form.formState;
-
   const isButtonDisabled = isSubmitting || isRegistroBloqueado;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -208,8 +240,6 @@ export const ReembolsoForm = () => {
         payloadReembolso.fecha_registro = fechaActual;
         payloadReembolso.user_crea = id_usuario;
       }
-
-      console.log({ payloadReembolso });
 
       const response = await updateReembolso(id!, payloadReembolso);
       const { result, message } = response;
@@ -299,8 +329,7 @@ export const ReembolsoForm = () => {
 
                 <CollapsibleContent className="px-3 pb-3 pt-1 border-t border-blue-100/60">
                   <div className="grid grid-cols-12 gap-2.5">
-                    {/* FILA 1 */}
-                    {/* Colaborador - 6 columnas */}
+                    {/* Colaborador */}
                     <div className="col-span-12 md:col-span-6 space-y-0.5">
                       <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
                         Colaborador
@@ -313,7 +342,7 @@ export const ReembolsoForm = () => {
                       </p>
                     </div>
 
-                    {/* Tipo Descanso - 3 columnas */}
+                    {/* Tipo Descanso */}
                     <div className="col-span-6 md:col-span-3 space-y-0.5">
                       <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
                         Tipo Descanso
@@ -326,7 +355,7 @@ export const ReembolsoForm = () => {
                       </p>
                     </div>
 
-                    {/* Tipo Contingencia - 3 columnas */}
+                    {/* Tipo Contingencia */}
                     <div className="col-span-6 md:col-span-3 space-y-0.5">
                       <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
                         Tipo Contingencia
@@ -339,50 +368,49 @@ export const ReembolsoForm = () => {
                       </p>
                     </div>
 
-                    {/* FILA 2 */}
-                    {/* Inicio Descanso - 3 columnas */}
+                    {/* Inicio Subsidio */}
                     <div className="col-span-6 md:col-span-3 space-y-0.5">
                       <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
-                        Inicio Descanso
+                        Inicio Subsidio
                       </label>
                       <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
-                        {defineCanje?.descansoMedico?.fecha_inicio
+                        {defineCanje?.fecha_inicio_subsidio
                           ? HDate.formatDateTimezone(
-                              defineCanje.descansoMedico.fecha_inicio,
+                              defineCanje.fecha_inicio_subsidio,
                               "dd/MM/yyyy",
                             )
                           : "---"}
                       </p>
                     </div>
 
-                    {/* Fin Descanso - 3 columnas */}
+                    {/* Fin Subsidio */}
                     <div className="col-span-6 md:col-span-3 space-y-0.5">
                       <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
-                        Fin Descanso
+                        Fin Subsidio
                       </label>
                       <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
-                        {defineCanje?.descansoMedico?.fecha_final
+                        {defineCanje?.fecha_final_subsidio
                           ? HDate.formatDateTimezone(
-                              defineCanje.descansoMedico.fecha_final,
+                              defineCanje.fecha_final_subsidio,
                               "dd/MM/yyyy",
                             )
                           : "---"}
                       </p>
                     </div>
 
-                    {/* Días Totales - 3 columnas */}
+                    {/* Días Totales */}
                     <div className="col-span-6 md:col-span-3 space-y-0.5">
                       <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
-                        Días Totales
+                        Días Subsidiados
                       </label>
                       <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
-                        {defineCanje?.descansoMedico?.total_dias
-                          ? `${defineCanje.descansoMedico.total_dias} días`
+                        {defineCanje?.total_dias
+                          ? `${defineCanje.total_dias} días`
                           : "---"}
                       </p>
                     </div>
 
-                    {/* Fecha Máxima Reembolso - 3 columnas */}
+                    {/* Fecha Máxima Reembolso */}
                     <div className="col-span-6 md:col-span-3 space-y-0.5">
                       <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
                         Fecha Máxima Reembolso
@@ -401,7 +429,7 @@ export const ReembolsoForm = () => {
               </Collapsible>
 
               {/* FORMULARIO */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
                 <FormField
                   control={form.control}
                   name="estadoRegistro"
@@ -450,80 +478,36 @@ export const ReembolsoForm = () => {
                 />
 
                 {showSolicitudEssalud && (
-                  <>
-                    <FormField
-                      control={form.control}
-                      name="fechaSolicitud"
-                      render={({ field, fieldState }) => (
-                        <FormItem className="space-y-1.5">
-                          <RequiredLabel className="text-xs font-semibold text-slate-700">
-                            Fecha de solicitud
-                          </RequiredLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Calendar className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400 pointer-events-none" />
-                              <Input
-                                type="date"
-                                value={
-                                  field.value
-                                    ? format(
-                                        typeof field.value === "string"
-                                          ? parseISO(field.value)
-                                          : field.value,
-                                        "yyyy-MM-dd",
-                                      )
-                                    : ""
-                                }
-                                onChange={(e) =>
-                                  field.onChange(
-                                    e.target.value
-                                      ? parseISO(e.target.value)
-                                      : null,
-                                  )
-                                }
-                                className={`pl-9 h-9 text-xs bg-white shadow-sm transition-colors ${
-                                  fieldState.invalid
-                                    ? "border-red-500 focus:ring-red-200"
-                                    : "border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                                }`}
-                                disabled={isButtonDisabled}
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage className="text-[11px]" />
-                        </FormItem>
-                      )}
-                    />
-                  </>
-                )}
-
-                {showPendienteSubsidio && (
                   <FormField
                     control={form.control}
-                    name="valorDia"
+                    name="fechaSolicitud"
                     render={({ field, fieldState }) => (
                       <FormItem className="space-y-1.5">
                         <RequiredLabel className="text-xs font-semibold text-slate-700">
-                          Valor por día
+                          Fecha de solicitud
                         </RequiredLabel>
                         <FormControl>
                           <div className="relative">
-                            <FileText className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400 pointer-events-none" />
+                            <Calendar className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400 pointer-events-none" />
                             <Input
-                              type="number"
-                              placeholder="10.00"
-                              autoComplete="off"
-                              maxLength={20}
-                              value={(field.value as number | string) ?? ""}
-                              onChange={(e) => {
-                                const val = e.target.value;
+                              type="date"
+                              value={
+                                field.value
+                                  ? format(
+                                      typeof field.value === "string"
+                                        ? parseISO(field.value)
+                                        : field.value,
+                                      "yyyy-MM-dd",
+                                    )
+                                  : ""
+                              }
+                              onChange={(e) =>
                                 field.onChange(
-                                  val === "" ? undefined : parseFloat(val),
-                                );
-                              }}
-                              // onBlur={field.onBlur} // Recomendado incluir onBlur
-                              // name={field.name} // Recomendado incluir name
-                              // ref={field.ref} // Recomendado incluir ref para auto-focus de errores
+                                  e.target.value
+                                    ? parseISO(e.target.value)
+                                    : null,
+                                )
+                              }
                               className={`pl-9 h-9 text-xs bg-white shadow-sm transition-colors ${
                                 fieldState.invalid
                                   ? "border-red-500 focus:ring-red-200"
@@ -537,6 +521,88 @@ export const ReembolsoForm = () => {
                       </FormItem>
                     )}
                   />
+                )}
+
+                {showPendienteSubsidio && (
+                  <>
+                    {/* Campo: Valor Día */}
+                    <FormField
+                      control={form.control}
+                      name="valorDia"
+                      render={({ fieldState }) => (
+                        <FormItem className="space-y-1.5">
+                          <RequiredLabel className="text-xs font-semibold text-slate-700">
+                            Valor por día (S/)
+                          </RequiredLabel>
+                          <FormControl>
+                            <div className="relative">
+                              {/* <DollarSign className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400 pointer-events-none" /> */}
+                              <Input
+                                type="text"
+                                inputMode="decimal"
+                                placeholder="0.00"
+                                autoComplete="off"
+                                maxLength={12}
+                                value={valorDiaInput}
+                                onChange={(e) =>
+                                  handleValorDiaChange(e.target.value)
+                                }
+                                onBlur={() => {
+                                  // Al salir del campo, si no hay valor numérico se setea a "0"
+                                  const valNum =
+                                    form.getValues("valorDia") || 0;
+                                  setValorDiaInput(valNum.toString());
+                                }}
+                                className={`h-9 text-xs bg-white shadow-sm transition-colors ${
+                                  fieldState.invalid
+                                    ? "border-red-500 focus:ring-red-200"
+                                    : "border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                }`}
+                                disabled={isButtonDisabled}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage className="text-[11px]" />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Campo: Valor Total Subsidio (Solo Lectura) */}
+                    <FormField
+                      control={form.control}
+                      name="valorTotalSubsidio"
+                      render={({ field, fieldState }) => (
+                        <FormItem className="space-y-1.5">
+                          <RequiredLabel className="text-xs font-semibold text-slate-700">
+                            Valor total del subsidio (S/)
+                          </RequiredLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Lock className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400 pointer-events-none" />
+                              <Input
+                                type="text"
+                                readOnly
+                                disabled
+                                placeholder="0.00"
+                                value={
+                                  field.value !== undefined &&
+                                  field.value !== null
+                                    ? Number(field.value).toFixed(2)
+                                    : "0.00"
+                                }
+                                className={`pl-9 h-9 text-xs bg-slate-100 font-semibold text-slate-700 cursor-not-allowed shadow-none ${
+                                  fieldState.invalid
+                                    ? "border-red-500"
+                                    : "border-slate-200"
+                                }`}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage className="text-[11px]" />
+                        </FormItem>
+                      )}
+                    />
+                  </>
                 )}
               </div>
 
@@ -586,8 +652,6 @@ export const ReembolsoForm = () => {
                 <Button
                   type="submit"
                   size="sm"
-                  // disabled={isSubmitting}
-                  // className="w-full sm:w-auto h-8 text-xs rounded-md px-4 font-medium transition-all bg-indigo-600 hover:bg-indigo-700 text-white"
                   disabled={isButtonDisabled}
                   className={`w-full sm:w-auto h-8 text-xs rounded-md px-4 font-medium transition-all ${
                     isRegistroBloqueado

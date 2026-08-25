@@ -1,4 +1,4 @@
-import { JSX, useCallback, useEffect, useState } from "react";
+import { JSX, useCallback, useEffect, useState, useMemo } from "react";
 import { getPersonasPaginate } from "../../services/personaService";
 import {
   Pagination,
@@ -28,6 +28,8 @@ import {
   ColaboradorFilters,
   ColaboradorFiltersData,
 } from "./ColaboradorFilters";
+import { getAuthData } from "../../utils/authMemo";
+import { EPerfil } from "@/enums/EPerfil";
 
 export const ColaboradorTable: React.FC = ({}) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -50,6 +52,8 @@ export const ColaboradorTable: React.FC = ({}) => {
     documento: "",
   });
 
+  const userProfile = useMemo(() => getAuthData()?.usuario, []);
+
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= paginationInfo.totalPages) {
       setCurrentPage(page);
@@ -66,6 +70,15 @@ export const ColaboradorTable: React.FC = ({}) => {
         numero_documento: filtersData.documento,
         nombreGrupo: "GRUPO COLABORADOR",
       };
+
+      const { nombre_perfil_url, id_empresa } = userProfile;
+
+      if (nombre_perfil_url === EPerfil.ESPECIALISTA_EMPRESA) {
+        filters["id_empresa"] = id_empresa;
+      }
+
+      console.log("---- filters colaborador ----");
+      console.log({ filters });
 
       try {
         const response = await getPersonasPaginate(pageToFetch, limit, filters);

@@ -39,25 +39,44 @@ export const ReembolsoRow: React.FC<Props> = ({ reembolso }) => {
       </TableCell>
 
       <TableCell className="py-2 px-3 text-xs text-slate-500">
-        {reembolso.fecha_maxima_reembolso
+        {reembolso.canje.fecha_inicio_subsidio
           ? HDate.formatDateTimezone(
-              reembolso.fecha_maxima_reembolso,
+              reembolso.canje.fecha_inicio_subsidio,
               "dd/MM/yyyy",
             )
           : "--/--/--"}
       </TableCell>
 
       <TableCell className="py-2 px-3 text-xs text-slate-500">
-        {reembolso.fecha_pago
-          ? HDate.formatDateTimezone(reembolso.fecha_pago, "dd/MM/yyyy")
+        {reembolso.canje.fecha_final_subsidio
+          ? HDate.formatDateTimezone(
+              reembolso.canje.fecha_final_subsidio,
+              "dd/MM/yyyy",
+            )
           : "--/--/--"}
       </TableCell>
 
       <TableCell className="py-2 px-3 text-xs text-slate-500">
-        {reembolso.numero_expediente &&
-        reembolso.numero_expediente.trim() !== ""
-          ? reembolso.numero_expediente
-          : "--"}
+        {reembolso.canje.total_dias ? reembolso.canje.total_dias : 0}
+      </TableCell>
+
+      <TableCell className="py-2 px-3 text-xs text-slate-500">
+        {reembolso.fecha_solicitud
+          ? HDate.formatDateTimezone(reembolso.fecha_solicitud, "dd/MM/yyyy")
+          : "--/--/--"}
+      </TableCell>
+
+      <TableCell className="py-2 px-3 text-xs text-slate-500">
+        {reembolso.valor_dia ? reembolso.valor_dia : 0.0}
+      </TableCell>
+
+      <TableCell className="py-2 px-3 text-xs text-slate-500">
+        {reembolso.fecha_maxima_reembolso
+          ? HDate.formatDateTimezone(
+              reembolso.fecha_maxima_reembolso,
+              "dd/MM/yyyy",
+            )
+          : "--/--/--"}
       </TableCell>
 
       <TableCell className="py-2 px-3 text-xs text-slate-500">

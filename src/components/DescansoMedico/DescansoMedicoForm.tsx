@@ -56,7 +56,6 @@ import { useToast } from "../../context/ToastContext";
 import { EDescansoMedico } from "../../enums/EDescansoMedico";
 import { getAuthData } from "../../utils/authMemo";
 import HDate from "../../helpers/HDate";
-import { EPerfil } from "../../enums/EPerfil";
 
 export const formSchema = z
   .object({
@@ -134,24 +133,7 @@ export const formSchema = z
     observacion: z.string().optional(),
   })
   .superRefine(async (data, ctx) => {
-    const {
-      idTipoDescansoMedico,
-      codigoCitt,
-      fechaOtorgamiento,
-      fechaInicio,
-      fechaFinal,
-    } = data;
-
-    if (
-      idTipoDescansoMedico === "972d5ed2-26f9-4ffd-b7cf-127384fad9db" &&
-      !codigoCitt
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "El código CITT es requerido para este tipo de descanso",
-        path: ["codigoCitt"],
-      });
-    }
+    const { fechaOtorgamiento, fechaInicio, fechaFinal } = data;
 
     if (fechaOtorgamiento && fechaInicio) {
       if (isBefore(fechaInicio, fechaOtorgamiento)) {
@@ -200,55 +182,51 @@ const defaultValues: FormSchemaType = {
 };
 
 export const DescansoMedicoForm = () => {
-  const [showResponsabilidad, setShowResponsabilidad] = useState(false);
-  const [showPoliticaSubsidio, setShowPoliticaSubsidio] = useState(false);
-  const [activeTab, setActiveTab] = useState("datos-descanso-medico");
-  const [estado, setEstado] = useState<string | null>(null);
-
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { showToast } = useToast();
 
-  const isEditMode = !!id;
+  const [showResponsabilidad, setShowResponsabilidad] = useState(false);
+  const [showPoliticaSubsidio, setShowPoliticaSubsidio] = useState(false);
+  const [activeTab, setActiveTab] = useState("datos-descanso-medico");
+
+  const [isLoading, setIsLoading] = useState<boolean>(Boolean(id));
+  const [estado, setEstado] = useState<string | null>(null);
+
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
   console.log({ userProfile });
-  const { nombre_perfil_url, id_persona, id_empresa, id_usuario } =
-    userProfile || {};
 
-  console.log({ nombre_perfil_url });
+  const {
+    nombre_perfil_url,
+    id_persona: idPersonaUser,
+    id_empresa: idEmpresaUser,
+    id_usuario: idUsuarioUser,
+  } = userProfile || {};
 
-  console.log({ id_persona });
+  // const isDisabled = useMemo(() => {
+  //   if (!id) return false;
+  //   return estado !== EDescansoMedico.REGISTRO_INGRESADO;
+  // }, [id, estado]);
 
-  console.log({ id_usuario });
-
-  const handleGoBack = () => {
-    navigate("/descanso-medico");
-  };
-
-  const isModoLectura =
-    (nombre_perfil_url === EPerfil.ESPECIALISTA_EMPRESA ||
-      nombre_perfil_url === EPerfil.ADMINISTRADOR) &&
-    isEditMode;
+  // console.log({ isDisabled });
 
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
 
+  const handleGoBack = () => {
+    navigate("/descanso-medico");
+  };
+
   const resetForm = () => {
     form.reset(defaultValues);
   };
 
   useEffect(() => {
-    const fecthDescansoMedico = async () => {
-      if (isEditMode && id) {
-        console.log("---- isEditMode ----");
-        console.log({ isEditMode });
-
-        console.log("---- id ----");
-        console.log({ id });
-
-        let idEmpresa = "";
+    const fetchInitialData = async () => {
+      if (id) {
+        setIsLoading(true);
 
         try {
           const responseDescanso = await getDescansoById(id);
@@ -282,38 +260,39 @@ export const DescansoMedicoForm = () => {
 
             setEstado(estado_registro);
 
-            const responseColaborador = await getPersonaById(id_colaborador);
+            let idEmpresaColaborador = "";
 
-            console.log({ responseColaborador });
+            if (id_colaborador) {
+              const responseColaborador = await getPersonaById(id_colaborador);
+              const { result: resultColaborador, data: dataColaborador } =
+                responseColaborador;
 
-            const { result: resultColaborador, data: dataColaborador } =
-              responseColaborador;
-
-            if (resultColaborador && dataColaborador) {
-              const { id_empresa } = dataColaborador as Persona;
-              idEmpresa = id_empresa;
+              if (resultColaborador && dataColaborador) {
+                const { id_empresa } = dataColaborador as Persona;
+                idEmpresaColaborador = id_empresa || "";
+              }
             }
 
             const dataForm = {
-              idEmpresa,
-              idColaborador: id_colaborador,
-              idTipoDescansoMedico: id_tipodescansomedico,
-              idTipoContingencia: id_tipocontingencia,
-              codigoCitt: codigo_citt || "",
+              idEmpresa: idEmpresaColaborador,
+              idColaborador: id_colaborador ?? "",
+              idTipoDescansoMedico: id_tipodescansomedico ?? "",
+              idTipoContingencia: id_tipocontingencia ?? "",
+              codigoCitt: codigo_citt ?? "",
               fechaOtorgamiento: fecha_otorgamiento
                 ? parseISO(fecha_otorgamiento)
                 : null,
               fechaInicio: fecha_inicio ? parseISO(fecha_inicio) : null,
               fechaFinal: fecha_final ? parseISO(fecha_final) : null,
-              totalDias: total_dias?.toString() || "",
-              colegiadoMedico: numero_colegiatura,
-              medicoTratante: medico_tratante,
-              idDiagnostico: codcie10_diagnostico,
-              nombreEstablecimiento: nombre_establecimiento,
-              aceptaResponsabilidad: is_acepta_responsabilidad,
-              aceptaPoliticaSubsidio: is_acepta_politica,
-              estadoRegistro: estado_registro,
-              observacion: observacion || "",
+              totalDias: total_dias?.toString() ?? "",
+              colegiadoMedico: numero_colegiatura ?? "",
+              medicoTratante: medico_tratante ?? "",
+              idDiagnostico: codcie10_diagnostico ?? "",
+              nombreEstablecimiento: nombre_establecimiento ?? "",
+              aceptaResponsabilidad: is_acepta_responsabilidad ?? false,
+              aceptaPoliticaSubsidio: is_acepta_politica ?? false,
+              estadoRegistro: estado_registro ?? "",
+              observacion: observacion ?? "",
             };
 
             console.log("dataForm descanso médico", dataForm);
@@ -323,26 +302,33 @@ export const DescansoMedicoForm = () => {
         } catch (error) {
           showToast("error", "Error al cargar los datos del descanso médico.");
           console.error("Error fetching descanso medico:", error);
+        } finally {
+          setIsLoading(false);
         }
       } else {
-        if (userProfile && id_empresa && id_persona) {
-          form.setValue("idEmpresa", id_empresa);
-          form.setValue("idColaborador", id_persona);
+        if (userProfile && idEmpresaUser && idPersonaUser) {
+          form.setValue("idEmpresa", idEmpresaUser);
+          form.setValue("idColaborador", idPersonaUser);
         }
 
         await createCodigoTempAuth();
+        setIsLoading(false);
       }
     };
 
-    fecthDescansoMedico();
-  }, [id, isEditMode]);
+    fetchInitialData();
+  }, [id]);
 
-  const isRegistroBloqueado =
-    isEditMode && estado === EDescansoMedico.REGISTRO_EXITOSO;
+  // const isRegistroBloqueado =
+  //   isDisabled && estado === EDescansoMedico.REGISTRO_EXITOSO;
 
   const { isSubmitting } = form.formState;
 
-  const isButtonDisabled = isSubmitting || isRegistroBloqueado;
+  const isButtonDisabled =
+    isSubmitting ||
+    (Boolean(id) &&
+      Boolean(estado) &&
+      estado === EDescansoMedico.REGISTRO_EXITOSO);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -442,15 +428,15 @@ export const DescansoMedicoForm = () => {
         observacion,
       };
 
-      if (isEditMode && id) {
+      if (id) {
         console.log("update");
         payloadDescansoMedico.fecha_actualiza = fechaActual;
-        payloadDescansoMedico.user_actualiza = id_usuario;
+        payloadDescansoMedico.user_actualiza = idUsuarioUser;
         response = await updateDescanso(id, payloadDescansoMedico);
       } else {
         console.log("create");
         payloadDescansoMedico.fecha_registro = fechaActual;
-        payloadDescansoMedico.user_crea = id_usuario;
+        payloadDescansoMedico.user_crea = idUsuarioUser;
         response = await createDescanso(payloadDescansoMedico);
       }
 
@@ -470,6 +456,17 @@ export const DescansoMedicoForm = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px] w-full">
+        <Spinner className="w-8 h-8 text-primary" />
+        <span className="ml-3 text-sm text-muted-foreground">
+          Cargando información...
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto py-3 px-2 sm:px-4">
       <Card className="shadow-md border border-slate-200 bg-white rounded-xl overflow-hidden">
@@ -478,16 +475,16 @@ export const DescansoMedicoForm = () => {
           <div className="space-y-0.5">
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.2 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100">
-                {isEditMode ? "Modo Edición" : "Nuevo Registro"}
+                {id ? "Modo Edición" : "Nuevo Registro"}
               </span>
             </div>
             <CardTitle className="text-lg font-bold text-slate-900 tracking-tight">
-              {isEditMode
+              {id
                 ? "Editar descanso médico"
                 : "Nuevo registro de descanso médico"}
             </CardTitle>
             <CardDescription className="text-slate-500 font-normal text-xs">
-              {isEditMode
+              {id
                 ? "Actualice la información general y médica de este registro."
                 : "Complete todos los campos requeridos para registrar el descanso médico."}
             </CardDescription>
@@ -505,7 +502,7 @@ export const DescansoMedicoForm = () => {
         </CardHeader>
 
         {/* Notificación de bloqueo por estado */}
-        {isRegistroBloqueado && (
+        {estado && estado === EDescansoMedico.REGISTRO_EXITOSO && (
           <div className="bg-amber-50 border-b border-amber-200 py-2 px-4 sm:px-5 flex items-center gap-2 text-amber-800 text-xs font-medium">
             <Lock className="h-4 w-4 text-amber-600 shrink-0" />
             <span>
@@ -560,7 +557,11 @@ export const DescansoMedicoForm = () => {
                   >
                     <DescansoMedicoDetalle
                       form={form}
-                      isModoLectura={isModoLectura}
+                      isModoLectura={
+                        Boolean(id) &&
+                        Boolean(estado) &&
+                        estado === EDescansoMedico.REGISTRO_EXITOSO
+                      }
                     />
                   </TabsContent>
 
@@ -568,14 +569,28 @@ export const DescansoMedicoForm = () => {
                     value="datos-medicos"
                     className="m-0 focus-visible:outline-none"
                   >
-                    <DatosMedicos form={form} isModoLectura={isModoLectura} />
+                    <DatosMedicos
+                      form={form}
+                      isModoLectura={
+                        Boolean(id) &&
+                        Boolean(estado) &&
+                        estado === EDescansoMedico.REGISTRO_EXITOSO
+                      }
+                    />
                   </TabsContent>
 
                   <TabsContent
                     value="validacion"
                     className="m-0 focus-visible:outline-none"
                   >
-                    <Validacion form={form} isModoLectura={isModoLectura} />
+                    <Validacion
+                      form={form}
+                      isModoLectura={
+                        Boolean(id) &&
+                        Boolean(estado) &&
+                        estado === EDescansoMedico.REGISTRO_EXITOSO
+                      }
+                    />
                   </TabsContent>
                 </div>
               </Tabs>
@@ -598,7 +613,11 @@ export const DescansoMedicoForm = () => {
                             type="checkbox"
                             checked={field.value}
                             onChange={field.onChange}
-                            disabled={isRegistroBloqueado}
+                            disabled={
+                              Boolean(id) &&
+                              Boolean(estado) &&
+                              estado === EDescansoMedico.REGISTRO_EXITOSO
+                            }
                             id="responsabilidad"
                             className={`mt-0.5 h-3.5 w-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 transition cursor-pointer disabled:cursor-not-allowed ${
                               fieldState.invalid
@@ -642,7 +661,11 @@ export const DescansoMedicoForm = () => {
                             type="checkbox"
                             checked={field.value}
                             onChange={field.onChange}
-                            disabled={isRegistroBloqueado}
+                            disabled={
+                              Boolean(id) &&
+                              Boolean(estado) &&
+                              estado === EDescansoMedico.REGISTRO_EXITOSO
+                            }
                             id="politicaSubsidio"
                             className={`mt-0.5 h-3.5 w-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 transition cursor-pointer disabled:cursor-not-allowed ${
                               fieldState.invalid
@@ -693,9 +716,15 @@ export const DescansoMedicoForm = () => {
                 <Button
                   type="submit"
                   size="sm"
-                  disabled={isButtonDisabled}
+                  disabled={
+                    Boolean(id) &&
+                    Boolean(estado) &&
+                    estado === EDescansoMedico.REGISTRO_EXITOSO
+                  }
                   className={`w-full sm:w-auto h-8 text-xs rounded-md px-4 font-medium transition-all ${
-                    isRegistroBloqueado
+                    Boolean(id) &&
+                    Boolean(estado) &&
+                    estado === EDescansoMedico.REGISTRO_EXITOSO
                       ? "bg-slate-300 text-slate-500 cursor-not-allowed"
                       : "bg-indigo-600 hover:bg-indigo-700 text-white"
                   }`}
@@ -703,12 +732,12 @@ export const DescansoMedicoForm = () => {
                   {isSubmitting ? (
                     <>
                       <Spinner className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                      {isEditMode ? "Guardando..." : "Procesando..."}
+                      {isButtonDisabled ? "Guardando..." : "Procesando..."}
                     </>
                   ) : (
                     <>
                       <Save className="h-3.5 w-3.5 mr-1.5" />
-                      {isEditMode ? "Actualizar registro" : "Guardar registro"}
+                      {id ? "Actualizar registro" : "Guardar registro"}
                     </>
                   )}
                 </Button>

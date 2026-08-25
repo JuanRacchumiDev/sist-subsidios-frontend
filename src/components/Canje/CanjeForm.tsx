@@ -46,6 +46,8 @@ import {
   RotateCcw,
   Save,
   Lock,
+  CalendarDays,
+  FileCheck2,
 } from "lucide-react";
 
 import { DescansoMedico } from "../../interfaces/IDescansoMedico";
@@ -77,16 +79,12 @@ export const CanjeForm = () => {
   const { showToast } = useToast();
 
   const [descanso, setDescanso] = useState<DescansoMedico | null>(null);
-  const [fechaMaximaCanje, setFechaMaximaCanje] = useState<string | "">("");
-  const [idUserCrea, setIdUserCrea] = useState<string | "">("");
-  const [isOpen, setIsOpen] = useState(false); // Estado para controlar el Collapsible
-  const [estado, setEstado] = useState<string | null>();
+  const [canje, setCanje] = useState<Canje | null>(null);
+  const [fechaMaximaCanje, setFechaMaximaCanje] = useState<string>("");
+  const [isOpen, setIsOpen] = useState<boolean>(true);
 
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
-  console.log({ userProfile });
-
-  const { id_usuario } = userProfile;
-  console.log({ id_usuario });
+  const { id_usuario } = userProfile || {};
 
   const estadosPermitidos: ECanje[] = useMemo(() => {
     return Object.values(ECanje);
@@ -111,7 +109,6 @@ export const CanjeForm = () => {
   const showObservacion = estadoRegistro === ECanje.CANJE_ORSERVADO;
   const showCodigoCitt = estadoRegistro === ECanje.CANJE_CONFORME;
 
-  // Lógica para calcular la fecha máxima de canje permitida
   const maxInputDate = useMemo(() => {
     if (!fechaMaximaCanje) return undefined;
     const date = parseISO(fechaMaximaCanje);
@@ -123,74 +120,60 @@ export const CanjeForm = () => {
       if (isEditMode && id) {
         try {
           const responseCanje = await getCanjeById(id);
-
-          console.log({ responseCanje });
-
           const { result, data } = responseCanje;
 
           if (result && data) {
-            const canje = data as Canje;
-
-            console.log({ canje });
-
+            const dataCanje = data as Canje;
             const {
               fecha_canje,
               fecha_maxima_canje,
               codigo_citt,
               estado_registro,
               observacion,
-              user_crea,
               descansoMedico,
-            } = canje;
+            } = dataCanje;
 
-            setEstado(estado_registro);
+            setFechaMaximaCanje(fecha_maxima_canje || "");
+            setCanje(dataCanje);
+            setDescanso(descansoMedico || null);
 
             let fechaDefault: Date | null = null;
-
             if (fecha_canje) {
               fechaDefault = parseISO(fecha_canje);
             } else if (fecha_maxima_canje) {
               fechaDefault = addDays(parseISO(fecha_maxima_canje), 7);
             }
 
-            const dataForm = {
+            form.reset({
+              id,
               fechaCanje: fechaDefault,
               codigoCitt: codigo_citt || "",
               estadoRegistro: estado_registro,
               observacion: observacion || "",
-            };
-
-            form.reset(dataForm);
-
-            setFechaMaximaCanje(fecha_maxima_canje);
-            setIdUserCrea(user_crea);
-            setDescanso(descansoMedico);
+            });
           }
         } catch (error) {
-          showToast("error", "Error al cargar los datos del descanso médico.");
-          console.error("Error fetching descanso medico:", error);
+          showToast("error", "Error al cargar los datos del canje.");
+          console.error("Error fetching canje:", error);
         }
       }
     };
     fetchData();
   }, [id, isEditMode, form]);
 
-  const isRegistroBloqueado = isEditMode && estado === ECanje.CANJE_CONFORME;
+  const isRegistroBloqueado =
+    isEditMode && canje && canje.estado_registro === ECanje.CANJE_CONFORME;
 
   const { isSubmitting } = form.formState;
-
   const isButtonDisabled = isSubmitting || isRegistroBloqueado;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       const { fechaCanje, codigoCitt, estadoRegistro, observacion } = values;
-
-      console.log({ idUserCrea });
-
       const fechaActual = HDate.formatDateTimezone(new Date());
 
       const payloadCanje: Canje = {
-        fecha_canje: HDate.formatDateTimezone(fechaCanje),
+        fecha_canje: fechaCanje ? HDate.formatDateTimezone(fechaCanje) : "",
         codigo_citt: codigoCitt,
         estado_registro: estadoRegistro as ECanje,
         observacion,
@@ -204,10 +187,7 @@ export const CanjeForm = () => {
         payloadCanje.user_crea = id_usuario;
       }
 
-      console.log({ payloadCanje });
-
       const response = await updateCanje(id, payloadCanje);
-
       const { result, message } = response;
 
       if (result) {
@@ -218,7 +198,16 @@ export const CanjeForm = () => {
       }
     } catch (error) {
       console.error("Error al registrar canje", error);
-      showToast("error", error);
+      showToast("error", "Error al guardar el registro.");
+    }
+  };
+
+  const formatDateDisplay = (dateString?: string) => {
+    if (!dateString) return "---";
+    try {
+      return HDate.formatDateTimezone(dateString, "dd/MM/yyyy");
+    } catch {
+      return "---";
     }
   };
 
@@ -228,7 +217,7 @@ export const CanjeForm = () => {
         <CardHeader className="border-b border-slate-100 bg-slate-50/60 pt-3 px-4 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="space-y-0.5">
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.2 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100">
                 {isEditMode ? "Modo Edición" : "Nuevo Registro"}
               </span>
             </div>
@@ -253,7 +242,6 @@ export const CanjeForm = () => {
           </Button>
         </CardHeader>
 
-        {/* Notificación de bloqueo por estado */}
         {isRegistroBloqueado && (
           <div className="bg-amber-50 border-b border-amber-200 py-2 px-4 sm:px-5 flex items-center gap-2 text-amber-800 text-xs font-medium">
             <Lock className="h-4 w-4 text-amber-600 shrink-0" />
@@ -266,18 +254,21 @@ export const CanjeForm = () => {
 
         <CardContent className="pb-4 px-4 sm:pb-5 sm:px-5">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {/* Informacion del Descanso Medico (Collapsible) */}
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-4 pt-4"
+            >
+              {/* Información del Descanso Médico y Canje (Collapsible) */}
               <Collapsible
                 open={isOpen}
                 onOpenChange={setIsOpen}
-                className="border border-blue-100 rounded-lg bg-blue-50/20 overflow-hidden"
+                className="border border-indigo-100 rounded-lg bg-indigo-50/20 overflow-hidden"
               >
                 <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-blue-50/50 transition-colors">
-                    <div className="flex items-center gap-1.5 text-blue-900 font-semibold text-xs">
-                      <Info className="h-4 w-4 text-blue-600" />
-                      <span>Información del Descanso Médico Relacionado</span>
+                  <div className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-indigo-50/50 transition-colors">
+                    <div className="flex items-center gap-1.5 text-indigo-950 font-semibold text-xs">
+                      <Info className="h-4 w-4 text-indigo-600" />
+                      <span>Información del Descanso Médico y Canje</span>
                     </div>
                     <Button
                       type="button"
@@ -293,93 +284,114 @@ export const CanjeForm = () => {
                     </Button>
                   </div>
                 </CollapsibleTrigger>
-                <CollapsibleContent className="px-3 pb-3 pt-1 border-t border-blue-100/60">
-                  <div className="grid grid-cols-12 gap-2.5">
-                    {/* PRIMERA FILA */}
-                    {/* Colaborador - 6 Columnas */}
-                    <div className="col-span-12 md:col-span-6 space-y-0.5">
-                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
-                        Colaborador
-                      </label>
-                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
-                        {descanso?.colaborador_dm.nombre_completo || "---"}
-                      </p>
+                <CollapsibleContent className="px-3 pb-3 pt-2 border-t border-indigo-100/60 space-y-3">
+                  {/* SECCIÓN DESCANSO MÉDICO */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-1 text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                      <FileCheck2 className="h-3.5 w-3.5 text-indigo-600" />
+                      <span>Detalle del Descanso Médico</span>
                     </div>
+                    <div className="grid grid-cols-12 gap-2.5">
+                      <div className="col-span-12 md:col-span-6 space-y-0.5">
+                        <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                          Colaborador
+                        </label>
+                        <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
+                          {descanso?.colaborador_dm?.nombre_completo || "---"}
+                        </p>
+                      </div>
 
-                    {/* Tipo Descanso - 3 Columnas */}
-                    <div className="col-span-6 md:col-span-3 space-y-0.5">
-                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
-                        Tipo Descanso
-                      </label>
-                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
-                        {descanso?.nombre_tipodescansomedico || "---"}
-                      </p>
+                      <div className="col-span-6 md:col-span-3 space-y-0.5">
+                        <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                          Tipo Descanso
+                        </label>
+                        <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
+                          {descanso?.nombre_tipodescansomedico || "---"}
+                        </p>
+                      </div>
+
+                      <div className="col-span-6 md:col-span-3 space-y-0.5">
+                        <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                          Tipo Contingencia
+                        </label>
+                        <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
+                          {descanso?.nombre_tipocontingencia || "---"}
+                        </p>
+                      </div>
+
+                      <div className="col-span-6 md:col-span-3 space-y-0.5">
+                        <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                          Inicio Descanso
+                        </label>
+                        <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
+                          {formatDateDisplay(descanso?.fecha_inicio)}
+                        </p>
+                      </div>
+
+                      <div className="col-span-6 md:col-span-3 space-y-0.5">
+                        <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                          Fin Descanso
+                        </label>
+                        <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
+                          {formatDateDisplay(descanso?.fecha_final)}
+                        </p>
+                      </div>
+
+                      <div className="col-span-6 md:col-span-3 space-y-0.5">
+                        <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                          Total Días
+                        </label>
+                        <p className="text-xs font-semibold text-indigo-700 bg-indigo-50/60 p-1.5 px-2 rounded border border-indigo-100 truncate">
+                          {descanso?.total_dias ?? 0} días
+                        </p>
+                      </div>
+
+                      <div className="col-span-6 md:col-span-3 space-y-0.5">
+                        <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                          Fecha Máxima Canje
+                        </label>
+                        <p className="text-xs font-semibold text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
+                          {formatDateDisplay(
+                            canje?.fecha_maxima_canje || fechaMaximaCanje,
+                          )}
+                        </p>
+                      </div>
                     </div>
+                  </div>
 
-                    {/* Tipo Contingencia - 3 Columnas */}
-                    <div className="col-span-6 md:col-span-3 space-y-0.5">
-                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
-                        Tipo Contingencia
-                      </label>
-                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
-                        {descanso?.nombre_tipocontingencia || "---"}
-                      </p>
+                  {/* SECCIÓN INFORMACIÓN DE SUBSIDIO / CANJE */}
+                  <div className="space-y-2 pt-2 border-t border-indigo-100/80">
+                    <div className="flex items-center gap-1 text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                      <CalendarDays className="h-3.5 w-3.5 text-indigo-600" />
+                      <span>Detalle del Subsidio / Canje (Informativo)</span>
                     </div>
+                    <div className="grid grid-cols-12 gap-2.5">
+                      <div className="col-span-6 md:col-span-4 space-y-0.5">
+                        <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                          Inicio Subsidio
+                        </label>
+                        <p className="text-xs font-medium text-slate-700 bg-slate-50 p-1.5 px-2 rounded border border-slate-200/80 truncate">
+                          {formatDateDisplay(canje?.fecha_inicio_subsidio)}
+                        </p>
+                      </div>
 
-                    {/* SEGUNDA FILA */}
-                    {/* Inicio Descanso - 3 Columnas */}
-                    <div className="col-span-6 md:col-span-3 space-y-0.5">
-                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
-                        Inicio Descanso
-                      </label>
-                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
-                        {descanso?.fecha_inicio
-                          ? HDate.formatDateTimezone(
-                              descanso.fecha_inicio,
-                              "dd/MM/yyyy",
-                            )
-                          : "---"}
-                      </p>
-                    </div>
+                      <div className="col-span-6 md:col-span-4 space-y-0.5">
+                        <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                          Fin Subsidio
+                        </label>
+                        <p className="text-xs font-medium text-slate-700 bg-slate-50 p-1.5 px-2 rounded border border-slate-200/80 truncate">
+                          {formatDateDisplay(canje?.fecha_final_subsidio)}
+                        </p>
+                      </div>
 
-                    {/* Fin Descanso - 3 Columnas */}
-                    <div className="col-span-6 md:col-span-3 space-y-0.5">
-                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
-                        Fin Descanso
-                      </label>
-                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
-                        {descanso?.fecha_final
-                          ? HDate.formatDateTimezone(
-                              descanso.fecha_final,
-                              "dd/MM/yyyy",
-                            )
-                          : "---"}
-                      </p>
-                    </div>
-
-                    {/* Días Totales - 3 Columnas */}
-                    <div className="col-span-6 md:col-span-3 space-y-0.5">
-                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
-                        Días Totales
-                      </label>
-                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
-                        {descanso?.total_dias || 0} días
-                      </p>
-                    </div>
-
-                    {/* Fecha Máxima Canje - 3 Columnas */}
-                    <div className="col-span-6 md:col-span-3 space-y-0.5">
-                      <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
-                        Fecha Máxima Canje
-                      </label>
-                      <p className="text-xs font-medium text-slate-800 bg-white p-1.5 px-2 rounded border border-slate-200/80 truncate">
-                        {fechaMaximaCanje
-                          ? HDate.formatDateTimezone(
-                              fechaMaximaCanje,
-                              "dd/MM/yyyy",
-                            )
-                          : "---"}
-                      </p>
+                      <div className="col-span-12 md:col-span-4 space-y-0.5">
+                        <label className="text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+                          Días Subsidio
+                        </label>
+                        <p className="text-xs font-medium text-slate-700 bg-slate-50 p-1.5 px-2 rounded border border-slate-200/80 truncate">
+                          {canje?.total_dias ?? 0} días
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </CollapsibleContent>
@@ -485,7 +497,7 @@ export const CanjeForm = () => {
                             <Input
                               placeholder="Ingrese CITT"
                               autoComplete="off"
-                              maxLength={12}
+                              maxLength={15}
                               className={`pl-8 h-8 text-xs focus-visible:ring-1 ${
                                 fieldState.invalid
                                   ? "border-red-500"

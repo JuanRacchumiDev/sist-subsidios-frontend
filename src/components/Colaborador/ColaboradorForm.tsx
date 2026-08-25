@@ -46,6 +46,7 @@ import { ArrowLeft, Save, XCircle } from "lucide-react";
 import { getAuthData } from "../../utils/authMemo";
 import { ParametroClase } from "../../constants/parametroClase";
 import { EOrigen } from "../../enums/EOrigen";
+import { EPerfil } from "@/enums/EPerfil";
 
 const formSchema = z.object({
   idTipoDocumento: z
@@ -107,7 +108,10 @@ const formSchema = z.object({
   esPresentaInconvenientes: z.boolean().optional(),
 });
 
-const loadEmpresas = async (): Promise<Empresa[]> => {
+const loadEmpresas = async (
+  id_empresa?: string,
+  tipo_perfil?: string,
+): Promise<Empresa[]> => {
   let empresas: Empresa[] = [];
 
   try {
@@ -117,6 +121,12 @@ const loadEmpresas = async (): Promise<Empresa[]> => {
 
     if (result && data) {
       empresas = data as Empresa[];
+    }
+
+    if (id_empresa && tipo_perfil === EPerfil.ESPECIALISTA_EMPRESA) {
+      empresas = empresas.filter(
+        (empresa) => empresa.id.toString() === id_empresa,
+      );
     }
 
     return empresas;
@@ -225,7 +235,7 @@ export const ColaboradorForm = () => {
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
   console.log({ userProfile });
 
-  const { id_usuario } = userProfile;
+  const { id_usuario, id_empresa, nombre_perfil_url } = userProfile;
   console.log({ id_usuario });
 
   const handleGoBack = () => {
@@ -251,7 +261,7 @@ export const ColaboradorForm = () => {
       try {
         const [listEmpresas, listTipoDocumentos, listCargos] =
           await Promise.all([
-            loadEmpresas(),
+            loadEmpresas(id_empresa, nombre_perfil_url),
             loadTipoDocumentos(),
             loadCargos(),
           ]);

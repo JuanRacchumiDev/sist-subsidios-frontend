@@ -21,6 +21,8 @@ interface Props {
 }
 
 export const DescansoMedicoRow: React.FC<Props> = ({ descanso }) => {
+  console.log({ descanso });
+
   const navigate = useNavigate();
 
   const handleShowDetail = () => {

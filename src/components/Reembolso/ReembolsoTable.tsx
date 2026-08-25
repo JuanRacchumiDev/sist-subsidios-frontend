@@ -151,14 +151,23 @@ export const ReembolsoTable = () => {
                 <TableHead className="w-[30%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
                   Colaborador
                 </TableHead>
-                <TableHead className="w-[15%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
-                  Fecha máximo reembolso
-                </TableHead>
-                <TableHead className="w-[15%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
-                  Fecha pago
+                <TableHead className="w-[8%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
+                  Fecha inicio subsidio
                 </TableHead>
                 <TableHead className="w-[8%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
-                  Número expediente
+                  Fecha final subsidio
+                </TableHead>
+                <TableHead className="w-[10%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
+                  Días subsidiados
+                </TableHead>
+                <TableHead className="w-[10%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
+                  Fecha solicitud
+                </TableHead>
+                <TableHead className="w-[10%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
+                  Pago por día
+                </TableHead>
+                <TableHead className="w-[8%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
+                  Fecha máxima reembolso
                 </TableHead>
                 <TableHead className="w-[7%] py-2.5 px-3 text-slate-500 font-medium text-[11px] uppercase tracking-wider">
                   Estado
@@ -171,14 +180,14 @@ export const ReembolsoTable = () => {
 
             <TableBody>
               {isLoading ? (
-                <TableSpinner colSpan={6} />
+                <TableSpinner colSpan={4} />
               ) : reembolsos.length > 0 ? (
                 reembolsos.map((reembolso) => (
                   <ReembolsoRow key={reembolso.id} reembolso={reembolso} />
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
+                  <TableCell colSpan={4} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-400 space-y-1">
                       <span className="text-xs font-medium text-slate-600">
                         No se encontraron registros
