@@ -8,7 +8,7 @@ import { EReembolso } from "../../enums/EReembolso";
 type Estado = EDescansoMedico | ECanje | ECobro | EReembolso;
 
 // Mapa de estilos que centraliza la lógica de colores
-const estadoStyles: Record<Estado, string> = {
+const estadoStyles: Partial<Record<Estado, string>> = {
   // Descanso Médico
   [EDescansoMedico.REGISTRO_INGRESADO]: "bg-blue-100 text-blue-800",
   [EDescansoMedico.REGISTRO_EXITOSO]: "bg-green-100 text-green-800",
@@ -28,9 +28,11 @@ const estadoStyles: Record<Estado, string> = {
 
   // Reembolso
   [EReembolso.REEMBOLSO_INGRESADO]: "bg-fuchsia-100 text-fuchsia-800",
-  [EReembolso.REEMBOLSO_ENVIADO]: "bg-green-100 text-green-800", // Similar a REGISTRO_EXITOSO
+  [EReembolso.REEMBOLSO_CORRECTO]: "bg-green-100 text-green-800", // Similar a REGISTRO_EXITOSO
   [EReembolso.REEMBOLSO_OBSERVADO]: "bg-orange-100 text-orange-800", // Similar a CANJE_ORSERVADO
-  [EReembolso.REEMBOLSO_CONFORME]: "bg-lime-100 text-lime-800",
+  [EReembolso.PENDIENTE_SUBSIDIO]: "bg-amber-100 text-amber-800",
+  [EReembolso.SOLICITUD_ESSALUD]: "bg-sky-100 text-sky-800",
+  // [EReembolso.REEMBOLSO_CONFORME]: "bg-lime-100 text-lime-800",
 };
 
 interface BadgeEstadoProps {

@@ -12,6 +12,8 @@ import { EPerfil } from "../../enums/EPerfil";
 
 interface SidebarProps {
   collapsed: boolean;
+  onToggle: () => void;
+  currentPage: string;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
