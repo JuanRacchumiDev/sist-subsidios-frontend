@@ -2,11 +2,12 @@
   "name": "dms-sophia-human-v3",
   "private": true,
   "version": "0.0.0",
-  "homepage": "http://18.227.0.225/dms-front",
+  "homepage": "https://dmstest.sophiah.pe",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "vite --mode development",
+    "build": "tsc -b && vite build --mode production",
+    "build:dev": "tsc -b && vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview"
   },
