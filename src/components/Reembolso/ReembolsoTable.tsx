@@ -180,14 +180,14 @@ export const ReembolsoTable = () => {
 
             <TableBody>
               {isLoading ? (
-                <TableSpinner colSpan={4} />
+                <TableSpinner colSpan={9} />
               ) : reembolsos.length > 0 ? (
                 reembolsos.map((reembolso) => (
                   <ReembolsoRow key={reembolso.id} reembolso={reembolso} />
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
+                  <TableCell colSpan={9} className="h-24 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-400 space-y-1">
                       <span className="text-xs font-medium text-slate-600">
                         No se encontraron registros

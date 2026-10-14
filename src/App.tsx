@@ -36,6 +36,9 @@ import { CobroFormPage } from "./components/Cobro/Page/CobroFormPage";
 import { UsuarioListPage } from "./components/Usuario/Page/UsuarioListPage";
 import { UsuarioFormPage } from "./components/Usuario/Page/UsuarioFormPage";
 
+import { ConfiguracionListPage } from "./components/Configuracion/Page/ConfiguracionListPage";
+import { ConfiguracionFormPage } from "./components/Configuracion/Page/ConfiguracionFormPage";
+
 import { MantenimientoPage } from "./components/Mantenimiento/MantenimientoPage";
 
 function App() {
@@ -216,6 +219,19 @@ function App() {
                     <Route
                       path="/usuario/nuevo"
                       element={<UsuarioFormPage />}
+                    ></Route>
+
+                    <Route
+                      path="/configuracion"
+                      element={<ConfiguracionListPage />}
+                    ></Route>
+                    <Route
+                      path="/configuracion/nuevo"
+                      element={<ConfiguracionFormPage />}
+                    ></Route>
+                    <Route
+                      path="/configuracion/editar/:id"
+                      element={<ConfiguracionFormPage />}
                     ></Route>
 
                     <Route

@@ -15,6 +15,9 @@ export interface Empresa {
     condicionSunat?: string
     es_agente_de_retencion?: boolean
     estado?: boolean
+    user_crea?: string
+    user_actualiza?: string
+    user_elimina?: string
     representantes?: Persona[]
 }
 

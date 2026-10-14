@@ -43,6 +43,8 @@ import { Button } from "../ui/button";
 import { ArrowLeft, Save, XCircle } from "lucide-react";
 import { ParametroClase } from "../../constants/parametroClase";
 import { getAuthData } from "../../utils/authMemo";
+import { EGrupo } from "../../enums/EGrupo";
+import { EPerfil } from "@/enums/EPerfil";
 
 export const formSchema = z.object({
   idPerfil: z
@@ -130,15 +132,6 @@ export const UsuarioForm = () => {
     navigate("/usuario");
   };
 
-  const resetForm = () => {
-    form.reset({
-      idPersona: "",
-      idPerfil: "",
-      username: "",
-      email: "",
-    });
-  };
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -149,13 +142,24 @@ export const UsuarioForm = () => {
     },
   });
 
+  const resetForm = () => {
+    form.reset({
+      idPersona: "",
+      idPerfil: "",
+      username: "",
+      email: "",
+    });
+  };
+
   const watchedIdPersona = form.watch("idPersona");
 
   useEffect(() => {
     if (watchedIdPersona) {
       const selectedPersona = personas.find((c) => c.id === watchedIdPersona);
+      console.log({ selectedPersona });
 
       if (selectedPersona) {
+        // Definir correos
         const listCorreos: string[] = [];
         const { email_institucional, email_personal } = selectedPersona;
 
@@ -166,11 +170,41 @@ export const UsuarioForm = () => {
 
         // Opcional: Si quieres que el campo email se limpie o resetee al cambiar de persona
         form.setValue("email", "");
+
+        // Definir perfil
+        const grupo = selectedPersona.grupos?.[0];
+        console.log({ grupo });
+
+        if (grupo) {
+          const { nombre_url } = grupo;
+          console.log({ nombre_url });
+
+          let nombrePerfil: string = "";
+
+          if (nombre_url === EGrupo.GRUPO_COLABORADOR) {
+            nombrePerfil = EPerfil.COLABORADOR;
+          } else if (nombre_url === EGrupo.GRUPO_ESPECIALISTA_SH) {
+            nombrePerfil = EPerfil.ESPECIALISTA_SOPHIA_HUMAN;
+          } else if (nombre_url === EGrupo.GRUPO_ESPECIALISTA_CLIENTE) {
+            nombrePerfil = EPerfil.ESPECIALISTA_CLIENTE;
+          }
+
+          const perfilSelected = perfiles.find(
+            (p) => p.nombre_url === nombrePerfil,
+          );
+
+          if (perfilSelected) {
+            const { id } = perfilSelected;
+            form.setValue("idPerfil", id);
+          } else {
+            form.setValue("idPerfil", "");
+          }
+        }
       }
     } else {
       setCorreos([]);
     }
-  }, [watchedIdPersona, personas, form]);
+  }, [watchedIdPersona, personas, perfiles, form]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -295,7 +329,7 @@ export const UsuarioForm = () => {
                   name="idPersona"
                   render={({ field, fieldState }) => (
                     <FormItem className="flex flex-col">
-                      <RequiredLabel>Persona</RequiredLabel>
+                      <RequiredLabel isRequired={true}>Persona</RequiredLabel>
                       <SearchableCombobox<Persona>
                         placeholder="Buscar una persona"
                         options={personas}
@@ -316,7 +350,7 @@ export const UsuarioForm = () => {
                   name="idPerfil"
                   render={({ field, fieldState }) => (
                     <FormItem className="flex flex-col">
-                      <RequiredLabel>Perfil</RequiredLabel>
+                      <RequiredLabel isRequired={true}>Perfil</RequiredLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value ?? ""}
@@ -332,7 +366,7 @@ export const UsuarioForm = () => {
                             <SelectValue placeholder="Seleccionar..." />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-white">
+                        <SelectContent className="bg-white text-xs border border-slate-200 shadow-md outline-none">
                           {perfiles.map((perfil) => (
                             <SelectItem
                               value={perfil.id}
@@ -354,7 +388,9 @@ export const UsuarioForm = () => {
                   name="username"
                   render={({ field, fieldState }) => (
                     <FormItem>
-                      <RequiredLabel>Nombre de usuario</RequiredLabel>
+                      <RequiredLabel isRequired={true}>
+                        Nombre de usuario
+                      </RequiredLabel>
                       <FormControl>
                         <Input
                           placeholder="Ingrese nombre de usuario"
@@ -378,7 +414,7 @@ export const UsuarioForm = () => {
                   name="email"
                   render={({ field, fieldState }) => (
                     <FormItem>
-                      <RequiredLabel>Email</RequiredLabel>
+                      <RequiredLabel isRequired={true}>Email</RequiredLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value ?? ""}
@@ -394,7 +430,7 @@ export const UsuarioForm = () => {
                             <SelectValue placeholder="Seleccionar..." />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-white">
+                        <SelectContent className="bg-white text-xs border border-slate-200 shadow-md outline-none">
                           {correos.map((correo) => (
                             <SelectItem
                               value={correo}
@@ -414,6 +450,16 @@ export const UsuarioForm = () => {
 
               <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t border-gray-100">
                 <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isSubmitting}
+                  onClick={resetForm}
+                  className="w-full sm:w-auto border-slate-200 text-slate-700 hover:bg-slate-50 font-medium transition-all"
+                >
+                  <XCircle className="h-4 w-4 mr-2 text-slate-500" />
+                  Cancelar
+                </Button>
+                <Button
                   type="submit"
                   disabled={isSubmitting}
                   className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md shadow-blue-100 transition-all active:scale-[0.98]"
@@ -423,17 +469,7 @@ export const UsuarioForm = () => {
                   ) : (
                     <Save className="h-4 w-4 mr-2" />
                   )}
-                  {isEditMode ? "Actualizar Datos" : "Confirmar Registro"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={isSubmitting}
-                  onClick={resetForm}
-                  className="w-full sm:w-auto border-slate-200 text-slate-700 hover:bg-slate-50 font-medium transition-all"
-                >
-                  <XCircle className="h-4 w-4 mr-2 text-slate-500" />
-                  Cancelar
+                  {isEditMode ? "Actualizar" : "Registrar"}
                 </Button>
               </div>
             </form>

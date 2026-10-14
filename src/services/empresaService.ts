@@ -4,6 +4,7 @@ import {
     getById,
     getByRazonSocial,
     create,
+    update,
     getAllPaginate,
     updateEstado
 } from '../repositories/empresaRepository'
@@ -65,6 +66,14 @@ export const getEmpresaByRazonSocial = async (razonSocial: string) => {
 
 export const createEmpresa = async (payload: Empresa) => {
     const response = await create(payload)
+
+    return {
+        ...response
+    }
+}
+
+export const updateEmpresa = async (id: string, payload: Empresa) => {
+    const response = await update(id, payload)
 
     return {
         ...response

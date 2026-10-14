@@ -246,7 +246,7 @@ export const DocumentoTipoContigenciaForm = () => {
                             <SelectValue placeholder="Seleccionar..." />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-white">
+                        <SelectContent className="bg-white text-xs border border-slate-200 shadow-md outline-none">
                           {tipoContingencias.map((tipo) => (
                             <SelectItem
                               value={tipo.id}
@@ -291,28 +291,28 @@ export const DocumentoTipoContigenciaForm = () => {
                 />
               </div>
 
-              <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t border-gray-100">
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md shadow-blue-100 transition-all active:scale-[0.98]"
-                >
-                  {isSubmitting ? (
-                    <Spinner className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save className="h-4 w-4 mr-2" />
-                  )}
-                  {isEditMode ? "Actualizar Datos" : "Confirmar Registro"}
-                </Button>
+              <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
                 <Button
                   type="button"
                   variant="outline"
                   disabled={isSubmitting}
                   onClick={resetForm}
-                  className="w-full sm:w-auto border-slate-200 text-slate-700 hover:bg-slate-50 font-medium transition-all"
+                  className="border-slate-200 text-slate-700 hover:bg-slate-50"
                 >
-                  <XCircle className="h-4 w-4 mr-2 text-slate-500" />
+                  <XCircle className="h-4 w-4 mr-2" />
                   Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-blue-600 hover:bg-blue-700 text-white transition-all min-w-[140px]"
+                >
+                  {isSubmitting ? (
+                    <Spinner className="h-4 w-4 mr-2 border-2 border-white/20 border-t-white" />
+                  ) : (
+                    <Save className="h-4 w-4 mr-2" />
+                  )}
+                  {isEditMode ? "Guardar Cambios" : "Registrar"}
                 </Button>
               </div>
             </form>

@@ -238,7 +238,7 @@ export const DescansoMedicoDetalle = ({
           const { nombre_perfil_url, id_persona } = userProfile;
 
           if (
-            nombre_perfil_url === EPerfil.ESPECIALISTA_EMPRESA ||
+            nombre_perfil_url === EPerfil.ESPECIALISTA_CLIENTE ||
             nombre_perfil_url === EPerfil.COLABORADOR
           ) {
             setIsEmpresaDisabled(true);
@@ -354,9 +354,6 @@ export const DescansoMedicoDetalle = ({
         name="idEmpresa"
         render={({ field, fieldState }) => (
           <FormItem className="flex flex-col space-y-1">
-            {/* <RequiredLabel className="text-xs font-semibold text-gray-700">
-              Empresa
-            </RequiredLabel> */}
             <SearchableCombobox<Empresa>
               label="Empresa"
               placeholder="Buscar una empresa"
@@ -409,7 +406,10 @@ export const DescansoMedicoDetalle = ({
         name="idTipoDescansoMedico"
         render={({ field, fieldState }) => (
           <FormItem className="w-full space-y-1">
-            <RequiredLabel className="text-xs font-semibold text-gray-700">
+            <RequiredLabel
+              className="text-xs font-semibold text-gray-700"
+              isRequired={true}
+            >
               Tipo de descanso médico
             </RequiredLabel>
             <Select
@@ -419,16 +419,16 @@ export const DescansoMedicoDetalle = ({
             >
               <FormControl>
                 <SelectTrigger
-                  className={`w-full h-8 text-xs ${
+                  className={`w-full transition-all bg-white ${
                     fieldState.invalid
-                      ? "border-red-500 focus:ring-red-500"
-                      : "focus:ring-blue-500"
-                  } focus:ring-1 transition-all duration-200 cursor-pointer`}
+                      ? "border-red-400 focus:ring-red-100"
+                      : "border-slate-200 focus:ring-blue-100 focus:border-blue-500"
+                  }`}
                 >
                   <SelectValue placeholder="Seleccionar tipo" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent className="bg-white text-xs">
+              <SelectContent className="bg-white text-xs border border-slate-200 shadow-md outline-none">
                 {tipoDescansos.map((td) => (
                   <SelectItem
                     key={td.id}
@@ -461,11 +461,11 @@ export const DescansoMedicoDetalle = ({
                   maxLength={30}
                   autoComplete="off"
                   {...field}
-                  className={`h-8 text-xs ${
+                  className={`transition-all bg-white ${
                     fieldState.invalid
-                      ? "border-red-500 focus:ring-red-500"
-                      : "focus:ring-blue-500"
-                  } transition-all duration-200`}
+                      ? "border-red-400 focus-visible:ring-red-100"
+                      : "border-slate-200 focus-visible:ring-blue-100 focus-visible:border-blue-500"
+                  }`}
                 />
               </FormControl>
               <FormMessage className="text-[10px]" />
@@ -480,7 +480,10 @@ export const DescansoMedicoDetalle = ({
         name="idTipoContingencia"
         render={({ field, fieldState }) => (
           <FormItem className="w-full space-y-1">
-            <RequiredLabel className="text-xs font-semibold text-gray-700">
+            <RequiredLabel
+              className="text-xs font-semibold text-gray-700"
+              isRequired={true}
+            >
               Tipo de Contingencia
             </RequiredLabel>
             <Select
@@ -490,16 +493,16 @@ export const DescansoMedicoDetalle = ({
             >
               <FormControl>
                 <SelectTrigger
-                  className={`w-full h-8 text-xs ${
+                  className={`w-full h-8 text-xs transition-all bg-white ${
                     fieldState.invalid
-                      ? "border-red-500 focus:ring-red-500"
-                      : "focus:ring-blue-500"
-                  } focus:ring-1 transition-all duration-200 cursor-pointer`}
+                      ? "border-red-400 focus-visible:ring-red-100"
+                      : "border-slate-200 focus-visible:ring-blue-100 focus-visible:border-blue-500"
+                  }`}
                 >
                   <SelectValue placeholder="Seleccionar contingencia" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent className="bg-white text-xs">
+              <SelectContent className="bg-white text-xs border border-slate-200 shadow-md outline-none">
                 {tipoContingencias.map((tc) => (
                   <SelectItem
                     key={tc.id}
@@ -537,7 +540,10 @@ export const DescansoMedicoDetalle = ({
           name="fechaOtorgamiento"
           render={({ field, fieldState }) => (
             <FormItem className="space-y-1">
-              <RequiredLabel className="text-xs font-semibold text-gray-700">
+              <RequiredLabel
+                className="text-xs font-semibold text-gray-700"
+                isRequired={true}
+              >
                 F. Otorgamiento
               </RequiredLabel>
               <FormControl>
@@ -550,11 +556,11 @@ export const DescansoMedicoDetalle = ({
                       e.target.value ? parseISO(e.target.value) : null,
                     )
                   }
-                  className={`h-8 text-xs ${
+                  className={`transition-all bg-white ${
                     fieldState.invalid
-                      ? "border-red-500 focus:ring-red-500"
-                      : "focus:ring-blue-500"
-                  } transition-all duration-200`}
+                      ? "border-red-400 focus-visible:ring-red-100"
+                      : "border-slate-200 focus-visible:ring-blue-100 focus-visible:border-blue-500"
+                  }`}
                 />
               </FormControl>
               <FormMessage className="text-[10px]" />
@@ -567,7 +573,10 @@ export const DescansoMedicoDetalle = ({
           name="fechaInicio"
           render={({ field, fieldState }) => (
             <FormItem className="space-y-1">
-              <RequiredLabel className="text-xs font-semibold text-gray-700">
+              <RequiredLabel
+                className="text-xs font-semibold text-gray-700"
+                isRequired={true}
+              >
                 Fecha Inicio
               </RequiredLabel>
               <FormControl>
@@ -580,11 +589,11 @@ export const DescansoMedicoDetalle = ({
                       e.target.value ? parseISO(e.target.value) : null,
                     )
                   }
-                  className={`h-8 text-xs ${
+                  className={`transition-all bg-white ${
                     fieldState.invalid
-                      ? "border-red-500 focus:ring-red-500"
-                      : "focus:ring-blue-500"
-                  } transition-all duration-200`}
+                      ? "border-red-400 focus-visible:ring-red-100"
+                      : "border-slate-200 focus-visible:ring-blue-100 focus-visible:border-blue-500"
+                  }`}
                 />
               </FormControl>
               <FormMessage className="text-[10px]" />
@@ -597,7 +606,10 @@ export const DescansoMedicoDetalle = ({
           name="fechaFinal"
           render={({ field, fieldState }) => (
             <FormItem className="space-y-1">
-              <RequiredLabel className="text-xs font-semibold text-gray-700">
+              <RequiredLabel
+                className="text-xs font-semibold text-gray-700"
+                isRequired={true}
+              >
                 Fecha Final
               </RequiredLabel>
               <FormControl>
@@ -610,11 +622,11 @@ export const DescansoMedicoDetalle = ({
                       e.target.value ? parseISO(e.target.value) : null,
                     )
                   }
-                  className={`h-8 text-xs ${
+                  className={`transition-all bg-white ${
                     fieldState.invalid
-                      ? "border-red-500 focus:ring-red-500"
-                      : "focus:ring-blue-500"
-                  } transition-all duration-200`}
+                      ? "border-red-400 focus-visible:ring-red-100"
+                      : "border-slate-200 focus-visible:ring-blue-100 focus-visible:border-blue-500"
+                  }`}
                 />
               </FormControl>
               <FormMessage className="text-[10px]" />
@@ -627,7 +639,10 @@ export const DescansoMedicoDetalle = ({
           name="totalDias"
           render={({ fieldState }) => (
             <FormItem className="space-y-1">
-              <RequiredLabel className="text-xs font-semibold text-gray-700">
+              <RequiredLabel
+                className="text-xs font-semibold text-gray-700"
+                isRequired={true}
+              >
                 Total Días
               </RequiredLabel>
               <FormControl>
@@ -635,11 +650,11 @@ export const DescansoMedicoDetalle = ({
                   readOnly
                   value={totalDias !== null ? totalDias.toString() : ""}
                   disabled={isModoLectura}
-                  className={`h-8 text-xs bg-gray-50 font-medium ${
+                  className={`transition-all bg-white ${
                     fieldState.invalid
-                      ? "border-red-500 focus:ring-red-500"
-                      : "focus:ring-blue-500"
-                  } transition-all duration-200`}
+                      ? "border-red-400 focus-visible:ring-red-100"
+                      : "border-slate-200 focus-visible:ring-blue-100 focus-visible:border-blue-500"
+                  }`}
                   autoComplete="off"
                 />
               </FormControl>

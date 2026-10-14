@@ -52,7 +52,7 @@ export const Validacion = ({
     console.log("---- nombre_perfil_url in component Validacion ----");
     console.log({ nombre_perfil_url });
 
-    if (nombre_perfil_url === EPerfil.ESPECIALISTA_EMPRESA) {
+    if (nombre_perfil_url === EPerfil.ESPECIALISTA_CLIENTE) {
       estadosPermitidos.push(EDescansoMedico.REGISTRO_INGRESADO);
       estadosPermitidos.push(EDescansoMedico.REGISTRO_EXITOSO);
       estadosPermitidos.push(EDescansoMedico.DOCUMENTACION_NO_CONFORME);
@@ -99,7 +99,7 @@ export const Validacion = ({
         name="estadoRegistro"
         render={({ field, fieldState }) => (
           <FormItem className="w-full">
-            <RequiredLabel>Estado del registro</RequiredLabel>
+            <RequiredLabel isRequired={true}>Estado del registro</RequiredLabel>
             <Select
               onValueChange={field.onChange}
               value={field.value}
@@ -107,16 +107,16 @@ export const Validacion = ({
             >
               <FormControl>
                 <SelectTrigger
-                  className={`w-full ${
+                  className={`w-full transition-all bg-white ${
                     fieldState.invalid
-                      ? "border-red-500 focus:ring-red-500"
-                      : "focus:ring-blue-500"
-                  } focus:ring-2 focus:ring-offset-2 transition-all duration-300 cursor-pointer `}
+                      ? "border-red-400 focus:ring-red-100"
+                      : "border-slate-200 focus:ring-blue-100 focus:border-blue-500"
+                  }`}
                 >
                   <SelectValue placeholder="Seleccionar estado" />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-white text-xs border border-slate-200 shadow-md outline-none">
                 {estadosPermitidos.map((estado) => (
                   <SelectItem
                     key={estado}

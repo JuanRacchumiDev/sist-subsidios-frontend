@@ -47,7 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
         return COLABORADOR_MENU_ITEMS;
       case EPerfil.ESPECIALISTA_SOPHIA_HUMAN:
         return ESP_SH_MENU_ITEMS;
-      case EPerfil.ESPECIALISTA_EMPRESA:
+      case EPerfil.ESPECIALISTA_CLIENTE:
         return ESP_EMPRESA_MENU_ITEMS;
       case EPerfil.ADMINISTRADOR:
         return ADMIN_MENU_ITEMS;
@@ -69,7 +69,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
         return "Colaborador Panel";
       case EPerfil.ESPECIALISTA_SOPHIA_HUMAN:
         return "Especialista SH Panel";
-      case EPerfil.ESPECIALISTA_EMPRESA:
+      case EPerfil.ESPECIALISTA_CLIENTE:
         return "Especialista Cliente";
       default:
         return "Panel";

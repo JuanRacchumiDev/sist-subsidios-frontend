@@ -54,6 +54,7 @@ export interface Persona {
     cargo?: Detalle
     sede?: Detalle
     pais?: Detalle
+    grupos?: Detalle[]
 }
 
 export interface PersonaResponse {

@@ -61,12 +61,14 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
 
   // Evaluamos si el campo está en estado de error
   const hasError = isInvalid || (!value && isInvalid);
-  // const finalErrorMessage = errorMessage || "Debe seleccionar un colaborador";
 
   return (
     <FormItem className="w-full">
       {label && (
-        <RequiredLabel className="text-xs font-semibold text-gray-700">
+        <RequiredLabel
+          className="text-xs font-semibold text-gray-700"
+          isRequired={true}
+        >
           {label}
         </RequiredLabel>
       )}
@@ -77,12 +79,12 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
               variant="outline"
               role="combobox"
               className={cn(
-                "w-full justify-between cursor-pointer h-8 px-2.5 text-xs text-left font-normal",
+                "w-full justify-between cursor-pointer h-8 px-2.5 text-xs text-left font-normal bg-white",
                 !value && "text-muted-foreground",
                 hasError
-                  ? "border-red-500 focus:ring-red-500 focus-visible:ring-red-500"
-                  : "focus:ring-blue-500",
-                "focus:ring-1 transition-all duration-200",
+                  ? "border-red-400 focus-visible:ring-red-100 focus-visible:border-red-500"
+                  : "border-slate-200 focus-visible:ring-blue-100 focus-visible:border-blue-500",
+                "focus-visible:ring-1 transition-all duration-200",
                 className,
               )}
               disabled={disabled}
@@ -94,15 +96,16 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
         </PopoverTrigger>
 
         <PopoverContent
-          className="w-(--radix-popover-trigger-width) min-w-[280px] p-0 bg-white"
+          className="w-(--radix-popover-trigger-width) min-w-[280px] p-0 bg-white border border-slate-200 shadow-md"
           align="start"
         >
-          <Command className="w-full">
+          <Command className="w-full bg-white outline-none">
+            {/* Se removió el borde inferior agregando border-none / shadow-none y evitando el borde negro al enfocar */}
             <CommandInput
               placeholder={`Buscar ${label ? label.toLowerCase() : ""}...`}
-              className="h-8 px-2.5 text-xs border-b border-gray-200 focus:ring-0 w-full"
+              className="h-9 px-3 text-xs border-none shadow-none focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:outline-none focus-visible:border-none w-full bg-transparent"
             />
-            <CommandList className="max-h-[250px] overflow-y-auto w-full">
+            <CommandList className="max-h-[250px] overflow-y-auto w-full outline-none focus:outline-none">
               <CommandEmpty className="py-4 text-center text-xs text-gray-500">
                 No se encontraron resultados {label ? label.toLowerCase() : ""}
               </CommandEmpty>
@@ -125,7 +128,7 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
                           setOpen(false);
                         }}
                         className={cn(
-                          "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1 text-xs outline-none",
+                          "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1 text-xs outline-none focus:outline-none",
                           "hover:bg-blue-50 hover:text-blue-700",
                           value === option[valueKey] &&
                             "bg-blue-50 font-medium text-blue-700",
@@ -156,13 +159,6 @@ const SearchableCombobox = <T extends { [key: string]: any }>({
           </Command>
         </PopoverContent>
       </Popover>
-
-      {/* Muestra el mensaje de error si no hay valor seleccionado o si isInvalid es true */}
-      {/* {hasError && (
-        <p className="text-[11px] text-red-500 mt-1 font-medium">
-          {finalErrorMessage}
-        </p>
-      )} */}
     </FormItem>
   );
 };

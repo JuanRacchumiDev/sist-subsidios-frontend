@@ -99,6 +99,13 @@ export const ADMIN_MENU_ITEMS = [
         path: "/usuario",
     },
     {
+        id: "configuracion",
+        icon: Settings,
+        label: "Configuración",
+        active: false,
+        path: "/configuracion"
+    },
+    {
         id: "mantenimiento",
         icon: Settings,
         label: "Mantenimiento",

@@ -33,7 +33,7 @@ import { useToast } from "../../../context/ToastContext";
 import { RequiredLabel } from "../../../components/Common/RequiredLabel";
 import { ParametroClase } from "../../../constants/parametroClase";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Save, XCircle } from "lucide-react";
 import { getAuthData } from "../../../utils/authMemo";
 
 const formSchema = z.object({
@@ -195,31 +195,28 @@ export const CargoForm = () => {
                 </FormItem>
               )}
             />
-            <div className="flex justify-end space-x-4 pt-4">
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="bg-blue-600 hover:bg-blue-700 hover: cursor-pointer text-white transition-colors duration-300"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Spinner className="mr-2 h-4 w-4 animate-spin" />
-                    {isEditMode ? "Actualizando..." : "Registrando..."}
-                  </>
-                ) : isEditMode ? (
-                  "Actualizar"
-                ) : (
-                  "Registrar"
-                )}
-              </Button>
+            <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
               <Button
                 type="button"
                 variant="outline"
                 disabled={isSubmitting}
                 onClick={() => resetForm()}
-                className="hover:bg-gray-200 hover: cursor-pointer transition-colors duration-300"
+                className="border-slate-200 text-slate-700 hover:bg-slate-50"
               >
+                <XCircle className="h-4 w-4 mr-2" />
                 Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-blue-600 hover:bg-blue-700 text-white transition-all min-w-[140px]"
+              >
+                {isSubmitting ? (
+                  <Spinner className="h-4 w-4 mr-2 border-2 border-white/20 border-t-white" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
+                )}
+                {isEditMode ? "Guardar Cambios" : "Registrar"}
               </Button>
             </div>
           </form>

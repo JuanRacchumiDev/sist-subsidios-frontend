@@ -5,13 +5,15 @@ import { cn } from "../../lib/utils";
 interface RequiredLabelProps {
   children: React.ReactNode;
   className?: string;
+  isRequired?: boolean;
 }
 
 export const RequiredLabel: React.FC<RequiredLabelProps> = ({
   children,
   className,
+  isRequired = false,
 }) => (
   <FormLabel className={cn("text-xs font-semibold text-gray-700", className)}>
-    {children} <span className="text-red-500">*</span>
+    {children} {isRequired && <span className="text-red-500">*</span>}
   </FormLabel>
 );

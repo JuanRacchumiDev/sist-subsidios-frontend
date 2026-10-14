@@ -71,7 +71,7 @@ export const CanjeTable: React.FC = () => {
 
       const { nombre_perfil_url, id_empresa, id_usuario } = userProfile;
 
-      if (nombre_perfil_url === EPerfil.ESPECIALISTA_EMPRESA) {
+      if (nombre_perfil_url === EPerfil.ESPECIALISTA_CLIENTE) {
         filters["id_empresa"] = id_empresa;
       } else if (nombre_perfil_url === EPerfil.COLABORADOR) {
         filters["user_crea"] = id_usuario;

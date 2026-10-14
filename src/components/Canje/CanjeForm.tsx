@@ -465,7 +465,7 @@ export const CanjeForm = () => {
                             <SelectValue placeholder="Seleccione estado..." />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-white">
+                        <SelectContent className="bg-white text-xs border border-slate-200 shadow-md outline-none">
                           {estadosPermitidos.map((estado) => (
                             <SelectItem
                               key={estado}

@@ -29,19 +29,6 @@ export const getUsuariosPaginate = async (
         )
     }).toString()
 
-    // const params: any = {
-    //     page: page.toString(),
-    //     limit: limit.toString()
-    // };
-
-    // Object.entries(filters).forEach(([key, value]) => {
-    //     if (value !== undefined && value !== undefined && value !== "") {
-    //         params[key] = value
-    //     }
-    // })
-
-    // const queryParams = new URLSearchParams(params).toString()
-
     console.log({ queryParams })
 
     const response = await getAllPaginate(queryParams)

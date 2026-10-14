@@ -43,7 +43,7 @@ export const EspecialistaClienteRow: React.FC<Props> = ({
   const modalMessage = `¿Deseas <strong>${action}</strong> la persona: <strong>${especialistaCliente.nombre_completo}</strong>?`;
 
   const handleShowDetail = () => {
-    const grupo = EPerfil.ESPECIALISTA_EMPRESA;
+    const grupo = EPerfil.ESPECIALISTA_CLIENTE;
     navigate(`/${grupo}/editar/${especialistaCliente.id}`);
   };
 

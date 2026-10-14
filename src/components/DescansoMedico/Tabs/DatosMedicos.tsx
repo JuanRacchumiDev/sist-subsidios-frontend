@@ -77,21 +77,18 @@ export const DatosMedicos = ({
         name="colegiadoMedico"
         render={({ field, fieldState }) => (
           <FormItem>
-            <RequiredLabel>Colegiado Médico</RequiredLabel>
+            <RequiredLabel isRequired={true}>Colegiado Médico</RequiredLabel>
             <FormControl>
               <Input
                 placeholder="Ingrese el número de colegiado"
                 autoComplete="off"
                 maxLength={6}
                 {...field}
-                className={`
-                  ${
-                    fieldState.invalid
-                      ? "border-red-500 focus:ring-red-500"
-                      : "focus:ring-blue-500"
-                  }
-                    transition-all duration-300
-                `}
+                className={`transition-all bg-white ${
+                  fieldState.invalid
+                    ? "border-red-400 focus-visible:ring-red-100"
+                    : "border-slate-200 focus-visible:ring-blue-100 focus-visible:border-blue-500"
+                }`}
                 disabled={isModoLectura}
               />
             </FormControl>
@@ -105,21 +102,18 @@ export const DatosMedicos = ({
         name="medicoTratante"
         render={({ field, fieldState }) => (
           <FormItem>
-            <RequiredLabel>Médico Tratante</RequiredLabel>
+            <RequiredLabel isRequired={true}>Médico Tratante</RequiredLabel>
             <FormControl>
               <Input
                 placeholder="Ingrese nombre del médico"
                 autoComplete="off"
                 maxLength={50}
                 {...field}
-                className={`
-                  ${
-                    fieldState.invalid
-                      ? "border-red-500 focus:ring-red-500"
-                      : "focus:ring-blue-500"
-                  }
-                    transition-all duration-300
-                `}
+                className={`transition-all bg-white ${
+                  fieldState.invalid
+                    ? "border-red-400 focus-visible:ring-red-100"
+                    : "border-slate-200 focus-visible:ring-blue-100 focus-visible:border-blue-500"
+                }`}
                 disabled={isModoLectura}
               />
             </FormControl>
@@ -134,7 +128,7 @@ export const DatosMedicos = ({
         render={({ field, fieldState }) => {
           return (
             <FormItem className="flex flex-col">
-              <RequiredLabel>Diagnóstico</RequiredLabel>
+              <RequiredLabel isRequired={true}>Diagnóstico</RequiredLabel>
               <SearchableCombobox<DiagnosticoConFormato>
                 placeholder="Buscar un diagnóstico"
                 options={formattedDxs}
@@ -157,21 +151,18 @@ export const DatosMedicos = ({
         name="nombreEstablecimiento"
         render={({ field, fieldState }) => (
           <FormItem>
-            <RequiredLabel>Establecimiento</RequiredLabel>
+            <RequiredLabel isRequired={true}>Establecimiento</RequiredLabel>
             <FormControl>
               <Input
                 placeholder="Ingrese nombre del establecimiento de salud"
                 autoComplete="off"
                 maxLength={100}
                 {...field}
-                className={`
-                  ${
-                    fieldState.invalid
-                      ? "border-red-500 focus:ring-red-500"
-                      : "focus:ring-blue-500"
-                  }
-                    transition-all duration-300
-                `}
+                className={`transition-all bg-white ${
+                  fieldState.invalid
+                    ? "border-red-400 focus-visible:ring-red-100"
+                    : "border-slate-200 focus-visible:ring-blue-100 focus-visible:border-blue-500"
+                }`}
                 disabled={isModoLectura}
               />
             </FormControl>

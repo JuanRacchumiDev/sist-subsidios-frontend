@@ -50,20 +50,6 @@ export const getAllPaginate = async (queryParams: string) => {
             message,
             pagination: paginationInfo
         }
-
-        // const response = await apiClient.get(urlApi)
-
-        // const { data: dataEmpresas } = response
-
-        // const { result, data, pagination, status } = dataEmpresas
-
-        // return {
-        //     result,
-        //     data,
-        //     pagination,
-        //     status
-        // }
-
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
         console.log('errorMessage', errorMessage)
@@ -93,7 +79,9 @@ export const getById = async (id: string): Promise<EmpresaResponse> => {
 
 export const getByRazonSocial = async (razonSocial: string): Promise<EmpresaResponse> => {
     try {
-        const urlApi = `${'/empresas/consulta-razon-social?razonSocial='}${razonSocial}`
+        const urlApi = `${'/empresas/filtrar?razonSocial='}${razonSocial}`
+
+        console.log({ urlApi })
 
         const response = await apiClient.get(urlApi)
 
@@ -120,6 +108,28 @@ export const getByRazonSocial = async (razonSocial: string): Promise<EmpresaResp
 export const create = async (payload: Empresa): Promise<EmpresaResponse> => {
     try {
         const response = await apiClient.post('/empresas', payload)
+
+        const { result, data, status, message, error } = response as EmpresaResponse
+
+        return {
+            result,
+            data,
+            status,
+            message,
+            error
+        }
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+        console.log('errorMessage', errorMessage)
+        return { result: false, error: errorMessage, status: 500 }
+    }
+}
+
+export const update = async (id: string, payload: Empresa): Promise<EmpresaResponse> => {
+    try {
+        const uri = `/empresas/${id}`
+
+        const response = await apiClient.patch(uri, payload)
 
         const { result, data, status, message, error } = response as EmpresaResponse
 
