@@ -57,11 +57,7 @@ export const CargoForm = () => {
 
   const isEditMode = !!id;
 
-  const inputErrorClass = (invalid: boolean) =>
-    invalid ? "border-red-500 focus:ring-red-500" : "focus:ring-blue-500";
-
   const userProfile = useMemo(() => getAuthData()?.usuario, []);
-
   const { id_usuario } = userProfile;
 
   const handleGoBack = () => {
@@ -96,9 +92,7 @@ export const CargoForm = () => {
       }
 
       const { result, message, error } = response;
-
       messageError = message;
-
       const colorNotification = error && error.length > 0 ? "error" : "warning";
 
       if (result) {
@@ -125,7 +119,6 @@ export const CargoForm = () => {
 
           if (result && data) {
             const cargo = data as Detalle;
-
             form.reset({
               nombre: cargo.nombre,
             });
@@ -146,7 +139,8 @@ export const CargoForm = () => {
   }, [id, isEditMode, form, navigate, showToast]);
 
   return (
-    <Card className="shadow-xl border-none bg-white">
+    /* Se agregó max-w-xl y mx-auto para restringir el ancho del contenedor principal */
+    <Card className="shadow-md border-none bg-white max-w-xl mx-auto">
       <CardHeader className="border-b border-gray-100 p-6 flex flex-row items-center justify-between bg-gray-50/50 rounded-t-xl">
         <div className="space-y-1">
           <CardTitle className="text-2xl font-extrabold text-slate-800 tracking-tight">
@@ -167,7 +161,7 @@ export const CargoForm = () => {
           Volver
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-6 sm:px-8 relative">
         {isLoadingData && (
           <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center z-10">
             <Spinner className="h-8 w-8 text-blue-600 animate-spin" />
@@ -176,47 +170,54 @@ export const CargoForm = () => {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="nombre"
-              render={({ field, fieldState }) => (
-                <FormItem>
-                  <RequiredLabel>Nombre</RequiredLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Director General"
-                      autoComplete="off"
-                      maxLength={50}
-                      {...field}
-                      className={inputErrorClass(fieldState.invalid)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
+            <div>
+              <FormField
+                control={form.control}
+                name="nombre"
+                render={({ field, fieldState }) => (
+                  <FormItem>
+                    <RequiredLabel isRequired={true}>Nombre</RequiredLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Director General"
+                        autoComplete="off"
+                        maxLength={50}
+                        {...field}
+                        className={`transition-all bg-white ${
+                          fieldState.invalid
+                            ? "border-red-400 focus-visible:ring-red-100"
+                            : "border-slate-200 focus-visible:ring-blue-100 focus-visible:border-blue-500"
+                        }`}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-xs font-medium text-red-500" />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t border-gray-100">
               <Button
                 type="button"
                 variant="outline"
                 disabled={isSubmitting}
                 onClick={() => resetForm()}
-                className="border-slate-200 text-slate-700 hover:bg-slate-50"
+                className="w-full sm:w-auto border-slate-200 text-slate-700 hover:bg-slate-50 font-medium transition-all"
               >
-                <XCircle className="h-4 w-4 mr-2" />
+                <XCircle className="h-4 w-4 mr-2 text-slate-500" />
                 Cancelar
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-blue-600 hover:bg-blue-700 text-white transition-all min-w-[140px]"
+                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md shadow-blue-100 transition-all active:scale-[0.98]"
               >
                 {isSubmitting ? (
-                  <Spinner className="h-4 w-4 mr-2 border-2 border-white/20 border-t-white" />
+                  <Spinner className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <Save className="h-4 w-4 mr-2" />
                 )}
-                {isEditMode ? "Guardar Cambios" : "Registrar"}
+                {isEditMode ? "Actualizar" : "Registrar"}
               </Button>
             </div>
           </form>

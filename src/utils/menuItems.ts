@@ -9,6 +9,7 @@ import {
     HeartPulse,
     LayoutDashboard,
     Settings,
+    SlidersHorizontal,
     Stethoscope,
     UserCheck,
     UserCog,
@@ -100,7 +101,7 @@ export const ADMIN_MENU_ITEMS = [
     },
     {
         id: "configuracion",
-        icon: Settings,
+        icon: SlidersHorizontal, // Ícono actualizado para evitar duplicidad con Mantenimiento
         label: "Configuración",
         active: false,
         path: "/configuracion"

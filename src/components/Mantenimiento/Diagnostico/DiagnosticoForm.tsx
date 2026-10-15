@@ -195,21 +195,28 @@ export const DiagnosticoForm = () => {
                   name="codCie10"
                   render={({ field, fieldState }) => (
                     <FormItem>
-                      <RequiredLabel>Nombre</RequiredLabel>
+                      <RequiredLabel isRequired={true}>
+                        COD. CIE10
+                      </RequiredLabel>
                       <FormControl>
                         <Input
                           placeholder="A02.5"
                           autoComplete="off"
                           maxLength={10}
                           {...field}
-                          className={`
-                          ${
+                          className={`transition-all bg-white ${
                             fieldState.invalid
-                              ? "border-red-500 focus:ring-red-500"
-                              : "focus:ring-blue-500"
-                          }
-                            transition-all duration-300
-                          `}
+                              ? "border-red-400 focus-visible:ring-red-100"
+                              : "border-slate-200 focus-visible:ring-blue-100 focus-visible:border-blue-500"
+                          }`}
+                          // className={`
+                          // ${
+                          //   fieldState.invalid
+                          //     ? "border-red-500 focus:ring-red-500"
+                          //     : "focus:ring-blue-500"
+                          // }
+                          //   transition-all duration-300
+                          // `}
                         />
                       </FormControl>
                       <FormMessage className="text-xs font-medium text-red-500" />
@@ -222,21 +229,26 @@ export const DiagnosticoForm = () => {
                   name="nombre"
                   render={({ field, fieldState }) => (
                     <FormItem>
-                      <RequiredLabel>Nombre</RequiredLabel>
+                      <RequiredLabel isRequired={true}>Nombre</RequiredLabel>
                       <FormControl>
                         <Input
                           placeholder="Fiebre tifoidea"
                           autoComplete="off"
                           maxLength={100}
                           {...field}
-                          className={`
-                          ${
+                          className={`transition-all bg-white ${
                             fieldState.invalid
-                              ? "border-red-500 focus:ring-red-500"
-                              : "focus:ring-blue-500"
-                          }
-                            transition-all duration-300
-                          `}
+                              ? "border-red-400 focus-visible:ring-red-100"
+                              : "border-slate-200 focus-visible:ring-blue-100 focus-visible:border-blue-500"
+                          }`}
+                          // className={`
+                          // ${
+                          //   fieldState.invalid
+                          //     ? "border-red-500 focus:ring-red-500"
+                          //     : "focus:ring-blue-500"
+                          // }
+                          //   transition-all duration-300
+                          // `}
                         />
                       </FormControl>
                       <FormMessage className="text-xs font-medium text-red-500" />
@@ -245,28 +257,28 @@ export const DiagnosticoForm = () => {
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t border-gray-100">
                 <Button
                   type="button"
                   variant="outline"
                   disabled={isSubmitting}
                   onClick={resetForm}
-                  className="border-slate-200 text-slate-700 hover:bg-slate-50"
+                  className="w-full sm:w-auto border-slate-200 text-slate-700 hover:bg-slate-50 font-medium transition-all"
                 >
-                  <XCircle className="h-4 w-4 mr-2" />
+                  <XCircle className="h-4 w-4 mr-2 text-slate-500" />
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-blue-600 hover:bg-blue-700 text-white transition-all min-w-[140px]"
+                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md shadow-blue-100 transition-all active:scale-[0.98]"
                 >
                   {isSubmitting ? (
-                    <Spinner className="h-4 w-4 mr-2 border-2 border-white/20 border-t-white" />
+                    <Spinner className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
                     <Save className="h-4 w-4 mr-2" />
                   )}
-                  {isEditMode ? "Guardar Cambios" : "Registrar"}
+                  {isEditMode ? "Actualizar" : "Registrar"}
                 </Button>
               </div>
             </form>
