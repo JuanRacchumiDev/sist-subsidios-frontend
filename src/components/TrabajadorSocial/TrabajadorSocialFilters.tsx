@@ -50,7 +50,7 @@ export const TrabajadorSocialFilters: React.FC<TrabajadorSocialFilterProps> = ({
           <Input
             type="text"
             name="search"
-            placeholder="Ej. Juan Perez..."
+            placeholder="Ej. Juan Perez"
             autoComplete="off"
             value={filters.search}
             onChange={handleInputChange}

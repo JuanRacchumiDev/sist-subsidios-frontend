@@ -367,7 +367,7 @@ export const DescansoMedicoDetalle = ({
               isInvalid={fieldState.invalid}
               className="h-8 text-xs"
             />
-            <FormMessage className="text-[10px]" />
+            <FormMessage className="text-xs font-medium text-red-500" />
           </FormItem>
         )}
       />
@@ -395,7 +395,7 @@ export const DescansoMedicoDetalle = ({
               // errorMessage={fieldState.error?.message}
               className="h-8 text-xs"
             />
-            <FormMessage className="text-[10px]" />
+            <FormMessage className="text-xs font-medium text-red-500" />
           </FormItem>
         )}
       />

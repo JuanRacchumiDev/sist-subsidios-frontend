@@ -205,7 +205,7 @@ export const EmpresaForm = () => {
   const handleSearchRuc = async (ruc: string) => {
     try {
       setIsSearchingRuc(true);
-      showToast("info", "Consultando RUC...");
+      showToast("info", "Consultando RUC");
       const response = await getEmpresaByApi(ruc);
       const { result, data, message } = response;
 
@@ -239,7 +239,7 @@ export const EmpresaForm = () => {
   const handleSearchPersona = async (tipoDoc: string, numDoc: string) => {
     try {
       setIsSearchingPersona(true);
-      showToast("info", "Consultando documento...");
+      showToast("info", "Consultando documento");
       const response = await getPersonaByApi(tipoDoc, numDoc);
       const { result, data, message } = response;
 
@@ -466,37 +466,8 @@ export const EmpresaForm = () => {
                   <Save className="h-4 w-4 mr-2" />
                 )}
                 {isEditMode ? "Actualizar" : "Guardar"}
-                {/* {isSubmitting ? (
-                  <Spinner className="h-4 w-4 mr-2 border-2 border-white/20 border-t-white" />
-                ) : (
-                  <Save className="h-4 w-4 mr-2" />
-                )}
-                {isEditMode ? "Guardar Cambios" : "Registrar"} */}
               </Button>
             </div>
-
-            {/* <div className="flex justify-end gap-4 pt-4 border-t border-gray-100">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleGoBack}
-                disabled={form.formState.isSubmitting}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                disabled={form.formState.isSubmitting}
-                className="bg-blue-600 hover:bg-blue-700 text-white min-w-[120px]"
-              >
-                {form.formState.isSubmitting ? (
-                  <Spinner className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <Save className="h-4 w-4 mr-2" />
-                )}
-                {isEditMode ? "Actualizar" : "Guardar"}
-              </Button>
-            </div> */}
           </form>
         </Form>
       </CardContent>

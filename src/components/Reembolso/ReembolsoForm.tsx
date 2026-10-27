@@ -457,7 +457,7 @@ export const ReembolsoForm = () => {
                                 : "border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                             }`}
                           >
-                            <SelectValue placeholder="Seleccione estado..." />
+                            <SelectValue placeholder="Seleccione estado" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="bg-white text-xs border border-slate-200 shadow-md outline-none">
@@ -618,7 +618,7 @@ export const ReembolsoForm = () => {
                         </RequiredLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="Motivos de la observación o documentos faltantes..."
+                            placeholder="Motivos de la observación o documentos faltantes"
                             className={`min-h-[70px] text-xs bg-white resize-none focus-visible:ring-1 ${
                               fieldState.invalid
                                 ? "border-red-500"
@@ -662,7 +662,7 @@ export const ReembolsoForm = () => {
                   {isSubmitting ? (
                     <>
                       <Spinner className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                      {isEditMode ? "Guardando..." : "Procesando..."}
+                      {isEditMode ? "Guardando" : "Procesando"}
                     </>
                   ) : (
                     <>

@@ -462,7 +462,7 @@ export const CanjeForm = () => {
                                 : "border-slate-300"
                             }`}
                           >
-                            <SelectValue placeholder="Seleccione estado..." />
+                            <SelectValue placeholder="Seleccione estado" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="bg-white text-xs border border-slate-200 shadow-md outline-none">
@@ -529,7 +529,7 @@ export const CanjeForm = () => {
                         <FormControl>
                           <Textarea
                             autoComplete="off"
-                            placeholder="Motivos de la observación o documentos faltantes..."
+                            placeholder="Motivos de la observación o documentos faltantes"
                             className={`min-h-[70px] text-xs bg-white resize-none focus-visible:ring-1 ${
                               fieldState.invalid
                                 ? "border-red-500"
@@ -573,7 +573,7 @@ export const CanjeForm = () => {
                   {isSubmitting ? (
                     <>
                       <Spinner className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                      {isEditMode ? "Guardando..." : "Procesando..."}
+                      {isEditMode ? "Guardando" : "Procesando"}
                     </>
                   ) : (
                     <>

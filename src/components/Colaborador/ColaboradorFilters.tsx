@@ -50,7 +50,7 @@ export const ColaboradorFilters: React.FC<ColaboradorFilterProps> = ({
           <Input
             type="text"
             name="search"
-            placeholder="Ej. Juan Perez..."
+            placeholder="Ej. Juan Perez"
             autoComplete="off"
             value={filters.search}
             onChange={handleInputChange}

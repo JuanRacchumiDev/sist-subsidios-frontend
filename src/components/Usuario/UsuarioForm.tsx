@@ -340,7 +340,7 @@ export const UsuarioForm = () => {
                         searchKeys={["nombre_completo"]}
                         isInvalid={fieldState.invalid}
                       />
-                      <FormMessage />
+                      <FormMessage className="text-xs font-medium text-red-500" />
                     </FormItem>
                   )}
                 />
@@ -363,7 +363,7 @@ export const UsuarioForm = () => {
                                 : "border-slate-200 focus:ring-blue-100 focus:border-blue-500"
                             }`}
                           >
-                            <SelectValue placeholder="Seleccionar..." />
+                            <SelectValue placeholder="Seleccionar perfil" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="bg-white text-xs border border-slate-200 shadow-md outline-none">
@@ -427,7 +427,7 @@ export const UsuarioForm = () => {
                                 : "border-slate-200 focus:ring-blue-100 focus:border-blue-500"
                             }`}
                           >
-                            <SelectValue placeholder="Seleccionar..." />
+                            <SelectValue placeholder="Seleccionar email" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="bg-white text-xs border border-slate-200 shadow-md outline-none">

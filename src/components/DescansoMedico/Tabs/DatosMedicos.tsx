@@ -140,7 +140,7 @@ export const DatosMedicos = ({
                 disabled={isModoLectura}
                 isInvalid={fieldState.invalid}
               />
-              <FormMessage />
+              <FormMessage className="text-xs font-medium text-red-500" />
             </FormItem>
           );
         }}

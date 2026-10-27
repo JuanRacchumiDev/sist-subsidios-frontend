@@ -98,7 +98,7 @@ export const InformacionLaboralFields = ({ empresas, cargos }: Props) => {
                         : "border-slate-200 focus:ring-blue-100 focus:border-blue-500"
                     }`}
                   >
-                    <SelectValue placeholder="Seleccionar cargo..." />
+                    <SelectValue placeholder="Seleccionar cargo" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent className="bg-white text-xs border border-slate-200 shadow-md outline-none">

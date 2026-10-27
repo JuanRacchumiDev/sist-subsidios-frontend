@@ -732,7 +732,7 @@ export const DescansoMedicoForm = () => {
                   {isSubmitting ? (
                     <>
                       <Spinner className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                      {isButtonDisabled ? "Guardando..." : "Procesando..."}
+                      {isButtonDisabled ? "Guardando" : "Procesando"}
                     </>
                   ) : (
                     <>

@@ -213,7 +213,7 @@ export const EspecialistaSHForm = () => {
   const handleSearchPersonaByDocumento = useCallback(
     async (idTipoDocumento: string, numeroDocumento: string) => {
       try {
-        showToast("info", "Buscando datos de la persona...");
+        showToast("info", "Buscando datos de la persona");
         const responsePersona = await getPersonaByIdTipoDocAndNumDoc(
           idTipoDocumento,
           numeroDocumento,

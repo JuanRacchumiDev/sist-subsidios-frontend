@@ -142,7 +142,7 @@ export const Validacion = ({
               <RequiredLabel>Observación</RequiredLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Detalle la documentación pendiente..."
+                  placeholder="Detalle la documentación pendiente"
                   {...field}
                   className={`
                     ${
